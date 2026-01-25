@@ -1,3 +1,19 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ 🔧 MAINTENANCE REQUIRED                                                      ║
+║                                                                              ║
+║ After editing this file, you MUST also update:                               ║
+║   □ CLAUDE.md        → "Current State" section (command count, list)         ║
+║   □ commands/agent-wf-help.md → "commands" topic                             ║
+║   □ README.md        → commands table                                        ║
+║   □ GUIDE.md         → commands list                                         ║
+║   □ tests/structural/test_commands_exist.sh → REQUIRED_COMMANDS array        ║
+║                                                                              ║
+║ Git hooks will BLOCK your commit if these are not updated.                   ║
+║ Run: ./scripts/verify-sync.sh to check compliance.                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+
 ---
 description: Implement from plans using engineering agents
 argument-hint: <"phase N" or specific component>

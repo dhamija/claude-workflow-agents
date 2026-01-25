@@ -1,3 +1,19 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║ 🔧 MAINTENANCE REQUIRED                                                      ║
+║                                                                              ║
+║ After editing this file, you MUST also update:                               ║
+║   □ CLAUDE.md        → "Current State" section (agent count, list)           ║
+║   □ commands/agent-wf-help.md → "agents" topic                               ║
+║   □ README.md        → agents table                                          ║
+║   □ GUIDE.md         → agents list                                           ║
+║   □ tests/structural/test_agents_exist.sh → REQUIRED_AGENTS array            ║
+║                                                                              ║
+║ Git hooks will BLOCK your commit if these are not updated.                   ║
+║ Run: ./scripts/verify-sync.sh to check compliance.                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+
 ---
 name: intent-guardian
 description: |

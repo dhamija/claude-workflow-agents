@@ -1,8 +1,50 @@
-# Claude Workflow Agents - Complete Context
+<!--
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                                                                               ║
+║   ██████╗ ███████╗ █████╗ ██████╗     ████████╗██╗  ██╗██╗███████╗           ║
+║   ██╔══██╗██╔════╝██╔══██╗██╔══██╗    ╚══██╔══╝██║  ██║██║██╔════╝           ║
+║   ██████╔╝█████╗  ███████║██║  ██║       ██║   ███████║██║███████╗           ║
+║   ██╔══██╗██╔══╝  ██╔══██║██║  ██║       ██║   ██╔══██║██║╚════██║           ║
+║   ██║  ██║███████╗██║  ██║██████╔╝       ██║   ██║  ██║██║███████║           ║
+║   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝        ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝           ║
+║                                                                               ║
+║   BEFORE DOING ANYTHING IN THIS REPOSITORY                                    ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+-->
 
-> **For Claude**: This file contains everything you need to understand and work with this repository. Read this fully before making any changes.
->
-> **🔄 SELF-UPDATING**: This file must be updated when the repo changes. See "Maintaining This File" section.
+# ⛔ MANDATORY: Read Before ANY Action
+
+> **Claude**: You MUST read this entire file before making ANY changes.
+> Git hooks will BLOCK your commits if you don't follow maintenance rules.
+
+## 🚨 Critical Rules (Enforced by Git Hooks)
+
+**After ANY change to `agents/`, `commands/`, or `templates/`:**
+
+| You Changed | You MUST Also Update |
+|-------------|---------------------|
+| `agents/*.md` | CLAUDE.md, help, README, GUIDE, tests |
+| `commands/*.md` | CLAUDE.md, help, README, GUIDE, tests |
+| `templates/*` | CLAUDE.md, WORKFLOW.md, help |
+| Any workflow | CLAUDE.md, help, WORKFLOW.md, README |
+
+**⚠️ Git pre-commit hooks will REJECT your commit if these aren't updated.**
+
+## ✅ Before Every Commit
+
+Run this to verify you're compliant:
+```bash
+./scripts/verify-sync.sh
+```
+
+If it fails, your commit will be blocked.
+
+---
+
+<!-- Rest of CLAUDE.md continues below -->
+
+# Claude Workflow Agents - Complete Context
 
 ---
 
