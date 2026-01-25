@@ -1235,7 +1235,7 @@ Commands for keeping project state and documentation in sync.
 ```
 
 **What it does:**
-Uses **documentation-engineer** to:
+Uses **project-ops** to:
 
 **Verify mode** (default):
 - Check if USAGE.md has all implemented features
@@ -1258,7 +1258,7 @@ Uses **documentation-engineer** to:
 - Generate API docs from code
 
 **Workflow:**
-1. **After L1 Planning (Auto)** - documentation-engineer automatically creates initial structure
+1. **After L1 Planning (Auto)** - project-ops automatically creates initial structure
 2. **During L2 Building** - Run `/docs update` to add completed features
 3. **Before Release** - Run `/docs verify` to ensure completeness
 
@@ -1290,7 +1290,7 @@ Run /docs update to complete missing sections.
 ```
 
 **Integration with /sync:**
-The project-maintainer agent (triggered by `/sync`) also checks documentation completeness and will suggest running `/docs verify` if gaps are found.
+The project-ops agent (triggered by `/sync`) also checks documentation completeness and will suggest running `/docs verify` if gaps are found.
 
 **When to use:**
 - After implementing features - to update documentation
@@ -1312,7 +1312,7 @@ The project-maintainer agent (triggered by `/sync`) also checks documentation co
 ```
 
 **What it does:**
-Launches **project-maintainer** agent to:
+Launches **project-ops** agent to:
 1. Update CLAUDE.md Current State section with:
    - Feature progress table
    - Current task and next steps
@@ -1394,7 +1394,7 @@ Claude: Continuing from where we left off...
 
 **Related:**
 - Commands: `/verify` (triggers auto-sync on success)
-- Agents: `project-maintainer`
+- Agents: `project-ops`
 - Files: CLAUDE.md Current State section
 
 ---

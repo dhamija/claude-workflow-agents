@@ -27,8 +27,7 @@
 | test-engineer | L2 Building | ✓ Complete |
 | code-reviewer | L2 Support | ✓ Complete |
 | debugger | L2 Support | ✓ Complete |
-| ci-cd-engineer | Setup | ✓ Complete |
-| project-maintainer | Maintenance | ✓ Complete |
+| project-ops | Operations | ✓ Complete |
 
 ## Commands List
 
