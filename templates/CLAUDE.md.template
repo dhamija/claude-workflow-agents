@@ -116,27 +116,111 @@ For each feature in implementation-order.md:
 
 ---
 
+## Detecting Project Type
+
+### Greenfield (New Project)
+**Indicators:**
+- User says "build", "create", "make", "new"
+- Empty or minimal codebase
+- No existing `/docs` directory
+
+**Action: CREATE mode**
+- Generate intent, UX, architecture from scratch
+- Create feature plans
+- Build sequentially
+
+### Brownfield (Existing Project)
+**Indicators:**
+- User says "analyze", "improve", "fix", "audit", "what's wrong"
+- Existing codebase with routes, components, services
+- No `/docs` but has real code
+- User says "this codebase", "existing", "current"
+
+**Action: AUDIT mode**
+1. Run L1 agents in AUDIT mode (infer from code)
+   - intent-guardian → INFERRED intent
+   - ux-architect → INFERRED journeys
+   - agentic-architect → INFERRED architecture
+2. Ask user to review inferred docs
+3. Run gap-analyzer
+4. Create migration plan
+5. Fix gaps using L2 agents
+
+**Brownfield workflow:**
+```
+"Analyze this codebase"
+        │
+        ▼
+┌─────────────────────────────────┐
+│  AUDIT PHASE                    │
+│  (L1 agents in audit mode)      │
+│                                 │
+│  Intent: What does this do?     │
+│  UX: How do users interact?     │
+│  Architecture: How is it built? │
+│                                 │
+│  All marked [INFERRED]          │
+└─────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────┐
+│  USER REVIEW                    │
+│                                 │
+│  "Here's what I found.          │
+│   Is this correct?"             │
+└─────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────┐
+│  GAP ANALYSIS                   │
+│                                 │
+│  Compare current vs ideal       │
+│  Prioritize fixes               │
+│  Create migration plan          │
+└─────────────────────────────────┘
+        │
+        ▼
+┌─────────────────────────────────┐
+│  IMPROVE PHASE                  │
+│  (Fix gaps one by one)          │
+│                                 │
+│  Phase 0: Critical              │
+│  Phase 1: High priority         │
+│  Phase 2: Medium                │
+│  ...                            │
+└─────────────────────────────────┘
+```
+
+---
+
 ## Available Specialized Agents
 
 You have access to these subagents. Use the Task tool to launch them when appropriate:
 
 ### Analysis Agents (L1)
 
-**intent-guardian** - Use when starting a new project or defining what we're building
-- Triggers: "build", "create", "make", "what should", "promise", "guarantee", "must always", "never should"
+**intent-guardian** - Use when starting a new project (CREATE mode) or analyzing existing code (AUDIT mode)
+- CREATE: Define intent from scratch
+- AUDIT: Infer intent from code, mark as [INFERRED]
+- Triggers: "build", "create", "analyze", "audit", "what should", "promise", "what's wrong"
 - Outputs: `/docs/intent/product-intent.md`
 
-**ux-architect** - Use when designing user experience or mapping user flows
-- Triggers: "user flow", "how will users", "screens", "pages", "UX", "experience", "journey", "interaction"
+**ux-architect** - Use when designing user experience (CREATE mode) or mapping existing UX (AUDIT mode)
+- CREATE: Design UX from scratch
+- AUDIT: Infer journeys from UI/routes, mark as [INFERRED]
+- Triggers: "user flow", "how will users", "screens", "UX", "analyze", "audit"
 - Outputs: `/docs/ux/user-journeys.md`
 
-**agentic-architect** - Use when designing system architecture or deciding what should be AI agents
-- Triggers: "architecture", "system design", "agents", "how will it work", "components", "backend structure"
-- Outputs: `/docs/architecture/system-design.md`, `/docs/architecture/agent-topology.md`
+**agentic-architect** - Use when designing system architecture (CREATE mode) or analyzing existing (AUDIT mode)
+- CREATE: Design architecture from scratch
+- AUDIT: Infer architecture, identify agentic opportunities
+- Triggers: "architecture", "system design", "analyze", "audit", "how will it work"
+- Outputs: `/docs/architecture/agent-design.md`
 
-**gap-analyzer** - Use when analyzing existing codebase for improvements (brownfield projects)
-- Triggers: "gaps", "improvements", "technical debt", "what's wrong", "how to fix", "migration"
-- Outputs: `/docs/analysis/gaps-current.md`, `/docs/analysis/gaps-ideal.md`, `/docs/migration/migration-plan.md`
+**gap-analyzer** - Use AFTER L1 audit to analyze gaps between current and ideal state
+- Prerequisites: L1 docs must exist (can be [INFERRED])
+- Triggers: "gaps", "improvements", "technical debt", "what's wrong", "how to fix"
+- Outputs: `/docs/gaps/gap-analysis.md`, `/docs/gaps/migration-plan.md`
 
 ### Planning Agents (L2)
 

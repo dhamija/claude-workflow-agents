@@ -6,12 +6,13 @@
 
 1. [Overview](#overview)
 2. [The Two-Level Workflow](#the-two-level-workflow)
-3. [The 11 Agents](#the-11-agents)
-4. [Available Commands](#available-commands)
-5. [Development Patterns](#development-patterns)
-6. [Parallel Development (Advanced)](#parallel-development-advanced)
-7. [Documentation Structure](#documentation-structure)
-8. [Troubleshooting](#troubleshooting)
+3. [Brownfield (Existing Code)](#brownfield-existing-code)
+4. [The 11 Agents](#the-11-agents)
+5. [Available Commands](#available-commands)
+6. [Development Patterns](#development-patterns)
+7. [Parallel Development (Advanced)](#parallel-development-advanced)
+8. [Documentation Structure](#documentation-structure)
+9. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -106,6 +107,97 @@ For each feature, Claude runs these agents in sequence:
 - **Level 2** ensures every feature is complete before moving on
 - Changes at Level 1 automatically trigger replanning at Level 2
 - Clear separation between "what to build" and "how to build it"
+
+---
+
+## Brownfield (Existing Code)
+
+For existing codebases, Claude uses **AUDIT mode** to understand what exists before suggesting improvements.
+
+### The Brownfield Workflow
+
+```
+"Analyze this codebase"
+        │
+        ▼
+    AUDIT (infer intent, UX, architecture)
+        │
+        ▼
+    REVIEW (confirm understanding)
+        │
+        ▼
+    GAP ANALYSIS (find issues)
+        │
+        ▼
+    IMPROVE (fix by priority)
+```
+
+### Trigger Phrases
+
+Claude enters brownfield mode when you say:
+- "Analyze this codebase"
+- "Improve this project"
+- "What's wrong with this code"
+- "Audit this"
+- "Fix the technical debt"
+
+### Inferred Documents
+
+In brownfield mode, Claude creates docs marked `[INFERRED]`:
+- `/docs/intent/product-intent.md [INFERRED]`
+- `/docs/ux/user-journeys.md [INFERRED]`
+- `/docs/architecture/agent-design.md [INFERRED]`
+
+These are educated guesses based on your code. **Review and correct them** before proceeding.
+
+### Example Session
+
+```
+You:    "Analyze this codebase"
+
+Claude: Analyzing...
+
+        This appears to be an e-commerce app:
+        - User auth with roles
+        - Product catalog
+        - Shopping cart
+        - Checkout with payments
+
+        Found 3 incomplete journeys and
+        several security concerns.
+
+        Is this understanding correct?
+
+You:    "Yes, but checkout is the priority"
+
+Claude: Running gap analysis focused on checkout...
+
+        Checkout issues:
+        🔴 No payment validation
+        🟠 Race condition in inventory
+        🟡 No order confirmation email
+
+        Fix these?
+
+You:    "Yes"
+
+Claude: [Fixes each issue, adds tests]
+```
+
+### Gap Prioritization
+
+- **Critical** 🔴 - Security, data loss (Phase 0, fix now)
+- **High** 🟠 - Broken features, major UX issues (Phase 1)
+- **Medium** 🟡 - Tech debt, minor improvements (Phase 2)
+- **Low** 🟢 - Polish, nice-to-have (Phase 3/backlog)
+
+### Tips for Brownfield
+
+- Let Claude audit first before asking for fixes
+- Review `[INFERRED]` docs - Claude might misunderstand
+- Start with security issues (Phase 0)
+- Fix one thing at a time, verify, then continue
+- Use natural language: "What's the status?" to track progress
 
 ---
 

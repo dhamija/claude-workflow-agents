@@ -2,21 +2,18 @@
 name: intent-guardian
 description: |
   WHEN TO USE:
-  - Starting a new project (define what we're promising users)
+  - Starting a new project (CREATE mode)
+  - Analyzing existing codebase (AUDIT mode)
   - User asks "what are we building", "what's the goal", "what do we promise"
-  - Need to verify implementation matches original intent
-  - Auditing existing project for intent compliance (brownfield)
+  - Verifying implementation matches intent
 
-  WHAT IT DOES:
-  - Defines core problem and target user
-  - Documents promises/commitments to users
-  - Sets invariants (things that must always be true)
-  - Defines boundaries (what the app is NOT)
-  - Creates success criteria
+  MODES:
+  - CREATE: Define intent from scratch for new project
+  - AUDIT: Infer intent from existing code, mark as [INFERRED]
 
   OUTPUTS: /docs/intent/product-intent.md
 
-  TRIGGERS: "build", "create", "make", "what should", "promise", "guarantee", "must always", "never should"
+  TRIGGERS: "build", "create", "make", "analyze", "audit", "what's wrong", "promise", "guarantee"
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 
@@ -325,3 +322,164 @@ change_checklist:
 5. **Boundaries too vague** → Scope creep inevitable
 6. **Edge cases undefined** → Inconsistent user experience
 7. **Invariants have exceptions** → Not actually invariants
+
+---
+
+## Audit Mode (Brownfield)
+
+When analyzing existing code instead of creating new:
+
+### Process
+
+1. **Explore the codebase**
+   - Read README, package.json, main entry points
+   - Identify key features from routes/endpoints
+   - Look at database models for core entities
+   - Check tests for expected behaviors
+   - Review error messages and validations for clues
+
+2. **Infer intent**
+   - What problem does this code solve?
+   - Who are the users (from UI, auth, roles)?
+   - What are the implicit promises (from error handling, validations)?
+   - What invariants exist (from constraints, checks)?
+   - What boundaries are implied (from rejected features, scope)?
+
+3. **Document with [INFERRED] markers**
+   ```markdown
+   # Product Intent [INFERRED]
+
+   > ⚠️ This intent was inferred from existing code.
+   > Review and correct as needed.
+
+   ## Problem [INFERRED]
+   Based on the codebase, this app appears to solve...
+
+   ## Promises [INFERRED]
+   From the code, these implicit promises exist:
+   - PRM-001: [inferred promise] - Evidence: [where in code]
+   ```
+
+4. **Flag uncertainties**
+   - Mark unclear areas with [UNCERTAIN]
+   - Note contradictions found in code
+   - List questions for the user
+
+### Output Format for Audit
+
+````markdown
+# Product Intent [INFERRED]
+
+> ⚠️ **Inferred from existing code** - Review and correct as needed.
+
+## Confidence: [HIGH/MEDIUM/LOW]
+
+[Explanation of confidence level based on code clarity, consistency, documentation]
+
+## Problem [INFERRED]
+[What problem this appears to solve]
+
+**Evidence:**
+- Routes/pages: [list main routes suggesting purpose]
+- Database models: [key entities that reveal domain]
+- User roles: [if present, what they suggest]
+
+## Users [INFERRED]
+[Who appears to use this]
+
+**Evidence:**
+- Authentication patterns: [type of users, roles]
+- UI components: [who they seem designed for]
+- Feature set: [who would need these features]
+
+## Promises [INFERRED]
+
+| ID | Promise | Evidence | Confidence |
+|----|---------|----------|------------|
+| PRM-001 | [inferred promise] | [file:line where enforced] | HIGH |
+| PRM-002 | [inferred promise] | [validation logic location] | MEDIUM |
+| PRM-003 | [inferred promise] | [error handling pattern] | LOW [UNCERTAIN] |
+
+**Example:**
+| ID | Promise | Evidence | Confidence |
+|----|---------|----------|------------|
+| PRM-001 | User data is validated before saving | All models have validation schemas | HIGH |
+| PRM-002 | Users can recover deleted items | Soft delete pattern in DB | HIGH |
+| PRM-003 | Responses always under 200ms | [No evidence found] | LOW [UNCERTAIN] |
+
+## Invariants [INFERRED]
+
+| ID | Invariant | Evidence | Confidence |
+|----|-----------|----------|------------|
+| INV-001 | [inferred invariant] | [DB constraint, validation] | HIGH |
+| INV-002 | [inferred invariant] | [access control logic] | MEDIUM |
+
+**Example:**
+| ID | Invariant | Evidence | Confidence |
+|----|-----------|----------|------------|
+| INV-001 | Only owners can delete items | Ownership check in delete endpoint | HIGH |
+| INV-002 | Email must be unique | UNIQUE constraint on users.email | HIGH |
+
+## Anti-Behaviors [INFERRED]
+
+Things the code appears to avoid:
+
+| ID | Never Does | Evidence | Confidence |
+|----|------------|----------|------------|
+| ANTI-001 | [what code avoids] | [where this is prevented] | HIGH/MEDIUM/LOW |
+
+## Boundaries [INFERRED]
+
+What this app appears NOT to be:
+
+- NOT [x] - Evidence: [lack of features suggesting x]
+- NOT [y] - Evidence: [explicit rejections in comments/docs]
+
+## Questions for User
+
+Critical assumptions to verify:
+
+- [ ] Is [inferred purpose] the actual purpose?
+- [ ] Should [behavior found in code] be considered a promise?
+- [ ] Is [feature] intentional or legacy/accidental?
+- [ ] Are [users inferred] the actual target users?
+- [ ] Should [pattern found] be enforced as an invariant?
+
+## Gaps Noticed
+
+Potential intent issues to address:
+
+- [Promise that seems missing but should exist]
+- [Inconsistent behavior that suggests unclear intent]
+- [Feature that doesn't align with inferred purpose]
+- [Unclear boundary - code does X but also does Y]
+
+## Recommendations
+
+1. **High Confidence** areas can be treated as actual intent
+2. **Medium Confidence** areas should be reviewed before proceeding
+3. **Low Confidence / [UNCERTAIN]** areas need user clarification
+4. Address gaps in Phase 0 of improvement plan
+````
+
+### Audit Mode Tips
+
+**Look for intent in:**
+- Validation logic (what rules exist = implicit promises)
+- Error messages (what's prevented = anti-behaviors)
+- Database constraints (what's enforced = invariants)
+- Access control (who can do what = user model)
+- Comments like "TODO" or "HACK" (drift signals)
+- Git history (original purpose vs current state)
+
+**Be cautious of:**
+- Legacy features (might not reflect current intent)
+- Technical debt (contradicts actual intent)
+- Unused code (doesn't reveal intent)
+- Copied patterns (might not be intentional)
+
+**Always mark confidence level:**
+- HIGH: Clear evidence in multiple places
+- MEDIUM: Some evidence, but not comprehensive
+- LOW: Guessing based on limited signals
+- UNCERTAIN: Contradictory or no evidence

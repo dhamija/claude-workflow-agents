@@ -1,7 +1,7 @@
 ---
 name: agent-wf-help
 description: Show help about the agent workflow system - workflow, agents, commands, and development patterns
-argument-hint: "[topic] - workflow | agents | commands | patterns | parallel"
+argument-hint: "[topic] - workflow | agents | commands | patterns | parallel | brownfield"
 ---
 
 # Claude Workflow Agents - Help System
@@ -16,6 +16,7 @@ Display help based on the topic requested.
 /agent-wf-help commands     # Available commands
 /agent-wf-help patterns     # Development patterns
 /agent-wf-help parallel     # Parallel development
+/agent-wf-help brownfield   # Improving existing code
 ```
 
 ---
@@ -60,11 +61,12 @@ Just talk naturally. Claude handles the rest.
 ┌─────────────────────────────────────────────────────────────────┐
 │ MORE HELP                                                       │
 │                                                                 │
-│   /agent-wf-help workflow  - How the two-level workflow works   │
-│   /agent-wf-help agents    - All 11 specialized agents          │
-│   /agent-wf-help commands  - Available commands                 │
-│   /agent-wf-help patterns  - Development patterns & examples    │
-│   /agent-wf-help parallel  - Parallel development guide         │
+│   /agent-wf-help workflow    - How the two-level workflow works │
+│   /agent-wf-help agents      - All 11 specialized agents        │
+│   /agent-wf-help commands    - Available commands               │
+│   /agent-wf-help patterns    - Development patterns & examples  │
+│   /agent-wf-help parallel    - Parallel development guide       │
+│   /agent-wf-help brownfield  - Improving existing code          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -302,12 +304,39 @@ PATTERN 3: EXISTING CODE (Brownfield)
 
   You:    "Analyze this codebase and improve it"
 
-  Claude: [Audits] Understanding existing code...
-          [Gaps] Found 5 improvements:
-          1. Auth missing rate limiting (security)
-          2. N+1 queries in dashboard (perf)
-          ...
-          Start fixing?
+  Claude: [Audits existing code]
+
+          Analyzing codebase...
+
+          Inferred intent:
+          - This appears to be a task management app
+          - Users can create, assign, and track tasks
+
+          Inferred journeys:
+          - Create task, Assign task, Complete task
+          - Some journeys seem incomplete
+
+          Is this understanding correct?
+
+  You:    "Yes, but it's also for team collaboration"
+
+  Claude: [Updates inferred docs]
+          [Runs gap analysis]
+
+          Found 12 gaps:
+          - 2 Critical (security)
+          - 4 High (broken features)
+          - 6 Medium (tech debt)
+
+          Start with critical fixes?
+
+  You:    "Yes"
+
+  Claude: [Fixes GAP-001: SQL injection in search]
+          [Fixes GAP-002: Missing auth on admin routes]
+
+          Critical gaps fixed ✓
+          Continue with high priority?
 
 
 PATTERN 4: BUG FIX
@@ -366,6 +395,66 @@ PATTERN 7: FOCUSED WORK
           - GET /api/auth/me
 
           Tests in /tests/auth/
+
+
+PATTERN 8: BROWNFIELD WITH REVIEW
+─────────────────────────────────
+
+  You:    "What's wrong with this code?"
+
+  Claude: [Quick audit]
+
+          Issues found:
+
+          🔴 Critical:
+             - No rate limiting on auth endpoints
+
+          🟠 High:
+             - N+1 queries in dashboard
+             - Missing error handling in checkout
+
+          🟡 Medium:
+             - Duplicated validation logic
+             - No tests for payment flow
+
+          Want a full analysis with migration plan?
+
+  You:    "Yes, full analysis"
+
+  Claude: [Runs complete audit]
+          [Creates gap-analysis.md]
+          [Creates migration-plan.md]
+
+          Full analysis complete. See /docs/gaps/
+
+          Recommended approach:
+          Phase 0: Fix rate limiting (security)
+          Phase 1: Fix N+1 queries, error handling
+          Phase 2: Refactor validation, add tests
+
+
+PATTERN 9: INCREMENTAL BROWNFIELD
+─────────────────────────────────
+
+  You:    "Just fix the security issues for now"
+
+  Claude: [Identifies security gaps only]
+
+          Security issues:
+          1. GAP-001: No rate limiting
+          2. GAP-002: SQL injection in search
+          3. GAP-003: Weak password requirements
+
+          Fixing...
+
+  Claude: [Fixes each with tests]
+
+          ✓ GAP-001: Added rate limiting middleware
+          ✓ GAP-002: Parameterized all queries
+          ✓ GAP-003: Added password strength validation
+
+          All security issues fixed.
+          Run /status to see remaining gaps.
 ```
 
 ### If topic = "parallel":
@@ -449,6 +538,135 @@ COMMANDS
   /parallel <feature>        Create worktree for feature
 ```
 
+### If topic = "brownfield":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                   BROWNFIELD DEVELOPMENT                         ║
+║                  (Improving Existing Code)                       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+For existing codebases, Claude uses AUDIT mode to understand
+what exists before suggesting improvements.
+
+
+THE PROCESS
+───────────
+
+  "Analyze this codebase"
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  1. AUDIT PHASE                         │
+  │     Claude reads your code and infers:  │
+  │     • Intent (what it's supposed to do) │
+  │     • UX (how users interact)           │
+  │     • Architecture (how it's built)     │
+  │                                         │
+  │     All marked [INFERRED]               │
+  └─────────────────────────────────────────┘
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  2. REVIEW                              │
+  │     Claude asks you to confirm:         │
+  │     "Is this understanding correct?"    │
+  │                                         │
+  │     You can correct any misunderstandings│
+  └─────────────────────────────────────────┘
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  3. GAP ANALYSIS                        │
+  │     Claude compares current vs ideal:   │
+  │     • What's broken?                    │
+  │     • What's missing?                   │
+  │     • What's risky?                     │
+  │                                         │
+  │     Creates prioritized migration plan  │
+  └─────────────────────────────────────────┘
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  4. IMPROVE                             │
+  │     Fix gaps in priority order:         │
+  │     • Phase 0: Critical (security)      │
+  │     • Phase 1: High (broken features)   │
+  │     • Phase 2: Medium (tech debt)       │
+  │     • Phase 3: Low (polish)             │
+  └─────────────────────────────────────────┘
+
+
+TRIGGER PHRASES
+───────────────
+
+  Claude enters brownfield mode when you say:
+
+  • "Analyze this codebase"
+  • "Improve this project"
+  • "What's wrong with this code"
+  • "Audit this"
+  • "Fix the technical debt"
+  • "Review existing code"
+
+
+INFERRED DOCS
+─────────────
+
+  In brownfield mode, docs are marked [INFERRED]:
+
+  /docs/intent/product-intent.md [INFERRED]
+  /docs/ux/user-journeys.md [INFERRED]
+  /docs/architecture/agent-design.md [INFERRED]
+
+  This means Claude guessed based on code.
+  Review and correct before proceeding.
+
+
+EXAMPLE SESSION
+───────────────
+
+  You:    "Analyze this codebase"
+
+  Claude: Analyzing...
+
+          This appears to be an e-commerce app:
+          - User auth with roles
+          - Product catalog
+          - Shopping cart
+          - Checkout with payments
+
+          Found 3 incomplete journeys and
+          several security concerns.
+
+          Is this understanding correct?
+
+  You:    "Yes, but checkout is the priority"
+
+  Claude: Running gap analysis focused on checkout...
+
+          Checkout issues:
+          🔴 No payment validation
+          🟠 Race condition in inventory
+          🟡 No order confirmation email
+
+          Fix these?
+
+  You:    "Yes"
+
+  Claude: [Fixes each, adds tests]
+
+
+TIPS
+────
+
+  • Let Claude audit first before asking for fixes
+  • Review [INFERRED] docs - Claude might misunderstand
+  • Start with security (Phase 0)
+  • Fix one thing at a time, verify, then continue
+  • Use /status to track remaining gaps
+```
+
 ### If topic not recognized:
 
 ```
@@ -461,6 +679,7 @@ Available topics:
   /agent-wf-help commands     - Available commands
   /agent-wf-help patterns     - Development patterns & examples
   /agent-wf-help parallel     - Parallel development guide
+  /agent-wf-help brownfield   - Improving existing code
 
 Or just ask me what you want to know!
 ```

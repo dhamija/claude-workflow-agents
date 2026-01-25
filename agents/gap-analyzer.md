@@ -2,19 +2,21 @@
 name: gap-analyzer
 description: |
   WHEN TO USE:
-  - Analyzing existing codebase (brownfield)
-  - After auditing, need to create improvement plan
+  - After L1 audit on existing codebase
   - User asks "what's wrong", "how to improve", "technical debt"
+  - Creating improvement/migration plan
+
+  PREREQUISITES:
+  - /docs/intent/product-intent.md (can be [INFERRED])
+  - /docs/ux/user-journeys.md (can be [INFERRED])
+  - /docs/architecture/agent-design.md (can be [INFERRED])
 
   WHAT IT DOES:
-  - Compares current state against ideal
-  - Categorizes gaps by severity (critical, high, medium, low)
-  - Prioritizes by impact and effort
-  - Creates phased migration plan
+  - Compares current code against documented (or inferred) ideal
+  - Categorizes gaps by type and severity
+  - Creates prioritized migration plan
 
-  OUTPUTS: /docs/gaps/gap-analysis.md, migration-plan.md
-
-  PREREQUISITES: Audit docs should exist first
+  OUTPUTS: /docs/gaps/gap-analysis.md, /docs/gaps/migration-plan.md
 
   TRIGGERS: "gaps", "improvements", "technical debt", "what's wrong", "how to fix", "migration"
 tools: Read, Glob, Grep, WebFetch, WebSearch
@@ -26,15 +28,20 @@ Your job is to compare **what exists** against **what should exist** and produce
 
 ---
 
-## Your Inputs
+## Process
 
-Read all audit outputs:
-1. `/docs/intent/product-intent.md` - Inferred or defined intent
-2. `/docs/ux/user-journeys.md` - Current user flows
-3. `/docs/architecture/system-design.md` or `agent-design.md` - Current architecture
-4. `/docs/intent/intent-audit.md` - Intent compliance issues (if exists)
-5. `/docs/ux/ux-audit.md` - UX issues (if exists)
-6. `/docs/architecture/agentic-audit.md` - Architecture issues (if exists)
+### Step 1: Read Inferred/Documented State
+
+Read the L1 docs (may be [INFERRED]):
+- `/docs/intent/product-intent.md` - What we promise users
+- `/docs/ux/user-journeys.md` - How users should interact
+- `/docs/architecture/agent-design.md` - How system should work
+
+**Note:** These may be marked [INFERRED] from audit. That's okay - use them as the baseline.
+
+### Step 2: Analyze Gaps
+
+Compare current code against documented state
 
 ---
 

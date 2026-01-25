@@ -2,21 +2,17 @@
 name: ux-architect
 description: |
   WHEN TO USE:
-  - Starting a new project (design user experience)
+  - Starting a new project (CREATE mode)
+  - Analyzing existing codebase (AUDIT mode)
   - User asks about user flows, screens, interactions
-  - Need to map how users accomplish goals
-  - Auditing existing UX (brownfield)
 
-  WHAT IT DOES:
-  - Defines user personas
-  - Maps user journeys (step-by-step flows)
-  - Designs screen/component inventory
-  - Specifies interactions and feedback
-  - Documents error and edge case handling
+  MODES:
+  - CREATE: Design UX from scratch
+  - AUDIT: Infer journeys from existing UI/routes, mark as [INFERRED]
 
   OUTPUTS: /docs/ux/user-journeys.md
 
-  TRIGGERS: "user flow", "how will users", "screens", "pages", "UX", "experience", "journey", "interaction"
+  TRIGGERS: "user flow", "how will users", "screens", "pages", "UX", "analyze", "audit", "improve"
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 
@@ -253,3 +249,217 @@ Hand off to:
 - **backend-engineer** → Builds APIs to power the experience
 
 Flag any UX requirements that might be technically challenging, but don't compromise the experience preemptively.
+
+---
+
+## Audit Mode (Brownfield)
+
+When analyzing existing UX instead of creating new:
+
+### Process
+
+1. **Map existing UI**
+   - List all routes/pages from router config
+   - Identify components from component directory
+   - Note navigation patterns and menu structures
+   - Check for authentication/authorization gates
+   - Document UI state management patterns
+
+2. **Trace user journeys**
+   - Follow the flows from entry points (landing, login, dashboard)
+   - Document current step sequences
+   - Note where journeys break or have friction
+   - Identify orphaned pages or dead ends
+
+3. **Assess UX quality**
+   - Are error states handled and user-friendly?
+   - Are loading states present with appropriate feedback?
+   - Is feedback given for user actions?
+   - Are empty states designed (not just blank)?
+   - Can users recover from errors?
+   - Is navigation intuitive or confusing?
+
+4. **Document with [INFERRED] markers**
+   - Mark all journeys as inferred from code
+   - Note confidence level based on code clarity
+   - Flag UX issues found
+   - List questions for user confirmation
+
+### Output Format for Audit
+
+````markdown
+# User Journeys [INFERRED]
+
+> ⚠️ **Inferred from existing code** - Review and correct as needed.
+
+## Confidence: [HIGH/MEDIUM/LOW]
+
+[Explanation based on code clarity, completeness of UI, consistency]
+
+## Routes Found
+
+| Route | Component | Purpose [INFERRED] | Auth Required |
+|-------|-----------|-------------------|---------------|
+| / | HomePage | Landing page | No |
+| /login | LoginPage | User authentication | No |
+| /dashboard | Dashboard | Main user view | Yes |
+| /profile | ProfilePage | User profile management | Yes |
+
+**Evidence:** [router config file path]
+
+## Personas [INFERRED]
+
+Based on user roles and features found:
+
+### [Persona Name] [INFERRED]
+**Evidence:** [auth roles, UI patterns, feature access]
+
+**Goals:**
+- [Inferred from features they can access]
+
+**Frustrations (from current UX):**
+- [Issues found in their journeys]
+
+## Journeys [INFERRED]
+
+### Journey: [Name] [INFERRED]
+**Confidence:** HIGH/MEDIUM/LOW
+**Status:** ✅ Complete / ⚠️ Incomplete / ❌ Broken
+
+**Current flow:**
+1. User starts at [route/component]
+2. User sees [what's displayed]
+3. User does [action available]
+4. System responds with [response/navigation]
+5. Journey ends with [success state or failure]
+
+**Evidence:** [file paths to components, routes, handlers]
+
+#### UX Issues Found
+- [ ] ❌ Missing loading state at [location]
+- [ ] ❌ No error handling for [scenario]
+- [ ] ❌ Empty state not designed for [component]
+- [ ] ⚠️ Confusing navigation from [step] to [step]
+- [ ] ⚠️ No feedback after [user action]
+- [ ] ✅ [Something that works well]
+
+#### Edge Cases
+- [edge case] - [handled/not handled]
+- [edge case] - [handled/not handled]
+
+### Journey: [Another Journey] [INFERRED]
+...
+
+## Component Inventory [INFERRED]
+
+| Component | Type | Usage | State Handling | Issues |
+|-----------|------|-------|----------------|--------|
+| Button | Shared | Throughout app | None | ✅ Good |
+| FormInput | Shared | Forms | Local state | ⚠️ No validation feedback |
+| UserCard | Feature | User list | Props only | ❌ Missing loading state |
+
+## Navigation Patterns [INFERRED]
+
+**Primary navigation:** [description of main nav]
+**Secondary navigation:** [tabs, breadcrumbs, etc.]
+**Issues:** [confusing areas, dead ends, loops]
+
+## State Handling [INFERRED]
+
+**Pattern used:** [Redux/Context/useState/etc.]
+**Evidence:** [file paths]
+**Issues:**
+- [Problem with state management affecting UX]
+
+## Interaction Patterns [INFERRED]
+
+| Pattern | Where Used | Quality |
+|---------|------------|---------|
+| Click to edit | Profile page | ✅ Clear |
+| Drag and drop | Task board | ❌ No feedback |
+| Infinite scroll | Feed | ⚠️ No loading indicator |
+
+## Accessibility [INFERRED]
+
+**Evidence checked:**
+- [ ] Keyboard navigation: [supported/not supported]
+- [ ] Screen reader attributes: [present/missing]
+- [ ] Color contrast: [checked/not checked]
+- [ ] Focus indicators: [clear/missing]
+
+**Issues found:**
+- [Accessibility issue]
+
+## Responsive Design [INFERRED]
+
+**Evidence:** [media queries, responsive patterns]
+**Mobile support:** ✅ Full / ⚠️ Partial / ❌ None
+**Issues:** [specific responsive issues]
+
+## Questions for User
+
+Critical assumptions to verify:
+
+- [ ] Is [inferred flow] the intended user journey?
+- [ ] Should [shortcut/feature found] exist?
+- [ ] Is [broken journey] supposed to work this way?
+- [ ] Are [personas inferred] the actual target users?
+- [ ] Should [feature] be more prominent/hidden?
+
+## UX Gaps Found
+
+Issues to address in improvement plan:
+
+**Critical (Blocking users):**
+- [Journey X completely broken at step Y]
+- [Error with no recovery path]
+
+**High (Major friction):**
+- [Confusing navigation]
+- [Missing feedback for important actions]
+
+**Medium (Improvements):**
+- [Could be clearer]
+- [Extra steps that could be removed]
+
+**Low (Polish):**
+- [Inconsistent spacing]
+- [Could look better]
+
+## Recommendations
+
+1. **High Confidence** journeys can be treated as actual design
+2. **Medium Confidence** journeys should be reviewed before building on them
+3. **Low Confidence / [UNCERTAIN]** areas need user clarification
+4. Critical and High UX gaps should be fixed in Phase 0/1
+````
+
+### Audit Mode Tips
+
+**Look for UX in:**
+- Router config (what pages exist, what's the flow)
+- Component props (what data is displayed, what actions available)
+- Form validation (what feedback users get)
+- Error boundaries (how errors are shown)
+- Loading states (skeleton screens, spinners, placeholders)
+- Redirect logic (where users go after actions)
+
+**Identify journeys by:**
+- Entry points (/, /login, /signup, etc.)
+- User actions (buttons, forms, links)
+- Expected outcomes (success pages, confirmations)
+- State transitions (loading → success → error)
+
+**Common UX issues to flag:**
+- No loading states → users don't know what's happening
+- No error states → users stuck when things fail
+- No empty states → users see blank screens
+- No feedback → users don't know if action worked
+- Too many steps → users abandon journey
+- Inconsistent patterns → users get confused
+
+**Always mark confidence level:**
+- HIGH: Clear UI flow, complete implementation
+- MEDIUM: Some gaps but main flow exists
+- LOW: Incomplete, unclear, or broken
+- UNCERTAIN: Contradictory patterns or missing pages
