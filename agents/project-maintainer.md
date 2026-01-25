@@ -658,6 +658,25 @@ When syncing **claude-workflow-agents itself** (this repository), perform these 
 - [ ] `/design` command exists: `commands/design.md`
 - [ ] Help topic exists: `/agent-wf-help design` in `commands/agent-wf-help.md`
 
+### LLM Integration Completeness
+- [ ] LLM integration guide exists: `templates/docs/architecture/llm-integration.md.template`
+- [ ] All LLM library templates exist in `templates/src/lib/llm/`:
+  - base-provider.ts
+  - client.ts
+  - config.ts
+  - json-parser.ts
+  - retry.ts
+  - providers/ollama.ts
+  - providers/openai.ts
+  - providers/anthropic.ts
+  - README.md
+  - examples.ts
+- [ ] `/llm` command exists: `commands/llm.md`
+- [ ] Help topic exists: `/agent-wf-help llm` in `commands/agent-wf-help.md`
+- [ ] BACKEND.md exists with LLM integration patterns
+- [ ] Agentic-architect includes LLM provider checklist
+- [ ] Backend-engineer includes LLM implementation checklist
+
 ### Agent Completeness
 - [ ] All agents have frontmatter with name, description, tools
 - [ ] Frontend-engineer mentions design system in instructions
@@ -672,15 +691,19 @@ When syncing **claude-workflow-agents itself** (this repository), perform these 
 
 ### Documentation Completeness
 - [ ] README.md mentions design system feature
+- [ ] README.md mentions LLM integration patterns
 - [ ] GUIDE.md includes design system in workflow
 - [ ] EXAMPLES.md has design system example
 - [ ] FRONTEND.md exists with design system guidelines
+- [ ] BACKEND.md exists with LLM integration patterns
 - [ ] CLAUDE.md template includes design system workflow
 
 ### Test Coverage
 - [ ] Design system test exists: `tests/structural/test_design_system.sh`
+- [ ] LLM integration test exists: `tests/structural/test_llm_integration.sh`
 - [ ] All structural tests passing
 - [ ] Command existence test includes /design
+- [ ] Command existence test includes /llm
 
 ### State Tracking
 - [ ] STATE.md command count matches actual commands

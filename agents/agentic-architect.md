@@ -456,6 +456,30 @@ Response: 200 OK
 
 ## AI/Agent Architecture
 
+### LLM Integration Pattern
+
+**CRITICAL: Every AI component must support dual provider architecture**
+
+When designing any AI/LLM feature, always include:
+
+1. **Ollama (Local) Support** - Free, private, development-friendly
+2. **Commercial API Support** - OpenAI and/or Anthropic for production reliability
+3. **Automatic Fallback Chain** - Seamless provider switching on failure
+4. **Robust JSON Parsing** - Handle malformed output from local models
+5. **Schema Validation** - Use Zod for type-safe output validation
+
+**LLM Integration Checklist:**
+- [ ] Supports Ollama (local model) as primary provider
+- [ ] Supports at least one commercial API (OpenAI/Anthropic) as fallback
+- [ ] Uses provider abstraction layer (`LLMClient` from `/src/lib/llm/`)
+- [ ] Implements robust JSON parsing with repair strategies
+- [ ] Validates outputs with Zod schemas
+- [ ] Has graceful degradation (rule-based fallback if all LLMs fail)
+- [ ] Includes retry logic with exponential backoff
+- [ ] Logs provider failures and costs
+
+**Reference:** See `/docs/architecture/llm-integration.md` template for complete implementation guide.
+
 ### Agent Catalog
 
 [From your original Output Format section - move agent catalog here]
@@ -471,6 +495,11 @@ outputs:
   - <what it produces>
 tools:
   - <what it can access>
+llm_provider:
+  primary: ollama | openai | anthropic
+  fallback: [openai, anthropic] | [anthropic] | [ollama]
+  json_mode: required | optional
+  structured_output: <zod schema or description>
 model_requirements:
   reasoning: low | medium | high
   speed: critical | normal | flexible
@@ -527,11 +556,35 @@ Where agents and code work together:
 
 ### LLM Provider Configuration
 
-| Provider | Models | Use Case | Cost | Latency |
-|----------|--------|----------|------|---------|
-| Anthropic | Claude 3.5 Sonnet | Complex reasoning | $3/1M tokens | 2-5s |
-| OpenAI | GPT-4 Turbo | General purpose | $10/1M tokens | 1-3s |
-| Ollama | Llama 3.1 8B | Local/fast tasks | Free | 0.5-1s |
+**Dual Provider Strategy (REQUIRED):**
+
+All AI components MUST support multiple providers:
+
+| Provider | Models | Use Case | Cost | Latency | Development | Production |
+|----------|--------|----------|------|---------|-------------|------------|
+| **Ollama** | Llama 3.2, Mistral, etc. | Local development, fast tasks | Free | 0.5-1s | ✅ Primary | ⚠️ Optional |
+| **OpenAI** | GPT-4o-mini, GPT-4o | General purpose | $0.15-$2.50/1M tokens | 1-3s | 🔄 Fallback | ✅ Primary |
+| **Anthropic** | Claude 3.5 Sonnet | Complex reasoning | $3/1M tokens | 2-5s | 🔄 Fallback | ✅ Primary |
+
+**Fallback Chain Example:**
+```
+1. Try Ollama (local, free) → Perfect for dev
+2. If unavailable → Try OpenAI (if API key set)
+3. If unavailable → Try Anthropic (if API key set)
+4. If all fail → Use rule-based fallback (never crash)
+```
+
+**Implementation:**
+- Use `/src/lib/llm/client.ts` for unified LLM access
+- Configure in `.env` (Ollama + at least one commercial API)
+- Document JSON schema for each LLM call (Zod validation)
+- Handle malformed JSON from local models (robust parser)
+
+**Cost Optimization:**
+- Development: Ollama (free) handles 95% of iterations
+- CI/CD: Use Ollama for tests (fast, no API costs)
+- Production: Commercial APIs (reliable, fast)
+- Background jobs: Ollama when latency isn't critical
 
 ### Cost & Latency Analysis
 
@@ -580,11 +633,20 @@ Where agents and code work together:
 - Input sanitization
 - System prompt isolation
 - Output validation
+- Schema validation (Zod) prevents malformed output exploitation
 
 **Data Access Controls:**
 - Agents can only access user's own data
 - Tool access restricted by agent role
 - Audit logging for all agent actions
+
+**LLM-Specific Security:**
+- Never trust LLM output without validation
+- Always use Zod schemas for structured output
+- Sanitize user input before sending to LLM (prevent prompt injection)
+- Rate limit LLM calls (prevent abuse/cost explosion)
+- Never expose API keys in client-side code
+- Use provider abstraction to swap compromised keys quickly
 
 ### API Security
 
@@ -752,28 +814,53 @@ Use PostgreSQL with JSON fields for flexibility.
 
 ---
 
-### ADR-002: Use Ollama for Local LLM Development
+### ADR-002: Dual LLM Provider Architecture (Ollama + Commercial APIs)
 
 **Status:** Accepted
 **Date:** [Date]
 
 **Context:**
-Need fast, cost-free LLM for development without API costs.
+Need cost-effective development with reliable production LLM access. Want to avoid vendor lock-in and support local-first privacy.
 
 **Decision:**
-Use Ollama with Llama 3.1 8B for local development, with abstraction layer to swap providers in production.
+Implement dual provider architecture:
+- **Primary (Dev):** Ollama (local, free)
+- **Fallback (Dev):** Commercial APIs (OpenAI/Anthropic)
+- **Primary (Prod):** Commercial APIs (reliable, fast)
+- **Fallback (Prod):** Ollama (optional, if deployed)
+
+Use unified `LLMClient` abstraction with automatic fallback chain.
 
 **Rationale:**
-- Zero cost for development
-- Fast iteration (no API latency)
-- Privacy (no data sent externally)
-- Easy to swap providers via abstraction
+- **Cost:** Zero cost for development iterations (Ollama)
+- **Reliability:** Production uses commercial APIs with proven uptime
+- **Privacy:** Local models keep sensitive data on-premise
+- **Vendor Independence:** Can swap providers without code changes
+- **Resilience:** Automatic fallback if provider unavailable
+- **Testing:** Local models enable fast, free CI/CD testing
 
 **Consequences:**
-- ✅ Fast development cycle
-- ✅ No API costs during development
-- ❌ Model differences between dev/prod (mitigated by testing)
-- ❌ Requires local GPU (mitigated by CPU fallback)
+- ✅ Fast, free development cycle (no API costs)
+- ✅ Reliable production (commercial APIs)
+- ✅ Provider independence (easy to swap)
+- ✅ Privacy-friendly (local option always available)
+- ✅ Resilient (automatic failover)
+- ⚠️ Requires robust JSON parsing (local models less reliable)
+- ⚠️ Dev/prod model differences (mitigated by testing both)
+- ⚠️ Local deployment needs GPU or fast CPU (mitigated by commercial fallback)
+
+**Implementation:**
+- Provider abstraction in `/src/lib/llm/`
+- Unified interface: `LLMClient`
+- Providers: `OllamaProvider`, `OpenAIProvider`, `AnthropicProvider`
+- Robust JSON parser with 5 extraction strategies
+- Zod schemas for all structured outputs
+- Environment variable configuration
+
+**Alternatives Considered:**
+- **Commercial-only:** Rejected (high dev costs, vendor lock-in)
+- **Local-only:** Rejected (unreliable for production)
+- **Single provider:** Rejected (no resilience, vendor lock-in)
 
 ---
 

@@ -19,6 +19,7 @@ REQUIRED_COMMANDS=(
     "improve"
     "intent"
     "intent-audit"
+    "llm"
     "parallel"
     "plan"
     "replan"

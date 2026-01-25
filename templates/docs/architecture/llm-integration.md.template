@@ -1,0 +1,980 @@
+# LLM Integration Guide
+
+> Standard patterns for integrating LLMs with Ollama + Commercial API support
+
+**Project:** {{PROJECT_NAME}}
+**Generated:** {{DATE}}
+**Pattern:** Dual Provider (Ollama + Commercial APIs)
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Architecture Pattern](#architecture-pattern)
+- [Provider Abstraction](#provider-abstraction)
+- [Robust JSON Parsing](#robust-json-parsing)
+- [Error Handling & Fallbacks](#error-handling--fallbacks)
+- [Configuration](#configuration)
+- [Testing Strategy](#testing-strategy)
+- [Implementation Checklist](#implementation-checklist)
+- [Common Patterns](#common-patterns)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Overview
+
+### Philosophy
+
+**Every AI component in this project supports both local and commercial LLM providers:**
+
+- **Ollama (Local)**: Free, private, no API costs, runs on developer machines
+- **Commercial APIs**: OpenAI, Anthropic (Claude) for production or when local models fail
+
+### Key Principles
+
+1. **Local First**: Default to Ollama for development, testing, and cost-sensitive operations
+2. **Automatic Fallback**: Seamlessly switch to commercial APIs if local model fails or is unavailable
+3. **Robust Parsing**: Handle unreliable JSON output from local models with multi-strategy parsing
+4. **Schema Validation**: Use Zod for type-safe output validation
+5. **Provider Agnostic**: Application code never knows which provider is used
+
+### Benefits
+
+- **Development**: Free local testing with Ollama
+- **Production**: Reliable commercial APIs with automatic fallback
+- **Privacy**: Keep sensitive data local when needed
+- **Cost Control**: Use cheaper local models when sufficient
+- **Resilience**: Multiple providers mean no single point of failure
+
+---
+
+## Architecture Pattern
+
+### Dual Provider Strategy
+
+```
+┌─────────────────────────────────────────────────────┐
+│          Application Code (Provider Agnostic)       │
+└─────────────────────┬───────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────┐
+│              LLM Client (Unified Interface)          │
+│  • complete(prompt, options)                         │
+│  • completeJSON(prompt, schema, options)             │
+│  • Automatic fallback chain                          │
+└─────────────────────┬───────────────────────────────┘
+                      │
+          ┌───────────┼───────────┐
+          ▼           ▼           ▼
+    ┌─────────┐ ┌─────────┐ ┌─────────┐
+    │ Ollama  │ │ OpenAI  │ │ Claude  │
+    │Provider │ │Provider │ │Provider │
+    └─────────┘ └─────────┘ └─────────┘
+          │           │           │
+          ▼           ▼           ▼
+    ┌─────────┐ ┌─────────┐ ┌─────────┐
+    │  Local  │ │ OpenAI  │ │Anthropic│
+    │  Model  │ │   API   │ │   API   │
+    └─────────┘ └─────────┘ └─────────┘
+```
+
+### Fallback Chain
+
+```
+1. Try Ollama (local, free)
+   ↓ (if fails or unavailable)
+2. Try OpenAI (if API key configured)
+   ↓ (if fails or unavailable)
+3. Try Anthropic (if API key configured)
+   ↓ (if all fail)
+4. Throw error with helpful message
+```
+
+---
+
+## Provider Abstraction
+
+### Base Provider Interface
+
+```typescript
+// src/lib/llm/base-provider.ts
+export interface LLMProvider {
+  name: string;
+  isAvailable(): Promise<boolean>;
+  complete(prompt: string, options?: LLMOptions): Promise<string>;
+  completeJSON<T>(prompt: string, schema: z.ZodSchema<T>, options?: LLMOptions): Promise<T>;
+}
+
+export interface LLMOptions {
+  systemPrompt?: string;
+  temperature?: number;
+  maxTokens?: number;
+  stopSequences?: string[];
+}
+```
+
+### Unified LLM Client
+
+```typescript
+// src/lib/llm/client.ts
+import { OllamaProvider } from './providers/ollama';
+import { OpenAIProvider } from './providers/openai';
+import { AnthropicProvider } from './providers/anthropic';
+
+export class LLMClient {
+  private providers: LLMProvider[];
+
+  constructor(config: LLMConfig) {
+    this.providers = [
+      new OllamaProvider(config.ollama),
+      new OpenAIProvider(config.openai),
+      new AnthropicProvider(config.anthropic),
+    ];
+  }
+
+  async complete(prompt: string, options?: LLMOptions): Promise<string> {
+    const errors: Error[] = [];
+
+    for (const provider of this.providers) {
+      if (!(await provider.isAvailable())) continue;
+
+      try {
+        return await provider.complete(prompt, options);
+      } catch (error) {
+        errors.push(new Error(`${provider.name}: ${error.message}`));
+        continue; // Try next provider
+      }
+    }
+
+    throw new Error(`All LLM providers failed:\n${errors.map(e => e.message).join('\n')}`);
+  }
+
+  async completeJSON<T>(
+    prompt: string,
+    schema: z.ZodSchema<T>,
+    options?: LLMOptions
+  ): Promise<T> {
+    const errors: Error[] = [];
+
+    for (const provider of this.providers) {
+      if (!(await provider.isAvailable())) continue;
+
+      try {
+        return await provider.completeJSON(prompt, schema, options);
+      } catch (error) {
+        errors.push(new Error(`${provider.name}: ${error.message}`));
+        continue;
+      }
+    }
+
+    throw new Error(`All LLM providers failed:\n${errors.map(e => e.message).join('\n')}`);
+  }
+}
+```
+
+### Provider Implementations
+
+#### Ollama Provider
+
+```typescript
+// src/lib/llm/providers/ollama.ts
+import { LLMProvider, LLMOptions } from '../base-provider';
+import { parseJSON } from '../json-parser';
+import { z } from 'zod';
+
+export class OllamaProvider implements LLMProvider {
+  name = 'Ollama';
+  private baseURL: string;
+  private model: string;
+
+  constructor(config: { baseURL?: string; model?: string }) {
+    this.baseURL = config.baseURL || 'http://localhost:11434';
+    this.model = config.model || 'llama3.2';
+  }
+
+  async isAvailable(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseURL}/api/tags`);
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async complete(prompt: string, options?: LLMOptions): Promise<string> {
+    const response = await fetch(`${this.baseURL}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: this.model,
+        prompt: this.buildPrompt(prompt, options?.systemPrompt),
+        stream: false,
+        options: {
+          temperature: options?.temperature ?? 0.7,
+          num_predict: options?.maxTokens ?? 2000,
+          stop: options?.stopSequences,
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.response;
+  }
+
+  async completeJSON<T>(
+    prompt: string,
+    schema: z.ZodSchema<T>,
+    options?: LLMOptions
+  ): Promise<T> {
+    const jsonPrompt = `${prompt}\n\nIMPORTANT: Return ONLY valid JSON, no markdown, no explanation.`;
+
+    const response = await this.complete(jsonPrompt, {
+      ...options,
+      temperature: 0.3, // Lower temperature for structured output
+    });
+
+    // Use robust JSON parser (handles malformed JSON from local models)
+    const parsed = parseJSON(response);
+    return schema.parse(parsed);
+  }
+
+  private buildPrompt(userPrompt: string, systemPrompt?: string): string {
+    if (!systemPrompt) return userPrompt;
+    return `${systemPrompt}\n\n${userPrompt}`;
+  }
+}
+```
+
+#### OpenAI Provider
+
+```typescript
+// src/lib/llm/providers/openai.ts
+import OpenAI from 'openai';
+import { LLMProvider, LLMOptions } from '../base-provider';
+import { z } from 'zod';
+
+export class OpenAIProvider implements LLMProvider {
+  name = 'OpenAI';
+  private client: OpenAI | null = null;
+  private model: string;
+
+  constructor(config: { apiKey?: string; model?: string }) {
+    if (config.apiKey) {
+      this.client = new OpenAI({ apiKey: config.apiKey });
+    }
+    this.model = config.model || 'gpt-4o-mini';
+  }
+
+  async isAvailable(): Promise<boolean> {
+    return this.client !== null;
+  }
+
+  async complete(prompt: string, options?: LLMOptions): Promise<string> {
+    if (!this.client) throw new Error('OpenAI not configured');
+
+    const messages: OpenAI.ChatCompletionMessageParam[] = [];
+    if (options?.systemPrompt) {
+      messages.push({ role: 'system', content: options.systemPrompt });
+    }
+    messages.push({ role: 'user', content: prompt });
+
+    const response = await this.client.chat.completions.create({
+      model: this.model,
+      messages,
+      temperature: options?.temperature ?? 0.7,
+      max_tokens: options?.maxTokens ?? 2000,
+      stop: options?.stopSequences,
+    });
+
+    return response.choices[0]?.message?.content || '';
+  }
+
+  async completeJSON<T>(
+    prompt: string,
+    schema: z.ZodSchema<T>,
+    options?: LLMOptions
+  ): Promise<T> {
+    if (!this.client) throw new Error('OpenAI not configured');
+
+    const messages: OpenAI.ChatCompletionMessageParam[] = [];
+    if (options?.systemPrompt) {
+      messages.push({ role: 'system', content: options.systemPrompt });
+    }
+    messages.push({ role: 'user', content: prompt });
+
+    const response = await this.client.chat.completions.create({
+      model: this.model,
+      messages,
+      temperature: options?.temperature ?? 0.3,
+      max_tokens: options?.maxTokens ?? 2000,
+      response_format: { type: 'json_object' }, // Native JSON mode
+    });
+
+    const content = response.choices[0]?.message?.content || '{}';
+    const parsed = JSON.parse(content);
+    return schema.parse(parsed);
+  }
+}
+```
+
+#### Anthropic Provider
+
+```typescript
+// src/lib/llm/providers/anthropic.ts
+import Anthropic from '@anthropic-ai/sdk';
+import { LLMProvider, LLMOptions } from '../base-provider';
+import { parseJSON } from '../json-parser';
+import { z } from 'zod';
+
+export class AnthropicProvider implements LLMProvider {
+  name = 'Anthropic';
+  private client: Anthropic | null = null;
+  private model: string;
+
+  constructor(config: { apiKey?: string; model?: string }) {
+    if (config.apiKey) {
+      this.client = new Anthropic({ apiKey: config.apiKey });
+    }
+    this.model = config.model || 'claude-3-5-sonnet-20241022';
+  }
+
+  async isAvailable(): Promise<boolean> {
+    return this.client !== null;
+  }
+
+  async complete(prompt: string, options?: LLMOptions): Promise<string> {
+    if (!this.client) throw new Error('Anthropic not configured');
+
+    const response = await this.client.messages.create({
+      model: this.model,
+      max_tokens: options?.maxTokens ?? 2000,
+      temperature: options?.temperature ?? 0.7,
+      system: options?.systemPrompt,
+      messages: [{ role: 'user', content: prompt }],
+      stop_sequences: options?.stopSequences,
+    });
+
+    const content = response.content[0];
+    return content.type === 'text' ? content.text : '';
+  }
+
+  async completeJSON<T>(
+    prompt: string,
+    schema: z.ZodSchema<T>,
+    options?: LLMOptions
+  ): Promise<T> {
+    if (!this.client) throw new Error('Anthropic not configured');
+
+    // Claude doesn't have native JSON mode, but prefilling with { helps
+    const response = await this.client.messages.create({
+      model: this.model,
+      max_tokens: options?.maxTokens ?? 2000,
+      temperature: options?.temperature ?? 0.3,
+      system: options?.systemPrompt,
+      messages: [
+        { role: 'user', content: `${prompt}\n\nReturn ONLY valid JSON.` },
+        { role: 'assistant', content: '{' }, // Prefill to encourage JSON
+      ],
+    });
+
+    const content = response.content[0];
+    const text = content.type === 'text' ? content.text : '{}';
+    const fullJSON = '{' + text; // Restore prefilled brace
+
+    const parsed = parseJSON(fullJSON);
+    return schema.parse(parsed);
+  }
+}
+```
+
+---
+
+## Robust JSON Parsing
+
+### Why Robust Parsing is Critical
+
+Local LLMs (Ollama) often produce malformed JSON:
+- Trailing commas: `{"key": "value",}`
+- Markdown wrapping: ` ```json\n{...}\n``` `
+- Preamble/postamble text: `"Here's the JSON: {...}"`
+- Single quotes: `{'key': 'value'}`
+- Truncated output: `{"items": [{"id":`
+
+**Solution**: Multi-strategy JSON parser with automatic repair.
+
+### JSON Parser Implementation
+
+```typescript
+// src/lib/llm/json-parser.ts
+
+/**
+ * Robust JSON parser that handles malformed LLM output
+ *
+ * Strategies (applied in order):
+ * 1. Direct parse (valid JSON)
+ * 2. Extract from markdown code blocks
+ * 3. Extract JSON between first { and last }
+ * 4. Repair common syntax errors
+ * 5. Extract partial valid JSON
+ */
+export function parseJSON(text: string): any {
+  // Strategy 1: Direct parse
+  try {
+    return JSON.parse(text);
+  } catch {}
+
+  // Strategy 2: Extract from markdown
+  const markdownMatch = text.match(/```(?:json)?\s*\n([\s\S]*?)\n```/);
+  if (markdownMatch) {
+    try {
+      return JSON.parse(markdownMatch[1]);
+    } catch {}
+  }
+
+  // Strategy 3: Extract between first { and last }
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    const extracted = text.slice(firstBrace, lastBrace + 1);
+    try {
+      return JSON.parse(extracted);
+    } catch {}
+
+    // Strategy 4: Try repairing extracted JSON
+    const repaired = repairJSON(extracted);
+    try {
+      return JSON.parse(repaired);
+    } catch {}
+  }
+
+  // Strategy 5: Try repairing full text
+  const repaired = repairJSON(text);
+  try {
+    return JSON.parse(repaired);
+  } catch (error) {
+    throw new Error(`Failed to parse JSON after all strategies: ${error.message}`);
+  }
+}
+
+function repairJSON(text: string): string {
+  let repaired = text;
+
+  // Fix trailing commas
+  repaired = repaired.replace(/,(\s*[}\]])/g, '$1');
+
+  // Fix single quotes to double quotes (careful with apostrophes)
+  repaired = repaired.replace(/'/g, '"');
+
+  // Fix Python-style booleans
+  repaired = repaired.replace(/\bTrue\b/g, 'true');
+  repaired = repaired.replace(/\bFalse\b/g, 'false');
+  repaired = repaired.replace(/\bNone\b/g, 'null');
+
+  // Remove comments
+  repaired = repaired.replace(/\/\/.*$/gm, '');
+  repaired = repaired.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  // Fix unquoted keys (simple cases)
+  repaired = repaired.replace(/(\{|,)\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*:/g, '$1"$2":');
+
+  return repaired;
+}
+
+/**
+ * Parse with retry - if parsing fails, ask LLM to fix it
+ */
+export async function parseJSONWithRetry<T>(
+  text: string,
+  schema: z.ZodSchema<T>,
+  retryFn: (error: string) => Promise<string>,
+  maxRetries: number = 2
+): Promise<T> {
+  let currentText = text;
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const parsed = parseJSON(currentText);
+      return schema.parse(parsed);
+    } catch (error) {
+      lastError = error as Error;
+
+      if (attempt < maxRetries) {
+        // Ask LLM to fix the JSON
+        currentText = await retryFn(
+          `Previous response was invalid JSON. Error: ${error.message}\n\n` +
+          `Return ONLY valid JSON, no markdown, no explanation.`
+        );
+      }
+    }
+  }
+
+  throw new Error(`Failed after ${maxRetries} retries: ${lastError?.message}`);
+}
+```
+
+---
+
+## Error Handling & Fallbacks
+
+### Retry Logic
+
+```typescript
+// src/lib/llm/retry.ts
+export async function withRetry<T>(
+  fn: () => Promise<T>,
+  options: {
+    maxAttempts?: number;
+    delayMs?: number;
+    backoff?: 'linear' | 'exponential';
+  } = {}
+): Promise<T> {
+  const { maxAttempts = 3, delayMs = 1000, backoff = 'exponential' } = options;
+
+  let lastError: Error;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+
+      if (attempt < maxAttempts) {
+        const delay = backoff === 'exponential'
+          ? delayMs * Math.pow(2, attempt - 1)
+          : delayMs * attempt;
+
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  throw lastError!;
+}
+```
+
+### Graceful Degradation
+
+```typescript
+// Example: Tag generation with fallback
+async function generateTags(content: string): Promise<string[]> {
+  try {
+    const llmClient = new LLMClient(config);
+    const result = await llmClient.completeJSON(
+      `Generate 3-5 relevant tags for this content:\n\n${content}`,
+      z.object({ tags: z.array(z.string()) })
+    );
+    return result.tags;
+  } catch (error) {
+    console.error('LLM tag generation failed, using rule-based fallback:', error);
+    return ruleBasedTags(content); // Simple keyword extraction
+  }
+}
+```
+
+---
+
+## Configuration
+
+### Environment Variables
+
+```bash
+# .env
+# Ollama (Local)
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2
+
+# OpenAI (Optional)
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
+
+# Anthropic (Optional)
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+```
+
+### Configuration Loading
+
+```typescript
+// src/lib/llm/config.ts
+export interface LLMConfig {
+  ollama: {
+    baseURL: string;
+    model: string;
+  };
+  openai: {
+    apiKey?: string;
+    model: string;
+  };
+  anthropic: {
+    apiKey?: string;
+    model: string;
+  };
+}
+
+export function loadLLMConfig(): LLMConfig {
+  return {
+    ollama: {
+      baseURL: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
+      model: process.env.OLLAMA_MODEL || 'llama3.2',
+    },
+    openai: {
+      apiKey: process.env.OPENAI_API_KEY,
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    },
+    anthropic: {
+      apiKey: process.env.ANTHROPIC_API_KEY,
+      model: process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022',
+    },
+  };
+}
+```
+
+---
+
+## Testing Strategy
+
+### Unit Tests
+
+```typescript
+// tests/llm/json-parser.test.ts
+import { describe, it, expect } from 'vitest';
+import { parseJSON } from '@/lib/llm/json-parser';
+
+describe('parseJSON', () => {
+  it('parses valid JSON', () => {
+    expect(parseJSON('{"key": "value"}')).toEqual({ key: 'value' });
+  });
+
+  it('extracts from markdown', () => {
+    const markdown = '```json\n{"key": "value"}\n```';
+    expect(parseJSON(markdown)).toEqual({ key: 'value' });
+  });
+
+  it('repairs trailing commas', () => {
+    expect(parseJSON('{"key": "value",}')).toEqual({ key: 'value' });
+  });
+
+  it('handles preamble text', () => {
+    const text = 'Here is the JSON: {"key": "value"}';
+    expect(parseJSON(text)).toEqual({ key: 'value' });
+  });
+
+  it('fixes Python booleans', () => {
+    expect(parseJSON('{"active": True, "none": None}')).toEqual({
+      active: true,
+      none: null
+    });
+  });
+});
+```
+
+### Integration Tests
+
+```typescript
+// tests/llm/providers.test.ts
+import { describe, it, expect, beforeAll } from 'vitest';
+import { LLMClient } from '@/lib/llm/client';
+import { z } from 'zod';
+
+describe('LLMClient Integration', () => {
+  let client: LLMClient;
+
+  beforeAll(() => {
+    client = new LLMClient(loadLLMConfig());
+  });
+
+  it('completes text prompts', async () => {
+    const response = await client.complete('Say "hello" and nothing else');
+    expect(response.toLowerCase()).toContain('hello');
+  });
+
+  it('completes JSON prompts with schema validation', async () => {
+    const schema = z.object({
+      greeting: z.string(),
+      count: z.number(),
+    });
+
+    const result = await client.completeJSON(
+      'Return JSON with greeting="hello" and count=42',
+      schema
+    );
+
+    expect(result.greeting).toBe('hello');
+    expect(result.count).toBe(42);
+  });
+
+  it('falls back to next provider on failure', async () => {
+    // This test requires mocking provider failures
+    // Implementation depends on your testing framework
+  });
+});
+```
+
+### End-to-End Tests
+
+```typescript
+// Example: Test actual feature using LLM
+it('generates tags for conversation', async () => {
+  const conversation = {
+    title: 'Recipe for chocolate cake',
+    messages: [
+      { role: 'user', content: 'How do I make chocolate cake?' },
+      { role: 'assistant', content: 'Here is a recipe...' },
+    ],
+  };
+
+  const tags = await generateTags(conversation);
+
+  expect(tags).toBeInstanceOf(Array);
+  expect(tags.length).toBeGreaterThan(0);
+  expect(tags.length).toBeLessThanOrEqual(5);
+  expect(tags.some(tag => tag.toLowerCase().includes('recipe'))).toBe(true);
+});
+```
+
+---
+
+## Implementation Checklist
+
+When implementing LLM integration, ensure:
+
+### Setup
+- [ ] Install dependencies: `ollama`, `openai`, `@anthropic-ai/sdk`, `zod`
+- [ ] Create `/src/lib/llm/` directory structure
+- [ ] Add environment variables to `.env`
+- [ ] Add `.env.example` with all LLM configuration options
+
+### Core Implementation
+- [ ] Create `base-provider.ts` with `LLMProvider` interface
+- [ ] Implement `OllamaProvider` with JSON mode support
+- [ ] Implement `OpenAIProvider` with native JSON mode
+- [ ] Implement `AnthropicProvider` with prefill strategy
+- [ ] Create `client.ts` with unified `LLMClient` class
+- [ ] Implement fallback chain logic
+- [ ] Create `json-parser.ts` with all 5 extraction strategies
+- [ ] Add JSON repair functions (trailing commas, quotes, etc.)
+- [ ] Create `config.ts` for environment variable loading
+
+### Error Handling
+- [ ] Implement retry logic with exponential backoff
+- [ ] Add graceful degradation for all LLM features
+- [ ] Log provider failures with context
+- [ ] Provide helpful error messages when all providers fail
+
+### Testing
+- [ ] Unit tests for JSON parser (all strategies)
+- [ ] Unit tests for JSON repair functions
+- [ ] Integration tests for each provider
+- [ ] Integration test for fallback chain
+- [ ] End-to-end tests for actual features using LLM
+- [ ] Mock tests for provider failure scenarios
+
+### Documentation
+- [ ] Document environment variables in README
+- [ ] Add LLM setup instructions to USAGE.md
+- [ ] Create examples of common LLM patterns
+- [ ] Document when to use Ollama vs commercial APIs
+
+### Validation
+- [ ] Test with Ollama running locally
+- [ ] Test with Ollama unavailable (fallback)
+- [ ] Test with malformed JSON from local models
+- [ ] Test with commercial APIs (OpenAI/Anthropic)
+- [ ] Verify schema validation catches invalid outputs
+
+---
+
+## Common Patterns
+
+### Pattern 1: Simple Text Completion
+
+```typescript
+const llm = new LLMClient(loadLLMConfig());
+
+const summary = await llm.complete(
+  `Summarize this text in one sentence:\n\n${longText}`,
+  { temperature: 0.3 }
+);
+```
+
+### Pattern 2: Structured Output with Schema
+
+```typescript
+const ConversationTagsSchema = z.object({
+  tags: z.array(z.string().min(1).max(30)).min(2).max(5),
+  confidence: z.number().min(0).max(1),
+});
+
+const result = await llm.completeJSON(
+  `Generate 2-5 relevant tags for this conversation:\n\n${content}`,
+  ConversationTagsSchema,
+  { temperature: 0.5 }
+);
+
+console.log(result.tags); // Type-safe: string[]
+```
+
+### Pattern 3: With Graceful Fallback
+
+```typescript
+async function intelligentFeature(input: string): Promise<Result> {
+  try {
+    const llm = new LLMClient(loadLLMConfig());
+    return await llm.completeJSON(input, ResultSchema);
+  } catch (error) {
+    console.warn('LLM unavailable, using rule-based fallback');
+    return ruleBasedApproach(input);
+  }
+}
+```
+
+### Pattern 4: Retry with Feedback
+
+```typescript
+import { parseJSONWithRetry } from '@/lib/llm/json-parser';
+
+const result = await parseJSONWithRetry(
+  llmResponse,
+  MySchema,
+  async (errorFeedback) => {
+    // Ask LLM to fix the error
+    return await llm.complete(
+      `${originalPrompt}\n\nPrevious attempt failed:\n${errorFeedback}`
+    );
+  }
+);
+```
+
+### Pattern 5: Parallel Requests with Fallback
+
+```typescript
+async function generateMultiple(items: string[]): Promise<Result[]> {
+  const llm = new LLMClient(loadLLMConfig());
+
+  const results = await Promise.allSettled(
+    items.map(item => llm.completeJSON(item, ResultSchema))
+  );
+
+  return results.map((result, i) =>
+    result.status === 'fulfilled'
+      ? result.value
+      : fallbackResult(items[i])
+  );
+}
+```
+
+---
+
+## Troubleshooting
+
+### Ollama Returns Malformed JSON
+
+**Problem**: Local model returns JSON with trailing commas, single quotes, or wrapped in markdown.
+
+**Solution**: The `parseJSON()` function handles this automatically with 5 extraction strategies.
+
+**If still failing**:
+```typescript
+// Enable debug logging in json-parser.ts
+console.log('Raw LLM output:', text);
+console.log('After repair:', repaired);
+```
+
+### All Providers Failing
+
+**Problem**: Error: "All LLM providers failed"
+
+**Checklist**:
+- [ ] Is Ollama running? (`curl http://localhost:11434/api/tags`)
+- [ ] Are API keys set in `.env`?
+- [ ] Are API keys valid? (test with provider's playground)
+- [ ] Is network available? (for commercial APIs)
+- [ ] Check error messages for each provider in error output
+
+### Schema Validation Fails
+
+**Problem**: `ZodError: Invalid input`
+
+**Solution**: Check what the LLM actually returned:
+```typescript
+try {
+  const result = await llm.completeJSON(prompt, schema);
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    console.log('Validation errors:', error.errors);
+    console.log('Raw parsed data:', parsed); // Add logging to provider
+  }
+}
+```
+
+**Common fixes**:
+- Make optional fields optional: `z.string().optional()`
+- Add defaults: `z.string().default('unknown')`
+- Use permissive validators: `z.coerce.number()` instead of `z.number()`
+
+### Ollama Model Not Found
+
+**Problem**: `Error: model 'llama3.2' not found`
+
+**Solution**:
+```bash
+# Pull the model
+ollama pull llama3.2
+
+# Or change model in .env
+OLLAMA_MODEL=llama2
+```
+
+### Commercial API Rate Limits
+
+**Problem**: 429 Too Many Requests from OpenAI/Anthropic
+
+**Solution**: Implement rate limiting:
+```typescript
+import pLimit from 'p-limit';
+
+const limit = pLimit(5); // Max 5 concurrent requests
+
+const results = await Promise.all(
+  items.map(item => limit(() => llm.completeJSON(item, schema)))
+);
+```
+
+### Slow Response Times
+
+**Problem**: Ollama taking too long
+
+**Solutions**:
+- Use smaller model: `llama3.2:1b` instead of `llama3.2:70b`
+- Reduce max tokens: `{ maxTokens: 500 }`
+- Use commercial API for production: falls back automatically if Ollama configured
+
+---
+
+## Summary
+
+This LLM integration pattern provides:
+
+✅ **Dual provider support** - Local (Ollama) + Commercial (OpenAI/Anthropic)
+✅ **Automatic fallback** - Seamless failover between providers
+✅ **Robust JSON parsing** - Handles malformed output from local models
+✅ **Type safety** - Zod schema validation
+✅ **Retry logic** - Automatic retries with error feedback
+✅ **Graceful degradation** - Never crashes, falls back to rule-based approaches
+✅ **Cost efficient** - Defaults to free local models, uses commercial only when needed
+✅ **Privacy preserving** - Keep sensitive data local when possible
+
+**Next Steps**:
+1. Set up Ollama locally for development
+2. Implement providers following this guide
+3. Add robust JSON parsing with all strategies
+4. Test with malformed JSON from local models
+5. Configure commercial API keys for production fallback

@@ -67,6 +67,7 @@ Just talk naturally. Claude handles the rest.
 │   /agent-wf-help docs        - Documentation management         │
 │   /agent-wf-help commands    - Available commands               │
 │   /agent-wf-help design      - Design system & visual styling   │
+│   /agent-wf-help llm         - LLM integration & AI components  │
 │   /agent-wf-help patterns    - Development patterns & examples  │
 │   /agent-wf-help parallel    - Parallel development guide       │
 │   /agent-wf-help brownfield  - Improving existing code          │
@@ -1674,4 +1675,196 @@ MORE INFORMATION
   See: /design command documentation
   Location: commands/design.md
   Templates: templates/docs/ux/presets/
+```
+
+### If topic = "llm":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                  LLM INTEGRATION & AI COMPONENTS                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+WHAT IS LLM INTEGRATION?
+─────────────────────────
+
+  Every AI component supports DUAL providers:
+  • Ollama (local, free) - For development
+  • Commercial APIs (OpenAI/Anthropic) - For production reliability
+  • Automatic fallback chain - Seamless provider switching
+  • Graceful degradation - Rule-based fallback if all LLMs fail
+
+
+WHY DUAL PROVIDERS?
+───────────────────
+
+  ✓ Free development (Ollama = $0 cost)
+  ✓ Reliable production (commercial APIs = proven uptime)
+  ✓ Privacy-friendly (local models keep data on-premise)
+  ✓ Vendor independence (easy to swap providers)
+  ✓ Never crashes (always has fallback)
+
+
+USING THE /llm COMMAND
+──────────────────────
+
+  /llm                      # Show provider status
+  /llm setup                # Set up providers interactively
+  /llm test                 # Test all providers
+  /llm providers            # List available providers
+  /llm config               # Show configuration
+
+
+TYPICAL WORKFLOW
+────────────────
+
+  1. Start development with Ollama (free, local):
+     ollama serve
+     /llm test
+
+  2. Add production fallback:
+     /llm setup
+     → Add OpenAI API key
+
+  3. Build AI features:
+     Claude automatically uses dual provider pattern
+
+  4. Deploy:
+     ✓ Dev uses Ollama (free)
+     ✓ Prod uses OpenAI (reliable)
+     ✓ Failures fall back gracefully
+
+
+IMPLEMENTATION PATTERN
+──────────────────────
+
+  All AI features follow this structure:
+
+  import { LLMClient } from '@/lib/llm/client';
+  import { z } from 'zod';
+
+  const llm = new LLMClient();  // Auto-configured
+
+  const Schema = z.object({
+    tags: z.array(z.string()).min(2).max(5),
+  });
+
+  try {
+    const result = await llm.completeJSON(prompt, Schema);
+    return result.tags;
+  } catch (error) {
+    // Graceful fallback - NEVER crash
+    return extractKeywords(content);
+  }
+
+
+KEY PRINCIPLES
+──────────────
+
+  1. ALWAYS use LLMClient (not direct provider)
+  2. ALWAYS define Zod schema for structured output
+  3. ALWAYS implement graceful fallback
+  4. NEVER crash on LLM failure
+  5. NEVER hardcode provider choice
+
+
+FALLBACK CHAIN
+──────────────
+
+  1. Try Ollama (local, free)
+     ↓ (if unavailable)
+  2. Try OpenAI (if API key set)
+     ↓ (if unavailable)
+  3. Try Anthropic (if API key set)
+     ↓ (if all fail)
+  4. Use rule-based fallback
+
+
+COST OPTIMIZATION
+─────────────────
+
+  Development: Ollama (free) - 100% of iterations
+  CI/CD: Ollama (free) - Fast, no API costs
+  Production: OpenAI - Reliable, ~$0.15/1M tokens
+  Background jobs: Ollama - When latency not critical
+
+
+ROBUST JSON PARSING
+────────────────────
+
+  Local models often return malformed JSON:
+  • Markdown wrapping: ```json\n{...}\n```
+  • Trailing commas: {"key": "value",}
+  • Single quotes: {'key': 'value'}
+
+  The LLM client handles this automatically with 5 strategies:
+  1. Direct parse
+  2. Extract from markdown
+  3. Extract between braces
+  4. Repair syntax errors
+  5. Retry with feedback
+
+
+FILES CREATED
+─────────────
+
+  Backend:
+    /src/lib/llm/client.ts          - Unified LLM client
+    /src/lib/llm/providers/         - Ollama, OpenAI, Anthropic
+    /src/lib/llm/json-parser.ts     - Robust JSON parsing
+    /src/lib/llm/config.ts          - Configuration loading
+
+  Documentation:
+    /docs/architecture/llm-integration.md  - Complete guide
+
+
+ENVIRONMENT VARIABLES
+─────────────────────
+
+  Ollama (local, free):
+    OLLAMA_BASE_URL=http://localhost:11434
+    OLLAMA_MODEL=llama3.2
+
+  OpenAI (commercial fallback):
+    OPENAI_API_KEY=sk-proj-...
+    OPENAI_MODEL=gpt-4o-mini
+
+  Anthropic (optional fallback):
+    ANTHROPIC_API_KEY=sk-ant-...
+    ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
+
+
+COMMON SCENARIOS
+────────────────
+
+  First-time setup:
+    /llm
+    → Ollama available ✓
+    → Ready for development!
+
+  Add production reliability:
+    /llm setup
+    → Add OpenAI fallback
+    → Fallback chain configured ✓
+
+  Check if production-ready:
+    /llm
+    → ✓ Ollama (dev)
+    → ✓ OpenAI (prod fallback)
+    → Production ready ✓
+
+
+RELATED COMMANDS
+────────────────
+
+  /llm               - Manage LLM providers
+  /plan              - Creates backend plans with LLM patterns
+  /implement         - backend-engineer uses dual provider pattern
+
+
+MORE INFORMATION
+────────────────
+
+  See: BACKEND.md - Complete LLM integration guide
+  Location: templates/src/lib/llm/ - Code templates
+  Command: commands/llm.md - /llm command documentation
 ```

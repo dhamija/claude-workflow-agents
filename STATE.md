@@ -8,7 +8,7 @@
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
 | Agents | 14 | 2026-01-25 |
-| Commands | 23 | 2026-01-25 |
+| Commands | 24 | 2026-01-25 |
 | Help Topics | 10 | 2026-01-25 |
 | Tests | 17 | 2026-01-25 |
 
@@ -39,11 +39,14 @@
 | audit | ✓ Complete |
 | change | ✓ Complete |
 | debug | ✓ Complete |
+| design | ✓ Complete |
+| docs | ✓ Complete |
 | gap | ✓ Complete |
 | implement | ✓ Complete |
 | improve | ✓ Complete |
 | intent | ✓ Complete |
 | intent-audit | ✓ Complete |
+| llm | ✓ Complete |
 | parallel | ✓ Complete |
 | plan | ✓ Complete |
 | replan | ✓ Complete |
@@ -60,9 +63,11 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-25 | Added LLM integration patterns (dual provider architecture) | Claude |
+| 2026-01-25 | Added /llm command and BACKEND.md | Claude |
+| 2026-01-25 | Added design system support and /design command | Claude |
 | 2026-01-25 | Added self-maintenance system | Claude |
-| 2026-01-25 | Added ci-cd-engineer agent | Claude |
-| 2026-01-24 | Added comprehensive test suite | Claude |
+| 2026-01-25 | Added ci-cd-engineer agent and documentation-engineer | Claude |
 
 ## Test Results
 
