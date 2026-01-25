@@ -381,7 +381,10 @@ For each feature in `implementation-order.md`:
 5. VERIFY
    └─> test-engineer runs tests, checks journeys, verifies promises
 
-6. MARK COMPLETE
+6. SYNC STATE
+   └─> project-maintainer updates CLAUDE.md, docs, test coverage
+
+7. MARK COMPLETE
    └─> Move to next feature
 ```
 
@@ -652,6 +655,14 @@ describe('Task Management Journey', () => {
 ```
 
 If verification fails, debugger is called to fix issues before moving on.
+
+**After successful verification**, project-maintainer automatically syncs project state:
+- Updates CLAUDE.md Current State section with completed feature
+- Syncs /docs/* status markers ([KEPT], [IMPLEMENTED])
+- Records test coverage
+- Prepares for next feature
+
+This ensures session continuity - next session can resume with "continue".
 
 ---
 

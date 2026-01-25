@@ -125,11 +125,18 @@ After each level, review the output before moving on:
 Don't skip verification:
 ```bash
 /implement phase 1
-/verify phase 1    # Catches issues early
+/verify phase 1    # Catches issues early, auto-syncs on success
 /implement phase 2
 ```
 
-### 3. Iterate on Intent
+### 3. Save State Between Sessions
+Before ending a session:
+```bash
+/sync              # Updates CLAUDE.md with current state
+# Next session: just say "continue"
+```
+
+### 4. Iterate on Intent
 If implementation reveals intent issues:
 ```bash
 /intent-audit
@@ -137,7 +144,7 @@ If implementation reveals intent issues:
 # Update product-intent.md manually if needed
 ```
 
-### 4. Focused Improvements
+### 5. Focused Improvements
 Fix one thing at a time in brownfield:
 ```bash
 /improve GAP-007   # Single gap
@@ -146,7 +153,7 @@ Fix one thing at a time in brownfield:
 # Verify
 ```
 
-### 5. Parallel Work Setup
+### 6. Parallel Work Setup
 For parallel implementation with worktrees:
 ```bash
 git worktree add ../myapp-api feature/api
@@ -196,6 +203,9 @@ git worktree add ../myapp-web feature/web
 | `/aa-audit` | Find opportunities for agents |
 | `/review` | Code review |
 | `/debug` | Fix errors or bugs |
+| `/sync` | Update project state & docs |
+| `/sync quick` | Quick state update |
+| `/sync report` | Check sync status |
 
 ## Workflow Decision Tree
 

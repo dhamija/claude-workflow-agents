@@ -38,7 +38,7 @@ While keeping the experience conversational.
 ```
 claude-workflow-agents/
 │
-├── agents/                    # 12 specialized agents
+├── agents/                    # 13 specialized agents
 │   ├── intent-guardian.md     # L1: Define promises to users
 │   ├── ux-architect.md        # L1: Design user experience
 │   ├── agentic-architect.md   # L1: Design system architecture
@@ -50,9 +50,10 @@ claude-workflow-agents/
 │   ├── test-engineer.md       # L2: Write tests, verify
 │   ├── code-reviewer.md       # L2: Review code quality
 │   ├── debugger.md            # L2: Fix bugs
-│   └── ci-cd-engineer.md      # Setup: CI/CD for user projects
+│   ├── ci-cd-engineer.md      # Setup: CI/CD for user projects
+│   └── project-maintainer.md  # Setup: Sync project state & docs
 │
-├── commands/                  # 20 optional commands
+├── commands/                  # 21 optional commands
 │   ├── agent-wf-help.md       # Comprehensive help system
 │   ├── analyze.md             # Run L1 analysis agents
 │   ├── audit.md               # Audit existing codebase
@@ -68,6 +69,7 @@ claude-workflow-agents/
 │   ├── replan.md              # Regenerate plans
 │   ├── review.md              # Code review
 │   ├── update.md              # Update docs after changes
+│   ├── sync.md                # Sync project state & docs
 │   ├── ux.md                  # Run ux-architect
 │   ├── ux-audit.md            # Audit existing UX
 │   ├── verify.md              # Verify current phase
@@ -83,14 +85,16 @@ claude-workflow-agents/
 │   │   ├── plans/
 │   │   ├── gaps/
 │   │   └── changes/
-│   └── ci/                    # CI/CD templates
-│       ├── validate.sh.template
-│       ├── github-workflow.yml.template
-│       └── validators/
-│           ├── intent-validator.sh.template
-│           ├── ux-validator.sh.template
-│           ├── arch-validator.sh.template
-│           └── test-validator.sh.template
+│   ├── ci/                    # CI/CD templates
+│   │   ├── validate.sh.template
+│   │   ├── github-workflow.yml.template
+│   │   └── validators/
+│   │       ├── intent-validator.sh.template
+│   │       ├── ux-validator.sh.template
+│   │       ├── arch-validator.sh.template
+│   │       └── test-validator.sh.template
+│   └── scripts/               # Utility scripts for user projects
+│       └── verify-project-sync.sh.template
 │
 ├── tests/                     # Automated tests
 │   ├── run_all_tests.sh       # Master test runner
