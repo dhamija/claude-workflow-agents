@@ -476,6 +476,40 @@ You: I'll investigate and fix this.
 
 ---
 
+## MCP Servers
+
+MCP servers extend Claude's capabilities for this project.
+
+### Recommended Servers
+
+Run `/mcp recommend` to see project-specific recommendations.
+
+| Server | Purpose | Status |
+|--------|---------|--------|
+| postgres/sqlite | Database access | Not configured |
+| github | PR automation | Not configured |
+| puppeteer | E2E testing | Not configured |
+| memory | Persistent context | Not configured |
+
+### Setup
+
+```bash
+/mcp recommend    # See recommendations for your project
+/mcp setup <...>  # Generate configuration
+```
+
+### Usage
+
+Once configured, Claude can:
+- **postgres/sqlite**: Query database directly for debugging
+- **github**: Create PRs, manage issues
+- **puppeteer**: Run browser tests interactively
+- **memory**: Remember architectural decisions across sessions
+
+See `/docs/architecture/mcp-integration.md` for complete guide.
+
+---
+
 ## Documentation Structure
 
 Agents create and read from `/docs` and root-level documentation:

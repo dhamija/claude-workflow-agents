@@ -128,6 +128,162 @@ For each invariant:
 
 ---
 
+## MCP-Enhanced Testing
+
+When MCP servers are available, leverage them for faster, more effective testing:
+
+### With Puppeteer MCP
+
+For E2E tests, can **directly interact** with the browser:
+
+**Traditional approach:**
+1. Write Playwright/Cypress test code
+2. Run test
+3. If it fails, add debugging code
+4. Run again
+5. Fix and repeat
+
+**With Puppeteer MCP:**
+1. Ask Claude to test the flow
+2. Claude uses MCP to navigate browser interactively
+3. Claude sees what actually happens
+4. Claude writes/fixes test based on real behavior
+
+**Example:**
+```
+User: Test the checkout flow
+
+Claude (with puppeteer MCP):
+  Opening http://localhost:3000/cart...
+
+  ✓ Found 2 items in cart
+  ✓ Clicked "Proceed to Checkout"
+  ✓ Filled shipping address
+  ✓ Filled payment info
+  ✗ Payment button not clickable (form validation error)
+
+  Found issue: ZIP code validation requires 5 digits, only 4 provided
+
+  Let me write the test:
+  [Creates E2E test that handles this correctly]
+```
+
+### With Database MCP (postgres/sqlite)
+
+For integration tests, can **directly verify** data state:
+
+**Traditional approach:**
+1. Write test that creates data
+2. Make API call
+3. Query to verify (via test code)
+4. Debug if wrong
+
+**With Database MCP:**
+1. Set up test data via MCP
+2. Run API call
+3. Query database via MCP to verify
+4. See actual vs expected immediately
+
+**Example:**
+```
+User: Test user creation endpoint
+
+Claude (with postgres MCP):
+  Querying current state: SELECT COUNT(*) FROM users
+  → 5 users
+
+  Creating test user via POST /api/users
+  → 201 Created
+
+  Querying new state: SELECT * FROM users WHERE email='test@example.com'
+  → User created with correct fields ✓
+
+  Count check: SELECT COUNT(*) FROM users
+  → 6 users ✓
+
+  Writing integration test based on this flow...
+```
+
+### MCP Testing Workflow
+
+```
+┌─────────────────────────────────────────┐
+│ 1. Understand Requirement               │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│ 2. Use MCP to Explore                   │
+│    • puppeteer: Try the flow             │
+│    • postgres: Check data model          │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│ 3. Write Test Based on Real Behavior    │
+│    (Not assumptions)                     │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│ 4. Run Test                              │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│ 5. Use MCP to Debug Failures             │
+│    • See actual browser state            │
+│    • Query actual database state         │
+└──────────────┬──────────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────────┐
+│ 6. Fix and Verify                        │
+└─────────────────────────────────────────┘
+```
+
+### When to Use MCP for Testing
+
+| Scenario | Without MCP | With MCP | Benefit |
+|----------|-------------|----------|---------|
+| E2E test failing | Add console.log, re-run | Use puppeteer MCP to inspect live | 10x faster debugging |
+| Data not saving | Add debug queries to test | Query postgres MCP directly | Immediate visibility |
+| Form validation issues | Screenshot on failure | Navigate with puppeteer MCP | Interactive debugging |
+| API integration issues | Mock complex setup | Use fetch MCP to test real API | More realistic tests |
+
+### Verification with MCP
+
+When verifying a phase:
+
+1. **Smoke tests**: Use puppeteer MCP to check critical flows work
+2. **Data verification**: Use postgres MCP to verify database state
+3. **Journey validation**: Use puppeteer MCP to walk through user journeys
+4. **API testing**: Use fetch MCP to test endpoints
+
+**Example verification:**
+```
+Verifying Phase 2 (Auth feature)...
+
+[Using puppeteer MCP]
+  ✓ Registration form renders
+  ✓ Can submit with valid data
+  ✓ Redirects to dashboard after success
+
+[Using postgres MCP]
+  ✓ User record created in database
+  ✓ Password is hashed
+  ✓ Created timestamp present
+
+[Using fetch MCP]
+  ✓ POST /api/auth/register returns 201
+  ✓ POST /api/auth/login returns token
+  ✓ Protected endpoints reject without token
+
+Phase 2 verification: PASS ✓
+```
+
+---
+
 ## Verification Output Format
 ```markdown
 # Phase N Verification Report

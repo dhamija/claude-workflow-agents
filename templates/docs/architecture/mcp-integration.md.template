@@ -1,0 +1,618 @@
+# MCP Server Integration
+
+> Extending Claude's capabilities with Model Context Protocol servers
+
+**Project:** {{PROJECT_NAME}}
+**Generated:** {{DATE}}
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Recommended MCP Servers](#recommended-mcp-servers)
+- [Configuration](#configuration)
+- [Usage Patterns](#usage-patterns)
+- [Project-Specific Setup](#project-specific-setup)
+- [MCP Server Details](#mcp-server-details)
+- [Troubleshooting](#troubleshooting)
+
+---
+
+## Overview
+
+### What is MCP?
+
+Model Context Protocol (MCP) servers extend Claude's capabilities by connecting to external tools and services. They allow Claude to:
+
+- Access databases directly
+- Interact with GitHub (create PRs, manage issues)
+- Automate browsers for testing
+- Connect to project management tools
+- Access external APIs
+- Maintain persistent memory
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        Claude Code                              │
+├─────────────────────────────────────────────────────────────────┤
+│                              │                                  │
+│                              ▼                                  │
+│                    ┌─────────────────┐                          │
+│                    │   MCP Client    │                          │
+│                    └────────┬────────┘                          │
+│                             │                                   │
+│         ┌───────────────────┼───────────────────┐              │
+│         ▼                   ▼                   ▼              │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐        │
+│  │   GitHub    │    │  Postgres   │    │  Puppeteer  │        │
+│  │   Server    │    │   Server    │    │   Server    │        │
+│  └──────┬──────┘    └──────┬──────┘    └──────┬──────┘        │
+│         │                  │                  │                │
+└─────────┼──────────────────┼──────────────────┼────────────────┘
+          │                  │                  │
+          ▼                  ▼                  ▼
+     GitHub API        PostgreSQL         Chrome Browser
+```
+
+### Benefits
+
+- **Database Debugging**: Query database directly without writing temporary scripts
+- **PR Automation**: Create branches, commits, and PRs without leaving Claude
+- **Interactive Testing**: Run browser tests and see what happens in real-time
+- **Persistent Memory**: Remember project decisions across sessions
+- **Team Integration**: Post to Slack, update Linear tickets automatically
+
+---
+
+## Recommended MCP Servers
+
+### For All Projects
+
+| Server | Purpose | Install |
+|--------|---------|---------|
+| **memory** | Persistent context | `@modelcontextprotocol/server-memory` |
+| **filesystem** | Extended file access | `@modelcontextprotocol/server-filesystem` |
+
+### For Web Projects
+
+| Server | Purpose | Install |
+|--------|---------|---------|
+| **puppeteer** | Browser automation, E2E | `@modelcontextprotocol/server-puppeteer` |
+| **fetch** | API testing | `@modelcontextprotocol/server-fetch` |
+
+### For Backend Projects
+
+| Server | Purpose | Install |
+|--------|---------|---------|
+| **postgres** | PostgreSQL access | `@modelcontextprotocol/server-postgres` |
+| **sqlite** | SQLite access | `@modelcontextprotocol/server-sqlite` |
+| **redis** | Redis access | `mcp-server-redis` |
+
+### For Team Collaboration
+
+| Server | Purpose | Install |
+|--------|---------|---------|
+| **github** | PRs, issues, code review | `@modelcontextprotocol/server-github` |
+| **slack** | Team notifications | `@modelcontextprotocol/server-slack` |
+| **linear** | Issue tracking | `mcp-server-linear` |
+| **notion** | Documentation | `mcp-server-notion` |
+
+### For DevOps
+
+| Server | Purpose | Install |
+|--------|---------|---------|
+| **docker** | Container management | `mcp-server-docker` |
+| **kubernetes** | K8s management | `mcp-server-kubernetes` |
+
+---
+
+## Configuration
+
+### Claude Desktop Configuration
+
+**Location:**
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+**Example Configuration:**
+
+```json
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+      }
+    },
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost:5432/db"
+      }
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/dir"]
+    }
+  }
+}
+```
+
+### Project-Specific Configuration
+
+Create `.mcp/config.json` in project root:
+
+```json
+{
+  "recommended": [
+    {
+      "name": "postgres",
+      "reason": "Direct database access for debugging and migrations",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-postgres"],
+        "env": {
+          "DATABASE_URL": "${DATABASE_URL}"
+        }
+      }
+    },
+    {
+      "name": "github",
+      "reason": "PR creation and issue management",
+      "config": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {
+          "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+        }
+      }
+    }
+  ]
+}
+```
+
+---
+
+## Usage Patterns
+
+### Pattern 1: Database-Driven Development
+
+With `postgres` MCP server:
+
+**Claude can directly:**
+- Query tables to understand schema
+- Test queries before writing code
+- Debug data issues
+- Run migrations
+- Seed test data
+
+**Example workflow:**
+```
+User: "Add a new field 'status' to the orders table"
+
+Claude (with postgres MCP):
+1. Queries current schema: SELECT * FROM orders LIMIT 1
+2. Creates migration file
+3. Runs migration directly
+4. Verifies change: \d orders
+5. Updates TypeScript types
+6. Updates API endpoints
+```
+
+### Pattern 2: GitHub-Integrated Development
+
+With `github` MCP server:
+
+**Claude can directly:**
+- Create branches
+- Commit changes
+- Create pull requests
+- Add reviewers
+- Respond to review comments
+- Manage issues
+
+**Example workflow:**
+```
+User: "Create a PR for the auth feature"
+
+Claude (with github MCP):
+1. Creates branch: feature/auth
+2. Commits changes
+3. Creates PR with description
+4. Links related issues
+5. Requests reviewers
+```
+
+### Pattern 3: E2E Testing with Browser
+
+With `puppeteer` MCP server:
+
+**Claude can directly:**
+- Navigate to pages
+- Fill forms
+- Click buttons
+- Take screenshots
+- Verify UI elements
+- Debug visual issues
+
+**Example workflow:**
+```
+User: "Test the login flow"
+
+Claude (with puppeteer MCP):
+1. Opens browser to /login
+2. Fills email and password
+3. Clicks submit
+4. Verifies redirect to /dashboard
+5. Takes screenshot as evidence
+6. Reports success/failure
+```
+
+### Pattern 4: Persistent Memory
+
+With `memory` MCP server:
+
+**Claude can:**
+- Remember project decisions
+- Track user preferences
+- Store context across sessions
+- Build knowledge base
+
+**Example workflow:**
+```
+User: "Remember that we decided to use PostgreSQL for this project"
+
+Claude (with memory MCP):
+1. Stores: { "database": "postgresql", "reason": "..." }
+2. Next session: Automatically knows DB choice
+```
+
+---
+
+## Project-Specific Setup
+
+### Recommended by Project Type
+
+#### Full-Stack Web App
+
+```json
+{
+  "mcpServers": {
+    "postgres": { "...": "Database access" },
+    "puppeteer": { "...": "E2E testing" },
+    "github": { "...": "PR workflow" },
+    "memory": { "...": "Context retention" }
+  }
+}
+```
+
+#### API-Only Backend
+
+```json
+{
+  "mcpServers": {
+    "postgres": { "...": "Database access" },
+    "fetch": { "...": "API testing" },
+    "github": { "...": "PR workflow" }
+  }
+}
+```
+
+#### Data Pipeline
+
+```json
+{
+  "mcpServers": {
+    "postgres": { "...": "Source database" },
+    "sqlite": { "...": "Local testing" },
+    "filesystem": { "...": "Data files" }
+  }
+}
+```
+
+#### Team Project
+
+```json
+{
+  "mcpServers": {
+    "github": { "...": "Code collaboration" },
+    "slack": { "...": "Notifications" },
+    "linear": { "...": "Issue tracking" },
+    "notion": { "...": "Documentation" }
+  }
+}
+```
+
+---
+
+## MCP Server Details
+
+### GitHub Server
+
+**Capabilities:**
+- Create/list/update repositories
+- Manage branches
+- Create pull requests
+- Manage issues
+- Code search
+- Review PRs
+
+**Setup:**
+```json
+{
+  "github": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-github"],
+    "env": {
+      "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+    }
+  }
+}
+```
+
+**Token permissions needed:**
+- `repo` - Full repository access
+- `workflow` - GitHub Actions (optional)
+
+**Get token:** https://github.com/settings/tokens
+
+---
+
+### Postgres Server
+
+**Capabilities:**
+- Execute SQL queries
+- Describe tables
+- List databases
+- Transaction support
+
+**Setup:**
+```json
+{
+  "postgres": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-postgres"],
+    "env": {
+      "DATABASE_URL": "postgresql://user:pass@localhost:5432/dbname"
+    }
+  }
+}
+```
+
+**Security note:** Use read-only credentials for production databases.
+
+---
+
+### Puppeteer Server
+
+**Capabilities:**
+- Navigate to URLs
+- Click elements
+- Fill forms
+- Take screenshots
+- Execute JavaScript
+- Handle dialogs
+
+**Setup:**
+```json
+{
+  "puppeteer": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+  }
+}
+```
+
+**Note:** Requires Chrome/Chromium installed.
+
+---
+
+### Memory Server
+
+**Capabilities:**
+- Store key-value pairs
+- Retrieve stored data
+- Persist across sessions
+- Build knowledge graphs
+
+**Setup:**
+```json
+{
+  "memory": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-memory"]
+  }
+}
+```
+
+---
+
+### Filesystem Server
+
+**Capabilities:**
+- Extended file access beyond project directory
+- Read/write files
+- List directories
+- Watch file changes
+
+**Setup:**
+```json
+{
+  "filesystem": {
+    "command": "npx",
+    "args": [
+      "-y",
+      "@modelcontextprotocol/server-filesystem",
+      "/path/to/allowed/directory"
+    ]
+  }
+}
+```
+
+**Security:** Only grants access to specified directories.
+
+---
+
+### Fetch Server
+
+**Capabilities:**
+- Make HTTP requests
+- Test APIs
+- Download files
+- Inspect responses
+
+**Setup:**
+```json
+{
+  "fetch": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-fetch"]
+  }
+}
+```
+
+---
+
+### Slack Server
+
+**Capabilities:**
+- Post messages
+- List channels
+- Send notifications
+- Update messages
+
+**Setup:**
+```json
+{
+  "slack": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-slack"],
+    "env": {
+      "SLACK_BOT_TOKEN": "xoxb-..."
+    }
+  }
+}
+```
+
+**Get token:** https://api.slack.com/apps
+
+---
+
+## Troubleshooting
+
+### Server Won't Start
+
+```bash
+# Check if npx can find the package
+npx -y @modelcontextprotocol/server-github --help
+
+# Check logs
+# macOS: ~/Library/Logs/Claude/
+# Windows: %APPDATA%\Claude\logs\
+```
+
+### Connection Issues
+
+1. Verify server is running
+2. Check environment variables
+3. Verify network access (for remote services)
+4. Check authentication tokens
+
+### Permission Errors
+
+- **GitHub:** Verify token has required scopes
+- **Database:** Check user permissions
+- **Filesystem:** Verify path is in allowed list
+
+### Common Errors
+
+**"Server not found"**
+- Server name typo in config
+- Package not installed (npx should handle this)
+
+**"Authentication failed"**
+- Token expired or invalid
+- Token missing required permissions
+
+**"Database connection failed"**
+- DATABASE_URL incorrect
+- Database not running
+- Network/firewall blocking connection
+
+---
+
+## Best Practices
+
+### Security
+
+1. **Use environment variables** for sensitive data (tokens, passwords)
+2. **Use read-only database credentials** for production databases
+3. **Limit filesystem access** to specific directories
+4. **Rotate tokens** periodically
+
+### Performance
+
+1. **Cache query results** when possible
+2. **Use specific queries** instead of SELECT *
+3. **Limit browser automation** to necessary actions
+4. **Close connections** when done
+
+### Development Workflow
+
+1. **Start with recommendations**: Run `/mcp recommend`
+2. **Configure gradually**: Add servers as needed
+3. **Test connections**: Use `/mcp status` to verify
+4. **Document usage**: Note which features use which MCP servers
+
+---
+
+## Quick Reference
+
+### Setup Steps
+
+1. Run `/mcp recommend` to see project-specific suggestions
+2. Run `/mcp setup <servers...>` to generate configuration
+3. Add configuration to Claude config file
+4. Restart Claude
+5. Verify with `/mcp status`
+
+### Common Commands
+
+```
+/mcp recommend        # Get recommendations
+/mcp setup postgres   # Generate config for postgres
+/mcp status           # Check connected servers
+/mcp guide            # Usage documentation
+```
+
+### Useful Prompts
+
+```
+"Query the users table"                  → Uses postgres
+"Create a PR for this feature"           → Uses github
+"Test the checkout flow"                 → Uses puppeteer
+"Remember this architectural decision"   → Uses memory
+"Post update to #engineering channel"    → Uses slack
+```
+
+---
+
+## See Also
+
+- `/mcp` command - Manage MCP servers
+- `/agent-wf-help mcp` - MCP help topic
+- Official MCP documentation: https://modelcontextprotocol.io

@@ -619,3 +619,76 @@ If these aren't clear from inputs, ASK:
 5. **Existing code**
    - New project or adding to existing?
    - Existing patterns to follow?
+
+---
+
+## MCP Server Recommendations
+
+When creating implementation plans, analyze what MCP servers would accelerate development and add to `/docs/plans/implementation-order.md`:
+
+### Analysis Criteria
+
+| Project Has | Recommend | Priority |
+|-------------|-----------|----------|
+| PostgreSQL database | postgres MCP | HIGH |
+| SQLite database | sqlite MCP | HIGH |
+| GitHub repository | github MCP | HIGH |
+| E2E tests planned | puppeteer MCP | MEDIUM |
+| Team collaboration | slack/linear MCP | MEDIUM |
+| Complex state | memory MCP | MEDIUM |
+| Redis cache | redis MCP | MEDIUM |
+
+### Add to Implementation Order
+
+In `/docs/plans/implementation-order.md`, add:
+
+```markdown
+## Recommended MCP Servers
+
+Based on this project's requirements:
+
+| Server | Purpose | Priority | Setup |
+|--------|---------|----------|-------|
+| postgres | Database debugging and migrations | HIGH | Requires DATABASE_URL |
+| github | PR workflow automation | HIGH | Requires GITHUB_PERSONAL_ACCESS_TOKEN |
+| puppeteer | E2E testing | MEDIUM | Requires Chrome |
+| memory | Persistent context | MEDIUM | No config needed |
+
+**Setup Command:** `/mcp setup postgres github puppeteer memory`
+
+**Benefits:**
+- Query database directly without writing temporary scripts
+- Create PRs and manage issues without leaving Claude
+- Test UI interactively before writing test code
+- Remember architectural decisions across sessions
+```
+
+### In Feature Plans
+
+When a feature would benefit from MCP, add to `/docs/plans/features/[feature].md`:
+
+```markdown
+## MCP Enhancement
+
+This feature benefits from:
+- **postgres MCP**: Test queries before implementing services
+- **puppeteer MCP**: Verify UI before writing E2E tests
+```
+
+### After Planning Complete
+
+Suggest MCP servers to user:
+
+```
+Planning complete!
+
+Based on your project (Full-stack app with PostgreSQL), these MCP servers
+would accelerate development:
+
+  ✓ postgres  - Direct database access for debugging/migrations
+  ✓ github    - Automate PR creation and code review
+  ✓ puppeteer - Interactive E2E testing
+
+Run `/mcp setup postgres github puppeteer` to configure.
+(Optional but recommended for faster development)
+```

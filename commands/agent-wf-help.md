@@ -68,6 +68,7 @@ Just talk naturally. Claude handles the rest.
 │   /agent-wf-help commands    - Available commands               │
 │   /agent-wf-help design      - Design system & visual styling   │
 │   /agent-wf-help llm         - LLM integration & AI components  │
+│   /agent-wf-help mcp         - MCP servers for enhanced dev     │
 │   /agent-wf-help patterns    - Development patterns & examples  │
 │   /agent-wf-help parallel    - Parallel development guide       │
 │   /agent-wf-help brownfield  - Improving existing code          │
@@ -1867,4 +1868,145 @@ MORE INFORMATION
   See: BACKEND.md - Complete LLM integration guide
   Location: templates/src/lib/llm/ - Code templates
   Command: commands/llm.md - /llm command documentation
+```
+
+### If: "mcp" or "model context protocol" or "servers"
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                      MCP SERVERS                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+MCP (Model Context Protocol) servers extend Claude's capabilities.
+
+
+WHAT THEY DO
+────────────
+
+  Claude + MCP Servers can:
+
+  • Query databases directly (postgres, sqlite)
+  • Manage GitHub PRs and issues (github)
+  • Automate browsers for testing (puppeteer)
+  • Post to Slack/Linear (slack, linear)
+  • Remember context across sessions (memory)
+  • Access external APIs (fetch)
+  • Manage infrastructure (docker, kubernetes)
+
+
+POPULAR SERVERS
+───────────────
+
+  DATABASE ACCESS
+    postgres     PostgreSQL queries and management
+    sqlite       SQLite queries and management
+    redis        Redis cache operations
+
+  DEVELOPMENT WORKFLOW
+    github       Create PRs, manage issues, code review
+    puppeteer    Browser automation and E2E testing
+    fetch        HTTP requests and API testing
+
+  TEAM COLLABORATION
+    slack        Post messages and notifications
+    linear       Issue tracking and project management
+    notion       Documentation access
+
+  INFRASTRUCTURE
+    docker       Container management
+    kubernetes   Cluster management
+
+
+COMMANDS
+────────
+
+  /mcp                          Show recommendations
+  /mcp recommend                Analyze project and recommend servers
+  /mcp setup <servers...>       Generate configuration
+  /mcp status                   Check server availability
+  /mcp guide                    Show usage guide
+
+
+EXAMPLE WORKFLOW
+────────────────
+
+  WITH POSTGRES:
+    You: "Query the users table"
+    → Claude queries database directly
+    → No need to write temporary scripts
+
+  WITH GITHUB:
+    You: "Create a PR for the auth feature"
+    → Claude creates branch, commits, creates PR
+    → All without leaving Claude
+
+  WITH PUPPETEER:
+    You: "Test the login flow"
+    → Claude navigates browser, fills forms, verifies
+    → Interactive debugging of E2E tests
+
+
+SETUP
+─────
+
+  1. Get recommendations for your project:
+     → /mcp recommend
+
+  2. Generate configuration:
+     → /mcp setup postgres github puppeteer
+
+  3. Add to Claude config file:
+     → macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+     → Windows: %APPDATA%\Claude\claude_desktop_config.json
+
+  4. Restart Claude Code
+
+  5. Verify connection:
+     → /mcp status
+
+
+WHEN TO USE MCP SERVERS
+───────────────────────
+
+  Planning Phase (after /analyze):
+    → implementation-planner suggests appropriate servers
+    → Based on project tech stack and requirements
+
+  Implementation Phase:
+    → Use postgres MCP to test queries before coding
+    → Use puppeteer MCP to verify UI before writing tests
+
+  Testing Phase:
+    → test-engineer uses MCP for interactive debugging
+    → Direct database verification
+    → Real browser testing
+
+
+PROJECT-SPECIFIC RECOMMENDATIONS
+─────────────────────────────────
+
+  Full-stack web app:
+    → postgres (database debugging)
+    → github (PR workflow)
+    → puppeteer (E2E testing)
+    → memory (context retention)
+
+  API-only backend:
+    → postgres/sqlite (database access)
+    → fetch (API testing)
+    → github (PR workflow)
+
+  Team project:
+    → github (code collaboration)
+    → slack (notifications)
+    → linear (issue tracking)
+    → notion (documentation)
+
+
+DOCS
+────
+
+  Complete guide: /docs/architecture/mcp-integration.md
+  Command docs: commands/mcp.md
+  Official MCP: https://modelcontextprotocol.io
 ```

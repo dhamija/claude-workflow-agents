@@ -8,8 +8,8 @@
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
 | Agents | 14 | 2026-01-25 |
-| Commands | 24 | 2026-01-25 |
-| Help Topics | 10 | 2026-01-25 |
+| Commands | 25 | 2026-01-25 |
+| Help Topics | 11 | 2026-01-25 |
 | Tests | 17 | 2026-01-25 |
 
 ## Agents List
@@ -58,16 +58,17 @@
 | verify | ✓ Complete |
 | aa | ✓ Complete |
 | aa-audit | ✓ Complete |
+| mcp | ✓ Complete |
 
 ## Recent Changes
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-25 | Added MCP server integration support and /mcp command | Claude |
 | 2026-01-25 | Added LLM integration patterns (dual provider architecture) | Claude |
 | 2026-01-25 | Added /llm command and BACKEND.md | Claude |
 | 2026-01-25 | Added design system support and /design command | Claude |
 | 2026-01-25 | Added self-maintenance system | Claude |
-| 2026-01-25 | Added ci-cd-engineer agent and documentation-engineer | Claude |
 
 ## Test Results
 
