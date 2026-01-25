@@ -198,7 +198,16 @@ else
 fi
 
 echo ""
+echo "Getting Help:"
+echo "  /agent-wf-help              # Quick overview"
+echo "  /agent-wf-help workflow     # How it works"
+echo "  /agent-wf-help agents       # All agents"
+echo "  /agent-wf-help commands     # All commands"
+echo "  /agent-wf-help patterns     # Dev patterns"
+echo "  /agent-wf-help parallel     # Parallel mode"
+echo ""
 echo "Documentation:"
+echo "  - GUIDE.md    - Complete guide with all topics"
 echo "  - README.md   - Quick start"
 echo "  - WORKFLOW.md - Workflow details"
 echo "  - USAGE.md    - Usage examples"

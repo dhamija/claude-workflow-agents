@@ -263,8 +263,27 @@ Agents create and use `/docs` as the source of truth:
     └── migration-plan.md          # Brownfield improvement plan
 ```
 
+## Getting Help
+
+Once installed, you can access the comprehensive help system:
+
+```bash
+/agent-wf-help              # Quick overview
+/agent-wf-help workflow     # Two-level workflow explanation
+/agent-wf-help agents       # All 11 specialized agents
+/agent-wf-help commands     # Available commands
+/agent-wf-help patterns     # Development patterns & examples
+/agent-wf-help parallel     # Parallel development guide
+```
+
+Or just ask Claude:
+- "How does this work?"
+- "What's next?"
+- "What should I do?"
+
 ## Further Reading
 
+- [GUIDE.md](GUIDE.md) - Complete guide with all topics
 - [WORKFLOW.md](WORKFLOW.md) - Detailed workflow patterns
 - [USAGE.md](USAGE.md) - Extended examples
 - [AGENTS.md](AGENTS.md) - Agent reference
