@@ -458,6 +458,34 @@ Describe the problem:
 
 ---
 
+## Testing
+
+### Run All Automated Tests
+```bash
+./tests/run_all_tests.sh
+```
+
+### Run Specific Test Category
+```bash
+./tests/run_all_tests.sh --structural
+./tests/run_all_tests.sh --content
+./tests/run_all_tests.sh --consistency
+./tests/run_all_tests.sh --documentation
+./tests/run_all_tests.sh --integration
+```
+
+### Manual Testing
+
+See [tests/MANUAL_TEST_CHECKLIST.md](tests/MANUAL_TEST_CHECKLIST.md) for manual testing procedures that verify functionality with Claude Code.
+
+### Test Report
+
+Use [tests/TEST_REPORT_TEMPLATE.md](tests/TEST_REPORT_TEMPLATE.md) to document test results.
+
+For details, see [tests/README.md](tests/README.md).
+
+---
+
 ## More Resources
 
 - [GUIDE.md](GUIDE.md) - Quick reference card
