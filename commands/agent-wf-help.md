@@ -667,6 +667,135 @@ TIPS
   • Use /status to track remaining gaps
 ```
 
+### If topic = "examples":
+
+```
+PRACTICAL EXAMPLES
+══════════════════
+
+See EXAMPLES.md for 7 complete real-world scenarios.
+
+Quick summaries:
+
+
+📝 EXAMPLE 1: SIMPLE TODO APP (Greenfield)
+─────────────────────────────────────────
+
+  You:    "Build me a simple todo app"
+
+  Claude: [Analyzes → Plans → Builds 3 features]
+          ✅ user-authentication
+          ✅ task-management
+          ✅ task-filtering
+
+  Time: ~10 minutes
+  Learn: Basic greenfield workflow
+
+
+🏢 EXAMPLE 2: E-COMMERCE PLATFORM (Greenfield + Parallel)
+──────────────────────────────────────────────────────────
+
+  You:    "Build me an e-commerce platform"
+          "We have 3 developers"
+
+  Claude: [Plans 11 features in 4 batches]
+          [Sets up git worktrees for parallel dev]
+          [3 developers work simultaneously]
+
+  Time: ~15 hours with 3 devs (vs 40 hours solo)
+  Learn: Parallel development for teams
+
+
+🔧 EXAMPLE 3: IMPROVING EXISTING CODE (Brownfield)
+───────────────────────────────────────────────────
+
+  You:    "Analyze this codebase"
+
+  Claude: [Infers intent/UX/architecture]
+          [Finds 12 gaps: 2 critical, 4 high, 6 medium]
+          [Fixes critical + high priority issues]
+
+  Time: ~8 hours
+  Learn: Brownfield audit and gap fixing
+
+
+➕ EXAMPLE 4: ADDING FEATURES (Change Management)
+──────────────────────────────────────────────────
+
+  You:    "Add meal planning to my recipe app"
+
+  Claude: [Analyzes impact]
+          [Updates docs and plans]
+          [Implements new feature]
+          ✅ No regressions
+
+  Time: ~6 hours
+  Learn: Change management workflow
+
+
+🎯 EXAMPLE 5: BACKEND ONLY (Focused Work)
+──────────────────────────────────────────
+
+  You:    "Build backend API for movie app"
+          "I'll handle frontend myself"
+
+  Claude: [Builds API only]
+          [Creates API documentation]
+          [Tests backend thoroughly]
+
+  Time: ~4 hours
+  Learn: Focused backend development
+
+
+🐛 EXAMPLE 6: DEBUGGING PRODUCTION ISSUE
+─────────────────────────────────────────
+
+  You:    "Users report 'Failed to load profile' errors"
+
+  Claude: [Finds root cause in 1 minute]
+          [Fixes + adds regression test]
+          [Deploys to production]
+
+  Time: ~30 minutes (from report to fix)
+  Learn: Systematic debugging
+
+
+✅ EXAMPLE 7: PRE-DEPLOYMENT REVIEW
+────────────────────────────────────
+
+  You:    "Review code before production deploy"
+
+  Claude: [Finds 2 critical security issues]
+          [Finds 5 high-priority issues]
+          [Finds 3 bugs]
+          [Fixes everything]
+          ✅ Ready for production
+
+  Time: ~4 hours (review + fixes)
+  Learn: Security and quality review
+
+
+KEY TAKEAWAYS
+─────────────
+
+  Pattern 1: Just talk - no commands needed
+  Pattern 2: Greenfield = Analyze → Plan → Build
+  Pattern 3: Brownfield = Audit → Gap → Improve
+  Pattern 4: Changes = Analyze Impact → Update
+  Pattern 5: Verification at every step
+  Pattern 6: Parallel for teams, sequential for solo
+  Pattern 7: Focused work is supported
+  Pattern 8: Debugging is systematic
+  Pattern 9: Reviews before deploy
+
+
+FULL DETAILS
+────────────
+
+  See EXAMPLES.md in project root for complete
+  conversation transcripts and detailed explanations.
+```
+
 ### If topic not recognized:
 
 ```
@@ -680,6 +809,7 @@ Available topics:
   /agent-wf-help patterns     - Development patterns & examples
   /agent-wf-help parallel     - Parallel development guide
   /agent-wf-help brownfield   - Improving existing code
+  /agent-wf-help examples     - Practical examples
 
 Or just ask me what you want to know!
 ```
