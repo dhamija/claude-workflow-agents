@@ -8,14 +8,91 @@ This project uses a multi-agent workflow. You (Claude) orchestrate specialized s
 
 ---
 
+## Two-Level Workflow
+
+This workflow supports both **sequential** and **parallel** development:
+
+### Level 1: Main Project (Analysis & Planning)
+
+**Where:** This repository (main branch)
+
+**Purpose:** High-level design and planning
+
+**Activities:**
+- Define product intent (what we promise users)
+- Design user experience (journeys, screens)
+- Design system architecture
+- Create implementation plans (overview + feature breakdown)
+
+**Agents used:**
+- intent-guardian, ux-architect, agentic-architect (L1 Analysis)
+- implementation-planner (L2 Planning)
+
+**Output:**
+- `/docs/intent/` - Product promises and invariants
+- `/docs/ux/` - User journeys
+- `/docs/architecture/` - System design
+- `/docs/plans/overview/` - Full system reference
+- `/docs/plans/features/` - Individual feature specs
+- `/docs/plans/implementation-order.md` - Parallel batches
+
+### Level 2: Feature Worktrees (Execution)
+
+**Where:** Separate worktrees (`../feature-name/`)
+
+**Purpose:** Implement individual features in parallel
+
+**Activities:**
+- Implement backend for ONE feature
+- Implement frontend for ONE feature
+- Write tests for ONE feature
+- Review and verify
+
+**Agents used:**
+- backend-engineer, frontend-engineer, test-engineer (L3 Implementation)
+- code-reviewer, debugger (Quality)
+
+**Output:**
+- Working code for the feature
+- Tests passing
+- Ready for PR merge
+
+### Why Two Levels?
+
+**Main project:** Big picture thinking, avoid conflicts
+**Feature worktrees:** Focused execution, parallel development
+
+**Example:**
+```
+Main project:
+  /analyze task manager app
+  /plan
+  → Creates 5 feature plans
+
+Feature worktrees (parallel):
+  Developer 1: /parallel user-authentication → works in ../user-authentication/
+  Developer 2: /parallel task-management → works in ../task-management/
+  Developer 3: /parallel notifications → works in ../notifications/
+
+All three developers work simultaneously without conflicts.
+```
+
+---
+
 ## How It Works
 
-**When the user talks to you, you:**
-1. Understand their intent
-2. Automatically select the right specialized agent(s)
-3. Launch them in parallel when possible
-4. Coordinate their outputs
-5. Present results to the user
+**In main project (analysis/planning):**
+1. User talks naturally: "I want to build X"
+2. Claude launches analysis agents (intent, UX, architecture)
+3. Claude creates plans (overview + features)
+4. User reviews batches of features that can be built in parallel
+
+**In feature worktree (execution):**
+1. Developer runs `/parallel <feature-name>`
+2. Gets isolated worktree with scoped CLAUDE.md
+3. Talks to Claude: "Implement this feature"
+4. Claude reads feature plan and implements
+5. Developer pushes and creates PR when done
 
 **The user doesn't need to know about agents or commands.** Just have a conversation.
 
@@ -48,7 +125,10 @@ You have access to these subagents. Use the Task tool to launch them when approp
 **implementation-planner** - Use when ready to create technical implementation plans
 - Prerequisites: Intent, UX, and Architecture docs must exist
 - Triggers: "plan", "how to implement", "what order", "technical spec", "ready to build"
-- Outputs: `/docs/plans/backend-plan.md`, `/docs/plans/frontend-plan.md`, `/docs/plans/test-plan.md`, `/docs/plans/implementation-order.md`
+- Outputs:
+  - `/docs/plans/overview/` - Full system reference (backend, frontend, test)
+  - `/docs/plans/features/` - Individual feature specs (one per feature)
+  - `/docs/plans/implementation-order.md` - Parallel batches and dependencies
 
 **change-analyzer** - Use when user wants to modify requirements mid-project
 - Triggers: "add feature", "change", "modify", "also need", "what if we", "actually", "pivot", "remove"
@@ -211,10 +291,15 @@ Agents create and read from `/docs`:
 │   ├── system-design.md           # Created by agentic-architect
 │   └── agent-topology.md          # Created by agentic-architect
 ├── plans/
-│   ├── backend-plan.md            # Created by implementation-planner
-│   ├── frontend-plan.md           # Created by implementation-planner
-│   ├── test-plan.md               # Created by implementation-planner
-│   └── implementation-order.md    # Created by implementation-planner
+│   ├── overview/                  # Full system reference
+│   │   ├── backend-plan.md        # All endpoints, DB, services
+│   │   ├── frontend-plan.md       # All pages, components, state
+│   │   └── test-plan.md           # Test strategy
+│   ├── features/                  # Feature-specific plans (execution)
+│   │   ├── user-authentication.md
+│   │   ├── profile-management.md
+│   │   └── ...
+│   └── implementation-order.md    # Parallel batches and dependencies
 ├── verification/
 │   └── phase-N-report.md          # Created by test-engineer
 ├── changes/
@@ -232,16 +317,27 @@ Agents create and read from `/docs`:
 
 While users don't need to use slash commands, these are available for power users:
 
+### Main Project Commands (Analysis & Planning)
+
 - `/analyze` - Run all L1 analysis agents in parallel
-- `/plan` - Run implementation-planner
-- `/implement phase N` - Implement specific phase
-- `/verify phase N` - Verify phase completion
-- `/debug` - Launch debugger
-- `/review` - Launch code-reviewer
-- `/change` - Analyze change impact
+- `/plan` - Run implementation-planner (creates overview + feature plans)
 - `/audit` - Audit existing codebase
 - `/gap` - Analyze gaps in brownfield project
+- `/change` - Analyze change impact
 - `/improve phase N` - Improve based on migration plan
+
+### Parallel Development Commands
+
+- `/parallel <feature-name>` - Set up git worktree for a feature
+  - Creates `../feature-name/` with scoped CLAUDE.md
+  - Creates branch `feature/feature-name`
+  - Ready for isolated development
+
+### Quality Commands (Any Context)
+
+- `/debug` - Launch debugger
+- `/review` - Launch code-reviewer
+- `/verify phase N` - Verify phase completion
 
 ---
 

@@ -147,20 +147,57 @@ Claude: I'll investigate this error.
 
 While conversation mode works automatically, power users can use slash commands:
 
+**Main Project (Analysis & Planning):**
 ```bash
 /analyze <idea>        # Run all analysis agents in parallel
-/plan <tech stack>     # Generate implementation plans
-/implement phase N     # Implement specific phase
-/verify phase N        # Verify correctness
-/debug                 # Launch debugger
-/review                # Code review
-/change <description>  # Analyze change impact
+/plan <tech stack>     # Generate feature-based plans
 /audit                 # Audit existing codebase
 /gap                   # Analyze technical debt
-/improve phase N       # Execute migration phase
+/change <description>  # Analyze change impact
+```
+
+**Parallel Development:**
+```bash
+/parallel <feature>    # Set up git worktree for feature
+                       # Creates ../feature-name/ with scoped CLAUDE.md
+```
+
+**Quality (Any Context):**
+```bash
+/debug                 # Launch debugger
+/review                # Code review
+/verify phase N        # Verify correctness
 ```
 
 ## How It Works
+
+### Two-Level Workflow
+
+**Level 1: Main Project (Analysis & Planning)**
+- Define product intent, UX, architecture
+- Create feature-based plans (vertical slices)
+- Determine what can be built in parallel
+
+**Level 2: Feature Worktrees (Execution)**
+- Each developer gets isolated worktree for one feature
+- Implement backend + frontend + tests for that feature
+- No merge conflicts (different files)
+- Push and merge when complete
+
+**Example:**
+```
+Main project:
+  /plan  →  Creates 5 features
+
+Parallel execution:
+  Developer 1: /parallel user-auth → ../user-auth/
+  Developer 2: /parallel profiles  → ../profiles/
+  Developer 3: /parallel notifs    → ../notifs/
+
+All work simultaneously, merge independently.
+```
+
+### How It Works
 
 1. **You talk naturally** - No need to memorize commands or agent names
 2. **Claude understands intent** - Detects trigger words and context
@@ -171,6 +208,7 @@ The system uses:
 - **CLAUDE.md** - Project orchestrator configuration (created during install)
 - **11 specialized agents** - Each handles specific tasks (analysis, planning, implementation, testing)
 - **/docs/** - Documentation artifacts created and used by agents
+- **Git worktrees** - Parallel feature development without conflicts
 - **Optional commands** - For power users who prefer explicit control
 
 ## Agent Auto-Selection
@@ -205,10 +243,15 @@ Agents create and use `/docs` as the source of truth:
 │   ├── system-design.md           # System architecture
 │   └── agent-topology.md          # Agent design
 ├── plans/
-│   ├── backend-plan.md            # Backend implementation spec
-│   ├── frontend-plan.md           # Frontend implementation spec
-│   ├── test-plan.md               # Test strategy
-│   └── implementation-order.md    # Phased rollout
+│   ├── overview/                  # Full system reference
+│   │   ├── backend-plan.md        # All endpoints, DB, services
+│   │   ├── frontend-plan.md       # All pages, components
+│   │   └── test-plan.md           # Test strategy
+│   ├── features/                  # Feature-specific (execution)
+│   │   ├── user-authentication.md # Vertical slice with all specs
+│   │   ├── profile-management.md
+│   │   └── ...
+│   └── implementation-order.md    # Parallel batches
 ├── verification/
 │   └── phase-N-report.md          # Verification results
 ├── changes/

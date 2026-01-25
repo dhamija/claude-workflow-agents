@@ -418,6 +418,145 @@ TypeScript, React, Node.js, PostgreSQL, Prisma
 
 Claude reads this configuration and follows it when orchestrating agents.
 
+---
+
+## Parallel Development with Feature Worktrees
+
+### Overview
+
+The implementation-planner creates **feature-based plans** that enable parallel development:
+- Each feature is a vertical slice (backend + frontend + tests)
+- Features map to git worktrees for isolation
+- Multiple developers work simultaneously without conflicts
+
+### Workflow
+
+**1. Main Project: Analysis & Planning**
+```
+Main project (main branch):
+  /analyze food delivery app
+  /plan fastapi react postgres
+
+  →  Creates:
+  - /docs/plans/overview/ (full system reference)
+  - /docs/plans/features/ (5 individual features)
+  - /docs/plans/implementation-order.md (parallel batches)
+```
+
+**2. Review Parallel Batches**
+```
+implementation-order.md shows:
+
+  Batch 0 (Sequential):
+    - user-authentication (must complete first)
+
+  Batch 1 (PARALLEL - 3 developers):
+    - restaurant-management
+    - customer-profiles
+    - menu-system
+
+  Batch 2 (PARALLEL - 2 developers):
+    - order-placement (depends on: restaurant, customer, menu)
+    - delivery-tracking (depends on: order)
+```
+
+**3. Set Up Worktrees**
+```bash
+# Developer 1
+/parallel restaurant-management
+cd ../restaurant-management
+# Now in isolated worktree with scoped CLAUDE.md
+
+# Developer 2 (same time)
+/parallel customer-profiles
+cd ../customer-profiles
+
+# Developer 3 (same time)
+/parallel menu-system
+cd ../menu-system
+```
+
+**4. Implement Features**
+```
+In ../restaurant-management/:
+  You: Implement this feature
+  Claude: [Reads FEATURE.md]
+          [Launches backend-engineer + frontend-engineer]
+          [Creates all files specified in plan]
+          [Runs tests]
+          All done. Ready to push.
+```
+
+**5. Push and Merge**
+```bash
+# In ../restaurant-management/
+git push origin feature/restaurant-management
+# Create PR on GitHub
+
+# After review, merge to main
+
+# Clean up
+cd ../main-project
+git worktree remove ../restaurant-management
+git pull origin main
+```
+
+### Benefits
+
+**Speed:**
+- 3 features in parallel = 3x faster than sequential
+- No waiting for other developers
+- Each feature independently testable
+
+**Quality:**
+- No merge conflicts (different files)
+- Feature-scoped tests
+- Independent code review
+
+**Focus:**
+- Scoped CLAUDE.md prevents wrong agents
+- FEATURE.md defines exact scope
+- No big-picture distractions
+
+### When to Use
+
+**✅ Use parallel worktrees for:**
+- Batch 1+ features (independent features)
+- Multiple developers on team
+- Long-running features (>4 hours)
+- Experimental features
+
+**❌ Don't use for:**
+- Batch 0 (foundation) - sequential in main project
+- Small fixes (<1 hour) - just use main branch
+- Features with heavy dependencies - wait for dependencies first
+
+### Scoped CLAUDE.md
+
+Feature worktrees get a simplified CLAUDE.md:
+```markdown
+# Feature: restaurant-management
+
+## Your Mission
+Implement this feature per FEATURE.md
+
+## Available Agents
+- backend-engineer (implementation)
+- frontend-engineer (implementation)
+- test-engineer (testing)
+- code-reviewer (quality)
+- debugger (fixing)
+
+## NOT Available
+- intent-guardian (already done in main)
+- ux-architect (already done in main)
+- implementation-planner (already done in main)
+```
+
+This prevents running analysis/planning agents in feature context.
+
+---
+
 ### Change Management (Mid-Flight Requirement Changes)
 ```bash
 # Initial workflow

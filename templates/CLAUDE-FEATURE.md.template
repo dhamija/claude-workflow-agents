@@ -1,0 +1,271 @@
+# Feature: [FEATURE_NAME]
+
+> **Scoped worktree** - This is a feature-specific development environment.
+>
+> **Your job:** Implement this feature according to `FEATURE.md`
+>
+> **Do NOT:** Run analysis or planning agents (already done in main project)
+
+---
+
+## Your Mission
+
+Implement the feature defined in `FEATURE.md`:
+1. Read `FEATURE.md` for complete specification
+2. Implement backend, frontend, and tests as specified
+3. Verify acceptance criteria are met
+4. Run tests and code review
+5. Push when ready for PR
+
+---
+
+## Available Agents
+
+You have access to **implementation and quality agents only**.
+
+### Implementation Agents
+
+**backend-engineer** - Implement backend code
+- Triggers: "backend", "API", "endpoint", "database", "server"
+- Use for: APIs, services, database work
+
+**frontend-engineer** - Implement frontend code
+- Triggers: "frontend", "UI", "component", "page"
+- Use for: Pages, components, state management
+
+**test-engineer** - Write tests and verify
+- Triggers: "test", "verify", "check"
+- Use for: Unit, integration, E2E tests
+
+### Quality Agents
+
+**code-reviewer** - Review code quality and security
+- Triggers: "review", "check code", "is this good"
+- Use before pushing
+
+**debugger** - Debug and fix issues
+- Triggers: "broken", "error", "bug", "fix"
+- Use when something doesn't work
+
+---
+
+## Workflow
+
+### 1. Understand Scope
+
+```
+You: Show me what I need to implement
+
+Claude: [Reads FEATURE.md]
+
+        This feature requires:
+
+        Backend:
+        - 3 API endpoints in /api/profiles
+        - ProfileService with CRUD operations
+        - Integration tests
+
+        Frontend:
+        - ProfilePage component
+        - ProfileEditor component
+        - API integration
+
+        Tests:
+        - Unit tests for validation
+        - Integration tests for API
+        - E2E test for edit flow
+```
+
+### 2. Implement
+
+```
+You: Implement the backend
+
+Claude: [Launches backend-engineer]
+
+        Created:
+        - backend/src/profiles/routes.ts
+        - backend/src/profiles/service.ts
+        - backend/src/profiles/validation.ts
+
+        All endpoints implemented per spec.
+
+You: Now the frontend
+
+Claude: [Launches frontend-engineer]
+
+        Created:
+        - frontend/src/features/profiles/ProfilePage.tsx
+        - frontend/src/features/profiles/ProfileEditor.tsx
+        - frontend/src/features/profiles/api.ts
+```
+
+### 3. Verify
+
+```
+You: Run the tests
+
+Claude: [Launches test-engineer]
+
+        ✓ 5 backend tests passing
+        ✓ 4 frontend tests passing
+        ✓ 1 E2E test passing
+
+        All acceptance criteria met.
+
+You: Review the code
+
+Claude: [Launches code-reviewer]
+
+        Code looks good. No security issues.
+        One suggestion: Add error boundary.
+```
+
+### 4. Push
+
+```bash
+git add .
+git commit -m "Implement [FEATURE_NAME]"
+git push origin feature/[FEATURE_NAME]
+```
+
+---
+
+## What NOT to Do
+
+**Don't run analysis agents:**
+- ❌ intent-guardian
+- ❌ ux-architect
+- ❌ agentic-architect
+
+**Don't run planning agents:**
+- ❌ implementation-planner
+- ❌ gap-analyzer
+
+**Why:** Analysis and planning already done in main project. This worktree is for **execution only**.
+
+---
+
+## Feature Specification
+
+See `FEATURE.md` for:
+- Complete scope
+- Exact file paths to create
+- Backend specifications
+- Frontend specifications
+- Test requirements
+- Acceptance criteria
+- Dependencies
+
+---
+
+## Acceptance Criteria
+
+Before pushing, verify ALL criteria in `FEATURE.md` are met:
+- [ ] All specified files created
+- [ ] All API endpoints working
+- [ ] All UI components rendering
+- [ ] All tests passing
+- [ ] Code reviewed
+- [ ] No regressions in existing functionality
+
+---
+
+## Project Context
+
+### Tech Stack
+[TECH_STACK_PLACEHOLDER]
+
+### Code Conventions
+[CONVENTIONS_PLACEHOLDER]
+
+### Testing Strategy
+- Backend: Jest for unit/integration tests
+- Frontend: React Testing Library
+- E2E: Playwright or Cypress
+
+---
+
+## When You're Done
+
+1. **Verify all tests pass**
+   ```bash
+   npm test
+   ```
+
+2. **Review your own code**
+   ```
+   You: Review all the code I just wrote
+   Claude: [Launches code-reviewer with full scope]
+   ```
+
+3. **Push and create PR**
+   ```bash
+   git push origin feature/[FEATURE_NAME]
+   # Create PR on GitHub to merge into main
+   ```
+
+4. **Clean up (after PR merged)**
+   ```bash
+   cd ../main-project
+   git worktree remove ../[FEATURE_NAME]
+   git pull origin main
+   ```
+
+---
+
+## Parallel Development
+
+Other developers may be working on other features simultaneously in their own worktrees:
+- `../profile-management/`
+- `../notification-system/`
+- `../social-feed/`
+
+**Stay in your lane:**
+- Only modify files specified in your `FEATURE.md`
+- Don't touch files from other features
+- If you need shared code, coordinate before creating it
+
+**Merge conflicts:**
+- Unlikely if features are properly scoped
+- If conflict occurs, resolve and retest
+
+---
+
+## Getting Help
+
+**If blocked by dependencies:**
+```
+You: This feature depends on user-authentication but it's not merged yet
+
+Claude: According to FEATURE.md, this feature has dependencies.
+        You should wait for those features to merge before continuing.
+
+        Or you can mock the dependencies for now and update after merge.
+```
+
+**If scope is unclear:**
+```
+You: The feature plan doesn't specify how to handle error state X
+
+Claude: Let's add that to the feature. I'll implement reasonable
+        error handling and document it for the PR description.
+```
+
+**If tests are failing:**
+```
+You: Tests are failing after my changes
+
+Claude: [Launches debugger]
+        Found the issue: [explains root cause]
+        [Fixes and reruns tests]
+```
+
+---
+
+## Remember
+
+- **You're building ONE feature** - Stay focused on FEATURE.md scope
+- **Tests are required** - No feature is complete without tests
+- **Code quality matters** - Always review before pushing
+- **Communicate** - If you deviate from the plan, document why
