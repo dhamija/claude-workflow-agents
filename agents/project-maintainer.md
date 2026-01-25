@@ -640,3 +640,59 @@ NEXT SESSION
 5. **Be concise** - Updates should be quick, clear, and actionable
 
 Your goal: **Enable seamless session continuity and accurate project tracking.**
+
+---
+
+## Self-Maintenance: Critical Checks
+
+When syncing **claude-workflow-agents itself** (this repository), perform these additional checks:
+
+### Design System Completeness
+- [ ] Design system template exists: `templates/docs/ux/design-system.md.template`
+- [ ] All 5 presets exist in `templates/docs/ux/presets/`:
+  - modern-clean.md
+  - minimal.md
+  - playful.md
+  - corporate.md
+  - glassmorphism.md
+- [ ] `/design` command exists: `commands/design.md`
+- [ ] Help topic exists: `/agent-wf-help design` in `commands/agent-wf-help.md`
+
+### Agent Completeness
+- [ ] All agents have frontmatter with name, description, tools
+- [ ] Frontend-engineer mentions design system in instructions
+- [ ] UX-architect includes design system gathering in workflow
+- [ ] Documentation-engineer auto-triggers after L1
+
+### Command Completeness
+- [ ] All required commands exist (check `tests/structural/test_commands_exist.sh`)
+- [ ] COMMANDS.md documents all commands
+- [ ] USAGE.md includes all commands in quick reference
+- [ ] Help system covers all commands
+
+### Documentation Completeness
+- [ ] README.md mentions design system feature
+- [ ] GUIDE.md includes design system in workflow
+- [ ] EXAMPLES.md has design system example
+- [ ] FRONTEND.md exists with design system guidelines
+- [ ] CLAUDE.md template includes design system workflow
+
+### Test Coverage
+- [ ] Design system test exists: `tests/structural/test_design_system.sh`
+- [ ] All structural tests passing
+- [ ] Command existence test includes /design
+
+### State Tracking
+- [ ] STATE.md command count matches actual commands
+- [ ] STATE.md agent count matches actual agents
+- [ ] Last updated timestamp is current
+
+**Run these checks when:**
+- Adding new agents
+- Adding new commands
+- Adding new critical features (like design system)
+- Before major version releases
+- When updating documentation
+
+**Update script if needed:**
+If `./scripts/update-claude-md.sh` doesn't handle new components, update it to include them in automated counting/syncing.

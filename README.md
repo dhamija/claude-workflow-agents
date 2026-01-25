@@ -137,12 +137,25 @@ Claude: I'll help you build a habit tracker. Let me start by understanding
 
         [Creates intent document]
         [Designs user experience]
+
+        What design style do you prefer?
+        1. modern-clean (professional SaaS)
+        2. minimal (ultra-clean)
+        3. playful (vibrant, fun)
+        4. corporate (enterprise)
+        5. glassmorphism (modern glass)
+        6. Reference another site
+
+You: modern-clean
+
+Claude: [Creates design system]
         [Plans architecture]
         [Creates feature plans]
 
         Ready to build. Starting with user authentication...
 
-        [Builds feature by feature]
+        [Frontend engineer reads design system first]
+        [Builds feature by feature with consistent UI]
 ```
 
 ### With More Detail
@@ -322,6 +335,7 @@ Claude: [Fixes only security-related gaps]
 | `/agent-wf-help agents` | All 13 agents |
 | `/agent-wf-help commands` | All commands |
 | `/agent-wf-help patterns` | Usage patterns |
+| `/agent-wf-help design` | Design system & UI consistency |
 | `/agent-wf-help parallel` | Parallel development |
 | `/agent-wf-help brownfield` | Existing codebases |
 | `/agent-wf-help sync` | Project state & maintenance |
@@ -521,6 +535,9 @@ For details, see [tests/README.md](tests/README.md).
 - [GUIDE.md](GUIDE.md) - Quick reference card
 - [WORKFLOW.md](WORKFLOW.md) - Detailed workflow explanation
 - [EXAMPLES.md](EXAMPLES.md) - Practical examples
+- [FRONTEND.md](FRONTEND.md) - Frontend development best practices
+- [COMMANDS.md](COMMANDS.md) - Complete command reference
+- [AGENTS.md](AGENTS.md) - All agents documentation
 - `/agent-wf-help` - In-app help system
 
 ---

@@ -69,6 +69,25 @@ Available only in current project. Can be committed to git for team sharing.
 /intent subscription management service
 ```
 
+### Example 4: Design System Setup
+```bash
+# Quick start with a preset
+/design preset modern-clean
+
+# Or match a competitor's style
+/design reference https://linear.app
+
+# Or let UX architect gather preferences
+/ux recipe sharing app with social features
+# (UX architect will ask about design preferences and create design system)
+
+# View the design system
+/design show
+
+# Update brand colors later
+/design update
+```
+
 ## Brownfield Workflow Examples
 
 ### Example 1: Full Audit & Improvement
@@ -201,6 +220,10 @@ git worktree add ../myapp-web feature/web
 | `/ux-audit` | Review current UX |
 | `/aa` | Design agentic architecture |
 | `/aa-audit` | Find opportunities for agents |
+| `/design` | Manage design system for UI consistency |
+| `/design preset <name>` | Apply design preset (modern-clean, minimal, etc.) |
+| `/design show` | View current design system |
+| `/design update` | Interactively update design system |
 | `/review` | Code review |
 | `/debug` | Fix errors or bugs |
 | `/sync` | Update project state & docs |
@@ -214,9 +237,11 @@ Do you have existing code?
 ├─ NO → Greenfield
 │   ├─ Run /analyze <idea>
 │   ├─ Review docs/intent, docs/ux, docs/architecture
+│   │   └─ (docs/ux/design-system.md created automatically)
 │   ├─ Run /plan <tech stack>
 │   ├─ Review docs/plans
 │   ├─ Run /implement phase 1
+│   │   └─ (frontend-engineer reads design-system.md first)
 │   ├─ Run /verify phase 1
 │   ├─ Repeat implement + verify for each phase
 │   └─ Run /verify final
@@ -230,6 +255,16 @@ Do you have existing code?
     ├─ Run /verify phase 0
     ├─ Repeat improve + verify for each phase
     └─ Run /verify final
+
+Design System (anytime):
+├─ Need to set up UI styling?
+│   └─ Run /design preset <name>
+├─ Want to match another site?
+│   └─ Run /design reference <url>
+├─ Need to update colors/fonts?
+│   └─ Run /design update
+└─ Want to see current design?
+    └─ Run /design show
 ```
 
 ## Advanced Usage

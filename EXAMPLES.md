@@ -13,6 +13,7 @@ Real-world examples showing how to use the system for different scenarios.
 5. [Example 5: Focused Work (Backend Only)](#example-5-focused-work-backend-only)
 6. [Example 6: Debugging Production Issue](#example-6-debugging-production-issue)
 7. [Example 7: Pre-Deployment Code Review](#example-7-pre-deployment-code-review)
+8. [Example 8: Design System Setup and Usage](#example-8-design-system-setup-and-usage)
 
 ---
 
@@ -1288,6 +1289,268 @@ Claude: Deploying...
 
 ---
 
+## Example 8: Design System Setup and Usage
+
+**Scenario:** You're building a SaaS product and want consistent, professional UI without making arbitrary styling decisions.
+
+### Conversation
+
+```
+You: I want to build a project management SaaS. I like Linear's clean design style.
+
+Claude: I'll help you build a project management SaaS. Let me start by analyzing your requirements...
+
+        [intent-guardian] Defining product intent...
+        [ux-architect] Designing user journeys...
+
+        I see you mentioned liking Linear's design style. Let me gather design preferences
+        before we continue with the architecture.
+
+        For the design system, I have a few options:
+
+        1. Apply a preset:
+           - modern-clean (professional SaaS - similar to Linear, Vercel, Stripe)
+           - minimal (ultra-clean, content-focused)
+           - playful (vibrant, fun, animated)
+           - corporate (enterprise-grade, formal)
+           - glassmorphism (modern glass effects)
+
+        2. Reference a site I should analyze
+        3. Specify custom brand colors and preferences
+
+        Since you mentioned Linear, I can either apply the "modern-clean" preset
+        (which is similar) or analyze Linear.app directly to extract their design patterns.
+
+        What would you prefer?
+
+You: Analyze Linear's design and create something similar
+
+Claude: [ux-architect] Analyzing https://linear.app...
+
+        ✓ Design system created at /docs/ux/design-system.md
+
+        Based on Linear's design language:
+        • Primary color: #5E6AD2 (purple-blue)
+        • Typography: Inter font family
+        • Spacing: Tight, efficient layout (8px base unit)
+        • Components: Minimal shadows, subtle borders, fast transitions
+        • Characteristics: Clean, fast, professional, data-dense
+
+        I've also included:
+        • Dark mode support (Linear's dark theme)
+        • Accessibility (WCAG AAA contrast ratios)
+        • Tailwind configuration
+        • CSS variables
+
+        Now continuing with architecture...
+
+        [agentic-architect] Designing architecture...
+
+        Analysis complete. Proceeding to planning phase.
+
+You: Great, plan it out with React and Node
+
+Claude: [implementation-planner] Creating implementation plans...
+
+        Plans ready. I've identified 5 features:
+        1. user-authentication (foundation)
+        2. project-management (core)
+        3. task-tracking (core)
+        4. team-collaboration (advanced)
+        5. notifications (enhancement)
+
+        Starting with feature 1: user-authentication...
+
+        [backend-engineer] Creating auth API...
+        ✓ Backend complete
+
+        [frontend-engineer] Setting up design system...
+
+        CRITICAL: Reading /docs/ux/design-system.md first...
+
+        ✓ Design system loaded:
+          - Primary: #5E6AD2
+          - Font: Inter
+          - Spacing: 8px base unit
+          - Components: Minimal, fast
+
+        Setting up Tailwind configuration from design system...
+
+        // tailwind.config.js
+        module.exports = {
+          theme: {
+            extend: {
+              colors: {
+                primary: {
+                  DEFAULT: '#5E6AD2',
+                  light: '#7B89DD',
+                  dark: '#4C55B0',
+                },
+              },
+              fontFamily: {
+                sans: ['Inter', 'system-ui', 'sans-serif'],
+              },
+              spacing: {
+                // 8px base unit
+                'unit': '0.5rem',
+              },
+            },
+          },
+        }
+
+        Creating base component library...
+
+        ✓ Button.tsx (primary, secondary, ghost variants - using design system)
+        ✓ Input.tsx (using design system input styles)
+        ✓ Card.tsx (using design system card styles)
+        ✓ Modal.tsx (using design system modal styles)
+
+        All components use ONLY design system values:
+        ✓ Colors from design system
+        ✓ Typography from design system
+        ✓ Spacing from design system
+        ✓ No arbitrary hex codes or custom fonts
+
+        Now building auth UI...
+
+        ✓ LoginPage.tsx (using Button, Input components)
+        ✓ SignupPage.tsx (using Button, Input components)
+        ✓ AuthLayout.tsx (consistent with design system)
+
+        Frontend complete.
+
+        [test-engineer] Writing tests...
+        ✓ Tests complete
+
+        Feature 1 complete.
+
+        [... continues with other features ...]
+
+You: I want to change the primary color to a darker blue
+
+Claude: I'll update the design system for you.
+
+        Current primary color: #5E6AD2
+        New primary color: #4C55B0
+
+        Updating /docs/ux/design-system.md...
+        ✓ Updated primary color
+        ✓ Updated primary-light (#6A75C8)
+        ✓ Updated primary-dark (#3D4490)
+        ✓ Updated Tailwind config in design system
+        ✓ Updated CSS variables in design system
+
+        ⚠️  This change affects your component library.
+
+        To apply the new color:
+        1. Copy the updated Tailwind config from design-system.md
+        2. Replace your tailwind.config.js
+        3. Rebuild your CSS
+
+        Or I can update the files for you. Would you like me to do that?
+
+You: Yes please update the files
+
+Claude: [frontend-engineer] Applying design system updates...
+
+        ✓ Updated tailwind.config.js with new colors
+        ✓ Rebuilt CSS (npm run build:css)
+        ✓ All components automatically use new color
+
+        The design system change has been applied. All components using
+        'bg-primary' or 'text-primary' now use #4C55B0 automatically.
+
+        No code changes needed - that's the power of design systems!
+```
+
+### Files Created
+
+```
+/docs/ux/design-system.md         - Complete design specification
+tailwind.config.js                 - Configured from design system
+src/components/ui/Button.tsx       - Uses design system
+src/components/ui/Input.tsx        - Uses design system
+src/components/ui/Card.tsx         - Uses design system
+src/components/ui/Modal.tsx        - Uses design system
+```
+
+### What Happened
+
+1. **UX architect gathered design preferences** - Asked about design style
+2. **Analyzed reference site** - Extracted Linear's design patterns
+3. **Created design system** - Complete visual specification in `/docs/ux/design-system.md`
+4. **Frontend engineer followed strictly** - Read design system first, no arbitrary styling
+5. **Component library bootstrapped** - All components use design system values
+6. **UI automatically consistent** - All screens/components match design system
+7. **Easy design updates** - Change design system once, updates everywhere
+
+### Benefits
+
+**Before design systems:**
+```tsx
+// Developer makes arbitrary choices
+<button className="bg-blue-500 px-4 py-2 rounded-md">
+  Click me
+</button>
+
+<button className="bg-indigo-600 px-3 py-2.5 rounded-lg">
+  Another button (different!)
+</button>
+```
+
+**With design system:**
+```tsx
+// All buttons use design system component
+<Button variant="primary">Click me</Button>
+<Button variant="primary">Another button (consistent!)</Button>
+
+// Button.tsx internally uses design system colors:
+// bg-primary (from design-system.md)
+```
+
+**Updating colors:**
+- Without design system: Find/replace every `bg-blue-500` across hundreds of files
+- With design system: Update one value in design-system.md → all components update
+
+### Key Points
+
+1. **Design system created early** - UX architect asks preferences during analysis phase
+2. **Frontend reads design system first** - Before writing any code
+3. **No arbitrary styling** - All colors/fonts/spacing from design system
+4. **Component library** - Reusable components enforcing design system
+5. **Easy updates** - Change design system, components update automatically
+6. **Accessibility built-in** - WCAG compliance in design system
+7. **Multiple options** - Presets, reference sites, or custom
+
+### Using /design Command
+
+```bash
+# Quick start with preset
+/design preset modern-clean
+
+# Match a competitor
+/design reference https://linear.app
+
+# View current design
+/design show
+
+# Update brand colors
+/design update
+
+# During /ux, design system created automatically
+/ux project management SaaS
+# (UX architect will ask about design preferences)
+```
+
+### Time: 6 hours total
+- Analysis + Design system: 1 hour
+- Planning: 1 hour
+- Implementation (5 features): 4 hours
+- All UI consistent from day one
+- Design change: 5 minutes (vs hours of find/replace)
+
+---
+
 ## Key Takeaways
 
 ### Pattern 1: Just Talk
@@ -1316,6 +1579,9 @@ Example 6 shows debugger finding root cause quickly, applying fix, preventing re
 
 ### Pattern 9: Reviews Before Deploy
 Example 7 shows comprehensive security/quality review before production.
+
+### Pattern 10: Design System for Consistency
+Example 8 shows design system ensuring UI consistency, no arbitrary styling, easy design updates.
 
 ---
 

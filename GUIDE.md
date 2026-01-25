@@ -47,8 +47,9 @@ Most common actions - no commands needed:
 ```
 /agent-wf-help              # Quick overview
 /agent-wf-help workflow     # Two-level workflow
-/agent-wf-help agents       # All 13 agents
+/agent-wf-help agents       # All 14 agents
 /agent-wf-help commands     # All commands
+/agent-wf-help design       # Design system & UI consistency
 /agent-wf-help patterns     # Usage patterns
 /agent-wf-help parallel     # Parallel development
 /agent-wf-help brownfield   # Existing codebases
@@ -64,11 +65,11 @@ Most common actions - no commands needed:
 ```
 "Build me a [app]"
       ↓
-Analyze (intent → UX → architecture)
+Analyze (intent → UX + design system → architecture)
       ↓
 Plan (features with dependencies)
       ↓
-Build (one feature at a time: backend → frontend → tests)
+Build (one feature at a time: backend → frontend [follows design system] → tests)
       ↓
 Done
 ```
@@ -95,7 +96,8 @@ Improve (fix by priority: Critical → High → Medium → Low)
 ├── intent/
 │   └── product-intent.md          # What we promise users
 ├── ux/
-│   └── user-journeys.md           # How users interact
+│   ├── user-journeys.md           # How users interact
+│   └── design-system.md           # Visual specifications (colors, typography, components)
 ├── architecture/
 │   └── agent-design.md            # System design
 ├── plans/
@@ -131,26 +133,33 @@ Improve (fix by priority: Critical → High → Medium → Low)
 
 ---
 
-## The 11 Agents
+## The 14 Agents
 
 ### Level 1: App Analysis (Run Once)
 | Agent | Creates | Trigger |
 |-------|---------|---------|
 | **intent-guardian** | Product intent & promises | "build", "create", new project |
-| **ux-architect** | User journeys & flows | "build", "UX", new project |
+| **ux-architect** | User journeys & design system | "build", "UX", new project |
 | **agentic-architect** | System architecture | "build", "architecture", new project |
 | **implementation-planner** | Implementation plans | After analysis |
 | **change-analyzer** | Change impact analysis | "add", "change", "also need" |
 | **gap-analyzer** | Gap analysis & migration plan | "analyze", "improve", existing code |
+| **documentation-engineer** | README, USAGE, API docs | After L1 analysis |
 
 ### Level 2: Feature Work (Run Per Feature)
 | Agent | Does | Trigger |
 |-------|------|---------|
 | **backend-engineer** | APIs, database, services | Backend work |
-| **frontend-engineer** | Pages, components, state | Frontend work |
+| **frontend-engineer** | Pages, components (follows design system) | Frontend work |
 | **test-engineer** | Tests & verification | Testing, after implementation |
 | **code-reviewer** | Code quality & security | "review", before milestone |
 | **debugger** | Fix bugs & errors | "broken", "error", "bug" |
+
+### Setup & Maintenance
+| Agent | Does | Trigger |
+|-------|------|---------|
+| **ci-cd-engineer** | CI/CD setup & validation | CI/CD tasks |
+| **project-maintainer** | Sync state, update docs | "/sync" command |
 
 ---
 
