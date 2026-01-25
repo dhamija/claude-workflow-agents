@@ -3,11 +3,11 @@ source "$(dirname "$0")/../test_utils.sh"
 
 section "Test: Help Command Coverage"
 
-HELP_CMD="$REPO_ROOT/commands/agent-wf-help.md"
+HELP_CMD="$REPO_ROOT/commands/help.md"
 AGENTS_DIR="$REPO_ROOT/agents"
 
 if [ ! -f "$HELP_CMD" ]; then
-    fail "agent-wf-help.md not found"
+    fail "help.md not found"
     summary
     exit 1
 fi

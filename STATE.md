@@ -7,8 +7,8 @@
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Agents | 14 | 2026-01-25 |
-| Commands | 25 | 2026-01-25 |
+| Agents | 12 | 2026-01-25 |
+| Commands | 22 | 2026-01-25 |
 | Help Topics | 11 | 2026-01-25 |
 | Tests | 17 | 2026-01-25 |
 

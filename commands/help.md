@@ -150,7 +150,7 @@ DOCUMENTS CREATED
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║                       THE 11 AGENTS                              ║
+║                       THE 12 AGENTS                              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Claude automatically selects agents. You don't call them directly.

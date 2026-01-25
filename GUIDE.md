@@ -53,7 +53,7 @@ Most common actions - no commands needed:
 ```
 /help                # Quick overview
 /help workflow       # Two-level workflow
-/help agents         # All 11 agents
+/help agents         # All 12 agents
 /help commands       # All commands
 /help patterns       # Usage patterns
 /help parallel       # Parallel development
@@ -128,7 +128,7 @@ Improve (fix by priority: Critical → High → Medium → Low)
 | Topic | Shows |
 |-------|-------|
 | `workflow` | Two-level workflow (App → Features) |
-| `agents` | All 11 agents and when they run |
+| `agents` | All 12 agents and when they run |
 | `commands` | All available commands |
 | `patterns` | Common development patterns |
 | `parallel` | Parallel development (teams) |

@@ -348,7 +348,7 @@ Claude: [Fixes only security-related gaps]
 |---------|---------|
 | `/help` | Quick overview |
 | `/help workflow` | How the system works |
-| `/help agents` | All 11 agents |
+| `/help agents` | All 12 agents |
 | `/help commands` | All commands |
 | `/help patterns` | Usage patterns |
 | `/help parallel` | Parallel development |
@@ -375,7 +375,7 @@ Backend → Frontend → Tests → Verify
 
 See `/help workflow` for details.
 
-### The 11 Agents
+### The 12 Agents
 
 | Agent | Purpose | Used When |
 |-------|---------|-----------|
