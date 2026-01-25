@@ -2,9 +2,16 @@
 
 ## Conversation-Driven Orchestration
 
-**You don't need to know this workflow.** Just talk to Claude naturally, and it will orchestrate the right agents automatically.
+**You don't need to know this workflow.** Just talk to Claude naturally, and it will:
+1. Analyze your product idea
+2. Create feature-based plans
+3. **Implement features one by one** (sequential mode - default)
+4. Report progress after each feature
 
 This document explains how the system works internally.
+
+**DEFAULT MODE:** Sequential implementation (one feature at a time in main project)
+**ADVANCED MODE:** Parallel implementation (opt-in, for teams with multiple developers)
 
 ---
 
@@ -420,16 +427,29 @@ Claude reads this configuration and follows it when orchestrating agents.
 
 ---
 
-## Parallel Development with Feature Worktrees
+## ADVANCED: Parallel Development with Feature Worktrees
+
+**This section is for ADVANCED users only. Most users should stick with sequential mode.**
+
+**When to read this:**
+- You have multiple developers on your team
+- You explicitly want parallel development
+- You understand git worktrees
+
+**When NOT to read this:**
+- Single developer (you)
+- Learning the system
+- Want simplicity
 
 ### Overview
 
-The implementation-planner creates **feature-based plans** that enable parallel development:
-- Each feature is a vertical slice (backend + frontend + tests)
-- Features map to git worktrees for isolation
-- Multiple developers work simultaneously without conflicts
+The implementation-planner creates **feature-based plans** that work for BOTH modes:
+- **Sequential (default):** Implement features one by one in main project
+- **Parallel (opt-in):** Each feature gets its own git worktree
 
-### Workflow
+Features are vertical slices (backend + frontend + tests) that minimize dependencies.
+
+### Parallel Workflow (Opt-In Only)
 
 **1. Main Project: Analysis & Planning**
 ```

@@ -4,95 +4,113 @@
 
 ## AI Workflow Instructions
 
-This project uses a multi-agent workflow. You (Claude) orchestrate specialized subagents automatically based on what the user needs. Users don't need to use special commands - just talk naturally.
+This project uses a **two-level workflow**:
+- **Level 1 (App):** Analyze → Plan → Orchestrate features
+- **Level 2 (Feature):** Backend → Frontend → Tests → Verify (per feature)
+
+You (Claude) orchestrate this automatically. Just talk naturally.
 
 ---
 
-## Two-Level Workflow
+## Development Modes
 
-This workflow supports both **sequential** and **parallel** development:
+### Sequential Mode (Default)
 
-### Level 1: Main Project (Analysis & Planning)
+**This is the normal mode. No special setup needed.**
 
-**Where:** This repository (main branch)
+When user says "implement this" or "build the features":
+1. Read `/docs/plans/implementation-order.md` for feature sequence
+2. Implement features ONE AT A TIME in dependency order
+3. For each feature:
+   - Read `/docs/plans/features/[name].md` for specification
+   - Launch backend-engineer for backend work
+   - Launch frontend-engineer for frontend work
+   - Launch test-engineer for tests
+   - Verify feature is complete
+4. Move to next feature automatically
 
-**Purpose:** High-level design and planning
-
-**Activities:**
-- Define product intent (what we promise users)
-- Design user experience (journeys, screens)
-- Design system architecture
-- Create implementation plans (overview + feature breakdown)
-
-**Agents used:**
-- intent-guardian, ux-architect, agentic-architect (L1 Analysis)
-- implementation-planner (L2 Planning)
-
-**Output:**
-- `/docs/intent/` - Product promises and invariants
-- `/docs/ux/` - User journeys
-- `/docs/architecture/` - System design
-- `/docs/plans/overview/` - Full system reference
-- `/docs/plans/features/` - Individual feature specs
-- `/docs/plans/implementation-order.md` - Parallel batches
-
-### Level 2: Feature Worktrees (Execution)
-
-**Where:** Separate worktrees (`../feature-name/`)
-
-**Purpose:** Implement individual features in parallel
-
-**Activities:**
-- Implement backend for ONE feature
-- Implement frontend for ONE feature
-- Write tests for ONE feature
-- Review and verify
-
-**Agents used:**
-- backend-engineer, frontend-engineer, test-engineer (L3 Implementation)
-- code-reviewer, debugger (Quality)
-
-**Output:**
-- Working code for the feature
-- Tests passing
-- Ready for PR merge
-
-### Why Two Levels?
-
-**Main project:** Big picture thinking, avoid conflicts
-**Feature worktrees:** Focused execution, parallel development
-
-**Example:**
+**User experience:**
 ```
-Main project:
-  /analyze task manager app
-  /plan
-  → Creates 5 feature plans
+User: Implement the features
 
-Feature worktrees (parallel):
-  Developer 1: /parallel user-authentication → works in ../user-authentication/
-  Developer 2: /parallel task-management → works in ../task-management/
-  Developer 3: /parallel notifications → works in ../notifications/
+Claude: Starting with feature 1: user-authentication
+        [Implements backend → frontend → tests]
+        ✓ user-authentication complete
 
-All three developers work simultaneously without conflicts.
+        Moving to feature 2: profile-management
+        [Implements backend → frontend → tests]
+        ✓ profile-management complete
+
+        Moving to feature 3: notifications
+        ...
 ```
+
+**When to use:**
+- Single developer
+- Learning the codebase
+- Want to see progress step-by-step
+- **DEFAULT MODE - use unless user specifically asks for parallel**
+
+### Parallel Mode (Opt-In)
+
+**Only use if user explicitly asks about parallel development or multiple developers.**
+
+User must explicitly run: `/parallel setup` or ask "how do I work in parallel?"
+
+Then they can create worktrees:
+```bash
+/parallel user-authentication  # Creates ../user-authentication/
+/parallel profile-management   # Creates ../profile-management/
+```
+
+**When to use:**
+- User explicitly asks for parallel mode
+- Multiple developers working simultaneously
+- User says "I want to work on features in parallel"
+- **NEVER suggest this unless user asks**
+
+---
+
+## Your Role
+
+**In main project (this directory):**
+- Run analysis agents (intent, UX, architecture)
+- Run planning agents (implementation-planner)
+- **Implement features sequentially by default**
+- Only mention parallel mode if user asks about it
+
+**Sequential implementation pattern:**
+```
+For each feature in implementation-order.md:
+  1. Read /docs/plans/features/[feature-name].md
+  2. Launch backend-engineer (if backend work specified)
+  3. Launch frontend-engineer (if frontend work specified)
+  4. Launch test-engineer (write tests)
+  5. Verify acceptance criteria met
+  6. Report completion, move to next feature
+```
+
+**DO NOT:**
+- Suggest parallel mode unless user asks
+- Create worktrees automatically
+- Recommend multi-terminal workflow unprompted
 
 ---
 
 ## How It Works
 
-**In main project (analysis/planning):**
-1. User talks naturally: "I want to build X"
+**Normal workflow (single terminal):**
+1. User: "I want to build X"
 2. Claude launches analysis agents (intent, UX, architecture)
-3. Claude creates plans (overview + features)
-4. User reviews batches of features that can be built in parallel
+3. Claude creates feature-based plans
+4. User: "Implement the features"
+5. Claude implements each feature sequentially, reports progress
 
-**In feature worktree (execution):**
-1. Developer runs `/parallel <feature-name>`
-2. Gets isolated worktree with scoped CLAUDE.md
-3. Talks to Claude: "Implement this feature"
-4. Claude reads feature plan and implements
-5. Developer pushes and creates PR when done
+**Advanced workflow (parallel, opt-in only):**
+1. After planning, user asks: "How can multiple developers work on this?"
+2. Claude explains `/parallel` command
+3. User explicitly runs `/parallel <feature>` per developer
+4. Each developer works in isolated worktree
 
 **The user doesn't need to know about agents or commands.** Just have a conversation.
 
@@ -162,29 +180,56 @@ You have access to these subagents. Use the Task tool to launch them when approp
 
 ## Workflow Patterns
 
-### Greenfield (New Project)
+### Greenfield (New Project) - Sequential Mode
 
 **Pattern**: When user says "I want to build [something]"
 
 1. Launch **intent-guardian** to define what we're promising
 2. Launch **ux-architect** and **agentic-architect** in parallel to design UX and system
 3. Launch **implementation-planner** once analysis is complete
-4. Launch **backend-engineer** and **frontend-engineer** in parallel per phase
-5. Launch **test-engineer** to verify each phase
-6. Use **code-reviewer** before major milestones
+4. **Implement features sequentially** (one at a time)
+   - For each feature in implementation-order.md:
+     - Launch backend-engineer (if backend work)
+     - Launch frontend-engineer (if frontend work)
+     - Launch test-engineer (tests)
+     - Verify and move to next
+5. Use **code-reviewer** before final merge
 
 **Example conversation:**
 ```
 User: I want to build a task manager with AI suggestions
-You: I'll help design this. Let me start by defining the product intent and designing the user experience.
-[Launches intent-guardian and ux-architect in parallel]
-[Presents results]
-You: Great! Now let me design the system architecture.
-[Launches agentic-architect]
-[Presents results]
-You: Ready to create implementation plans?
-[User confirms]
-[Launches implementation-planner]
+
+Claude: I'll help design this. Let me start by defining the product intent and designing the user experience.
+        [Launches intent-guardian and ux-architect in parallel]
+
+        I've defined the product intent and user journeys. Now let me design the system architecture.
+        [Launches agentic-architect]
+
+        Ready to create implementation plans?
+
+User: Yes
+
+Claude: [Launches implementation-planner]
+
+        Created 4 features:
+        1. user-authentication (foundation)
+        2. task-management
+        3. ai-suggestions
+        4. notifications
+
+        Ready to implement? I'll build them one by one.
+
+User: Go ahead
+
+Claude: Starting with user-authentication...
+        [Implements backend → frontend → tests]
+        ✓ user-authentication complete
+
+        Moving to task-management...
+        [Implements backend → frontend → tests]
+        ✓ task-management complete
+
+        ... (continues)
 ```
 
 ### Brownfield (Existing Project)
@@ -317,27 +362,26 @@ Agents create and read from `/docs`:
 
 While users don't need to use slash commands, these are available for power users:
 
-### Main Project Commands (Analysis & Planning)
+### Main Commands
 
 - `/analyze` - Run all L1 analysis agents in parallel
-- `/plan` - Run implementation-planner (creates overview + feature plans)
+- `/plan` - Run implementation-planner (creates feature-based plans)
 - `/audit` - Audit existing codebase
 - `/gap` - Analyze gaps in brownfield project
 - `/change` - Analyze change impact
-- `/improve phase N` - Improve based on migration plan
+- `/debug` - Launch debugger
+- `/review` - Launch code-reviewer
 
-### Parallel Development Commands
+### Advanced: Parallel Development (Opt-In Only)
+
+**Only mention these if user asks about parallel development or multiple developers:**
 
 - `/parallel <feature-name>` - Set up git worktree for a feature
   - Creates `../feature-name/` with scoped CLAUDE.md
   - Creates branch `feature/feature-name`
-  - Ready for isolated development
+  - For teams working on multiple features simultaneously
 
-### Quality Commands (Any Context)
-
-- `/debug` - Launch debugger
-- `/review` - Launch code-reviewer
-- `/verify phase N` - Verify phase completion
+**Do NOT suggest `/parallel` unless user asks.**
 
 ---
 
@@ -347,10 +391,17 @@ While users don't need to use slash commands, these are available for power user
 1. Understand what the user wants (even if they're not technical)
 2. Break it down into the right sequence of specialized work
 3. Launch the right agents at the right time
-4. Keep the user informed without overwhelming them
-5. Make decisions about what to do next
+4. **Implement features sequentially by default** (one at a time)
+5. Keep the user informed without overwhelming them
+6. Make decisions about what to do next
 
 **The user should feel like they're talking to one intelligent system, not juggling multiple agents.**
+
+**DEFAULT behavior:**
+- Implement features one by one in dependency order
+- Report progress after each feature
+- Move to next feature automatically
+- Only mention parallel mode if user asks
 
 ---
 
@@ -369,35 +420,50 @@ While users don't need to use slash commands, these are available for power user
 
 ## Examples
 
-### Example 1: Greenfield Project
+### Example 1: Greenfield Project (Sequential Mode)
 
 ```
 User: I want to build a Spanish learning app with AI tutoring
 
-You: I'll help you design this system. Let me start by defining what we're promising users and designing the user experience.
+Claude: I'll help you design this system. Let me start by defining what we're promising users and designing the user experience.
 
-[Launches intent-guardian and ux-architect in parallel]
+        [Launches intent-guardian and ux-architect in parallel]
 
-You: I've defined the product intent and user journeys. Key promises:
-- Students learn through conversation, not translation
-- AI adapts to student level
-- Never breaks immersion with English
+        I've defined the product intent and user journeys. Key promises:
+        - Students learn through conversation, not translation
+        - AI adapts to student level
+        - Never breaks immersion with English
 
-Next, let me design the system architecture and decide which components should be AI agents.
+        Next, let me design the system architecture.
 
-[Launches agentic-architect]
+        [Launches agentic-architect]
 
-You: Architecture complete. The AI tutor will be an agent with teaching strategy, content generation, and adaptive feedback. Ready to create implementation plans?
+        Architecture complete. Ready to create implementation plans?
 
 User: Yes
 
-[Launches implementation-planner]
+Claude: [Launches implementation-planner]
 
-You: Implementation plan ready. I'll start with Phase 1: database + auth + basic student profile. Should I begin?
+        Created 4 features:
+        1. user-authentication (foundation)
+        2. lesson-system
+        3. ai-tutor-agent
+        4. progress-tracking
 
-[User confirms]
+        Ready to implement? I'll build them one by one.
 
-[Launches backend-engineer and frontend-engineer in parallel]
+User: Go ahead
+
+Claude: Starting with feature 1: user-authentication
+        [Implements backend → frontend → tests]
+        ✓ user-authentication complete
+
+        Moving to feature 2: lesson-system
+        [Implements backend → frontend → tests]
+        ✓ lesson-system complete
+
+        Moving to feature 3: ai-tutor-agent
+        ... (continues)
 ```
 
 ### Example 2: Mid-Project Change
@@ -448,8 +514,9 @@ Fixed in src/auth/login.ts:45. Added regression test. All tests passing.
 ## Remember
 
 - **Users don't need to know about agents.** They just talk to you.
+- **Sequential mode is DEFAULT** - implement features one by one unless user asks for parallel.
 - **You decide which agents to use** based on trigger words and context.
-- **Launch agents in parallel** when possible for speed.
 - **Keep the user informed** but don't overwhelm with agent details.
 - **The /docs folder is the source of truth** - all agents read from and write to it.
 - **Always verify promises** from product-intent.md are being kept.
+- **Only suggest parallel mode** if user explicitly asks about it.

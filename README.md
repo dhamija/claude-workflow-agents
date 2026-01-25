@@ -1,8 +1,8 @@
 # Claude Workflow Agents
 
-A conversation-driven multi-agent system for Claude Code. Just talk naturally - Claude automatically orchestrates specialized agents to design, plan, implement, and verify your software projects.
+A conversation-driven multi-agent system for Claude Code. Just talk naturally - Claude automatically orchestrates specialized agents to design, plan, and implement your software projects **one feature at a time**.
 
-**No slash commands required.** Claude understands your intent and runs the right agents at the right time.
+**No slash commands required.** Claude understands your intent, creates feature-based plans, and implements features sequentially by default.
 
 ## What's Included
 
@@ -171,44 +171,47 @@ While conversation mode works automatically, power users can use slash commands:
 
 ## How It Works
 
-### Two-Level Workflow
+### Sequential Development (Default)
 
-**Level 1: Main Project (Analysis & Planning)**
-- Define product intent, UX, architecture
-- Create feature-based plans (vertical slices)
-- Determine what can be built in parallel
-
-**Level 2: Feature Worktrees (Execution)**
-- Each developer gets isolated worktree for one feature
-- Implement backend + frontend + tests for that feature
-- No merge conflicts (different files)
-- Push and merge when complete
+1. **You talk naturally** - No need to memorize commands or agent names
+2. **Claude analyzes** - Understands product intent, UX, architecture
+3. **Claude plans** - Creates feature-based breakdown
+4. **Claude implements** - Builds features one by one:
+   - Feature 1: backend → frontend → tests → ✓
+   - Feature 2: backend → frontend → tests → ✓
+   - Feature 3: backend → frontend → tests → ✓
+5. **You see progress** - Clear updates after each feature
 
 **Example:**
 ```
-Main project:
-  /plan  →  Creates 5 features
+You: Build a task manager
 
-Parallel execution:
-  Developer 1: /parallel user-auth → ../user-auth/
-  Developer 2: /parallel profiles  → ../profiles/
-  Developer 3: /parallel notifs    → ../notifs/
+Claude: [Analyzes → Plans → Creates 4 features]
 
-All work simultaneously, merge independently.
+        Implementing feature 1: user-authentication...
+        ✓ Complete
+
+        Implementing feature 2: task-management...
+        ✓ Complete
+
+        ... (continues)
 ```
 
-### How It Works
+### Parallel Development (Opt-In, Advanced)
 
-1. **You talk naturally** - No need to memorize commands or agent names
-2. **Claude understands intent** - Detects trigger words and context
-3. **Agents auto-selected** - Right agents for the job, run in parallel when possible
-4. **Results presented** - Claude synthesizes outputs and asks what's next
+**Only for teams with multiple developers** who explicitly want to work in parallel.
+
+Run `/parallel <feature>` to create isolated worktrees. Each developer works on one feature independently.
+
+**Not needed for single developers** - sequential mode is simpler and better.
+
+---
 
 The system uses:
 - **CLAUDE.md** - Project orchestrator configuration (created during install)
 - **11 specialized agents** - Each handles specific tasks (analysis, planning, implementation, testing)
 - **/docs/** - Documentation artifacts created and used by agents
-- **Git worktrees** - Parallel feature development without conflicts
+- **Feature-based plans** - Work for both sequential and parallel modes
 - **Optional commands** - For power users who prefer explicit control
 
 ## Agent Auto-Selection

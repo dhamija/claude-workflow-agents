@@ -1,12 +1,24 @@
 ---
 name: parallel
-description: Set up parallel development with git worktrees for a feature
+description: (ADVANCED - OPT-IN ONLY) Set up parallel development with git worktrees for a feature
 subagent_type: general-purpose
 ---
 
 # /parallel - Parallel Feature Development Setup
 
-Sets up git worktrees for parallel feature development.
+**ADVANCED FEATURE - OPT-IN ONLY**
+
+This command is for teams with multiple developers who want to work on features in parallel.
+
+**DEFAULT MODE is sequential** - Claude implements features one by one in the main project.
+
+Only use this if you have multiple developers or explicitly want parallel development.
+
+---
+
+## Sets Up Git Worktrees
+
+Creates isolated development environment for parallel feature development.
 
 ## Usage
 
