@@ -19,6 +19,9 @@ This document provides detailed information about each specialized agent in the 
 - [Quality Agents](#quality-agents)
   - [code-reviewer](#code-reviewer)
   - [debugger](#debugger)
+- [Setup & Maintenance Agents](#setup--maintenance-agents)
+  - [ci-cd-engineer](#ci-cd-engineer)
+  - [project-maintainer](#project-maintainer)
 
 ---
 
@@ -552,6 +555,129 @@ This document provides detailed information about each specialized agent in the 
 
 ---
 
+## Setup & Maintenance Agents
+
+### ci-cd-engineer
+
+**Purpose:** Set up automated CI/CD validation infrastructure in user projects
+
+**Tools:** Read, Write, Edit, Bash, Glob, Grep
+
+**When to use:**
+- After L1 planning (intent, UX, architecture docs exist)
+- When user requests "set up CI/CD", "validate", "protect the intent"
+- Before production deployment
+- When working with a team
+
+**What it produces:**
+- `/ci/validate.sh` - Master validation script
+- `/ci/rules.json` - Generated from /docs (auto-updated when docs change)
+- `/ci/validators/` - Intent, UX, architecture, and test validators
+- `.git/hooks/pre-commit` - Quick validation before commit
+- `.git/hooks/pre-push` - Full validation before push
+- `.github/workflows/validate.yml` - GitHub Actions workflow
+
+**How it works:**
+1. Reads /docs/intent/, /docs/ux/, /docs/architecture/
+2. Generates validation rules from promises, journeys, and constraints
+3. Creates validators that check code against those rules
+4. Sets up git hooks and CI/CD workflow
+5. Auto-regenerates rules when docs change
+
+**Key philosophy:**
+- Every rule traces to a specific promise/journey/constraint
+- Validation is intent-aware, not generic
+- CRITICAL promises block deployment
+- HIGH promises warn
+- MEDIUM/LOW inform
+
+**Example rule:**
+```json
+{
+  "id": "INTENT-001",
+  "severity": "CRITICAL",
+  "promise": "User data never leaves device",
+  "source": "/docs/intent/product-intent.md:12",
+  "pattern": "fetch\\(.*api\\..*sync",
+  "message": "Found network call with user data - breaks privacy promise"
+}
+```
+
+**Opt-in, not mandatory:** Users can decline CI/CD setup.
+
+---
+
+### project-maintainer
+
+**Purpose:** Keep project documentation and state in sync with code reality
+
+**Tools:** Read, Edit, Bash, Glob, Grep
+
+**When to use:**
+- **Automatically:** After feature verification (test-engineer triggers)
+- **Automatically:** After L1 planning (implementation-planner triggers)
+- **Manually:** Before ending session (`/sync` or "save state")
+- **Periodically:** Every 3-4 features during long sessions
+
+**What it maintains:**
+1. **Project CLAUDE.md - Current State section:**
+   - Feature progress table (Backend/Frontend/Tests/Overall status)
+   - Current task and next steps
+   - Important context from this session
+   - Test coverage summary
+   - Open questions
+
+2. **Documentation (/docs/) status markers:**
+   - /docs/intent/product-intent.md - `[KEPT]`, `[AT RISK]`, `[BROKEN]`
+   - /docs/ux/user-journeys.md - `[IMPLEMENTED]`, `[PARTIAL]`, `[NOT STARTED]`
+   - /docs/plans/implementation-order.md - Feature completion tracking
+
+3. **Test Coverage Verification:**
+   - Completed features have tests
+   - Journeys have E2E tests
+   - Identify gaps
+
+**Modes:**
+- **Full sync** (`/sync`): Complete state update + docs + test coverage
+- **Quick sync** (`/sync quick`): CLAUDE.md Current State only
+- **Report** (`/sync report`): Show status without making changes
+
+**Session Continuity:**
+Running `/sync` before ending a session saves complete context so next session can resume with "continue".
+
+**Example output:**
+```
+✓ CLAUDE.md updated
+  - Feature progress table refreshed
+  - Current task updated
+  - Session continuity notes added
+
+✓ Documentation synced
+  - product-intent.md: 6/8 promises KEPT
+  - user-journeys.md: 4/6 IMPLEMENTED
+  - implementation-order.md: Updated statuses
+
+✓ Test coverage verified
+  - Completed features: 100% covered
+  - Current feature: Backend tested, frontend pending
+
+Progress: 5/8 features complete
+Current: search frontend (SearchBar component)
+Next: Continue SearchBar, then ResultsList
+```
+
+**Integration:**
+- `test-engineer` auto-triggers after successful verification
+- `implementation-planner` auto-triggers after planning complete
+
+**Key philosophy:**
+- Documentation reflects reality, not aspirations
+- Session state enables seamless handoff
+- Test coverage tracking prevents technical debt
+- Nothing gets lost between sessions
+
+---
+
 ## Agent Interaction Patterns
 
 ### Sequential Flow (Greenfield)
@@ -560,9 +686,11 @@ intent-guardian →
 ux-architect →
 agentic-architect →
 implementation-planner →
+  └─> project-maintainer (initial sync) →
 backend-engineer + frontend-engineer + test-engineer →
 code-reviewer →
-test-engineer (verify)
+test-engineer (verify) →
+  └─> project-maintainer (sync after feature)
 ```
 
 ### Sequential Flow (Brownfield)
@@ -601,7 +729,10 @@ implementation → code-reviewer → [issues found] → debugger → test-engine
 | test-engineer | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
 | code-reviewer | ✓ | | | | ✓ | ✓ | | |
 | debugger | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
+| ci-cd-engineer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | |
+| project-maintainer | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
 
 **Analysis agents** (Read-only + Web): Research and design, produce documentation
 **Implementation agents** (Read + Edit + Bash): Write code, run tests
 **Quality agents** (Read + limited Edit): Review and debug
+**Setup & Maintenance agents** (Read + Edit/Write + Bash): Set up infrastructure, maintain state

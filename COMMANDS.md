@@ -27,6 +27,8 @@ This document provides detailed information about each workflow command.
 - [Quality Commands](#quality-commands)
   - [/review](#review)
   - [/debug](#debug)
+- [Maintenance Commands](#maintenance-commands)
+  - [/sync](#sync)
 
 ---
 
@@ -930,6 +932,109 @@ Uses **debugger** to:
 ```
 fix(scope): description of bug fixed
 ```
+
+---
+
+## Maintenance Commands
+
+Commands for keeping project state and documentation in sync.
+
+### /sync
+
+**Purpose:** Sync project state, documentation, and test coverage
+
+**Usage:**
+```bash
+/sync              # Full sync (default)
+/sync quick        # Quick CLAUDE.md update only
+/sync report       # Status check without changes
+```
+
+**What it does:**
+Launches **project-maintainer** agent to:
+1. Update CLAUDE.md Current State section with:
+   - Feature progress table
+   - Current task and next steps
+   - Important context from this session
+   - Test coverage summary
+2. Sync documentation status markers:
+   - /docs/intent/ - Mark promises as [KEPT], [AT RISK], or [BROKEN]
+   - /docs/ux/ - Mark journeys as [IMPLEMENTED], [PARTIAL], or [NOT STARTED]
+   - /docs/plans/ - Update feature completion statuses
+3. Verify test coverage and identify gaps
+4. Generate comprehensive sync report
+
+**Modes:**
+
+**Full Sync** (default):
+- Complete state update
+- Documentation sync
+- Test coverage verification
+- Comprehensive report
+
+**Quick Sync** (`/sync quick`):
+- CLAUDE.md Current State only
+- Recent changes log
+- Brief status report
+- Fast checkpoint
+
+**Report Mode** (`/sync report`):
+- Compare code vs docs
+- Identify what's out of sync
+- Show what would be updated
+- No changes made
+
+**When to use:**
+- **Automatically:** After feature verification (test-engineer triggers)
+- **Manually:** Before ending a session ("save state")
+- **Periodically:** Every 3-4 features during long sessions
+- **Status check:** Use `/sync report` to see current state
+
+**Example output:**
+```
+✓ CLAUDE.md updated
+  - Feature progress table refreshed
+  - Current task updated
+  - Session continuity notes added
+
+✓ Documentation synced
+  - product-intent.md: 6/8 promises KEPT
+  - user-journeys.md: 4/6 IMPLEMENTED
+  - implementation-order.md: Updated statuses
+
+✓ Test coverage verified
+  - Completed features: 100% covered
+  - Current feature: Backend tested, frontend pending
+
+╔══════════════════════════════════════════════════╗
+║            PROJECT SYNC COMPLETE                 ║
+╚══════════════════════════════════════════════════╝
+
+Progress: 5/8 features complete
+Current: search frontend (SearchBar component)
+Next: Continue SearchBar, then ResultsList
+```
+
+**Session Continuity:**
+
+Before ending session:
+```bash
+/sync              # or say "save state"
+```
+
+Next session:
+```
+You: Continue
+
+Claude: Continuing from where we left off...
+        Current task: SearchBar component
+        [Resumes seamlessly]
+```
+
+**Related:**
+- Commands: `/verify` (triggers auto-sync on success)
+- Agents: `project-maintainer`
+- Files: CLAUDE.md Current State section
 
 ---
 
