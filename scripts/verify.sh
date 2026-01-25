@@ -139,7 +139,7 @@ if [ ! -f "$README" ]; then
     ((ERRORS++))
 else
     # Check for key agents (not all, as README may be selective)
-    KEY_AGENTS=("intent-guardian" "ux-architect" "backend-engineer" "ci-cd-engineer")
+    KEY_AGENTS=("intent-guardian" "ux-architect" "backend-engineer" "project-ops")
     for agent in "${KEY_AGENTS[@]}"; do
         if grep -qi "$agent" "$README"; then
             log "${GREEN}  ✓ Key agent '$agent' in README${NC}"

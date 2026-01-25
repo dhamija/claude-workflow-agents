@@ -277,8 +277,13 @@ ANALYSIS & PLANNING
 ───────────────────
   /analyze                   Run all analysis agents
   /plan                      Generate implementation plans
+  /replan                    Regenerate plans after changes
   /audit                     Audit existing codebase
-  /gap                       Find gaps and create migration plan
+  /intent-audit [focus]      Audit implementation vs intent
+  /ux-audit [focus]          Audit user experience
+  /aa [focus]                Agentic architecture analysis
+  /aa-audit [focus]          Audit agentic optimizations
+  /gap [focus]               Find gaps and create migration plan
   /change <description>      Analyze change impact
 
 
