@@ -217,6 +217,185 @@ All analysis, plans, and gaps are documented in `/docs/`. Code implements the do
 /verify content-classifier
 ```
 
+### Change Management (Mid-Flight Requirement Changes)
+```bash
+# Initial workflow
+/analyze task app
+/plan fastapi react
+/implement phase 1
+/implement phase 2   # IN PROGRESS
+
+# User realizes they need teams
+/change add team workspaces where users can create teams and share tasks
+# Review impact analysis in /docs/changes/
+/update
+# Artifacts updated, plans regenerated
+/implement phase 2   # Continue with updated plans (now includes teams)
+/verify final
+```
+
+## Change Management Workflow
+
+One of the biggest challenges in software development is handling requirement changes after planning or mid-implementation. The change management workflow solves this.
+
+### The Problem
+
+```
+Initial:  /analyze → /plan → /implement phase 1 → /implement phase 2
+
+User: "Actually, we also need user roles and permissions"
+
+Now what? Which docs are stale? What needs updating?
+```
+
+### The Solution
+
+```
+                    ┌─────────────────┐
+                    │  CHANGE REQUEST │
+                    │  (user input)   │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │  /change        │
+                    │  (impact analysis)│
+                    └────────┬────────┘
+                             │
+              ┌──────────────┼──────────────┐
+              ▼              ▼              ▼
+        ┌──────────┐  ┌──────────┐  ┌──────────┐
+        │ Intent   │  │ UX       │  │ System   │
+        │ affected?│  │ affected?│  │ affected?│
+        └────┬─────┘  └────┬─────┘  └────┬─────┘
+             │              │              │
+             └──────────────┼──────────────┘
+                            │
+                            ▼
+                    ┌─────────────────┐
+                    │  /update        │
+                    │  (apply changes)│
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │  /replan        │
+                    │  (update plans) │
+                    └────────┬────────┘
+                             │
+                             ▼
+                    ┌─────────────────┐
+                    │  Updated plans  │
+                    │  + migration    │
+                    └─────────────────┘
+```
+
+### Change Workflow Steps
+
+1. **Analyze Impact** - `/change <description>`
+   - change-analyzer examines all artifacts
+   - Identifies what needs updating
+   - Detects conflicts
+   - Assesses rework needed
+   - Produces impact analysis report
+
+2. **Review Impact**
+   - Read `/docs/changes/change-[timestamp].md`
+   - Understand scope of changes
+   - Decide if acceptable
+
+3. **Apply Changes** - `/update`
+   - Updates intent, UX, architecture documents
+   - Preserves existing work
+   - Validates consistency
+   - Automatically triggers `/replan`
+
+4. **Continue Implementation**
+   - Plans now reflect changes
+   - Phases adjusted
+   - Migration tasks created if needed
+   - `/implement` continues with updated plans
+
+### What Gets Updated
+
+The change workflow intelligently updates:
+
+**L1 Artifacts (Analysis):**
+- product-intent.md - New/modified promises, invariants
+- user-journeys.md - New/modified journeys
+- agent-design.md - New/modified components
+
+**L2 Artifacts (Plans):**
+- backend-plan.md - New endpoints, modified schema
+- frontend-plan.md - New pages, modified components
+- test-plan.md - New tests for new journeys
+- implementation-order.md - Adjusted phases, migration tasks
+
+**Preservation:**
+- Completed phases stay marked complete
+- In-progress work extended (not rewritten)
+- Unaffected sections unchanged
+- Migration tasks created for rework
+
+### Example: Adding Roles Mid-Flight
+
+```bash
+# Initial state
+/analyze task management app
+/plan
+/implement phase 1  # ✅ Complete - Auth, CRUD
+/implement phase 2  # 🔄 In progress - Dashboard, Reports
+
+# Change request
+/change add user roles (admin, editor, viewer) with different permissions
+
+# Impact analysis shows:
+# - Intent: Add promise about access control
+# - UX: Add role management journey
+# - Architecture: Add Role entity, permission middleware
+# - Backend: Add role endpoints, modify auth
+# - Frontend: Add role management page
+# - Phase 1 (complete): Needs auth modification (migration)
+# - Phase 2 (in progress): Extended with role features
+
+# Accept changes
+/update
+
+# Result:
+# - All artifacts updated
+# - Plans regenerated
+# - Phase 2 extended with:
+#   - Backend: Role endpoints, permission checks
+#   - Frontend: Role management UI
+# - Migration task created:
+#   - MIG-001: Update auth middleware for role checks
+
+# Continue
+/implement phase 2     # Now includes role features
+/improve MIG-001       # Apply migration to phase 1 auth
+/verify final
+```
+
+### Change Impact Levels
+
+Changes are categorized by scope:
+
+- **Minor** - Single component, no architectural impact
+  - Example: Add new field to existing form
+  - Impact: Low, quick to implement
+
+- **Medium** - Multiple components, new journeys
+  - Example: Add export feature
+  - Impact: Moderate, adds work to current phase
+
+- **Major** - Core architecture, multiple journeys
+  - Example: Add multi-tenancy
+  - Impact: High, may add phases
+
+- **Pivot** - Fundamental change to direction
+  - Example: Change from B2C to B2B
+  - Impact: Critical, may require re-analysis
+
 ## Integration with Git Workflows
 
 ### Feature Branch Development

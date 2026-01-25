@@ -13,6 +13,10 @@ This document provides detailed information about each workflow command.
   - [/audit](#audit)
   - [/gap](#gap)
   - [/improve](#improve)
+- [Change Management Commands](#change-management-commands)
+  - [/change](#change)
+  - [/update](#update)
+  - [/replan](#replan)
 - [Focused Commands](#focused-commands)
   - [/intent](#intent)
   - [/intent-audit](#intent-audit)
@@ -407,6 +411,190 @@ Must have migration plan (run `/gap` first):
 ```
 fix(scope): [GAP-XXX] description
 ```
+
+---
+
+## Change Management Commands
+
+Commands for handling mid-flight requirement changes.
+
+### /change
+
+**Purpose:** Analyze impact of requirement changes across all artifacts
+
+**Usage:**
+```bash
+/change <description of the change>
+```
+
+**What it does:**
+Uses **change-analyzer** to:
+1. Read all existing artifacts (intent, UX, architecture, plans)
+2. Analyze impact on each artifact
+3. Detect conflicts with existing decisions
+4. Assess rework needed for completed work
+5. Estimate effort impact
+6. Produce detailed impact analysis report
+
+**Output:**
+- `/docs/changes/change-[timestamp].md` - Impact analysis
+- Impact summary table (artifact → level → action)
+- Detailed changes per artifact
+- Conflicts detected
+- Rework assessment
+- Recommended update sequence
+- Effort and timeline estimates
+
+**Next step:**
+```bash
+/update  # Apply changes if accepted
+```
+
+**Examples:**
+```bash
+/change add user roles and permissions with admin, editor, viewer levels
+
+/change add team workspaces where users can create teams and share tasks
+
+/change remove the export feature - we're pivoting to focus on collaboration
+```
+
+**When to use:**
+- Mid-flight requirement changes
+- User realizes they need additional features
+- Stakeholder requests modifications
+- Exploring "what if" scenarios
+
+**Change impact levels:**
+- **Minor:** Single component, quick to add
+- **Medium:** Multiple components, moderate work
+- **Major:** Core architecture changes, significant effort
+- **Pivot:** Fundamental direction change, may require re-analysis
+
+---
+
+### /update
+
+**Purpose:** Apply changes to artifacts after impact analysis
+
+**Usage:**
+```bash
+/update <path to change analysis or "latest">
+```
+
+**Prerequisites:**
+Must have change impact analysis (run `/change` first)
+
+**What it does:**
+1. Loads change analysis
+2. Updates L1 artifacts in dependency order:
+   - product-intent.md (if affected)
+   - user-journeys.md (if affected)
+   - agent-design.md (if affected)
+3. Validates consistency
+4. Automatically triggers `/replan`
+
+Uses appropriate agents:
+- **intent-guardian** for intent updates
+- **ux-architect** for UX updates
+- **agentic-architect** for architecture updates
+
+**Output:**
+- Updated L1 artifacts (marked with update comments)
+- Validation report
+- Automatically regenerated plans
+- Update log in `/docs/changes/update-[timestamp].md`
+
+**Next step:**
+```bash
+/implement phase N  # Continue implementation with updated plans
+```
+
+**Examples:**
+```bash
+/update            # Apply latest change analysis
+/update latest     # Same as above
+/update /docs/changes/change-2025-01-24-143022.md  # Specific analysis
+```
+
+**What gets updated:**
+- Intent promises, invariants, boundaries
+- UX journeys, personas, screens
+- Architecture entities, endpoints, agents
+- ALL plans (via automatic `/replan`)
+
+**Error handling:**
+If any step fails:
+- Stops immediately
+- Reports which step failed
+- Doesn't corrupt remaining artifacts
+- User must fix and re-run
+
+---
+
+### /replan
+
+**Purpose:** Regenerate implementation plans after L1 artifact changes
+
+**Usage:**
+```bash
+/replan <optional: specific plan or "all">
+```
+
+**Prerequisites:**
+L1 artifacts must exist:
+- product-intent.md
+- user-journeys.md
+- agent-design.md
+
+**What it does:**
+Uses **implementation-planner** to:
+1. Detect changes in L1 artifacts
+2. Check implementation progress (what's complete/in-progress)
+3. Preserve completed work where possible
+4. Regenerate affected plans
+5. Adjust implementation order
+6. Create migration tasks for rework
+
+**Output:**
+Updated plans:
+- backend-plan.md (new endpoints, modified schema)
+- frontend-plan.md (new pages, modified components)
+- test-plan.md (new tests)
+- implementation-order.md (adjusted phases, migration tasks)
+
+Replan summary in `/docs/changes/replan-[timestamp].md`
+
+**Next step:**
+```bash
+/implement phase N  # Continue with updated plans
+```
+
+**Examples:**
+```bash
+/replan             # Regenerate all affected plans
+/replan all         # Same as above
+/replan backend     # Just backend plan
+/replan frontend    # Just frontend plan
+```
+
+**When to use:**
+- Automatically called by `/update`
+- After manual edits to L1 artifacts
+- To refresh plans based on current state
+
+**Preservation rules:**
+- ✅ Complete phases: Unchanged (unless affected)
+- 🔄 In progress: Extended (not rewritten)
+- ⚠️ Affected complete: Migration tasks created
+- 🆕 Future phases: Freely updated
+
+**Phase markings:**
+- ✅ COMPLETE - Done, no changes
+- 🔄 IN PROGRESS (MODIFIED) - Partially done, extended
+- ⚠️ NEEDS MIGRATION - Complete but affected
+- 🆕 NEW - Added from changes
+- (REORDERED) - Sequence changed
 
 ---
 
@@ -808,6 +996,22 @@ fix(scope): description of bug fixed
 /aa-audit
 ```
 
+### Change Management Workflow
+```bash
+# Mid-implementation change
+/analyze task app
+/plan
+/implement phase 1
+/implement phase 2  # IN PROGRESS
+
+# Change request
+/change add team workspaces and sharing
+# Review /docs/changes/change-*.md
+/update
+# Artifacts and plans updated automatically
+/implement phase 2  # Continue with updated plans
+```
+
 ### Quality Workflow
 ```bash
 # Before merge
@@ -833,6 +1037,9 @@ fix(scope): description of bug fixed
 | `/audit` | None | `/gap` |
 | `/gap` | Audit docs | `/improve` |
 | `/improve` | Gap docs | `/verify` |
+| `/change` | Existing artifacts | `/update` |
+| `/update` | Change analysis | `/replan` (auto) |
+| `/replan` | L1 artifacts, plans | `/implement` |
 | `/intent` | None | Optional |
 | `/intent-audit` | None | Optional |
 | `/ux` | None | Optional |

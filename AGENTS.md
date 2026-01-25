@@ -11,6 +11,7 @@ This document provides detailed information about each specialized agent in the 
 - [Planning Agents](#planning-agents)
   - [implementation-planner](#implementation-planner)
   - [gap-analyzer](#gap-analyzer)
+  - [change-analyzer](#change-analyzer)
 - [Implementation Agents](#implementation-agents)
   - [backend-engineer](#backend-engineer)
   - [frontend-engineer](#frontend-engineer)
@@ -238,6 +239,64 @@ This document provides detailed information about each specialized agent in the 
 - Risk/blast radius
 - Dependencies
 - Effort
+
+---
+
+### change-analyzer
+
+**Purpose:** Analyze impact of requirement changes across all artifacts
+
+**Tools:** Read, Glob, Grep
+
+**When to use:**
+- Mid-flight requirement changes
+- User realizes they need additional features
+- Stakeholder requests modifications
+- After initial analysis/planning but before completion
+
+**Required inputs (existing artifacts):**
+1. `/docs/intent/product-intent.md` - Current intent
+2. `/docs/ux/user-journeys.md` - Current UX
+3. `/docs/architecture/agent-design.md` - Current architecture
+4. `/docs/plans/*.md` - Current plans (if greenfield)
+5. `/docs/gaps/migration-plan.md` - Current plan (if brownfield)
+
+**What it produces:**
+- `/docs/changes/change-[timestamp].md` - Impact analysis report
+- Impact summary table (artifact → impact level → action)
+- Detailed changes per artifact
+- Conflict detection
+- Rework assessment for completed work
+- Recommended update sequence
+- Effort estimate
+
+**Change categorization:**
+- **Addition:** New feature/capability
+- **Modification:** Changing existing behavior
+- **Removal:** Removing feature
+- **Pivot:** Fundamental direction change
+
+**Impact levels:**
+- **Minor:** Single component, no architectural impact
+- **Medium:** Multiple components, may need new journeys
+- **Major:** Core architecture, intent, or multiple journeys
+- **Pivot:** Requires rethinking most decisions
+
+**Example invocation:**
+```bash
+/change add user roles and permissions with admin, editor, viewer levels
+```
+
+**What it reports:**
+- Impact on each artifact (intent, UX, architecture, plans)
+- Dependency ripple effects
+- Conflicts with existing decisions
+- Completed work affected
+- Effort and timeline impact
+
+**Use with:**
+- `/update` to apply changes
+- `/replan` to regenerate plans
 
 ---
 
@@ -536,6 +595,7 @@ implementation → code-reviewer → [issues found] → debugger → test-engine
 | agentic-architect | ✓ | | | | ✓ | ✓ | ✓ | ✓ |
 | implementation-planner | ✓ | | | | ✓ | ✓ | ✓ | ✓ |
 | gap-analyzer | ✓ | | | | ✓ | ✓ | ✓ | ✓ |
+| change-analyzer | ✓ | | | | ✓ | ✓ | | |
 | backend-engineer | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
 | frontend-engineer | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
 | test-engineer | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
