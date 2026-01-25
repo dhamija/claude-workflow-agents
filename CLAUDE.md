@@ -144,7 +144,7 @@ claude-workflow-agents/
 
 ⚠️ **UPDATE THIS SECTION** when adding/removing agents, commands, or features.
 
-### Agents: 12 total
+### Agents: 13 total
 
 **L1 Analysis** (run once at project start):
 - **intent-guardian** - Define promises to users
@@ -165,10 +165,11 @@ claude-workflow-agents/
 - **code-reviewer** - Review code quality
 - **debugger** - Fix bugs
 
-**Setup**:
+**Setup & Maintenance**:
 - **ci-cd-engineer** - Set up CI/CD in user projects
+- **project-maintainer** - Keep user project docs and state in sync
 
-### Commands: 20 total
+### Commands: 21 total
 
 | Command | Purpose |
 |---------|---------|
@@ -186,6 +187,7 @@ claude-workflow-agents/
 | `/plan` | Show/create implementation plans |
 | `/replan` | Regenerate plans after changes |
 | `/review` | Code review |
+| `/sync` | Sync project state and docs |
 | `/update` | Update docs after changes |
 | `/ux` | Run ux-architect |
 | `/ux-audit` | Audit existing UX |

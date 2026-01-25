@@ -1,7 +1,7 @@
 ---
 name: agent-wf-help
 description: Show help about the agent workflow system - workflow, agents, commands, and development patterns
-argument-hint: "[topic] - workflow | agents | commands | patterns | parallel | brownfield | cicd"
+argument-hint: "[topic] - workflow | agents | commands | patterns | parallel | brownfield | cicd | sync"
 ---
 
 # Claude Workflow Agents - Help System
@@ -63,12 +63,13 @@ Just talk naturally. Claude handles the rest.
 │ MORE HELP                                                       │
 │                                                                 │
 │   /agent-wf-help workflow    - How the two-level workflow works │
-│   /agent-wf-help agents      - All 12 specialized agents        │
+│   /agent-wf-help agents      - All 13 specialized agents        │
 │   /agent-wf-help commands    - Available commands               │
 │   /agent-wf-help patterns    - Development patterns & examples  │
 │   /agent-wf-help parallel    - Parallel development guide       │
 │   /agent-wf-help brownfield  - Improving existing code          │
 │   /agent-wf-help cicd        - CI/CD validation setup           │
+│   /agent-wf-help sync        - Project state & maintenance      │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -134,7 +135,7 @@ DOCUMENTS CREATED
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║                       THE 11 AGENTS                              ║
+║                       THE 13 AGENTS                              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Claude automatically selects agents. You don't call them directly.
@@ -224,6 +225,12 @@ LEVEL 2 AGENTS (Feature-level)
   │ Sets up: Automated validation, rules, GitHub Actions        │
   │ Triggers: "Set up CI/CD", "validate", after L1 planning     │
   └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ PROJECT-MAINTAINER                                          │
+  │ Maintains: Project docs, state, and test coverage           │
+  │ Triggers: After features, "/sync", "save state"             │
+  └─────────────────────────────────────────────────────────────┘
 ```
 
 ### If topic = "commands":
@@ -240,7 +247,7 @@ HELP
 ────
   /agent-wf-help [topic]     This help system
                              Topics: workflow, agents, commands,
-                                     patterns, parallel
+                                     patterns, parallel, sync
 
 
 MAIN COMMANDS
@@ -973,6 +980,180 @@ MORE INFO
   You just ask for it - Claude does the rest.
 ```
 
+### If topic = "sync" or "maintenance" or "state":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                    PROJECT MAINTENANCE                           ║
+║              (Keep Docs & State In Sync)                         ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Keep your project documentation and state in sync automatically.
+
+
+WHAT IS PROJECT SYNC?
+─────────────────────
+
+  As you build, your project evolves:
+  • Features get completed
+  • Tests get written
+  • Decisions get made
+  • Context accumulates
+
+  The project-maintainer agent keeps everything in sync so:
+  • Your next session knows where to continue
+  • Documentation reflects reality
+  • Tests are tracked
+  • Nothing gets lost
+
+
+WHAT GETS MAINTAINED?
+──────────────────────
+
+  1. CLAUDE.md "Current State" Section
+     • Feature progress table
+     • Current task and next steps
+     • Important context from this session
+     • Test coverage summary
+     • Open questions
+
+  2. Documentation (/docs/*)
+     • Intent: Promise statuses ([KEPT], [AT RISK], [BROKEN])
+     • UX: Journey statuses ([IMPLEMENTED], [PARTIAL])
+     • Plans: Feature completion statuses
+
+  3. Test Coverage Verification
+     • Every completed feature has tests
+     • Every journey has E2E tests
+     • Identify gaps
+
+
+WHEN DOES IT RUN?
+─────────────────
+
+  AUTOMATICALLY:
+  • After feature completion (test-engineer triggers it)
+  • After L1 planning (implementation-planner triggers it)
+  • Periodically during long sessions (every 3-4 features)
+
+  MANUALLY:
+  • /sync              - Full sync
+  • /sync quick        - Quick CLAUDE.md update only
+  • /sync report       - Show status without changes
+  • "Save state"       - Before ending session
+  • "Update the docs"  - Full sync
+
+
+THE SYNC COMMAND
+────────────────
+
+  /sync                # Full sync (default)
+  /sync quick          # Quick CLAUDE.md update
+  /sync report         # Status check, no changes
+
+  Full Sync Does:
+  1. Update CLAUDE.md Current State section
+  2. Sync all /docs/* with code reality
+  3. Verify test coverage
+  4. Generate comprehensive report
+
+  Quick Sync Does:
+  1. Update CLAUDE.md Current State
+  2. Log recent changes
+  3. Brief status report
+
+  Report Mode Does:
+  1. Compare code vs docs
+  2. Identify what's out of sync
+  3. Show what would be updated (no changes)
+
+
+SESSION CONTINUITY
+──────────────────
+
+  Before ending a session:
+
+    You: "Save state before I go"
+
+    Claude: [Runs full sync]
+            ✓ CLAUDE.md updated with:
+              - Current task: search frontend (SearchBar)
+              - Important context: Using debounced search
+              - Next steps: SearchBar → ResultsList → FilterPanel
+
+            Session state saved ✓
+
+  Next session:
+
+    You: "Continue"
+
+    Claude: Continuing from where we left off...
+            From last session:
+            - Current task: SearchBar component
+            - Using debounced search
+            [Continues seamlessly]
+
+
+WHAT YOU SEE
+────────────
+
+  Full Sync Output:
+
+    ✓ CLAUDE.md updated
+      - Feature progress table refreshed
+      - Current task updated
+      - Session continuity notes added
+
+    ✓ Documentation synced
+      - product-intent.md: 6/8 promises KEPT
+      - user-journeys.md: 4/6 IMPLEMENTED
+      - implementation-order.md: Updated statuses
+
+    ✓ Test coverage verified
+      - Completed features: 100% covered
+      - Current feature: Backend tested, frontend pending
+
+    ╔══════════════════════════════════════════════════╗
+    ║            PROJECT SYNC COMPLETE                 ║
+    ╚══════════════════════════════════════════════════╝
+
+    Progress: 5/8 features complete
+    Current: search frontend (SearchBar component)
+    Next: Continue SearchBar, then ResultsList
+
+
+TIPS
+────
+
+  • Before ending session - Always run /sync or say "save state"
+  • After each feature - Automatic, but verify with /sync report
+  • Check status - Use /sync report to see current state
+  • Quick updates - Use /sync quick for fast checkpoints
+
+
+WHY IT MATTERS
+──────────────
+
+  Without sync:
+  • "Where were we?" - Can't remember
+  • Docs go stale - Don't reflect reality
+  • Context is lost - Decisions forgotten
+  • Session handoff is rough
+
+  With sync:
+  • "Continue" - Instant resumption
+  • Docs always accurate - Source of truth
+  • Context preserved - Decisions recorded
+  • Seamless sessions - No cognitive overhead
+
+
+MORE INFO
+─────────
+
+  The project-maintainer agent handles all syncing automatically.
+  See: /sync command documentation
+```
+
 ### If topic not recognized:
 
 ```
@@ -981,12 +1162,13 @@ I don't have specific help for "<topic>".
 Available topics:
   /agent-wf-help              - Quick overview
   /agent-wf-help workflow     - How the two-level workflow works
-  /agent-wf-help agents       - All 12 specialized agents
+  /agent-wf-help agents       - All 13 specialized agents
   /agent-wf-help commands     - Available commands
   /agent-wf-help patterns     - Development patterns & examples
   /agent-wf-help parallel     - Parallel development guide
   /agent-wf-help brownfield   - Improving existing code
   /agent-wf-help cicd         - CI/CD validation setup
+  /agent-wf-help sync         - Project state & maintenance
   /agent-wf-help examples     - Practical examples
 
 Or just ask me what you want to know!

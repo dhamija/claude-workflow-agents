@@ -69,7 +69,7 @@ cd /path/to/your/project
 
 ### Verify Installation
 ```bash
-ls ~/.claude/agents/  # Should show 11 .md files
+ls ~/.claude/agents/  # Should show 13 .md files
 ```
 
 ---
@@ -185,6 +185,32 @@ Claude: Project: Habit Tracker
         Continue with tracking frontend?
 ```
 
+### Saving State Between Sessions
+
+Before ending a session:
+```
+You: Save state before I go
+
+Claude: [Runs /sync]
+        ✓ CLAUDE.md updated with current task
+        ✓ Documentation synced
+        ✓ Test coverage recorded
+
+        Session state saved ✓
+
+        Next session, just say "continue" and I'll know
+        exactly where we left off.
+```
+
+Next session:
+```
+You: Continue
+
+Claude: Continuing from where we left off...
+        Current task: tracking frontend (SearchResults component)
+        [Continues seamlessly]
+```
+
 ---
 
 ## Existing Projects (Brownfield)
@@ -274,6 +300,9 @@ Claude: [Fixes only security-related gaps]
 | `/next` | Continue building | `/next` |
 | `/review [target]` | Review code quality | `/review auth` |
 | `/plan show` | Display current plans | `/plan show` |
+| `/sync` | Update project state & docs | `/sync` |
+| `/sync quick` | Quick state update | `/sync quick` |
+| `/sync report` | Check sync status | `/sync report` |
 
 ### Parallel Development
 
@@ -290,11 +319,12 @@ Claude: [Fixes only security-related gaps]
 |---------|---------|
 | `/agent-wf-help` | Quick overview |
 | `/agent-wf-help workflow` | How the system works |
-| `/agent-wf-help agents` | All 11 agents |
+| `/agent-wf-help agents` | All 13 agents |
 | `/agent-wf-help commands` | All commands |
 | `/agent-wf-help patterns` | Usage patterns |
 | `/agent-wf-help parallel` | Parallel development |
 | `/agent-wf-help brownfield` | Existing codebases |
+| `/agent-wf-help sync` | Project state & maintenance |
 | `/agent-wf-help examples` | Practical examples |
 
 ---

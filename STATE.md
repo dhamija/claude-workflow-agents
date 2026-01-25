@@ -7,10 +7,10 @@
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Agents | 12 | 2026-01-25 |
-| Commands | 20 | 2026-01-25 |
-| Help Topics | 9 | 2026-01-25 |
-| Tests | 16 | 2026-01-25 |
+| Agents | 13 | 2026-01-25 |
+| Commands | 21 | 2026-01-25 |
+| Help Topics | 10 | 2026-01-25 |
+| Tests | 17 | 2026-01-25 |
 
 ## Agents List
 
@@ -28,6 +28,7 @@
 | code-reviewer | L2 Support | ✓ Complete |
 | debugger | L2 Support | ✓ Complete |
 | ci-cd-engineer | Setup | ✓ Complete |
+| project-maintainer | Maintenance | ✓ Complete |
 
 ## Commands List
 
@@ -47,6 +48,7 @@
 | plan | ✓ Complete |
 | replan | ✓ Complete |
 | review | ✓ Complete |
+| sync | ✓ Complete |
 | update | ✓ Complete |
 | ux | ✓ Complete |
 | ux-audit | ✓ Complete |

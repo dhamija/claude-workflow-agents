@@ -21,6 +21,7 @@ REQUIRED_COMMANDS=(
     "plan"
     "replan"
     "review"
+    "sync"
     "update"
     "ux"
     "ux-audit"

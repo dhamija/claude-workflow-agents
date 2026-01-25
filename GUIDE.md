@@ -18,6 +18,7 @@ Most common actions - no commands needed:
 | Check progress | "Where are we?" |
 | Review code | "Review the [thing]" |
 | Change something | "Actually, change [thing] to [other]" |
+| Save session state | "Save state" or "Before I go" |
 
 ---
 
@@ -29,6 +30,9 @@ Most common actions - no commands needed:
 /next                # Continue building
 /review [target]     # Review code (file, dir, or "staged")
 /plan show           # Display current plans
+/sync                # Update project state & docs
+/sync quick          # Quick state update
+/sync report         # Check sync status
 ```
 
 ### Parallel Development (Teams Only)
@@ -43,11 +47,12 @@ Most common actions - no commands needed:
 ```
 /agent-wf-help              # Quick overview
 /agent-wf-help workflow     # Two-level workflow
-/agent-wf-help agents       # All 11 agents
+/agent-wf-help agents       # All 13 agents
 /agent-wf-help commands     # All commands
 /agent-wf-help patterns     # Usage patterns
 /agent-wf-help parallel     # Parallel development
 /agent-wf-help brownfield   # Existing codebases
+/agent-wf-help sync         # Project state & maintenance
 /agent-wf-help examples     # Practical examples
 ```
 
