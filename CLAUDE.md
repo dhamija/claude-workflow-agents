@@ -54,7 +54,7 @@ claude-workflow-agents/
 │   ├── ci-cd-engineer.md      # Setup: CI/CD for user projects
 │   └── project-maintainer.md  # Setup: Sync project state & docs
 │
-├── commands/                  # 23 optional commands
+├── commands/                  # 25 optional commands
 │   ├── agent-wf-help.md       # Comprehensive help system
 │   ├── analyze.md             # Run L1 analysis agents
 │   ├── audit.md               # Audit existing codebase
@@ -175,7 +175,7 @@ claude-workflow-agents/
 - **ci-cd-engineer** - Set up CI/CD in user projects
 - **project-maintainer** - Keep user project docs and state in sync
 
-### Commands: 23 total
+### Commands: 25 total
 
 | Command | Purpose |
 |---------|---------|
@@ -440,11 +440,14 @@ After changes, verify CLAUDE.md is accurate:
 ### Quick Commands
 
 ```bash
+# Check for documentation gaps and update counts (RECOMMENDED)
+./scripts/update-system-docs.sh
+
+# Or just update counts only
+./scripts/update-claude-md.sh
+
 # Verify everything is in sync
 ./scripts/verify-sync.sh
-
-# Auto-update CLAUDE.md counts
-./scripts/update-claude-md.sh
 
 # Run all tests
 ./tests/run_all_tests.sh
@@ -452,6 +455,9 @@ After changes, verify CLAUDE.md is accurate:
 # Install git hooks (enforces sync on commit)
 ./scripts/install-dev-hooks.sh
 ```
+
+**Recommended:** Run `./scripts/update-system-docs.sh` after adding agents/commands.
+It detects undocumented items and reminds you to update README.md, COMMANDS.md, etc.
 
 ---
 
@@ -514,7 +520,7 @@ vim tests/structural/test_commands_exist.sh
 #    - Add to REQUIRED_COMMANDS array
 
 # 6. Verify and commit
-./scripts/verify-sync.sh
+./scripts/update-system-docs.sh  # Checks for missing docs
 ./tests/run_all_tests.sh
 git add -A
 git commit -m "feat: add /new-command for X"
