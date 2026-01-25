@@ -26,6 +26,9 @@ This document provides detailed information about each workflow command.
   - [/aa-audit](#aa-audit)
 - [Design Commands](#design-commands)
   - [/design](#design)
+- [Enhancement Commands](#enhancement-commands)
+  - [/mcp](#mcp)
+  - [/llm](#llm)
 - [Quality Commands](#quality-commands)
   - [/review](#review)
   - [/debug](#debug)
@@ -889,6 +892,210 @@ Manages `/docs/ux/design-system.md` containing complete visual specifications:
 - Prevents arbitrary color/font/spacing choices
 - Makes design changes systematic (update once, applies everywhere)
 - Built-in accessibility (WCAG compliance)
+
+---
+
+## Enhancement Commands
+
+Commands for integrating external capabilities and advanced features.
+
+### /mcp
+
+**Purpose:** Manage MCP (Model Context Protocol) server integration
+
+**Usage:**
+```bash
+/mcp                          # Show recommendations (same as /mcp recommend)
+/mcp recommend                # Analyze project and recommend MCP servers
+/mcp setup <servers...>       # Generate configuration for specified servers
+/mcp status                   # Check MCP server availability
+/mcp guide                    # Show usage guide
+```
+
+**What it does:**
+
+MCP servers extend Claude's capabilities by connecting to external tools like databases, GitHub, browsers, and collaboration platforms.
+
+**Modes:**
+
+**Recommend Mode** (`/mcp` or `/mcp recommend`):
+- Analyzes project tech stack (package.json, requirements.txt, etc.)
+- Recommends appropriate MCP servers by priority (HIGH/MEDIUM/LOW)
+- Explains why each server would be useful for your project
+- Provides quick setup command
+
+**Setup Mode** (`/mcp setup <servers...>`):
+```bash
+/mcp setup postgres github puppeteer
+```
+- Generates ready-to-use configuration JSON
+- Shows where to add it (Claude desktop config file)
+- Lists required environment variables and tokens
+- Provides step-by-step setup instructions
+- Includes security best practices
+
+**Status Mode** (`/mcp status`):
+- Shows which MCP servers are configured
+- Indicates connection status (✓ Connected, ⚠ Failed, ○ Not configured)
+- Lists available but not configured servers
+- Provides troubleshooting hints for failed connections
+
+**Guide Mode** (`/mcp guide`):
+- Comprehensive MCP documentation
+- Popular servers by category (database, development, collaboration, infrastructure)
+- Usage examples for each server type
+- Configuration file format
+- Security best practices
+- Troubleshooting common issues
+
+**Popular MCP Servers:**
+
+| Server | Purpose | When to Use |
+|--------|---------|-------------|
+| **postgres** | PostgreSQL database access | Direct queries, debugging, migrations |
+| **sqlite** | SQLite database access | Local database testing |
+| **github** | GitHub automation | PR creation, issue management |
+| **puppeteer** | Browser automation | E2E testing, visual debugging |
+| **memory** | Persistent context | Remember decisions across sessions |
+| **fetch** | HTTP requests | API testing |
+| **slack** | Team notifications | Team collaboration |
+| **linear** | Issue tracking | Project management |
+| **docker** | Container management | DevOps workflows |
+
+**Example Workflows:**
+
+**Database Development:**
+```
+User: Query the users table
+
+Claude (with postgres MCP):
+  SELECT * FROM users LIMIT 5;
+
+  Found 1,234 users. Here's a sample:
+  id | email            | created_at
+  ---|------------------|------------
+  1  | alice@example.com| 2024-01-15
+  ...
+```
+
+**PR Automation:**
+```
+User: Create a PR for the auth feature
+
+Claude (with github MCP):
+  ✓ Created branch: feature/auth
+  ✓ Committed changes (5 files)
+  ✓ Created PR #42: "Add user authentication"
+  ✓ Added reviewers: @alice, @bob
+
+  PR: https://github.com/myorg/myrepo/pull/42
+```
+
+**E2E Testing:**
+```
+User: Test the login flow
+
+Claude (with puppeteer MCP):
+  Opening browser to http://localhost:3000/login
+
+  1. Filled email: test@example.com ✓
+  2. Filled password ✓
+  3. Clicked "Sign In" ✓
+  4. Verified redirect to /dashboard ✓
+  5. Took screenshot: screenshot-1.png ✓
+
+  ✅ Login flow works correctly
+```
+
+**When to use:**
+- **Planning phase:** After `/plan`, setup recommended servers
+- **Implementation:** Use MCP for faster debugging (database queries, browser testing)
+- **Testing:** Interactive E2E testing with puppeteer, direct database verification
+- **Collaboration:** Automate PRs, update team tools
+
+**Integration with Workflow:**
+
+The **implementation-planner** automatically recommends MCP servers based on your project:
+- PostgreSQL project → Recommends `postgres` MCP (HIGH priority)
+- E2E tests planned → Recommends `puppeteer` MCP (MEDIUM priority)
+- GitHub repository → Recommends `github` MCP (HIGH priority)
+
+The **test-engineer** can leverage MCP for interactive testing:
+- Use `puppeteer` MCP to debug E2E tests interactively
+- Use `postgres` MCP to verify database state directly
+- 10x faster debugging with real-time browser/database access
+
+**Configuration Location:**
+
+```
+macOS:   ~/Library/Application Support/Claude/claude_desktop_config.json
+Windows: %APPDATA%\Claude\claude_desktop_config.json
+```
+
+**Example Configuration:**
+```json
+{
+  "mcpServers": {
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "DATABASE_URL": "postgresql://user:pass@localhost:5432/db"
+      }
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "ghp_..."
+      }
+    }
+  }
+}
+```
+
+**Related:**
+- Commands: `/plan` (suggests MCP servers)
+- Files: `/docs/architecture/mcp-integration.md` (complete guide)
+- Help: `/agent-wf-help mcp`
+
+---
+
+### /llm
+
+**Purpose:** Manage LLM provider integration for AI-powered features
+
+**Usage:**
+```bash
+/llm                          # Show current configuration
+/llm setup                    # Interactive setup wizard
+/llm providers                # List available providers
+```
+
+**What it does:**
+
+Configures LLM integration for projects that need AI capabilities (chatbots, content generation, analysis, etc.).
+
+**Providers Supported:**
+- **Ollama** (local models) - Free, private, no API keys
+- **OpenAI** (GPT-4, GPT-3.5) - Commercial API, requires API key
+- **Anthropic** (Claude) - Commercial API, requires API key
+
+**Dual Provider Pattern:**
+
+The system recommends a **dual provider architecture**:
+1. **Primary:** Ollama (local) for development and cost savings
+2. **Fallback:** OpenAI/Anthropic for production or when local unavailable
+
+**When to use:**
+- Building chatbots or conversational interfaces
+- Need AI-powered content generation
+- Implementing semantic search or embeddings
+- Adding AI analysis to existing features
+
+**Related:**
+- Files: `BACKEND.md` (complete LLM integration guide)
+- Templates: `templates/src/lib/llm/` (code templates)
 
 ---
 

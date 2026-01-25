@@ -326,6 +326,15 @@ Claude: [Fixes only security-related gaps]
 | `/parallel merge` | Merge completed features | `/parallel merge` |
 | `/parallel clean` | Remove merged worktrees | `/parallel clean` |
 
+### Enhancement
+
+| Command | Purpose |
+|---------|---------|
+| `/mcp recommend` | Get MCP server recommendations for your project |
+| `/mcp setup <servers...>` | Generate MCP configuration |
+| `/design create` | Set up design system for UI consistency |
+| `/llm setup` | Configure LLM providers for AI features |
+
 ### Help
 
 | Command | Purpose |
@@ -336,6 +345,8 @@ Claude: [Fixes only security-related gaps]
 | `/agent-wf-help commands` | All commands |
 | `/agent-wf-help patterns` | Usage patterns |
 | `/agent-wf-help design` | Design system & UI consistency |
+| `/agent-wf-help mcp` | MCP servers for enhanced development |
+| `/agent-wf-help llm` | LLM integration & AI components |
 | `/agent-wf-help parallel` | Parallel development |
 | `/agent-wf-help brownfield` | Existing codebases |
 | `/agent-wf-help sync` | Project state & maintenance |
