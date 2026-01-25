@@ -24,6 +24,8 @@ This document provides detailed information about each workflow command.
   - [/ux-audit](#ux-audit)
   - [/aa](#aa)
   - [/aa-audit](#aa-audit)
+- [Design Commands](#design-commands)
+  - [/design](#design)
 - [Quality Commands](#quality-commands)
   - [/review](#review)
   - [/debug](#debug)
@@ -814,6 +816,79 @@ Uses **agentic-architect** to:
 - Looking to add AI capabilities
 - Want to replace brittle rules
 - Exploring agent migration
+
+---
+
+## Design Commands
+
+Commands for managing design systems and visual consistency.
+
+### /design
+
+**Purpose:** Manage design system for visual consistency
+
+**Usage:**
+```bash
+/design show                  # Display current design system
+/design update                # Interactively update design system
+/design preset <name>         # Apply a design preset
+/design reference <url>       # Analyze a website and create design system
+```
+
+**What it does:**
+Manages `/docs/ux/design-system.md` containing complete visual specifications:
+- Colors (primary, secondary, neutral, semantic, dark mode)
+- Typography (fonts, sizes, weights)
+- Spacing & layout (scale, max-widths, grid, border radius, shadows)
+- Components (buttons, inputs, cards, modals with CSS/Tailwind specs)
+- Motion & animation (timing, easing, keyframes)
+- Accessibility (contrast ratios, focus states, ARIA patterns)
+- Implementation (Tailwind config, CSS variables)
+
+**Available Presets:**
+- `modern-clean` - Professional SaaS style (blue, clean, trustworthy)
+- `minimal` - Ultra-clean, content-focused (black/white, typography)
+- `playful` - Vibrant, fun, energetic (purple/pink gradients, animations)
+- `corporate` - Enterprise-grade, formal (dark blue, professional)
+- `glassmorphism` - Modern glass effects with transparency
+
+**Output:**
+- Creates or updates `/docs/ux/design-system.md`
+- Provides Tailwind configuration code
+- Provides CSS variables definitions
+- Component library bootstrap guide
+
+**Examples:**
+```bash
+# Quick start with preset
+/design preset modern-clean
+
+# Match competitor's style
+/design reference https://linear.app
+
+# Update brand colors
+/design update
+
+# View current design
+/design show
+```
+
+**When to use:**
+- During UX phase (usually auto-created by ux-architect)
+- Before frontend implementation
+- When changing brand colors/fonts
+- When starting component library
+
+**Integration:**
+- **ux-architect** asks about design preferences and creates initial design system
+- **frontend-engineer** reads design system FIRST before implementing any UI
+- All components must follow design system strictly (no arbitrary styling)
+
+**Why it matters:**
+- Ensures consistent UI across entire app
+- Prevents arbitrary color/font/spacing choices
+- Makes design changes systematic (update once, applies everywhere)
+- Built-in accessibility (WCAG compliance)
 
 ---
 

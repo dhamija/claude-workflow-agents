@@ -1,0 +1,634 @@
+# Design System
+
+> Visual design specifications for {{PROJECT_NAME}}
+
+**Last Updated:** {{DATE}}
+**Preset:** {{PRESET_NAME}}
+
+## Table of Contents
+
+- [Design Philosophy](#design-philosophy)
+- [Color Palette](#color-palette)
+- [Typography](#typography)
+- [Spacing & Layout](#spacing--layout)
+- [Components](#components)
+- [Icons & Images](#icons--images)
+- [Motion & Animation](#motion--animation)
+- [Responsive Design](#responsive-design)
+- [Accessibility](#accessibility)
+- [Examples & References](#examples--references)
+- [Implementation](#implementation)
+
+---
+
+## Design Philosophy
+
+### Overall Style
+
+**Preset:** {{PRESET}} (modern | minimal | corporate | playful | brutalist | glassmorphism | custom)
+
+**Description:**
+{{STYLE_DESCRIPTION}}
+
+**Keywords:**
+{{#KEYWORDS}}
+- {{KEYWORD}}
+{{/KEYWORDS}}
+
+### Brand Personality
+
+| Trait | Scale (1-5) | Notes |
+|-------|-------------|-------|
+| Formal ↔ Casual | {{FORMAL_CASUAL}} | {{FORMAL_CASUAL_NOTES}} |
+| Serious ↔ Playful | {{SERIOUS_PLAYFUL}} | {{SERIOUS_PLAYFUL_NOTES}} |
+| Traditional ↔ Modern | {{TRADITIONAL_MODERN}} | {{TRADITIONAL_MODERN_NOTES}} |
+| Simple ↔ Complex | {{SIMPLE_COMPLEX}} | {{SIMPLE_COMPLEX_NOTES}} |
+| Bold ↔ Subtle | {{BOLD_SUBTLE}} | {{BOLD_SUBTLE_NOTES}} |
+
+### Inspirations
+
+{{#INSPIRATIONS}}
+| Site/App | What to Take |
+|----------|--------------|
+| {{SITE}} | {{TAKEAWAY}} |
+{{/INSPIRATIONS}}
+
+---
+
+## Color Palette
+
+### Primary Colors
+
+| Name | Hex | RGB | Usage |
+|------|-----|-----|-------|
+| Primary | {{PRIMARY_HEX}} | {{PRIMARY_RGB}} | Main actions, key UI elements |
+| Primary Light | {{PRIMARY_LIGHT_HEX}} | {{PRIMARY_LIGHT_RGB}} | Hover states, backgrounds |
+| Primary Dark | {{PRIMARY_DARK_HEX}} | {{PRIMARY_DARK_RGB}} | Active states, emphasis |
+
+### Secondary Colors
+
+| Name | Hex | RGB | Usage |
+|------|-----|-----|-------|
+| Secondary | {{SECONDARY_HEX}} | {{SECONDARY_RGB}} | Secondary actions |
+| Accent | {{ACCENT_HEX}} | {{ACCENT_RGB}} | Highlights, special elements |
+
+### Neutral Colors
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| White | #FFFFFF | Backgrounds |
+| Gray 50 | #F9FAFB | Subtle backgrounds |
+| Gray 100 | #F3F4F6 | Borders, dividers |
+| Gray 200 | #E5E7EB | Disabled states |
+| Gray 300 | #D1D5DB | Placeholder text |
+| Gray 400 | #9CA3AF | Secondary text |
+| Gray 500 | #6B7280 | Body text |
+| Gray 600 | #4B5563 | Headings |
+| Gray 700 | #374151 | Primary text |
+| Gray 800 | #1F2937 | High emphasis |
+| Gray 900 | #111827 | Maximum contrast |
+| Black | #000000 | Rarely used |
+
+### Semantic Colors
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| Success | #10B981 | Success states, confirmations |
+| Warning | #F59E0B | Warnings, cautions |
+| Error | #EF4444 | Errors, destructive actions |
+| Info | #3B82F6 | Informational |
+
+{{#DARK_MODE}}
+### Dark Mode
+
+| Element | Light Mode | Dark Mode |
+|---------|------------|-----------|
+| Background | #FFFFFF | #111827 |
+| Surface | #F9FAFB | #1F2937 |
+| Text Primary | #111827 | #F9FAFB |
+| Text Secondary | #6B7280 | #9CA3AF |
+{{/DARK_MODE}}
+
+---
+
+## Typography
+
+### Font Families
+
+| Usage | Font | Fallback |
+|-------|------|----------|
+| Headings | {{HEADING_FONT}} | system-ui, sans-serif |
+| Body | {{BODY_FONT}} | system-ui, sans-serif |
+| Monospace | {{MONO_FONT}} | ui-monospace, monospace |
+
+### Font Sizes
+
+| Name | Size | Line Height | Usage |
+|------|------|-------------|-------|
+| xs | 12px / 0.75rem | 1.5 | Captions, labels |
+| sm | 14px / 0.875rem | 1.5 | Secondary text |
+| base | 16px / 1rem | 1.5 | Body text |
+| lg | 18px / 1.125rem | 1.5 | Large body |
+| xl | 20px / 1.25rem | 1.4 | H4, small titles |
+| 2xl | 24px / 1.5rem | 1.3 | H3 |
+| 3xl | 30px / 1.875rem | 1.3 | H2 |
+| 4xl | 36px / 2.25rem | 1.2 | H1 |
+| 5xl | 48px / 3rem | 1.1 | Display |
+
+### Font Weights
+
+| Name | Weight | Usage |
+|------|--------|-------|
+| Light | 300 | Decorative only |
+| Normal | 400 | Body text |
+| Medium | 500 | Emphasis |
+| Semibold | 600 | Subheadings |
+| Bold | 700 | Headings |
+
+### Text Styles
+```css
+/* Heading 1 */
+.h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+/* Heading 2 */
+.h2 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Body */
+.body {
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* Small */
+.small {
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+```
+
+---
+
+## Spacing & Layout
+
+### Spacing Scale
+
+| Name | Size | Usage |
+|------|------|-------|
+| 0 | 0 | None |
+| 1 | 4px / 0.25rem | Tight spacing |
+| 2 | 8px / 0.5rem | Related elements |
+| 3 | 12px / 0.75rem | Standard gap |
+| 4 | 16px / 1rem | Section padding |
+| 5 | 20px / 1.25rem | Component padding |
+| 6 | 24px / 1.5rem | Card padding |
+| 8 | 32px / 2rem | Section margins |
+| 10 | 40px / 2.5rem | Large gaps |
+| 12 | 48px / 3rem | Page sections |
+| 16 | 64px / 4rem | Major sections |
+
+### Layout
+
+| Property | Value |
+|----------|-------|
+| Max content width | {{MAX_WIDTH}} |
+| Content padding | {{MOBILE_PADDING}} (mobile), {{TABLET_PADDING}} (tablet), {{DESKTOP_PADDING}} (desktop) |
+| Grid columns | 12 |
+| Grid gap | 24px |
+
+### Border Radius
+
+| Name | Size | Usage |
+|------|------|-------|
+| none | 0 | Sharp corners |
+| sm | {{RADIUS_SM}} | Subtle rounding |
+| md | {{RADIUS_MD}} | Standard (buttons, inputs) |
+| lg | {{RADIUS_LG}} | Cards |
+| xl | {{RADIUS_XL}} | Large cards, modals |
+| 2xl | {{RADIUS_2XL}} | Feature sections |
+| full | 9999px | Pills, avatars |
+
+### Shadows
+
+| Name | Value | Usage |
+|------|-------|-------|
+| sm | {{SHADOW_SM}} | Subtle depth |
+| md | {{SHADOW_MD}} | Cards |
+| lg | {{SHADOW_LG}} | Dropdowns, modals |
+| xl | {{SHADOW_XL}} | Elevated elements |
+
+---
+
+## Components
+
+### Buttons
+
+#### Primary Button
+```css
+.btn-primary {
+  background: var(--color-primary);
+  color: white;
+  padding: 12px 24px;
+  border-radius: {{BUTTON_RADIUS}};
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-primary:hover {
+  background: var(--color-primary-dark);
+  transform: translateY(-1px);
+}
+```
+
+**States:**
+| State | Style |
+|-------|-------|
+| Default | Primary color, white text |
+| Hover | Darker, slight lift |
+| Active | Darker, no lift |
+| Disabled | 50% opacity, no hover |
+| Loading | Spinner, disabled |
+
+#### Button Sizes
+| Size | Padding | Font Size |
+|------|---------|-----------|
+| sm | 8px 16px | 14px |
+| md | 12px 24px | 16px |
+| lg | 16px 32px | 18px |
+
+### Inputs
+```css
+.input {
+  padding: 12px 16px;
+  border: 1px solid var(--gray-300);
+  border-radius: {{INPUT_RADIUS}};
+  font-size: 16px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+  outline: none;
+}
+.input:invalid {
+  border-color: var(--color-error);
+}
+```
+
+**States:**
+| State | Style |
+|-------|-------|
+| Default | Gray border |
+| Focus | Primary border + ring |
+| Error | Red border |
+| Disabled | Gray background |
+
+### Cards
+```css
+.card {
+  background: white;
+  border-radius: {{CARD_RADIUS}};
+  padding: 24px;
+  box-shadow: {{CARD_SHADOW}};
+}
+.card-hover:hover {
+  box-shadow: {{CARD_HOVER_SHADOW}};
+  transform: translateY(-2px);
+}
+```
+
+### Navigation
+
+| Element | Style |
+|---------|-------|
+| Nav height | 64px |
+| Nav background | White / Blur |
+| Nav shadow | sm |
+| Active link | Primary color, bold |
+| Mobile menu | Slide from right |
+
+### Tables
+
+| Element | Style |
+|---------|-------|
+| Header bg | Gray 50 |
+| Header text | Gray 700, semibold |
+| Row border | Gray 200 |
+| Row hover | Gray 50 |
+| Cell padding | 12px 16px |
+
+### Forms
+
+| Element | Style |
+|---------|-------|
+| Label | Gray 700, semibold, mb-2 |
+| Help text | Gray 500, sm, mt-1 |
+| Error text | Error color, sm, mt-1 |
+| Field gap | 24px |
+
+### Modals
+
+| Property | Value |
+|----------|-------|
+| Overlay | Black 50% opacity |
+| Background | White |
+| Border radius | {{MODAL_RADIUS}} |
+| Max width | 500px |
+| Padding | 24px |
+| Shadow | xl |
+
+### Alerts/Toasts
+
+| Type | Background | Border | Icon |
+|------|------------|--------|------|
+| Success | Green 50 | Green 500 | Check |
+| Warning | Yellow 50 | Yellow 500 | Warning |
+| Error | Red 50 | Red 500 | X |
+| Info | Blue 50 | Blue 500 | Info |
+
+---
+
+## Icons & Images
+
+### Icon System
+
+**Library:** {{ICON_LIBRARY}}
+
+**Sizes:**
+| Name | Size | Usage |
+|------|------|-------|
+| xs | 12px | Inline |
+| sm | 16px | Buttons |
+| md | 20px | Default |
+| lg | 24px | Emphasis |
+| xl | 32px | Features |
+
+**Style:** {{ICON_STYLE}}
+
+### Images
+
+| Type | Aspect Ratio | Treatment |
+|------|--------------|-----------|
+| Hero | 16:9 | Full width |
+| Thumbnail | 1:1 | Rounded corners |
+| Avatar | 1:1 | Circular |
+| Card image | 4:3 | Top of card |
+
+{{#ILLUSTRATIONS}}
+### Illustrations
+
+**Style:** {{ILLUSTRATION_STYLE}}
+**Source:** {{ILLUSTRATION_SOURCE}}
+{{/ILLUSTRATIONS}}
+
+---
+
+## Motion & Animation
+
+### Timing
+
+| Name | Duration | Easing | Usage |
+|------|----------|--------|-------|
+| Fast | 150ms | ease-out | Hovers, small changes |
+| Normal | 200ms | ease-in-out | Transitions |
+| Slow | 300ms | ease-in-out | Modals, large changes |
+| Slower | 500ms | ease-in-out | Page transitions |
+
+### Common Animations
+```css
+/* Fade in */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Slide up */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scale in */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+```
+
+### Micro-interactions
+
+| Element | Animation |
+|---------|-----------|
+| Button hover | {{BUTTON_HOVER_ANIMATION}} |
+| Button click | Scale down (0.98) |
+| Card hover | {{CARD_HOVER_ANIMATION}} |
+| Link hover | Color transition |
+| Input focus | Border color + ring |
+| Checkbox | Scale bounce |
+
+---
+
+## Responsive Design
+
+### Breakpoints
+
+| Name | Size | Target |
+|------|------|--------|
+| sm | 640px | Large phones |
+| md | 768px | Tablets |
+| lg | 1024px | Laptops |
+| xl | 1280px | Desktops |
+| 2xl | 1536px | Large screens |
+
+### Mobile-First Approach
+```css
+/* Mobile (default) */
+.element { padding: 16px; }
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .element { padding: 24px; }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .element { padding: 32px; }
+}
+```
+
+### Responsive Patterns
+
+| Pattern | Mobile | Tablet | Desktop |
+|---------|--------|--------|---------|
+| Navigation | Hamburger | Hamburger | Full nav |
+| Grid | 1 column | 2 columns | 3-4 columns |
+| Sidebar | Hidden/drawer | Hidden/drawer | Visible |
+| Font size | Base | Base | Slightly larger |
+
+---
+
+## Accessibility
+
+### Color Contrast
+
+- Normal text: 4.5:1 minimum
+- Large text: 3:1 minimum
+- UI components: 3:1 minimum
+
+### Focus States
+
+All interactive elements must have visible focus:
+```css
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+```
+
+### ARIA Patterns
+
+| Component | ARIA Role | Notes |
+|-----------|-----------|-------|
+| Modal | dialog | With aria-labelledby |
+| Navigation | navigation | With aria-label |
+| Main content | main | One per page |
+| Alert | alert | For important messages |
+| Tab panel | tabpanel | With aria-labelledby |
+
+### Keyboard Navigation
+
+- Tab order follows visual order
+- All interactive elements keyboard accessible
+- Skip links for main content
+- Escape closes modals/dropdowns
+
+---
+
+## Examples & References
+
+{{#REFERENCES}}
+### Reference Sites
+
+| Site | What to Reference |
+|------|-------------------|
+| {{URL}} | {{REFERENCE_NOTES}} |
+{{/REFERENCES}}
+
+{{#MOODBOARD}}
+### Moodboard
+
+{{MOODBOARD_LINKS}}
+{{/MOODBOARD}}
+
+### DO's
+
+{{#DOS}}
+- ✅ {{DO}}
+{{/DOS}}
+
+### DON'Ts
+
+{{#DONTS}}
+- ❌ {{DONT}}
+{{/DONTS}}
+
+---
+
+## Implementation
+
+### Tailwind CSS Config
+```javascript
+// tailwind.config.js
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          DEFAULT: '{{PRIMARY_HEX}}',
+          light: '{{PRIMARY_LIGHT_HEX}}',
+          dark: '{{PRIMARY_DARK_HEX}}',
+        },
+        secondary: '{{SECONDARY_HEX}}',
+        accent: '{{ACCENT_HEX}}',
+      },
+      fontFamily: {
+        sans: ['{{BODY_FONT}}', 'system-ui', 'sans-serif'],
+        heading: ['{{HEADING_FONT}}', 'system-ui', 'sans-serif'],
+      },
+      borderRadius: {
+        'card': '{{CARD_RADIUS}}',
+        'button': '{{BUTTON_RADIUS}}',
+      },
+      boxShadow: {
+        'card': '{{CARD_SHADOW}}',
+      },
+    },
+  },
+}
+```
+
+### CSS Variables
+```css
+:root {
+  /* Colors */
+  --color-primary: {{PRIMARY_HEX}};
+  --color-primary-light: {{PRIMARY_LIGHT_HEX}};
+  --color-primary-dark: {{PRIMARY_DARK_HEX}};
+  --color-secondary: {{SECONDARY_HEX}};
+  --color-accent: {{ACCENT_HEX}};
+
+  /* Typography */
+  --font-sans: '{{BODY_FONT}}', system-ui, sans-serif;
+  --font-heading: '{{HEADING_FONT}}', system-ui, sans-serif;
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+
+  /* Border Radius */
+  --radius-sm: {{RADIUS_SM}};
+  --radius-md: {{RADIUS_MD}};
+  --radius-lg: {{RADIUS_LG}};
+
+  /* Shadows */
+  --shadow-sm: {{SHADOW_SM}};
+  --shadow-md: {{SHADOW_MD}};
+  --shadow-lg: {{SHADOW_LG}};
+}
+```
+
+### Component Library Bootstrap
+
+Create base components that enforce this design system:
+- Button (with all variants and sizes)
+- Input (with all states)
+- Card (with hover effects)
+- Modal (with overlay)
+- Alert (all semantic types)
+
+See `/src/components/ui/` for implementations.

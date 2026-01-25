@@ -54,7 +54,7 @@ claude-workflow-agents/
 │   ├── ci-cd-engineer.md      # Setup: CI/CD for user projects
 │   └── project-maintainer.md  # Setup: Sync project state & docs
 │
-├── commands/                  # 22 optional commands
+├── commands/                  # 23 optional commands
 │   ├── agent-wf-help.md       # Comprehensive help system
 │   ├── analyze.md             # Run L1 analysis agents
 │   ├── audit.md               # Audit existing codebase
@@ -175,7 +175,7 @@ claude-workflow-agents/
 - **ci-cd-engineer** - Set up CI/CD in user projects
 - **project-maintainer** - Keep user project docs and state in sync
 
-### Commands: 22 total
+### Commands: 23 total
 
 | Command | Purpose |
 |---------|---------|

@@ -66,6 +66,7 @@ Just talk naturally. Claude handles the rest.
 │   /agent-wf-help agents      - All 14 specialized agents        │
 │   /agent-wf-help docs        - Documentation management         │
 │   /agent-wf-help commands    - Available commands               │
+│   /agent-wf-help design      - Design system & visual styling   │
 │   /agent-wf-help patterns    - Development patterns & examples  │
 │   /agent-wf-help parallel    - Parallel development guide       │
 │   /agent-wf-help brownfield  - Improving existing code          │
@@ -1379,7 +1380,298 @@ Available topics:
   /agent-wf-help cicd         - CI/CD validation setup
   /agent-wf-help sync         - Project state & maintenance
   /agent-wf-help docs         - Documentation management
+  /agent-wf-help design       - Design system & visual styling
   /agent-wf-help examples     - Practical examples
 
 Or just ask me what you want to know!
+```
+
+### If topic = "design":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║               DESIGN SYSTEM & VISUAL CONSISTENCY                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Ensure visual consistency across your entire UI with design systems.
+
+
+WHAT IS A DESIGN SYSTEM?
+────────────────────────
+
+  A complete visual specification that defines:
+  • Colors (primary, secondary, neutral, semantic)
+  • Typography (fonts, sizes, weights)
+  • Spacing & layout (margins, padding, grid)
+  • Components (buttons, inputs, cards, modals)
+  • Motion & animation (transitions, timing)
+  • Accessibility (contrast, focus states, ARIA)
+  • Implementation (Tailwind config, CSS variables)
+
+  It's the single source of truth for ALL visual design decisions.
+  Frontend engineer MUST follow it - no arbitrary colors or styling.
+
+
+THE DESIGN WORKFLOW
+───────────────────
+
+  Step 1: Define Design System (during UX phase)
+
+    UX architect asks about design preferences:
+    • "Do you have existing brand guidelines?"
+    • "What style do you prefer?" (shows presets)
+    • "Any reference sites you like?"
+
+    Creates: /docs/ux/design-system.md
+
+  Step 2: Bootstrap Component Library (before building)
+
+    Frontend engineer:
+    • Reads design system
+    • Sets up Tailwind config OR CSS variables
+    • Creates base components (Button, Input, Card, etc.)
+    • All components use design system values ONLY
+
+  Step 3: Build Features (following design system)
+
+    Every component/page:
+    • Uses colors from design system
+    • Uses typography from design system
+    • Uses spacing from design system
+    • Never arbitrary styling decisions
+
+
+USING THE /design COMMAND
+──────────────────────────
+
+  View current design system:
+    /design show
+
+  Apply a preset (quick start):
+    /design preset modern-clean     - Professional SaaS style
+    /design preset minimal          - Ultra-clean, content-focused
+    /design preset playful          - Vibrant, fun, energetic
+    /design preset corporate        - Enterprise, formal
+    /design preset glassmorphism    - Modern glass effects
+
+  Match a reference site:
+    /design reference https://linear.app
+    /design reference https://notion.so
+
+  Update design system:
+    /design update
+
+
+AVAILABLE PRESETS
+─────────────────
+
+  ┌────────────────┬─────────────────────────────────────────────┐
+  │ modern-clean   │ Blue primary, clean, professional           │
+  │                │ Best for: SaaS, business apps, dashboards   │
+  ├────────────────┼─────────────────────────────────────────────┤
+  │ minimal        │ Black/white, typography-focused             │
+  │                │ Best for: Blogs, docs, reading apps         │
+  ├────────────────┼─────────────────────────────────────────────┤
+  │ playful        │ Purple/pink gradients, vibrant, animated    │
+  │                │ Best for: Consumer apps, gaming, creative   │
+  ├────────────────┼─────────────────────────────────────────────┤
+  │ corporate      │ Dark blue, formal, enterprise-grade         │
+  │                │ Best for: B2B, financial, legal tech        │
+  ├────────────────┼─────────────────────────────────────────────┤
+  │ glassmorphism  │ Frosted glass, transparency, depth          │
+  │                │ Best for: Modern apps, portfolios, premium  │
+  └────────────────┴─────────────────────────────────────────────┘
+
+
+DESIGN SYSTEM STRUCTURE
+────────────────────────
+
+  /docs/ux/design-system.md contains:
+
+  1. Color Palette
+     - Primary (default, light, dark variants)
+     - Secondary & accent colors
+     - Neutral scale (grays)
+     - Semantic (success, warning, error, info)
+     - Dark mode support
+
+  2. Typography
+     - Font families (heading, body, monospace)
+     - Font sizes (xs through 5xl)
+     - Font weights (regular through bold)
+     - Line heights & text styles
+
+  3. Spacing & Layout
+     - Spacing scale (0-16 in rem)
+     - Max widths, grid system
+     - Border radius scale
+     - Shadow definitions
+
+  4. Components
+     - Buttons (primary, secondary, variants)
+     - Inputs, forms, validation states
+     - Cards, modals, navigation
+     - Badges, alerts, tables
+     - All with complete CSS/Tailwind specs
+
+  5. Motion & Animation
+     - Transition durations
+     - Easing functions
+     - Hover/focus/active states
+     - Keyframe animations
+
+  6. Accessibility
+     - WCAG color contrast ratios
+     - Focus state specifications
+     - ARIA patterns
+     - Keyboard navigation
+
+  7. Implementation
+     - Tailwind configuration code
+     - CSS variables definitions
+     - Component library bootstrap guide
+
+
+FRONTEND ENGINEER RULES
+────────────────────────
+
+  ✓ ALWAYS read /docs/ux/design-system.md FIRST
+  ✓ Use ONLY colors from design system
+  ✓ Use ONLY fonts from design system
+  ✓ Use ONLY spacing from design system
+  ✓ Follow component specs exactly
+
+  ✗ NEVER use arbitrary hex codes (#3b82f6)
+  ✗ NEVER use custom fonts not specified
+  ✗ NEVER use arbitrary spacing (padding: 17px)
+  ✗ NEVER create component styles without design system spec
+
+  If using Tailwind:
+  → Configure from design system Tailwind config section
+  → Use only configured values, never arbitrary
+
+  If using vanilla CSS:
+  → Copy CSS variables from design system
+  → Reference variables in all components
+
+
+EXAMPLE: APPLYING A PRESET
+───────────────────────────
+
+  Starting a new SaaS app:
+
+    You: "Build me a project management app"
+
+    Claude (via ux-architect):
+      "What design style do you prefer?
+       1. modern-clean (professional SaaS)
+       2. minimal (content-focused)
+       3. playful (vibrant, fun)
+       4. corporate (enterprise)
+       5. glassmorphism (modern, premium)
+       6. Reference another site
+       7. Custom specifications"
+
+    You: "1"
+
+    Claude:
+      ✓ Applied modern-clean preset
+      ✓ Created /docs/ux/design-system.md
+        Primary: #2563eb (Blue)
+        Typography: Inter font
+        Style: Clean, professional, trustworthy
+
+    Later, frontend-engineer:
+      1. Reads /docs/ux/design-system.md
+      2. Sets up Tailwind config with design system colors
+      3. Creates Button component using design system specs
+      4. All UI automatically consistent
+
+
+EXAMPLE: UPDATING DESIGN
+─────────────────────────
+
+  Changing brand color:
+
+    You: "/design update"
+
+    Claude: "What would you like to update?"
+            1. Colors
+            2. Typography
+            ...
+
+    You: "1"
+
+    Claude: "Current primary: #2563eb
+             New primary color:"
+
+    You: "#7c3aed"
+
+    Claude: ✓ Updated primary to #7c3aed (purple)
+            ✓ Updated primary-light to #a78bfa
+            ✓ Updated primary-dark to #5b21b6
+            ✓ Updated Tailwind config
+            ✓ Updated CSS variables
+
+            ⚠ This affects existing components.
+              Rebuild component library to apply changes.
+
+
+WHY DESIGN SYSTEMS MATTER
+──────────────────────────
+
+  Without design system:
+  ✗ Frontend engineer makes arbitrary color choices
+  ✗ Buttons look different across pages
+  ✗ Inconsistent spacing everywhere
+  ✗ Hard to change colors/fonts later
+  ✗ Accessibility not guaranteed
+
+  With design system:
+  ✓ All visual decisions documented upfront
+  ✓ Frontend follows spec strictly
+  ✓ Consistent UI across entire app
+  ✓ Easy to update (change once, applies everywhere)
+  ✓ Accessibility built-in (WCAG compliance)
+
+
+FILES CREATED
+─────────────
+
+  /docs/ux/design-system.md        - Complete visual specification
+  tailwind.config.js               - Tailwind configuration
+  styles/variables.css             - CSS variables (if not using Tailwind)
+
+
+COMMON WORKFLOWS
+────────────────
+
+  Quick start with preset:
+    /design preset modern-clean
+
+  Match competitor's style:
+    /design reference https://linear.app
+
+  Custom brand colors:
+    /design update
+    → Colors → Primary → #your-hex
+
+  View current design:
+    /design show
+
+
+RELATED COMMANDS
+────────────────
+
+  /ux                - Creates user journeys AND design system
+  /implement         - Frontend uses design system for implementation
+  /review            - Code review can check design system compliance
+
+
+MORE INFORMATION
+────────────────
+
+  See: /design command documentation
+  Location: commands/design.md
+  Templates: templates/docs/ux/presets/
 ```

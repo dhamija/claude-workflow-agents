@@ -488,7 +488,8 @@ Agents create and read from `/docs` and root-level documentation:
     ├── intent/
     │   └── product-intent.md          # Created by intent-guardian
     ├── ux/
-    │   └── user-journeys.md           # Created by ux-architect
+    │   ├── user-journeys.md           # Created by ux-architect
+    │   └── design-system.md           # Created by ux-architect (visual specs)
     ├── architecture/
     │   ├── README.md                  # Created by agentic-architect (comprehensive)
     │   ├── agent-design.md            # Created by agentic-architect (agent-specific)
@@ -537,6 +538,45 @@ Agents create and read from `/docs` and root-level documentation:
 **Before Release:**
 - Run `/docs verify` to ensure all features are documented
 - Complete FAQ, troubleshooting, and examples
+
+### Design System Workflow
+
+**During UX Phase (Auto-Trigger):**
+1. **ux-architect** asks about design preferences during user journey design
+2. Creates `/docs/ux/design-system.md` with complete visual specifications:
+   - Colors (primary, secondary, neutral, semantic, dark mode)
+   - Typography (fonts, sizes, weights, line heights)
+   - Spacing & layout (scale, max-widths, grid, border radius, shadows)
+   - Components (buttons, inputs, cards, modals with CSS/Tailwind specs)
+   - Motion & animation (timing, easing, keyframes)
+   - Accessibility (contrast ratios, focus states, ARIA patterns)
+   - Implementation (Tailwind config, CSS variables)
+
+**Options for creating design system:**
+- **Apply preset**: Choose from modern-clean, minimal, playful, corporate, glassmorphism
+- **Reference site**: Analyze a website and extract design patterns
+- **Custom**: Specify brand colors, fonts, and preferences
+- **Default**: modern-clean if no preference given
+
+**Before Frontend Implementation:**
+1. **frontend-engineer** reads `/docs/ux/design-system.md` FIRST
+2. Sets up Tailwind config OR CSS variables from design system
+3. Creates base component library (Button, Input, Card, etc.)
+4. All components use design system values ONLY - no arbitrary styling
+
+**Managing Design System:**
+- View: `/design show`
+- Update: `/design update`
+- Apply preset: `/design preset modern-clean`
+- Reference site: `/design reference https://example.com`
+
+**Frontend Engineer Rules:**
+- ✓ ALWAYS read design-system.md before coding
+- ✓ Use ONLY colors from design system
+- ✓ Use ONLY fonts from design system
+- ✓ Use ONLY spacing from design system
+- ✗ NEVER use arbitrary hex codes or custom fonts
+- ✗ NEVER create component styles without design system spec
 
 ---
 
