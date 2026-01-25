@@ -19,9 +19,8 @@ This document provides detailed information about each specialized agent in the 
 - [Quality Agents](#quality-agents)
   - [code-reviewer](#code-reviewer)
   - [debugger](#debugger)
-- [Setup & Maintenance Agents](#setup--maintenance-agents)
-  - [ci-cd-engineer](#ci-cd-engineer)
-  - [project-maintainer](#project-maintainer)
+- [Operations Agent](#operations-agent)
+  - [project-ops](#project-ops)
 
 ---
 
@@ -242,59 +241,6 @@ This document provides detailed information about each specialized agent in the 
 - Risk/blast radius
 - Dependencies
 - Effort
-
----
-
-### documentation-engineer
-
-**Purpose:** Create and maintain comprehensive project documentation
-
-**Tools:** Read, Write, Glob, Grep
-
-**When to use:**
-- Automatically after L1 planning completes (creates initial structure)
-- After features are built (to update documentation)
-- Before release (to verify completeness)
-- When user asks for documentation
-
-**What it creates:**
-1. `/USAGE.md` - Complete end-user usage guide
-2. `/README.md` - Project overview and quick start
-3. `/docs/api/README.md` - API documentation
-4. `/docs/guides/developer-guide.md` - Development setup and workflow
-5. `/docs/guides/deployment-guide.md` - Deployment instructions
-
-**Documentation workflow:**
-- **Phase 1 (Auto):** After L1 planning → creates initial structure with skeletons
-- **Phase 2 (Manual):** During feature building → `/docs update` to add implemented features
-- **Phase 3 (Verification):** Before release → `/docs verify` to ensure completeness
-
-**Integration with other agents:**
-- Pulls from intent-guardian: project description, features, promises
-- Pulls from ux-architect: user journeys, personas, flows
-- Pulls from agentic-architect: architecture, components, tech stack
-- Pulls from implementation-planner: feature list, API endpoints, configuration
-
-**Key principles:**
-1. Gets users started quickly - clear quick start
-2. Covers all features - nothing undocumented
-3. Provides examples - real usage for everything
-4. Explains architecture - developers understand system
-5. Stays current - updated as project evolves
-
-**Example invocation:**
-```bash
-/docs verify    # Check documentation completeness
-/docs update    # Update docs from current code
-/docs generate  # Generate all documentation
-```
-
-**Quality checklist:**
-- All implemented features documented with examples
-- All endpoints in API docs with request/response
-- Developer guide has working setup steps
-- Deployment guide has all environment variables
-- README quick start is tested and works
 
 ---
 
@@ -608,126 +554,86 @@ This document provides detailed information about each specialized agent in the 
 
 ---
 
-## Setup & Maintenance Agents
+## Operations Agent
 
-### ci-cd-engineer
+### project-ops
 
-**Purpose:** Set up automated CI/CD validation infrastructure in user projects
+**Purpose:** Consolidated project operations - setup, sync, verification, documentation, and infrastructure
 
 **Tools:** Read, Write, Edit, Bash, Glob, Grep
 
 **When to use:**
-- After L1 planning (intent, UX, architecture docs exist)
-- When user requests "set up CI/CD", "validate", "protect the intent"
-- Before production deployment
-- When working with a team
+- **Setup:** `/project setup` - Initialize project infrastructure (scripts, hooks, CI/CD)
+- **Sync:** `/project sync` - Keep docs and state in sync with code
+- **Verify:** `/project verify` - Check compliance and test coverage
+- **Docs:** `/project docs` - Manage project documentation
+- **AI Integration:** `/project ai` - Set up LLM provider integration
+- **MCP:** `/project mcp` - Configure MCP servers
+- **Status:** `/project status` - Show project health
 
-**What it produces:**
-- `/ci/validate.sh` - Master validation script
-- `/ci/rules.json` - Generated from /docs (auto-updated when docs change)
-- `/ci/validators/` - Intent, UX, architecture, and test validators
-- `.git/hooks/pre-commit` - Quick validation before commit
-- `.git/hooks/pre-push` - Full validation before push
-- `.github/workflows/validate.yml` - GitHub Actions workflow
+**What it provides:**
 
-**How it works:**
-1. Reads /docs/intent/, /docs/ux/, /docs/architecture/
-2. Generates validation rules from promises, journeys, and constraints
-3. Creates validators that check code against those rules
-4. Sets up git hooks and CI/CD workflow
-5. Auto-regenerates rules when docs change
+**1. Infrastructure Setup** (`/project setup`)
+- Creates `/scripts/` directory with validation and sync scripts
+- Sets up `.git/hooks/pre-commit` and `.git/hooks/pre-push`
+- Creates `.github/workflows/validate.yml` for CI/CD
+- Initializes project CLAUDE.md if not exists
+- Sets up test infrastructure
+
+**2. Documentation Sync** (`/project sync`)
+- **CLAUDE.md Current State:** Feature progress, current task, next steps
+- **Doc status markers:** Intent promises, UX journeys, implementation status
+- **Test coverage:** Verify completed features have tests
+- **Session continuity:** Save context for seamless handoff
+
+**Sync modes:**
+- `full` - Complete state update + docs + tests (default)
+- `quick` - CLAUDE.md only
+- `report` - Show status without changes
+
+**3. Compliance Verification** (`/project verify`)
+- Runs all validation scripts
+- Checks promises and invariants
+- Verifies test coverage
+- Reports compliance status
+
+**4. Documentation Management** (`/project docs`)
+- `generate` - Create comprehensive project docs
+- `update` - Refresh docs from code
+- `verify` - Check documentation completeness
+
+**5. AI Integration** (`/project ai`)
+- `setup` - Configure LLM providers (Ollama, OpenAI, Claude)
+- `test` - Verify AI integration
+- Multi-provider support with fallback chains
+- Cost tracking enabled
+
+**6. MCP Server Setup** (`/project mcp`)
+- `setup` - Configure MCP servers
+- `list` - Show available servers
+- Template-based configuration
+
+**Example invocations:**
+```bash
+/project setup                    # Initialize all infrastructure
+/project sync                     # Sync docs and state
+/project sync quick               # Quick state update
+/project verify                   # Check compliance
+/project docs generate            # Create documentation
+/project ai setup                 # Set up LLM integration
+/project status                   # Show project health
+```
+
+**Integration with other agents:**
+- `test-engineer` triggers sync after successful verification
+- `implementation-planner` triggers sync after planning
+- All agents can query status
 
 **Key philosophy:**
-- Every rule traces to a specific promise/journey/constraint
-- Validation is intent-aware, not generic
-- CRITICAL promises block deployment
-- HIGH promises warn
-- MEDIUM/LOW inform
-
-**Example rule:**
-```json
-{
-  "id": "INTENT-001",
-  "severity": "CRITICAL",
-  "promise": "User data never leaves device",
-  "source": "/docs/intent/product-intent.md:12",
-  "pattern": "fetch\\(.*api\\..*sync",
-  "message": "Found network call with user data - breaks privacy promise"
-}
-```
-
-**Opt-in, not mandatory:** Users can decline CI/CD setup.
-
----
-
-### project-maintainer
-
-**Purpose:** Keep project documentation and state in sync with code reality
-
-**Tools:** Read, Edit, Bash, Glob, Grep
-
-**When to use:**
-- **Automatically:** After feature verification (test-engineer triggers)
-- **Automatically:** After L1 planning (implementation-planner triggers)
-- **Manually:** Before ending session (`/sync` or "save state")
-- **Periodically:** Every 3-4 features during long sessions
-
-**What it maintains:**
-1. **Project CLAUDE.md - Current State section:**
-   - Feature progress table (Backend/Frontend/Tests/Overall status)
-   - Current task and next steps
-   - Important context from this session
-   - Test coverage summary
-   - Open questions
-
-2. **Documentation (/docs/) status markers:**
-   - /docs/intent/product-intent.md - `[KEPT]`, `[AT RISK]`, `[BROKEN]`
-   - /docs/ux/user-journeys.md - `[IMPLEMENTED]`, `[PARTIAL]`, `[NOT STARTED]`
-   - /docs/plans/implementation-order.md - Feature completion tracking
-
-3. **Test Coverage Verification:**
-   - Completed features have tests
-   - Journeys have E2E tests
-   - Identify gaps
-
-**Modes:**
-- **Full sync** (`/sync`): Complete state update + docs + test coverage
-- **Quick sync** (`/sync quick`): CLAUDE.md Current State only
-- **Report** (`/sync report`): Show status without making changes
-
-**Session Continuity:**
-Running `/sync` before ending a session saves complete context so next session can resume with "continue".
-
-**Example output:**
-```
-✓ CLAUDE.md updated
-  - Feature progress table refreshed
-  - Current task updated
-  - Session continuity notes added
-
-✓ Documentation synced
-  - product-intent.md: 6/8 promises KEPT
-  - user-journeys.md: 4/6 IMPLEMENTED
-  - implementation-order.md: Updated statuses
-
-✓ Test coverage verified
-  - Completed features: 100% covered
-  - Current feature: Backend tested, frontend pending
-
-Progress: 5/8 features complete
-Current: search frontend (SearchBar component)
-Next: Continue SearchBar, then ResultsList
-```
-
-**Integration:**
-- `test-engineer` auto-triggers after successful verification
-- `implementation-planner` auto-triggers after planning complete
-
-**Key philosophy:**
+- One command for all project operations
 - Documentation reflects reality, not aspirations
 - Session state enables seamless handoff
-- Test coverage tracking prevents technical debt
-- Nothing gets lost between sessions
+- Infrastructure enforces quality automatically
 
 ---
 
@@ -739,11 +645,11 @@ intent-guardian →
 ux-architect →
 agentic-architect →
 implementation-planner →
-  └─> project-maintainer (initial sync) →
+  └─> project-ops (initial sync) →
 backend-engineer + frontend-engineer + test-engineer →
 code-reviewer →
 test-engineer (verify) →
-  └─> project-maintainer (sync after feature)
+  └─> project-ops (sync after feature)
 ```
 
 ### Sequential Flow (Brownfield)
@@ -782,10 +688,9 @@ implementation → code-reviewer → [issues found] → debugger → test-engine
 | test-engineer | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
 | code-reviewer | ✓ | | | | ✓ | ✓ | | |
 | debugger | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
-| ci-cd-engineer | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | |
-| project-maintainer | ✓ | ✓ | | ✓ | ✓ | ✓ | | |
+| project-ops | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | | |
 
 **Analysis agents** (Read-only + Web): Research and design, produce documentation
 **Implementation agents** (Read + Edit + Bash): Write code, run tests
 **Quality agents** (Read + limited Edit): Review and debug
-**Setup & Maintenance agents** (Read + Edit/Write + Bash): Set up infrastructure, maintain state
+**Operations agent** (Read + Edit/Write + Bash): Set up infrastructure, maintain state
