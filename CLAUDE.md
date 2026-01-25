@@ -38,11 +38,12 @@ While keeping the experience conversational.
 ```
 claude-workflow-agents/
 │
-├── agents/                    # 13 specialized agents
+├── agents/                    # 14 specialized agents
 │   ├── intent-guardian.md     # L1: Define promises to users
 │   ├── ux-architect.md        # L1: Design user experience
 │   ├── agentic-architect.md   # L1: Design system architecture
 │   ├── implementation-planner.md  # L1: Create build plans
+│   ├── documentation-engineer.md # L1: Create comprehensive docs
 │   ├── change-analyzer.md     # L1: Assess change impact
 │   ├── gap-analyzer.md        # L1: Find issues in existing code
 │   ├── backend-engineer.md    # L2: Build server-side code
@@ -53,12 +54,13 @@ claude-workflow-agents/
 │   ├── ci-cd-engineer.md      # Setup: CI/CD for user projects
 │   └── project-maintainer.md  # Setup: Sync project state & docs
 │
-├── commands/                  # 21 optional commands
+├── commands/                  # 22 optional commands
 │   ├── agent-wf-help.md       # Comprehensive help system
 │   ├── analyze.md             # Run L1 analysis agents
 │   ├── audit.md               # Audit existing codebase
 │   ├── change.md              # Analyze change impact
 │   ├── debug.md               # Launch debugger
+│   ├── docs.md                # Manage project documentation
 │   ├── gap.md                 # Find gaps in brownfield
 │   ├── implement.md           # Implement from plans
 │   ├── improve.md             # Improve brownfield gaps
@@ -148,7 +150,7 @@ claude-workflow-agents/
 
 ⚠️ **UPDATE THIS SECTION** when adding/removing agents, commands, or features.
 
-### Agents: 13 total
+### Agents: 14 total
 
 **L1 Analysis** (run once at project start):
 - **intent-guardian** - Define promises to users
@@ -173,7 +175,7 @@ claude-workflow-agents/
 - **ci-cd-engineer** - Set up CI/CD in user projects
 - **project-maintainer** - Keep user project docs and state in sync
 
-### Commands: 21 total
+### Commands: 22 total
 
 | Command | Purpose |
 |---------|---------|

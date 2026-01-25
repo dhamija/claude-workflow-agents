@@ -939,6 +939,85 @@ fix(scope): description of bug fixed
 
 Commands for keeping project state and documentation in sync.
 
+### /docs
+
+**Purpose:** Manage project documentation - verify completeness, update, or generate
+
+**Usage:**
+```bash
+/docs              # Check documentation completeness (verify)
+/docs verify       # Same as above
+/docs update       # Update docs from current code
+/docs generate     # Generate all documentation
+/docs status       # Quick status check
+```
+
+**What it does:**
+Uses **documentation-engineer** to:
+
+**Verify mode** (default):
+- Check if USAGE.md has all implemented features
+- Check if API docs have all endpoints
+- Check if architecture docs are current
+- Check if guides are complete
+- Report completeness percentage and gaps
+
+**Update mode:**
+- Scan implemented features
+- Add missing features to USAGE.md with examples
+- Add new endpoints to API docs
+- Update architecture if changed
+- Add troubleshooting items
+
+**Generate mode:**
+- Create complete documentation structure from scratch
+- Populate from intent, UX, architecture docs
+- Create skeletons for unimplemented features
+- Generate API docs from code
+
+**Workflow:**
+1. **After L1 Planning (Auto)** - documentation-engineer automatically creates initial structure
+2. **During L2 Building** - Run `/docs update` to add completed features
+3. **Before Release** - Run `/docs verify` to ensure completeness
+
+**Output example:**
+```
+Documentation Verification
+══════════════════════════
+
+USAGE.md: 95% complete
+  ✓ Overview complete
+  ✓ Getting Started complete
+  ⚠ Features: 4/5 documented
+  ✓ Configuration complete
+  ○ Troubleshooting: 2 issues (needs more)
+
+API Docs: 100% complete
+  ✓ All endpoints documented
+
+Guides: 90% complete
+  ⚠ Deployment guide: Missing monitoring setup
+
+Overall: 92% complete
+
+Missing documentation:
+  - USAGE.md: search feature examples
+  - Deployment guide: monitoring section
+
+Run /docs update to complete missing sections.
+```
+
+**Integration with /sync:**
+The project-maintainer agent (triggered by `/sync`) also checks documentation completeness and will suggest running `/docs verify` if gaps are found.
+
+**When to use:**
+- After implementing features - to update documentation
+- Before release - to verify nothing is undocumented
+- When starting new project - to generate initial structure (auto)
+- When documentation is stale - to regenerate from code
+
+---
+
 ### /sync
 
 **Purpose:** Sync project state, documentation, and test coverage

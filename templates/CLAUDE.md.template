@@ -274,7 +274,13 @@ You have access to these subagents. Use the Task tool to launch them when approp
 - CREATE: Design architecture from scratch
 - AUDIT: Infer architecture, identify agentic opportunities
 - Triggers: "architecture", "system design", "analyze", "audit", "how will it work"
-- Outputs: `/docs/architecture/agent-design.md`
+- Outputs: `/docs/architecture/README.md`, `/docs/architecture/agent-design.md`
+
+**documentation-engineer** - Use to create and maintain comprehensive project documentation
+- AUTO-TRIGGER: After L1 planning completes (creates initial doc structure)
+- Manual: User asks for "usage guide", "README", "API docs", "documentation"
+- Triggers: "document", "usage guide", "README", "how do users", "help docs"
+- Outputs: `/USAGE.md`, `/README.md`, `/docs/api/README.md`, `/docs/guides/`
 
 **gap-analyzer** - Use AFTER L1 audit to analyze gaps between current and ideal state
 - Prerequisites: L1 docs must exist (can be [INFERRED])
@@ -472,37 +478,65 @@ You: I'll investigate and fix this.
 
 ## Documentation Structure
 
-Agents create and read from `/docs`:
+Agents create and read from `/docs` and root-level documentation:
 
 ```
-/docs
-├── intent/
-│   └── product-intent.md          # Created by intent-guardian
-├── ux/
-│   └── user-journeys.md           # Created by ux-architect
-├── architecture/
-│   ├── system-design.md           # Created by agentic-architect
-│   └── agent-topology.md          # Created by agentic-architect
-├── plans/
-│   ├── overview/                  # Full system reference
-│   │   ├── backend-plan.md        # All endpoints, DB, services
-│   │   ├── frontend-plan.md       # All pages, components, state
-│   │   └── test-plan.md           # Test strategy
-│   ├── features/                  # Feature-specific plans (execution)
-│   │   ├── user-authentication.md
-│   │   ├── profile-management.md
-│   │   └── ...
-│   └── implementation-order.md    # Parallel batches and dependencies
-├── verification/
-│   └── phase-N-report.md          # Created by test-engineer
-├── changes/
-│   └── change-[timestamp].md      # Created by change-analyzer
-├── analysis/
-│   ├── gaps-current.md            # Created by gap-analyzer
-│   └── gaps-ideal.md              # Created by gap-analyzer
-└── migration/
-    └── migration-plan.md          # Created by gap-analyzer
+/
+├── README.md                      # Created by documentation-engineer (after L1)
+├── USAGE.md                       # Created by documentation-engineer (after L1)
+└── /docs
+    ├── intent/
+    │   └── product-intent.md          # Created by intent-guardian
+    ├── ux/
+    │   └── user-journeys.md           # Created by ux-architect
+    ├── architecture/
+    │   ├── README.md                  # Created by agentic-architect (comprehensive)
+    │   ├── agent-design.md            # Created by agentic-architect (agent-specific)
+    │   └── diagrams/                  # Architecture diagrams
+    ├── api/
+    │   └── README.md                  # Created by documentation-engineer
+    ├── guides/
+    │   ├── developer-guide.md         # Created by documentation-engineer
+    │   └── deployment-guide.md        # Created by documentation-engineer
+    ├── plans/
+    │   ├── overview/                  # Full system reference
+    │   │   ├── backend-plan.md        # All endpoints, DB, services
+    │   │   ├── frontend-plan.md       # All pages, components, state
+    │   │   └── test-plan.md           # Test strategy
+    │   ├── features/                  # Feature-specific plans (execution)
+    │   │   ├── user-authentication.md
+    │   │   ├── profile-management.md
+    │   │   └── ...
+    │   └── implementation-order.md    # Parallel batches and dependencies
+    ├── verification/
+    │   └── phase-N-report.md          # Created by test-engineer
+    ├── changes/
+    │   └── change-[timestamp].md      # Created by change-analyzer
+    ├── analysis/
+    │   ├── gaps-current.md            # Created by gap-analyzer
+    │   └── gaps-ideal.md              # Created by gap-analyzer
+    └── migration/
+        └── migration-plan.md          # Created by gap-analyzer
 ```
+
+### Documentation Workflow
+
+**After L1 Planning (Auto-Trigger):**
+1. Intent, UX, and Architecture analysis completes
+2. **documentation-engineer** automatically launches
+3. Creates initial documentation structure:
+   - `README.md` with project overview
+   - `USAGE.md` skeleton with planned features
+   - `/docs/api/README.md` skeleton
+   - `/docs/guides/` structure
+
+**During L2 Building:**
+- As features are built, documentation can be updated via `/docs update`
+- Documentation stays in sync with implementation
+
+**Before Release:**
+- Run `/docs verify` to ensure all features are documented
+- Complete FAQ, troubleshooting, and examples
 
 ---
 
@@ -519,6 +553,12 @@ While users don't need to use slash commands, these are available for power user
 - `/change` - Analyze change impact
 - `/debug` - Launch debugger
 - `/review` - Launch code-reviewer
+- `/docs` - Manage project documentation
+  - `/docs` or `/docs verify` - Check documentation completeness
+  - `/docs update` - Update docs from current code
+  - `/docs generate` - Generate all documentation
+  - `/docs status` - Quick status check
+- `/sync` - Update project state and CLAUDE.md Current State
 
 ### Advanced: Parallel Development (Opt-In Only)
 

@@ -1,0 +1,586 @@
+# Deployment Guide
+
+> Deployment instructions and operational procedures for {{PROJECT_NAME}}
+
+**Last Updated:** {{DATE}}
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Prerequisites](#prerequisites)
+3. [Deployment Options](#deployment-options)
+4. [Environment Configuration](#environment-configuration)
+5. [Production Checklist](#production-checklist)
+6. [Monitoring](#monitoring)
+7. [Scaling](#scaling)
+8. [Rollback Procedure](#rollback-procedure)
+9. [Maintenance](#maintenance)
+
+---
+
+## Overview
+
+### Deployment Architecture
+
+{{DEPLOYMENT_ARCHITECTURE_DESCRIPTION}}
+
+```
+{{DEPLOYMENT_DIAGRAM}}
+```
+
+### Environments
+
+| Environment | Purpose | URL |
+|-------------|---------|-----|
+{{#ENVIRONMENTS}}
+| {{ENV_NAME}} | {{ENV_PURPOSE}} | {{ENV_URL}} |
+{{/ENVIRONMENTS}}
+
+---
+
+## Prerequisites
+
+### Infrastructure Requirements
+
+{{#INFRA_REQUIREMENTS}}
+- **{{REQUIREMENT}}:** {{REQUIREMENT_DETAILS}}
+{{/INFRA_REQUIREMENTS}}
+
+### Access Requirements
+
+{{#ACCESS_REQUIREMENTS}}
+- [ ] {{REQUIREMENT}}
+{{/ACCESS_REQUIREMENTS}}
+
+### Tools Required
+
+{{#REQUIRED_TOOLS}}
+- **{{TOOL}}** version {{VERSION}}+ ([install]({{INSTALL_URL}}))
+{{/REQUIRED_TOOLS}}
+
+---
+
+## Deployment Options
+
+### Option 1: {{OPTION_1_NAME}}
+
+{{OPTION_1_DESCRIPTION}}
+
+**Pros:**
+{{#OPTION_1_PROS}}
+- {{PRO}}
+{{/OPTION_1_PROS}}
+
+**Cons:**
+{{#OPTION_1_CONS}}
+- {{CON}}
+{{/OPTION_1_CONS}}
+
+**Deployment Steps:**
+
+```bash
+{{OPTION_1_COMMANDS}}
+```
+
+**Configuration:**
+```{{CONFIG_FORMAT}}
+{{OPTION_1_CONFIG}}
+```
+
+---
+
+### Option 2: {{OPTION_2_NAME}}
+
+{{OPTION_2_DESCRIPTION}}
+
+**Pros:**
+{{#OPTION_2_PROS}}
+- {{PRO}}
+{{/OPTION_2_PROS}}
+
+**Cons:**
+{{#OPTION_2_CONS}}
+- {{CON}}
+{{/OPTION_2_CONS}}
+
+**Deployment Steps:**
+
+```bash
+{{OPTION_2_COMMANDS}}
+```
+
+**Configuration:**
+```{{CONFIG_FORMAT}}
+{{OPTION_2_CONFIG}}
+```
+
+---
+
+### Option 3: {{OPTION_3_NAME}}
+
+{{OPTION_3_DESCRIPTION}}
+
+**Deployment Steps:**
+
+```bash
+{{OPTION_3_COMMANDS}}
+```
+
+---
+
+## Environment Configuration
+
+### Required Environment Variables
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+{{#ENV_VARS}}
+| `{{VAR_NAME}}` | {{VAR_DESCRIPTION}} | {{VAR_EXAMPLE}} | {{VAR_REQUIRED}} |
+{{/ENV_VARS}}
+
+### Secrets Management
+
+{{SECRETS_MANAGEMENT_DESCRIPTION}}
+
+**{{SECRETS_TOOL_NAME}} setup:**
+
+```bash
+{{SECRETS_SETUP_COMMANDS}}
+```
+
+**Accessing secrets in code:**
+```{{CODE_LANGUAGE}}
+{{SECRETS_ACCESS_EXAMPLE}}
+```
+
+### Database Configuration
+
+**Connection string format:**
+```
+{{DB_CONNECTION_FORMAT}}
+```
+
+**Example:**
+```
+{{DB_CONNECTION_EXAMPLE}}
+```
+
+**Connection pooling:**
+```{{CODE_LANGUAGE}}
+{{DB_POOL_CONFIG}}
+```
+
+### External Services
+
+{{#EXTERNAL_SERVICES}}
+**{{SERVICE_NAME}}**
+
+Configuration:
+```{{CONFIG_FORMAT}}
+{{SERVICE_CONFIG}}
+```
+
+Required credentials:
+{{#SERVICE_CREDENTIALS}}
+- {{CREDENTIAL}}
+{{/SERVICE_CREDENTIALS}}
+
+{{/EXTERNAL_SERVICES}}
+
+---
+
+## Production Checklist
+
+### Pre-Deployment
+
+{{#PRE_DEPLOYMENT_CHECKS}}
+- [ ] {{CHECK}}
+{{/PRE_DEPLOYMENT_CHECKS}}
+
+### Infrastructure
+
+{{#INFRA_CHECKS}}
+- [ ] {{CHECK}}
+{{/INFRA_CHECKS}}
+
+### Security
+
+{{#SECURITY_CHECKS}}
+- [ ] {{CHECK}}
+{{/SECURITY_CHECKS}}
+
+### Database
+
+{{#DATABASE_CHECKS}}
+- [ ] {{CHECK}}
+{{/DATABASE_CHECKS}}
+
+### Monitoring & Logging
+
+{{#MONITORING_CHECKS}}
+- [ ] {{CHECK}}
+{{/MONITORING_CHECKS}}
+
+### Performance
+
+{{#PERFORMANCE_CHECKS}}
+- [ ] {{CHECK}}
+{{/PERFORMANCE_CHECKS}}
+
+### Disaster Recovery
+
+{{#DR_CHECKS}}
+- [ ] {{CHECK}}
+{{/DR_CHECKS}}
+
+---
+
+## Monitoring
+
+### Application Monitoring
+
+**Metrics to monitor:**
+{{#APP_METRICS}}
+- **{{METRIC_NAME}}:** {{METRIC_DESCRIPTION}} (threshold: {{THRESHOLD}})
+{{/APP_METRICS}}
+
+**Setup:**
+```bash
+{{MONITORING_SETUP_COMMAND}}
+```
+
+**Dashboard URL:** {{DASHBOARD_URL}}
+
+### Infrastructure Monitoring
+
+{{#INFRA_METRICS}}
+- **{{METRIC}}:** {{THRESHOLD}}
+{{/INFRA_METRICS}}
+
+### Log Aggregation
+
+**Log sources:**
+{{#LOG_SOURCES}}
+- {{SOURCE}}: {{LOG_LOCATION}}
+{{/LOG_SOURCES}}
+
+**Accessing logs:**
+```bash
+{{LOG_ACCESS_COMMAND}}
+```
+
+**Log retention:** {{LOG_RETENTION_PERIOD}}
+
+### Alerting
+
+**Alert channels:**
+{{#ALERT_CHANNELS}}
+- {{CHANNEL}}: {{CHANNEL_DETAILS}}
+{{/ALERT_CHANNELS}}
+
+**Critical alerts:**
+{{#CRITICAL_ALERTS}}
+- **{{ALERT_NAME}}:** {{ALERT_CONDITION}} → {{ALERT_ACTION}}
+{{/CRITICAL_ALERTS}}
+
+### Health Checks
+
+**Endpoint:** `{{HEALTH_CHECK_ENDPOINT}}`
+
+**Expected response:**
+```json
+{{HEALTH_CHECK_RESPONSE}}
+```
+
+**Check frequency:** {{HEALTH_CHECK_FREQUENCY}}
+
+---
+
+## Scaling
+
+### Horizontal Scaling
+
+**Auto-scaling configuration:**
+
+```{{CONFIG_FORMAT}}
+{{AUTOSCALE_CONFIG}}
+```
+
+**Manual scaling:**
+```bash
+# Scale up
+{{SCALE_UP_COMMAND}}
+
+# Scale down
+{{SCALE_DOWN_COMMAND}}
+```
+
+### Vertical Scaling
+
+**Current limits:**
+{{#VERTICAL_LIMITS}}
+- {{RESOURCE}}: {{LIMIT}}
+{{/VERTICAL_LIMITS}}
+
+**Scaling up:**
+```bash
+{{VERTICAL_SCALE_COMMAND}}
+```
+
+**Requires:** {{VERTICAL_SCALE_DOWNTIME}}
+
+### Database Scaling
+
+**Read replicas:**
+```bash
+# Add read replica
+{{ADD_REPLICA_COMMAND}}
+```
+
+**Sharding:** {{SHARDING_STRATEGY}}
+
+**Connection pooling:**
+```{{CODE_LANGUAGE}}
+{{DB_POOL_SCALING_CONFIG}}
+```
+
+### Load Balancing
+
+**Load balancer:** {{LOAD_BALANCER_TYPE}}
+
+**Configuration:**
+```{{CONFIG_FORMAT}}
+{{LOAD_BALANCER_CONFIG}}
+```
+
+**Health check:** {{LB_HEALTH_CHECK}}
+
+---
+
+## Rollback Procedure
+
+### Automatic Rollback
+
+**Triggers:**
+{{#ROLLBACK_TRIGGERS}}
+- {{TRIGGER}}
+{{/ROLLBACK_TRIGGERS}}
+
+**Process:**
+{{AUTOMATIC_ROLLBACK_PROCESS}}
+
+### Manual Rollback
+
+**Steps:**
+
+```bash
+{{#ROLLBACK_STEPS}}
+# Step {{STEP_NUMBER}}: {{STEP_DESCRIPTION}}
+{{STEP_COMMAND}}
+
+{{/ROLLBACK_STEPS}}
+```
+
+**Verification:**
+```bash
+{{ROLLBACK_VERIFY_COMMAND}}
+```
+
+### Database Rollback
+
+**⚠️ CAUTION:** Database rollbacks can be destructive.
+
+```bash
+# Rollback last migration
+{{DB_ROLLBACK_COMMAND}}
+
+# Rollback to specific version
+{{DB_ROLLBACK_TO_VERSION_COMMAND}}
+```
+
+**Backup before rollback:**
+```bash
+{{DB_BACKUP_COMMAND}}
+```
+
+---
+
+## Maintenance
+
+### Routine Maintenance
+
+| Task | Frequency | Command |
+|------|-----------|---------|
+{{#MAINTENANCE_TASKS}}
+| {{TASK}} | {{FREQUENCY}} | `{{COMMAND}}` |
+{{/MAINTENANCE_TASKS}}
+
+### Database Maintenance
+
+**Backups:**
+```bash
+# Manual backup
+{{DB_MANUAL_BACKUP_COMMAND}}
+
+# Verify backup
+{{DB_VERIFY_BACKUP_COMMAND}}
+```
+
+**Backup schedule:** {{BACKUP_SCHEDULE}}
+**Backup retention:** {{BACKUP_RETENTION}}
+
+**Restore:**
+```bash
+{{DB_RESTORE_COMMAND}}
+```
+
+### SSL Certificate Renewal
+
+{{SSL_RENEWAL_PROCESS}}
+
+**Check expiry:**
+```bash
+{{SSL_CHECK_COMMAND}}
+```
+
+### Dependency Updates
+
+**Security patches:**
+```bash
+# Check for security updates
+{{SECURITY_UPDATE_CHECK_COMMAND}}
+
+# Apply security patches
+{{SECURITY_UPDATE_APPLY_COMMAND}}
+```
+
+**Regular updates:**
+
+Frequency: {{DEPENDENCY_UPDATE_FREQUENCY}}
+
+Process:
+{{#UPDATE_PROCESS}}
+{{STEP_NUMBER}}. {{STEP}}
+{{/UPDATE_PROCESS}}
+
+### Cache Clearing
+
+```bash
+# Clear application cache
+{{CACHE_CLEAR_COMMAND}}
+
+# Clear CDN cache
+{{CDN_CLEAR_COMMAND}}
+```
+
+---
+
+## Troubleshooting
+
+{{#DEPLOYMENT_ISSUES}}
+### {{ISSUE_TITLE}}
+
+**Symptoms:**
+{{#SYMPTOMS}}
+- {{SYMPTOM}}
+{{/SYMPTOMS}}
+
+**Diagnosis:**
+```bash
+{{DIAGNOSIS_COMMAND}}
+```
+
+**Solution:**
+{{#SOLUTION_STEPS}}
+{{STEP_NUMBER}}. {{STEP}}
+{{/SOLUTION_STEPS}}
+
+---
+
+{{/DEPLOYMENT_ISSUES}}
+
+---
+
+## Emergency Procedures
+
+### Service Outage
+
+{{#OUTAGE_STEPS}}
+{{STEP_NUMBER}}. **{{STEP_TITLE}}**
+   {{STEP_DETAILS}}
+   ```bash
+   {{STEP_COMMAND}}
+   ```
+{{/OUTAGE_STEPS}}
+
+### Data Breach Response
+
+{{#BREACH_STEPS}}
+{{STEP_NUMBER}}. **{{STEP_TITLE}}**
+   {{STEP_DETAILS}}
+{{/BREACH_STEPS}}
+
+### Incident Communication
+
+**Stakeholders to notify:**
+{{#INCIDENT_STAKEHOLDERS}}
+- {{STAKEHOLDER}}: {{CONTACT}}
+{{/INCIDENT_STAKEHOLDERS}}
+
+**Status page:** {{STATUS_PAGE_URL}}
+
+---
+
+## Disaster Recovery
+
+### Recovery Time Objective (RTO)
+
+{{RTO_DESCRIPTION}}
+
+### Recovery Point Objective (RPO)
+
+{{RPO_DESCRIPTION}}
+
+### DR Procedure
+
+{{#DR_PROCEDURE}}
+{{STEP_NUMBER}}. **{{STEP_TITLE}}**
+   {{STEP_DESCRIPTION}}
+   ```bash
+   {{STEP_COMMAND}}
+   ```
+{{/DR_PROCEDURE}}
+
+### DR Testing
+
+**Test frequency:** {{DR_TEST_FREQUENCY}}
+
+**Last DR test:** {{LAST_DR_TEST_DATE}}
+
+**Next DR test:** {{NEXT_DR_TEST_DATE}}
+
+---
+
+## Resources
+
+- **Architecture Documentation:** [../architecture/README.md](../architecture/README.md)
+- **Developer Guide:** [developer-guide.md](developer-guide.md)
+- **Runbook:** {{RUNBOOK_URL}}
+- **Monitoring Dashboard:** {{MONITORING_URL}}
+- **On-Call Schedule:** {{ONCALL_URL}}
+
+---
+
+## Support Contacts
+
+| Role | Contact | Availability |
+|------|---------|--------------|
+{{#SUPPORT_CONTACTS}}
+| {{ROLE}} | {{CONTACT}} | {{AVAILABILITY}} |
+{{/SUPPORT_CONTACTS}}
+
+---
+
+**For production incidents:** {{INCIDENT_CONTACT}} ({{INCIDENT_RESPONSE_SLA}})

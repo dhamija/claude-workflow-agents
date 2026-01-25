@@ -1,7 +1,7 @@
 ---
 name: agent-wf-help
 description: Show help about the agent workflow system - workflow, agents, commands, and development patterns
-argument-hint: "[topic] - workflow | agents | commands | patterns | parallel | brownfield | cicd | sync"
+argument-hint: "[topic] - workflow | agents | commands | patterns | parallel | brownfield | cicd | sync | docs"
 ---
 
 # Claude Workflow Agents - Help System
@@ -12,7 +12,7 @@ Display help based on the topic requested.
 ```bash
 /agent-wf-help              # Quick overview
 /agent-wf-help workflow     # Two-level workflow
-/agent-wf-help agents       # All 12 agents
+/agent-wf-help agents       # All 14 agents
 /agent-wf-help commands     # Available commands
 /agent-wf-help patterns     # Development patterns
 /agent-wf-help parallel     # Parallel development
@@ -63,7 +63,8 @@ Just talk naturally. Claude handles the rest.
 │ MORE HELP                                                       │
 │                                                                 │
 │   /agent-wf-help workflow    - How the two-level workflow works │
-│   /agent-wf-help agents      - All 13 specialized agents        │
+│   /agent-wf-help agents      - All 14 specialized agents        │
+│   /agent-wf-help docs        - Documentation management         │
 │   /agent-wf-help commands    - Available commands               │
 │   /agent-wf-help patterns    - Development patterns & examples  │
 │   /agent-wf-help parallel    - Parallel development guide       │
@@ -135,7 +136,7 @@ DOCUMENTS CREATED
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║                       THE 13 AGENTS                              ║
+║                       THE 14 AGENTS                              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Claude automatically selects agents. You don't call them directly.
@@ -161,7 +162,7 @@ LEVEL 1 AGENTS (App-level)
   ┌─────────────────────────────────────────────────────────────┐
   │ AGENTIC-ARCHITECT                                           │
   │ "How should the system work?"                               │
-  │ Creates: /docs/architecture/agent-design.md                 │
+  │ Creates: /docs/architecture/README.md, agent-design.md      │
   │ Triggers: New project, "architecture", "system design"      │
   └─────────────────────────────────────────────────────────────┘
 
@@ -170,6 +171,13 @@ LEVEL 1 AGENTS (App-level)
   │ "What's the build plan?"                                    │
   │ Creates: /docs/plans/overview/*, /docs/plans/features/*     │
   │ Triggers: After L1 analysis, "plan", "how to build"         │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ DOCUMENTATION-ENGINEER                                      │
+  │ "Create and maintain comprehensive docs"                    │
+  │ Creates: USAGE.md, README.md, /docs/api/, /docs/guides/     │
+  │ Triggers: After L1 planning (auto), "document", "usage"     │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
@@ -259,6 +267,10 @@ MAIN COMMANDS
   /change <description>      Analyze change impact
   /debug                     Launch debugger
   /review [target]           Code review (file, dir, or "staged")
+  /docs [mode]               Manage documentation
+                             Modes: verify, update, generate, status
+  /sync [mode]               Update project state & docs
+                             Modes: full (default), quick, report
 
 
 PARALLEL DEVELOPMENT (Advanced, Opt-In)
@@ -1154,6 +1166,203 @@ MORE INFO
   See: /sync command documentation
 ```
 
+### If topic = "docs":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                  DOCUMENTATION MANAGEMENT                        ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Keep comprehensive, up-to-date documentation automatically.
+
+
+WHAT IT CREATES
+───────────────
+
+  After L1 Planning (Auto):
+  • USAGE.md - Complete end-user guide
+  • README.md - Project overview and quick start
+  • /docs/api/README.md - API documentation
+  • /docs/architecture/README.md - Comprehensive architecture
+  • /docs/guides/developer-guide.md - Development setup
+  • /docs/guides/deployment-guide.md - Deployment instructions
+
+
+DOCUMENTATION WORKFLOW
+──────────────────────
+
+  Phase 1: After L1 Planning (Automatic)
+
+    After intent-guardian, ux-architect, agentic-architect complete:
+    → documentation-engineer automatically launches
+    → Creates initial documentation structure
+    → Populates with info from intent/UX/architecture
+    → Creates skeleton for planned features
+
+  Phase 2: During L2 Building (Manual Updates)
+
+    As features are built:
+    → Run "/docs update" to add feature documentation
+    → Documentation stays in sync with implementation
+
+  Phase 3: Before Release (Verification)
+
+    Before shipping:
+    → Run "/docs verify" to check completeness
+    → All features documented?
+    → All endpoints in API docs?
+    → Examples working?
+
+
+COMMANDS
+────────
+
+  /docs                      Check documentation completeness
+  /docs verify               Same as above (explicit)
+  /docs update               Update docs from current code
+  /docs generate             Generate all documentation
+  /docs status               Quick documentation status
+
+
+TYPICAL USAGE
+─────────────
+
+  # After planning phase:
+  You: "I'm ready to start building"
+
+  Claude: Planning complete. Creating documentation structure...
+          [documentation-engineer creates initial docs]
+
+          ✓ README.md created
+          ✓ USAGE.md skeleton created
+          ✓ API docs structure created
+          ✓ Developer & deployment guides created
+
+
+  # After building search feature:
+  You: "/docs update"
+
+  Claude: Documentation updated ✓
+
+          USAGE.md
+            + Added "Search" feature documentation
+            + Added 3 usage examples
+
+          docs/api/README.md
+            + Added GET /api/search endpoint
+            + Added request/response examples
+
+
+  # Before release:
+  You: "/docs verify"
+
+  Claude: Documentation Verification
+
+          USAGE.md: 95% complete
+            ⚠ Missing: 1 FAQ entry
+
+          API Docs: 100% complete
+            ✓ All endpoints documented
+
+          Guides: 90% complete
+            ⚠ Deployment guide: Missing monitoring setup
+
+          Run "/docs update" to complete missing sections
+
+
+WHAT GETS DOCUMENTED
+────────────────────
+
+  USAGE.md:
+  • Overview and key features
+  • Installation and quick start
+  • Every feature with examples
+  • User journeys step-by-step
+  • Configuration options
+  • Troubleshooting and FAQ
+
+  README.md:
+  • Project overview (1-2 paragraphs)
+  • Quick start (5 minutes)
+  • Tech stack
+  • Links to full documentation
+
+  /docs/api/README.md:
+  • All API endpoints
+  • Request/response schemas
+  • Error codes
+  • Authentication
+  • Examples for each endpoint
+
+  /docs/architecture/README.md:
+  • System architecture with diagrams
+  • Component catalog
+  • Data architecture (ERD)
+  • API design
+  • Security architecture
+  • Design decisions (ADRs)
+
+  /docs/guides/:
+  • Developer setup and workflow
+  • Testing strategy
+  • Deployment options
+  • Environment configuration
+
+
+INTEGRATION WITH /sync
+──────────────────────
+
+  The project-maintainer agent checks documentation completeness:
+
+  When you run "/sync":
+  → Verifies docs exist for implemented features
+  → Reports documentation gaps
+  → Suggests running "/docs verify" if needed
+
+  Example sync output:
+
+    USER DOCUMENTATION COMPLETENESS
+    ────────────────────────────────
+      ✓ USAGE.md - 80% complete
+      ⚠ docs/api/README.md - Missing 2 endpoints
+      ✓ docs/guides/ - Complete
+
+      💡 Suggestion: Run /docs verify for detailed report
+
+
+WHY IT MATTERS
+──────────────
+
+  Without comprehensive docs:
+  • Users don't know how to use your app
+  • New developers struggle to contribute
+  • Deployment process is unclear
+  • API is hard to integrate
+
+  With comprehensive docs:
+  • Users onboard quickly
+  • Developers contribute easily
+  • Deployment is straightforward
+  • API integration is smooth
+
+
+TIPS
+────
+
+  • Let docs auto-generate after L1 - Saves time
+  • Update docs after each feature - Stays current
+  • Verify before release - Ensures completeness
+  • Test all examples - Make sure they work
+
+
+MORE INFO
+─────────
+
+  The documentation-engineer agent handles all documentation.
+  Templates are based on best practices for user-facing docs.
+  All documentation is comprehensive and example-driven.
+```
+
 ### If topic not recognized:
 
 ```
@@ -1162,13 +1371,14 @@ I don't have specific help for "<topic>".
 Available topics:
   /agent-wf-help              - Quick overview
   /agent-wf-help workflow     - How the two-level workflow works
-  /agent-wf-help agents       - All 13 specialized agents
+  /agent-wf-help agents       - All 14 specialized agents
   /agent-wf-help commands     - Available commands
   /agent-wf-help patterns     - Development patterns & examples
   /agent-wf-help parallel     - Parallel development guide
   /agent-wf-help brownfield   - Improving existing code
   /agent-wf-help cicd         - CI/CD validation setup
   /agent-wf-help sync         - Project state & maintenance
+  /agent-wf-help docs         - Documentation management
   /agent-wf-help examples     - Practical examples
 
 Or just ask me what you want to know!

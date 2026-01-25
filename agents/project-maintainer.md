@@ -254,12 +254,59 @@ Report gaps:
 | auth | Rate limiting test |
 ```
 
-### 4. README (if exists)
+### 4. README and USAGE.md (if exist)
 
-Keep project README accurate:
+Keep project README and USAGE.md accurate:
 - Installation instructions work
 - Commands are correct
 - Feature list matches reality
+- Examples are up-to-date
+- All implemented features are documented
+
+### 5. Documentation Completeness
+
+Verify comprehensive documentation exists:
+
+**USAGE.md Completeness:**
+- [ ] All implemented features documented with examples
+- [ ] User journeys have step-by-step guides
+- [ ] Configuration options documented
+- [ ] Troubleshooting section has common issues
+- [ ] FAQ has common questions
+
+**README.md Completeness:**
+- [ ] Quick start works
+- [ ] Features list is current
+- [ ] Tech stack is accurate
+- [ ] Links to full documentation work
+
+**/docs/api/README.md Completeness:**
+- [ ] All endpoints documented
+- [ ] Request/response examples provided
+- [ ] Error codes documented
+- [ ] Authentication described
+
+**/docs/architecture/README.md Completeness:**
+- [ ] Architecture diagrams current
+- [ ] Component catalog up-to-date
+- [ ] Data architecture reflects schema
+- [ ] Design decisions (ADRs) documented
+
+**/docs/guides/ Completeness:**
+- [ ] Developer guide has setup steps
+- [ ] Deployment guide has deployment options
+- [ ] All environment variables documented
+
+**Report Documentation Gaps:**
+```markdown
+### Documentation Gaps
+
+| Document | Missing |
+|----------|---------|
+| USAGE.md | Search feature examples, filter configuration |
+| API docs | GET /api/search/advanced endpoint |
+| Developer guide | Testing strategy section |
+```
 
 ---
 
@@ -302,7 +349,18 @@ For each doc file:
 - Update any incorrect information
 - Add implementation notes
 
-### Step 5: Generate Report
+### Step 5: Check Documentation Completeness
+
+Verify user-facing documentation exists and is complete:
+- Check if USAGE.md has all implemented features
+- Check if README.md quick start is accurate
+- Check if /docs/api/ has all endpoints
+- Check if /docs/guides/ are complete
+- Report any gaps found
+
+**Suggest running `/docs verify` if significant gaps found.**
+
+### Step 6: Generate Report
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
@@ -315,6 +373,7 @@ SUMMARY
   Journeys:    4/6 implemented
   Test gaps:   2 identified
   Doc updates: 3 files updated
+  Doc gaps:    4 identified
 
 CLAUDE.md UPDATES
 ─────────────────
@@ -327,6 +386,15 @@ DOCUMENTATION SYNC
   ✓ product-intent.md - 6/8 promises KEPT
   ✓ user-journeys.md - 4/6 IMPLEMENTED
   ✓ implementation-order.md - statuses updated
+
+USER DOCUMENTATION COMPLETENESS
+────────────────────────────────
+  ✓ USAGE.md - 80% complete (missing 2 features)
+  ⚠ README.md - Quick start needs update
+  ✓ docs/api/README.md - All endpoints documented
+  ⚠ docs/guides/developer-guide.md - Missing testing section
+
+  💡 Suggestion: Run /docs verify for detailed report
 
 TEST COVERAGE
 ─────────────

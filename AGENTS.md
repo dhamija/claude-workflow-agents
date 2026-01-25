@@ -245,6 +245,59 @@ This document provides detailed information about each specialized agent in the 
 
 ---
 
+### documentation-engineer
+
+**Purpose:** Create and maintain comprehensive project documentation
+
+**Tools:** Read, Write, Glob, Grep
+
+**When to use:**
+- Automatically after L1 planning completes (creates initial structure)
+- After features are built (to update documentation)
+- Before release (to verify completeness)
+- When user asks for documentation
+
+**What it creates:**
+1. `/USAGE.md` - Complete end-user usage guide
+2. `/README.md` - Project overview and quick start
+3. `/docs/api/README.md` - API documentation
+4. `/docs/guides/developer-guide.md` - Development setup and workflow
+5. `/docs/guides/deployment-guide.md` - Deployment instructions
+
+**Documentation workflow:**
+- **Phase 1 (Auto):** After L1 planning → creates initial structure with skeletons
+- **Phase 2 (Manual):** During feature building → `/docs update` to add implemented features
+- **Phase 3 (Verification):** Before release → `/docs verify` to ensure completeness
+
+**Integration with other agents:**
+- Pulls from intent-guardian: project description, features, promises
+- Pulls from ux-architect: user journeys, personas, flows
+- Pulls from agentic-architect: architecture, components, tech stack
+- Pulls from implementation-planner: feature list, API endpoints, configuration
+
+**Key principles:**
+1. Gets users started quickly - clear quick start
+2. Covers all features - nothing undocumented
+3. Provides examples - real usage for everything
+4. Explains architecture - developers understand system
+5. Stays current - updated as project evolves
+
+**Example invocation:**
+```bash
+/docs verify    # Check documentation completeness
+/docs update    # Update docs from current code
+/docs generate  # Generate all documentation
+```
+
+**Quality checklist:**
+- All implemented features documented with examples
+- All endpoints in API docs with request/response
+- Developer guide has working setup steps
+- Deployment guide has all environment variables
+- README quick start is tested and works
+
+---
+
 ### change-analyzer
 
 **Purpose:** Analyze impact of requirement changes across all artifacts

@@ -12,6 +12,7 @@ REQUIRED_COMMANDS=(
     "audit"
     "change"
     "debug"
+    "docs"
     "gap"
     "implement"
     "improve"

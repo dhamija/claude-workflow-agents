@@ -1,0 +1,304 @@
+# {{PROJECT_NAME}} - Usage Guide
+
+> Complete guide to using {{PROJECT_NAME}}
+
+**Last Updated:** {{DATE}}
+**Version:** {{VERSION}}
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Getting Started](#getting-started)
+- [Features](#features)
+- [User Journeys](#user-journeys)
+- [Configuration](#configuration)
+- [Troubleshooting](#troubleshooting)
+- [FAQ](#faq)
+
+---
+
+## Overview
+
+### What is {{PROJECT_NAME}}?
+
+{{PROJECT_DESCRIPTION}}
+
+### Key Features
+
+| Feature | Description |
+|---------|-------------|
+{{#FEATURES}}
+| {{FEATURE_NAME}} | {{FEATURE_DESCRIPTION}} |
+{{/FEATURES}}
+
+### System Requirements
+
+{{#REQUIREMENTS}}
+- {{REQUIREMENT}}
+{{/REQUIREMENTS}}
+
+---
+
+## Getting Started
+
+### Installation
+
+#### Prerequisites
+
+{{#PREREQUISITES}}
+- {{PREREQUISITE}}
+{{/PREREQUISITES}}
+
+#### Step-by-Step Installation
+
+```bash
+# Step 1: Clone the repository
+git clone {{REPO_URL}}
+cd {{PROJECT_DIR}}
+
+# Step 2: Install dependencies
+{{INSTALL_COMMAND}}
+
+# Step 3: Configure environment
+cp .env.example .env
+# Edit .env with your configuration
+
+# Step 4: Initialize database (if applicable)
+{{DB_INIT_COMMAND}}
+
+# Step 5: Start the application
+{{START_COMMAND}}
+```
+
+#### Verify Installation
+
+```bash
+{{VERIFY_COMMAND}}
+```
+
+Expected output:
+```
+{{EXPECTED_OUTPUT}}
+```
+
+### Quick Start
+
+Get up and running in 5 minutes:
+
+1. **Install and start**
+   ```bash
+   {{QUICK_START_COMMANDS}}
+   ```
+
+2. **Access the application**
+   - Open {{APP_URL}} in your browser
+   - {{FIRST_ACTION}}
+
+3. **Your first {{PRIMARY_ENTITY}}**
+   {{FIRST_ENTITY_STEPS}}
+
+---
+
+## Features
+
+{{#FEATURES}}
+### {{FEATURE_NAME}}
+
+#### Overview
+
+{{FEATURE_OVERVIEW}}
+
+#### How to Use
+
+{{FEATURE_USAGE_STEPS}}
+
+#### Examples
+
+**Example 1: {{EXAMPLE_1_SCENARIO}}**
+```
+{{EXAMPLE_1_CODE}}
+```
+
+**Example 2: {{EXAMPLE_2_SCENARIO}}**
+```
+{{EXAMPLE_2_CODE}}
+```
+
+#### Options and Settings
+
+| Option | Description | Default |
+|--------|-------------|---------|
+{{#FEATURE_OPTIONS}}
+| {{OPTION_NAME}} | {{OPTION_DESCRIPTION}} | {{OPTION_DEFAULT}} |
+{{/FEATURE_OPTIONS}}
+
+#### Tips
+
+{{#FEATURE_TIPS}}
+- {{TIP}}
+{{/FEATURE_TIPS}}
+
+---
+
+{{/FEATURES}}
+
+---
+
+## User Journeys
+
+{{#JOURNEYS}}
+### {{JOURNEY_NAME}}
+
+**Goal:** {{JOURNEY_GOAL}}
+
+**Steps:**
+
+{{#JOURNEY_STEPS}}
+{{STEP_NUMBER}}. {{STEP_DESCRIPTION}}
+{{/JOURNEY_STEPS}}
+
+**Result:** {{JOURNEY_RESULT}}
+
+**Common Issues:**
+{{#JOURNEY_ISSUES}}
+- {{ISSUE}} → {{SOLUTION}}
+{{/JOURNEY_ISSUES}}
+
+---
+
+{{/JOURNEYS}}
+
+---
+
+## Configuration
+
+### Configuration File
+
+Location: `{{CONFIG_FILE_PATH}}`
+
+```{{CONFIG_FORMAT}}
+{{CONFIG_EXAMPLE}}
+```
+
+### Environment Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+{{#ENV_VARS}}
+| {{VAR_NAME}} | {{VAR_DESCRIPTION}} | {{VAR_REQUIRED}} | {{VAR_DEFAULT}} |
+{{/ENV_VARS}}
+
+### Advanced Configuration
+
+{{ADVANCED_CONFIG_DETAILS}}
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+{{#COMMON_ISSUES}}
+#### {{ISSUE_NAME}}
+
+**Symptoms:**
+- {{SYMPTOM_1}}
+- {{SYMPTOM_2}}
+
+**Cause:**
+{{ISSUE_CAUSE}}
+
+**Solution:**
+```bash
+{{ISSUE_SOLUTION}}
+```
+
+---
+
+{{/COMMON_ISSUES}}
+
+### Getting Help
+
+- **Documentation:** {{DOCS_URL}}
+- **Issue Tracker:** {{ISSUES_URL}}
+- **Community:** {{COMMUNITY_URL}}
+- **Email:** {{SUPPORT_EMAIL}}
+
+### Debug Mode
+
+Enable debug mode to see detailed logs:
+
+```bash
+{{DEBUG_MODE_COMMAND}}
+```
+
+---
+
+## FAQ
+
+### General
+
+{{#GENERAL_FAQ}}
+**Q: {{QUESTION}}**
+
+A: {{ANSWER}}
+
+{{/GENERAL_FAQ}}
+
+### Technical
+
+{{#TECHNICAL_FAQ}}
+**Q: {{QUESTION}}**
+
+A: {{ANSWER}}
+
+{{/TECHNICAL_FAQ}}
+
+---
+
+## Appendix
+
+### Glossary
+
+| Term | Definition |
+|------|------------|
+{{#GLOSSARY_TERMS}}
+| {{TERM}} | {{DEFINITION}} |
+{{/GLOSSARY_TERMS}}
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+{{#SHORTCUTS}}
+| {{KEY_COMBO}} | {{ACTION}} |
+{{/SHORTCUTS}}
+
+### API Quick Reference
+
+For full API documentation, see [API Documentation](docs/api/README.md).
+
+**Base URL:** `{{API_BASE_URL}}`
+
+**Authentication:** {{AUTH_METHOD}}
+
+**Key Endpoints:**
+{{#KEY_ENDPOINTS}}
+- `{{METHOD}} {{ENDPOINT}}` - {{ENDPOINT_DESCRIPTION}}
+{{/KEY_ENDPOINTS}}
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+{{#VERSIONS}}
+| {{VERSION}} | {{DATE}} | {{CHANGES}} |
+{{/VERSIONS}}
+
+---
+
+**Need more help?** See the [Developer Guide](docs/guides/developer-guide.md) or [Deployment Guide](docs/guides/deployment-guide.md).

@@ -1,0 +1,504 @@
+# System Architecture
+
+> {{PROJECT_NAME}} - Complete architectural specification
+
+**Last Updated:** {{DATE}}
+**Status:** {{STATUS}}
+**Architecture Confidence:** {{CONFIDENCE_LEVEL}}
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [System Overview](#system-overview)
+3. [Component Architecture](#component-architecture)
+4. [Data Architecture](#data-architecture)
+5. [API Design](#api-design)
+6. [AI/Agent Architecture](#aiagent-architecture) *(if applicable)*
+7. [Security Architecture](#security-architecture)
+8. [Infrastructure & Deployment](#infrastructure--deployment)
+9. [Design Decisions (ADRs)](#design-decisions-adrs)
+10. [Migration & Scalability](#migration--scalability)
+
+---
+
+## Executive Summary
+
+{{EXECUTIVE_SUMMARY}}
+
+**Key Architectural Decisions:**
+{{#KEY_DECISIONS}}
+- **{{DECISION}}** - {{RATIONALE}}
+{{/KEY_DECISIONS}}
+
+---
+
+## System Overview
+
+### Purpose
+
+{{SYSTEM_PURPOSE}}
+
+### Architecture Style
+
+- **Pattern:** {{ARCHITECTURE_PATTERN}}
+- **Deployment:** {{DEPLOYMENT_MODEL}}
+- **Data Flow:** {{DATA_FLOW_PATTERN}}
+
+### High-Level Architecture Diagram
+
+```mermaid
+{{ARCHITECTURE_DIAGRAM}}
+```
+
+### Technology Stack
+
+| Layer | Technology | Why Chosen |
+|-------|------------|------------|
+{{#TECH_STACK}}
+| {{LAYER}} | {{TECHNOLOGY}} | {{REASON}} |
+{{/TECH_STACK}}
+
+---
+
+## Component Architecture
+
+### Component Diagram
+
+```mermaid
+{{COMPONENT_DIAGRAM}}
+```
+
+### Component Catalog
+
+#### Frontend Components
+
+| Component | Responsibility | Dependencies | Notes |
+|-----------|---------------|--------------|-------|
+{{#FRONTEND_COMPONENTS}}
+| {{COMPONENT}} | {{RESPONSIBILITY}} | {{DEPENDENCIES}} | {{NOTES}} |
+{{/FRONTEND_COMPONENTS}}
+
+#### Backend Components
+
+| Component | Type | Responsibility | Dependencies | Location |
+|-----------|------|---------------|--------------|----------|
+{{#BACKEND_COMPONENTS}}
+| {{COMPONENT}} | {{TYPE}} | {{RESPONSIBILITY}} | {{DEPENDENCIES}} | {{LOCATION}} |
+{{/BACKEND_COMPONENTS}}
+
+#### Traditional Code Components
+
+Components that should NOT be agents (if AI/agent architecture):
+
+| Component | Why Not an Agent | Implementation |
+|-----------|------------------|----------------|
+{{#NON_AGENT_COMPONENTS}}
+| {{COMPONENT}} | {{REASON}} | {{IMPLEMENTATION}} |
+{{/NON_AGENT_COMPONENTS}}
+
+---
+
+## Data Architecture
+
+### Database Schema
+
+#### Entity Relationship Diagram
+
+```mermaid
+{{ERD_DIAGRAM}}
+```
+
+#### Schema Details
+
+{{#TABLES}}
+**`{{TABLE_NAME}}`**
+
+| Column | Type | Constraints | Purpose |
+|--------|------|-------------|---------|
+{{#COLUMNS}}
+| {{COLUMN_NAME}} | {{TYPE}} | {{CONSTRAINTS}} | {{PURPOSE}} |
+{{/COLUMNS}}
+
+{{/TABLES}}
+
+**Indexes:**
+{{#INDEXES}}
+- `{{INDEX_NAME}}` on `{{TABLE}}({{COLUMNS}})` - {{PURPOSE}}
+{{/INDEXES}}
+
+**Constraints:**
+{{#CONSTRAINTS}}
+- {{CONSTRAINT_DESCRIPTION}}
+{{/CONSTRAINTS}}
+
+### Data Flow
+
+```mermaid
+{{DATA_FLOW_DIAGRAM}}
+```
+
+### Caching Strategy
+
+| Data Type | Cache Layer | TTL | Invalidation |
+|-----------|-------------|-----|--------------|
+{{#CACHE_STRATEGY}}
+| {{DATA_TYPE}} | {{CACHE_LAYER}} | {{TTL}} | {{INVALIDATION}} |
+{{/CACHE_STRATEGY}}
+
+### Data Retention
+
+| Data Type | Retention Period | Archival Strategy |
+|-----------|-----------------|-------------------|
+{{#DATA_RETENTION}}
+| {{DATA_TYPE}} | {{RETENTION}} | {{ARCHIVAL}} |
+{{/DATA_RETENTION}}
+
+---
+
+## API Design
+
+### API Overview
+
+**Base URL:** `{{API_BASE_URL}}`
+**Authentication:** {{AUTH_METHOD}}
+**Rate Limiting:** {{RATE_LIMIT}}
+
+### Endpoint Catalog
+
+{{#ENDPOINT_GROUPS}}
+#### {{GROUP_NAME}}
+
+{{#ENDPOINTS}}
+**{{METHOD}} `{{ENDPOINT}}`**
+
+{{ENDPOINT_DESCRIPTION}}
+
+```json
+Request:
+{{REQUEST_EXAMPLE}}
+
+Response: {{STATUS_CODE}}
+{{RESPONSE_EXAMPLE}}
+```
+
+{{/ENDPOINTS}}
+{{/ENDPOINT_GROUPS}}
+
+### Error Handling
+
+**Standard Error Response:**
+```json
+{
+  "error": {
+    "code": "ERROR_CODE",
+    "message": "Human-readable message",
+    "details": {}
+  }
+}
+```
+
+**Error Codes:**
+
+| Code | HTTP Status | Description |
+|------|-------------|-------------|
+{{#ERROR_CODES}}
+| {{CODE}} | {{STATUS}} | {{DESCRIPTION}} |
+{{/ERROR_CODES}}
+
+### API Versioning
+
+**Strategy:** {{VERSIONING_STRATEGY}}
+**Migration:** {{MIGRATION_POLICY}}
+**Compatibility:** {{COMPATIBILITY_POLICY}}
+
+---
+
+## AI/Agent Architecture
+
+*(Include this section only if the system uses AI agents)*
+
+### Agent Catalog
+
+{{#AGENTS}}
+```yaml
+agent: {{AGENT_NAME}}
+role: {{AGENT_ROLE}}
+type: {{AGENT_TYPE}}
+inputs:
+  {{#INPUTS}}
+  - {{INPUT}}
+  {{/INPUTS}}
+outputs:
+  {{#OUTPUTS}}
+  - {{OUTPUT}}
+  {{/OUTPUTS}}
+tools:
+  {{#TOOLS}}
+  - {{TOOL}}
+  {{/TOOLS}}
+model_requirements:
+  reasoning: {{REASONING_LEVEL}}
+  speed: {{SPEED_REQUIREMENT}}
+  cost_sensitivity: {{COST_SENSITIVITY}}
+suggested_model: {{SUGGESTED_MODEL}}
+failure_modes:
+  {{#FAILURE_MODES}}
+  - mode: {{MODE}}
+    detection: {{DETECTION}}
+    fallback: {{FALLBACK}}
+  {{/FAILURE_MODES}}
+```
+
+{{/AGENTS}}
+
+### Agent Topology
+
+```mermaid
+{{AGENT_TOPOLOGY_DIAGRAM}}
+```
+
+### Hybrid Patterns
+
+| Pattern | Agent Role | Code Role | Example |
+|---------|------------|-----------|---------|
+{{#HYBRID_PATTERNS}}
+| {{PATTERN}} | {{AGENT_ROLE}} | {{CODE_ROLE}} | {{EXAMPLE}} |
+{{/HYBRID_PATTERNS}}
+
+### Cost & Latency Analysis
+
+| Flow | Agents Involved | Est. Tokens | Est. Latency | Est. Cost |
+|------|-----------------|-------------|--------------|-----------|
+{{#AGENT_FLOWS}}
+| {{FLOW}} | {{AGENTS}} | {{TOKENS}} | {{LATENCY}} | {{COST}} |
+{{/AGENT_FLOWS}}
+
+---
+
+## Security Architecture
+
+### Authentication & Authorization
+
+**Authentication:**
+{{#AUTH_MECHANISMS}}
+- {{MECHANISM}}
+{{/AUTH_MECHANISMS}}
+
+**Authorization:**
+{{AUTHORIZATION_MODEL}}
+
+**Permission Matrix:**
+
+| Role | {{#PERMISSIONS}}{{PERMISSION}} | {{/PERMISSIONS}}
+|------|{{#PERMISSIONS}}--------|{{/PERMISSIONS}}
+{{#ROLES}}
+| {{ROLE}} | {{#ROLE_PERMISSIONS}}{{HAS_PERMISSION}} | {{/ROLE_PERMISSIONS}}
+{{/ROLES}}
+
+### Data Security
+
+**Encryption:**
+{{#ENCRYPTION}}
+- {{ENCRYPTION_DETAIL}}
+{{/ENCRYPTION}}
+
+**Secrets Management:**
+{{SECRETS_MANAGEMENT}}
+
+### API Security
+
+**Rate Limiting:**
+{{RATE_LIMITING_DETAILS}}
+
+**Input Validation:**
+{{#VALIDATION}}
+- {{VALIDATION_DETAIL}}
+{{/VALIDATION}}
+
+### Security Monitoring
+
+**Logging:**
+{{#SECURITY_LOGGING}}
+- {{LOG_TYPE}}
+{{/SECURITY_LOGGING}}
+
+**Alerts:**
+{{#SECURITY_ALERTS}}
+- {{ALERT_CONDITION}}
+{{/SECURITY_ALERTS}}
+
+---
+
+## Infrastructure & Deployment
+
+### Infrastructure Diagram
+
+```mermaid
+{{INFRASTRUCTURE_DIAGRAM}}
+```
+
+### Deployment Strategy
+
+**Environments:**
+{{#ENVIRONMENTS}}
+- **{{ENV_NAME}}:** {{ENV_DESCRIPTION}}
+{{/ENVIRONMENTS}}
+
+**CI/CD Pipeline:**
+```
+{{CICD_PIPELINE}}
+```
+
+**Rollback Strategy:**
+{{ROLLBACK_STRATEGY}}
+
+### Scalability
+
+**Horizontal Scaling:**
+{{#HORIZONTAL_SCALING}}
+- {{SCALING_DETAIL}}
+{{/HORIZONTAL_SCALING}}
+
+**Vertical Scaling Limits:**
+{{#VERTICAL_LIMITS}}
+- {{LIMIT}}
+{{/VERTICAL_LIMITS}}
+
+**Bottlenecks:**
+{{#BOTTLENECKS}}
+- {{BOTTLENECK}} (solution: {{SOLUTION}})
+{{/BOTTLENECKS}}
+
+### Monitoring & Observability
+
+**Metrics:**
+{{#METRICS}}
+- {{METRIC}}
+{{/METRICS}}
+
+**Logging:**
+{{LOGGING_STRATEGY}}
+
+**Tracing:**
+{{TRACING_STRATEGY}}
+
+### Disaster Recovery
+
+**Backup Strategy:**
+{{#BACKUPS}}
+- {{BACKUP_DETAIL}}
+{{/BACKUPS}}
+
+**Recovery Time Objective (RTO):** {{RTO}}
+**Recovery Point Objective (RPO):** {{RPO}}
+
+**Failover:**
+{{FAILOVER_STRATEGY}}
+
+---
+
+## Design Decisions (ADRs)
+
+{{#ADRS}}
+### ADR-{{ADR_NUMBER}}: {{ADR_TITLE}}
+
+**Status:** {{STATUS}}
+**Date:** {{DATE}}
+
+**Context:**
+{{CONTEXT}}
+
+**Decision:**
+{{DECISION}}
+
+**Rationale:**
+{{#RATIONALE}}
+- {{REASON}}
+{{/RATIONALE}}
+
+**Consequences:**
+{{#CONSEQUENCES}}
+- {{CONSEQUENCE}}
+{{/CONSEQUENCES}}
+
+**Alternatives Considered:**
+{{#ALTERNATIVES}}
+- {{ALTERNATIVE}}: {{ALTERNATIVE_REASON}}
+{{/ALTERNATIVES}}
+
+---
+
+{{/ADRS}}
+
+---
+
+## Migration & Scalability
+
+### Current Limits
+
+| Resource | Current Capacity | Scaling Trigger | Target Capacity |
+|----------|------------------|-----------------|-----------------|
+{{#CURRENT_LIMITS}}
+| {{RESOURCE}} | {{CURRENT}} | {{TRIGGER}} | {{TARGET}} |
+{{/CURRENT_LIMITS}}
+
+### Scalability Roadmap
+
+{{#SCALING_PHASES}}
+**Phase {{PHASE_NUMBER}} ({{PHASE_DESCRIPTION}}):**
+{{#PHASE_ITEMS}}
+- {{ITEM}}
+{{/PHASE_ITEMS}}
+
+{{/SCALING_PHASES}}
+
+### Migration Strategy
+
+**Database Migrations:**
+{{DB_MIGRATION_STRATEGY}}
+
+**Agent Updates:** *(if applicable)*
+{{AGENT_UPDATE_STRATEGY}}
+
+---
+
+## Extensibility Points
+
+### Adding New Features
+
+{{#EXTENSION_POINTS}}
+**{{EXTENSION_TYPE}}:**
+{{#STEPS}}
+{{STEP_NUMBER}}. {{STEP_DESCRIPTION}}
+{{/STEPS}}
+
+{{/EXTENSION_POINTS}}
+
+---
+
+## Anti-Patterns Avoided
+
+{{#ANTI_PATTERNS}}
+{{PATTERN_NUMBER}}. **{{ANTI_PATTERN}}** → {{WHY_AVOIDED}}
+{{/ANTI_PATTERNS}}
+
+---
+
+## Questions for Stakeholders
+
+**Architecture Validation:**
+{{#ARCH_QUESTIONS}}
+- [ ] {{QUESTION}}
+{{/ARCH_QUESTIONS}}
+
+**Technical Validation:**
+{{#TECH_QUESTIONS}}
+- [ ] {{QUESTION}}
+{{/TECH_QUESTIONS}}
+
+**Operational Validation:**
+{{#OPS_QUESTIONS}}
+- [ ] {{QUESTION}}
+{{/OPS_QUESTIONS}}

@@ -1,0 +1,487 @@
+# Developer Guide
+
+> Development environment setup and workflows for {{PROJECT_NAME}}
+
+**Last Updated:** {{DATE}}
+
+---
+
+## Table of Contents
+
+1. [Development Environment Setup](#development-environment-setup)
+2. [Project Structure](#project-structure)
+3. [Development Workflow](#development-workflow)
+4. [Testing](#testing)
+5. [Debugging](#debugging)
+6. [Code Standards](#code-standards)
+7. [Common Tasks](#common-tasks)
+
+---
+
+## Development Environment Setup
+
+### Prerequisites
+
+{{#PREREQUISITES}}
+- **{{TOOL}}** version {{VERSION}}+ ([installation]({{INSTALL_URL}}))
+{{/PREREQUISITES}}
+
+### Setup Steps
+
+```bash
+# 1. Clone repository
+git clone {{REPO_URL}}
+cd {{PROJECT_DIR}}
+
+# 2. Install dependencies
+{{INSTALL_COMMAND}}
+
+# 3. Setup environment
+cp .env.example .env
+# Edit .env with your local configuration:
+#   {{ENV_INSTRUCTIONS}}
+
+# 4. Initialize database (if applicable)
+{{DB_INIT_COMMAND}}
+
+# 5. Seed data (optional, for development)
+{{SEED_COMMAND}}
+
+# 6. Start development server
+{{DEV_START_COMMAND}}
+```
+
+### Verify Setup
+
+```bash
+# Check server is running
+{{VERIFY_COMMAND}}
+
+# Run tests
+{{TEST_COMMAND}}
+```
+
+Expected output:
+```
+{{EXPECTED_OUTPUT}}
+```
+
+### IDE Setup
+
+#### VS Code (Recommended)
+
+Install recommended extensions:
+{{#VSCODE_EXTENSIONS}}
+- {{EXTENSION}}
+{{/VSCODE_EXTENSIONS}}
+
+Settings (`.vscode/settings.json`):
+```json
+{{VSCODE_SETTINGS}}
+```
+
+#### Other IDEs
+
+{{OTHER_IDE_INSTRUCTIONS}}
+
+---
+
+## Project Structure
+
+```
+{{PROJECT_DIR}}/
+{{PROJECT_STRUCTURE}}
+```
+
+### Key Directories
+
+{{#KEY_DIRECTORIES}}
+**`{{DIRECTORY}}/`**
+{{DESCRIPTION}}
+
+Key files:
+{{#FILES}}
+- `{{FILE}}` - {{FILE_DESCRIPTION}}
+{{/FILES}}
+
+{{/KEY_DIRECTORIES}}
+
+### Code Organization
+
+**{{ORGANIZATION_PATTERN}}**
+
+{{ORGANIZATION_DESCRIPTION}}
+
+Example:
+```
+{{ORGANIZATION_EXAMPLE}}
+```
+
+---
+
+## Development Workflow
+
+### Branch Strategy
+
+{{BRANCH_STRATEGY_DESCRIPTION}}
+
+**Branch Types:**
+{{#BRANCH_TYPES}}
+- `{{BRANCH_PREFIX}}` - {{BRANCH_DESCRIPTION}}
+{{/BRANCH_TYPES}}
+
+**Example:**
+```bash
+# Create feature branch
+git checkout -b feature/add-user-auth
+
+# Make changes, commit
+git add .
+git commit -m "feat: add JWT authentication"
+
+# Push and create PR
+git push origin feature/add-user-auth
+```
+
+### Commit Convention
+
+{{COMMIT_CONVENTION_DESCRIPTION}}
+
+**Format:**
+```
+{{COMMIT_FORMAT}}
+```
+
+**Types:**
+{{#COMMIT_TYPES}}
+- `{{TYPE}}`: {{TYPE_DESCRIPTION}}
+{{/COMMIT_TYPES}}
+
+**Examples:**
+```
+{{#COMMIT_EXAMPLES}}
+{{EXAMPLE}}
+{{/COMMIT_EXAMPLES}}
+```
+
+### Pull Request Process
+
+1. **Create PR** from your feature branch to `{{BASE_BRANCH}}`
+2. **Fill out PR template** with description and testing notes
+3. **Ensure CI passes** (tests, linting, build)
+4. **Request review** from {{REVIEWERS}}
+5. **Address feedback** and push updates
+6. **Merge** after approval (use {{MERGE_STRATEGY}})
+
+---
+
+## Testing
+
+### Test Structure
+
+```
+{{TEST_STRUCTURE}}
+```
+
+### Running Tests
+
+```bash
+# All tests
+{{TEST_ALL_COMMAND}}
+
+# Unit tests only
+{{TEST_UNIT_COMMAND}}
+
+# Integration tests only
+{{TEST_INTEGRATION_COMMAND}}
+
+# E2E tests only
+{{TEST_E2E_COMMAND}}
+
+# Specific test file
+{{TEST_FILE_COMMAND}}
+
+# Watch mode (re-run on changes)
+{{TEST_WATCH_COMMAND}}
+
+# Coverage report
+{{TEST_COVERAGE_COMMAND}}
+```
+
+### Writing Tests
+
+**Unit Test Example:**
+```{{TEST_LANGUAGE}}
+{{UNIT_TEST_EXAMPLE}}
+```
+
+**Integration Test Example:**
+```{{TEST_LANGUAGE}}
+{{INTEGRATION_TEST_EXAMPLE}}
+```
+
+**E2E Test Example:**
+```{{TEST_LANGUAGE}}
+{{E2E_TEST_EXAMPLE}}
+```
+
+### Test Data
+
+{{TEST_DATA_DESCRIPTION}}
+
+**Test fixtures:**
+```
+{{TEST_FIXTURES_LOCATION}}
+```
+
+**Factory pattern:**
+```{{TEST_LANGUAGE}}
+{{TEST_FACTORY_EXAMPLE}}
+```
+
+### Coverage Requirements
+
+- **Unit tests:** {{UNIT_COVERAGE_TARGET}}% coverage minimum
+- **Integration tests:** Cover all API endpoints
+- **E2E tests:** Cover all critical user journeys
+
+**Check coverage:**
+```bash
+{{COVERAGE_COMMAND}}
+```
+
+---
+
+## Debugging
+
+### Development Mode
+
+Start with debugging enabled:
+```bash
+{{DEBUG_START_COMMAND}}
+```
+
+### Debug Logs
+
+Enable verbose logging:
+```bash
+{{DEBUG_LOG_COMMAND}}
+```
+
+Log levels: {{LOG_LEVELS}}
+
+### Debugging Tools
+
+{{#DEBUG_TOOLS}}
+**{{TOOL_NAME}}**
+{{TOOL_DESCRIPTION}}
+
+```bash
+{{TOOL_COMMAND}}
+```
+{{/DEBUG_TOOLS}}
+
+### Common Issues
+
+{{#DEBUG_ISSUES}}
+**{{ISSUE}}**
+
+*Symptoms:* {{SYMPTOMS}}
+
+*Cause:* {{CAUSE}}
+
+*Solution:*
+```bash
+{{SOLUTION}}
+```
+{{/DEBUG_ISSUES}}
+
+---
+
+## Code Standards
+
+### Style Guide
+
+We follow {{STYLE_GUIDE_NAME}}.
+
+**Key rules:**
+{{#STYLE_RULES}}
+- {{RULE}}
+{{/STYLE_RULES}}
+
+### Linting
+
+```bash
+# Check for issues
+{{LINT_COMMAND}}
+
+# Auto-fix issues
+{{LINT_FIX_COMMAND}}
+```
+
+Linter config: `{{LINT_CONFIG_FILE}}`
+
+### Formatting
+
+We use {{FORMATTER_NAME}} for code formatting.
+
+```bash
+# Check formatting
+{{FORMAT_CHECK_COMMAND}}
+
+# Auto-format
+{{FORMAT_FIX_COMMAND}}
+```
+
+Formatter config: `{{FORMATTER_CONFIG_FILE}}`
+
+**Pre-commit hook:**
+```bash
+# Install pre-commit hook
+{{PRECOMMIT_INSTALL_COMMAND}}
+```
+
+### Type Checking
+
+{{#IF_TYPESCRIPT}}
+```bash
+# Type check
+{{TYPE_CHECK_COMMAND}}
+```
+
+**Type coverage target:** {{TYPE_COVERAGE_TARGET}}%
+{{/IF_TYPESCRIPT}}
+
+---
+
+## Common Tasks
+
+### Adding a New Feature
+
+{{#NEW_FEATURE_STEPS}}
+{{STEP_NUMBER}}. {{STEP_DESCRIPTION}}
+   ```bash
+   {{STEP_COMMAND}}
+   ```
+{{/NEW_FEATURE_STEPS}}
+
+### Adding an API Endpoint
+
+{{#NEW_ENDPOINT_STEPS}}
+{{STEP_NUMBER}}. {{STEP_DESCRIPTION}}
+   {{STEP_DETAILS}}
+{{/NEW_ENDPOINT_STEPS}}
+
+### Adding a Database Migration
+
+```bash
+# Create migration
+{{CREATE_MIGRATION_COMMAND}}
+
+# Run migration
+{{RUN_MIGRATION_COMMAND}}
+
+# Rollback migration
+{{ROLLBACK_MIGRATION_COMMAND}}
+```
+
+### Adding Dependencies
+
+```bash
+# Production dependency
+{{ADD_PROD_DEP_COMMAND}}
+
+# Development dependency
+{{ADD_DEV_DEP_COMMAND}}
+```
+
+**Before adding:** Check if it's necessary, consider bundle size, check license.
+
+### Updating Dependencies
+
+```bash
+# Check for updates
+{{CHECK_UPDATES_COMMAND}}
+
+# Update dependencies
+{{UPDATE_DEPS_COMMAND}}
+
+# Update specific package
+{{UPDATE_PACKAGE_COMMAND}}
+```
+
+**After updating:** Run full test suite.
+
+### Database Operations
+
+```bash
+# Reset database (CAUTION: destroys data)
+{{DB_RESET_COMMAND}}
+
+# Backup database
+{{DB_BACKUP_COMMAND}}
+
+# Restore database
+{{DB_RESTORE_COMMAND}}
+```
+
+### Performance Profiling
+
+{{#PROFILING_TOOLS}}
+**{{TOOL_NAME}}**
+```bash
+{{TOOL_COMMAND}}
+```
+{{TOOL_DESCRIPTION}}
+{{/PROFILING_TOOLS}}
+
+---
+
+## Environment Variables
+
+### Development
+
+Required environment variables for local development:
+
+```bash
+{{DEV_ENV_VARS}}
+```
+
+### Testing
+
+Test-specific environment variables:
+
+```bash
+{{TEST_ENV_VARS}}
+```
+
+---
+
+## Troubleshooting
+
+{{#TROUBLESHOOTING}}
+### {{ISSUE_TITLE}}
+
+**Problem:** {{PROBLEM}}
+
+**Solution:**
+{{#SOLUTION_STEPS}}
+{{STEP_NUMBER}}. {{STEP}}
+{{/SOLUTION_STEPS}}
+
+{{/TROUBLESHOOTING}}
+
+---
+
+## Resources
+
+- **Documentation:** {{DOCS_URL}}
+- **Issue Tracker:** {{ISSUES_URL}}
+- **Slack/Discord:** {{CHAT_URL}}
+- **Code Style Guide:** {{STYLE_GUIDE_URL}}
+- **Architecture Docs:** [docs/architecture/README.md](../architecture/README.md)
+- **Deployment Guide:** [deployment-guide.md](deployment-guide.md)
+
+---
+
+**Questions?** Ask in {{CHAT_CHANNEL}} or open a discussion on {{DISCUSSIONS_URL}}

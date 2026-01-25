@@ -1,0 +1,192 @@
+# {{PROJECT_NAME}}
+
+> {{ONE_LINE_DESCRIPTION}}
+
+{{#BADGES}}
+![{{BADGE_NAME}}]({{BADGE_URL}})
+{{/BADGES}}
+
+---
+
+## Overview
+
+{{PROJECT_OVERVIEW}}
+
+---
+
+## Features
+
+{{#FEATURES}}
+- ✅ **{{FEATURE_NAME}}** - {{FEATURE_DESCRIPTION}}
+{{/FEATURES}}
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+{{#PREREQUISITES}}
+- {{PREREQUISITE}}
+{{/PREREQUISITES}}
+
+### Installation
+
+```bash
+{{INSTALL_COMMANDS}}
+```
+
+### Basic Usage
+
+```bash
+{{BASIC_USAGE}}
+```
+
+**You should see:**
+```
+{{EXPECTED_OUTPUT}}
+```
+
+---
+
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [USAGE.md](USAGE.md) | Complete usage guide with examples |
+| [Architecture](docs/architecture/README.md) | System architecture and design |
+| [API Documentation](docs/api/README.md) | API endpoints and schemas |
+| [Developer Guide](docs/guides/developer-guide.md) | Development setup and workflow |
+| [Deployment Guide](docs/guides/deployment-guide.md) | Deployment instructions |
+
+---
+
+## Architecture
+
+{{ARCHITECTURE_OVERVIEW}}
+
+```
+{{ARCHITECTURE_DIAGRAM}}
+```
+
+**Key Components:**
+{{#COMPONENTS}}
+- **{{COMPONENT_NAME}}**: {{COMPONENT_DESCRIPTION}}
+{{/COMPONENTS}}
+
+See [Architecture Documentation](docs/architecture/README.md) for details.
+
+---
+
+## Technology Stack
+
+| Layer | Technology | Why |
+|-------|------------|-----|
+{{#TECH_STACK}}
+| {{LAYER}} | {{TECHNOLOGY}} | {{REASON}} |
+{{/TECH_STACK}}
+
+---
+
+## Development
+
+### Setup
+
+```bash
+# Clone repository
+git clone {{REPO_URL}}
+cd {{PROJECT_DIR}}
+
+# Install dependencies
+{{INSTALL_COMMAND}}
+
+# Setup environment
+cp .env.example .env
+# Edit .env with your settings
+
+# Initialize database (if applicable)
+{{DB_INIT_COMMAND}}
+
+# Start development server
+{{DEV_COMMAND}}
+```
+
+### Running Tests
+
+```bash
+# All tests
+{{TEST_ALL_COMMAND}}
+
+# Unit tests
+{{TEST_UNIT_COMMAND}}
+
+# Integration tests
+{{TEST_INTEGRATION_COMMAND}}
+
+# E2E tests
+{{TEST_E2E_COMMAND}}
+```
+
+### Project Structure
+
+```
+{{PROJECT_DIR}}/
+{{PROJECT_STRUCTURE}}
+```
+
+---
+
+## Deployment
+
+See [Deployment Guide](docs/guides/deployment-guide.md) for detailed instructions.
+
+**Quick deploy:**
+
+```bash
+{{DEPLOY_COMMAND}}
+```
+
+---
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Run tests (`{{TEST_COMMAND}}`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+---
+
+## License
+
+{{LICENSE_INFO}}
+
+See [LICENSE](LICENSE) for details.
+
+---
+
+## Support
+
+- **Documentation:** {{DOCS_URL}}
+- **Issues:** {{ISSUES_URL}}
+- **Discussions:** {{DISCUSSIONS_URL}}
+- **Email:** {{SUPPORT_EMAIL}}
+
+---
+
+## Acknowledgments
+
+{{#ACKNOWLEDGMENTS}}
+- {{ACKNOWLEDGMENT}}
+{{/ACKNOWLEDGMENTS}}
+
+---
+
+**Built with ❤️ by {{AUTHOR}}**

@@ -11,6 +11,7 @@ REQUIRED_AGENTS=(
     "ux-architect"
     "agentic-architect"
     "implementation-planner"
+    "documentation-engineer"
     "change-analyzer"
     "gap-analyzer"
     "backend-engineer"
