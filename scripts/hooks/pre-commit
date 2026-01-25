@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Pre-commit hook for claude-workflow-agents
+# Ensures documentation stays in sync
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+echo ""
+echo "═══════════════════════════════════════════════════════════"
+echo "          PRE-COMMIT: Checking documentation sync"
+echo "═══════════════════════════════════════════════════════════"
+echo ""
+
+# Check what files are being committed
+STAGED_FILES=$(git diff --cached --name-only)
+
+# Check if any agents or commands changed
+AGENTS_CHANGED=$(echo "$STAGED_FILES" | grep "^agents/" || true)
+COMMANDS_CHANGED=$(echo "$STAGED_FILES" | grep "^commands/" || true)
+TEMPLATES_CHANGED=$(echo "$STAGED_FILES" | grep "^templates/" || true)
+
+if [ -n "$AGENTS_CHANGED" ] || [ -n "$COMMANDS_CHANGED" ] || [ -n "$TEMPLATES_CHANGED" ]; then
+    echo "⚠️  Changes detected in agents, commands, or templates."
+    echo ""
+    echo "Staged changes:"
+    [ -n "$AGENTS_CHANGED" ] && echo "  Agents: $(echo "$AGENTS_CHANGED" | tr '\n' ' ')"
+    [ -n "$COMMANDS_CHANGED" ] && echo "  Commands: $(echo "$COMMANDS_CHANGED" | tr '\n' ' ')"
+    [ -n "$TEMPLATES_CHANGED" ] && echo "  Templates: $(echo "$TEMPLATES_CHANGED" | tr '\n' ' ')"
+    echo ""
+
+    # Check if CLAUDE.md is also staged
+    if ! echo "$STAGED_FILES" | grep -q "CLAUDE.md"; then
+        echo "❌ CLAUDE.md is NOT staged!"
+        echo "   You must update CLAUDE.md when changing agents/commands/templates."
+        echo ""
+        echo "   Add CLAUDE.md: git add CLAUDE.md"
+        echo "   Or bypass:     git commit --no-verify"
+        echo ""
+        exit 1
+    fi
+
+    # Check if help is also staged when agents/commands change
+    if [ -n "$AGENTS_CHANGED" ] || [ -n "$COMMANDS_CHANGED" ]; then
+        if ! echo "$STAGED_FILES" | grep -q "commands/agent-wf-help.md"; then
+            echo "⚠️  WARNING: agent-wf-help.md is NOT staged!"
+            echo "   You should update help when changing agents/commands."
+            echo ""
+        fi
+    fi
+fi
+
+# Run sync verification
+if [ -f "$REPO_ROOT/scripts/verify-sync.sh" ]; then
+    echo "Running sync verification..."
+    if ! bash "$REPO_ROOT/scripts/verify-sync.sh"; then
+        echo ""
+        echo "❌ Documentation is out of sync!"
+        echo "   Complete the maintenance checklist in CLAUDE.md"
+        echo "   Then stage all changes and try again."
+        echo ""
+        echo "   Bypass: git commit --no-verify"
+        exit 1
+    fi
+fi
+
+echo ""
+echo "✓ Pre-commit checks passed"
+echo ""
