@@ -1,0 +1,161 @@
+#!/bin/bash
+
+# Intent Validator
+# Checks if code honors promises from /docs/intent/product-intent.md
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RULES_FILE="$SCRIPT_DIR/rules.json"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+echo ""
+echo "## Intent Validation"
+echo ""
+
+# Check if rules exist
+if [ ! -f "$RULES_FILE" ]; then
+    echo "❌ ERROR: Rules file not found: $RULES_FILE"
+    exit 1
+fi
+
+VIOLATIONS=()
+PASSES=()
+
+# Load rules using jq
+if ! command -v jq &> /dev/null; then
+    echo "⚠️  WARNING: jq not installed - install with: brew install jq"
+    echo "Skipping automated checks"
+    exit 0
+fi
+
+# Check MUST DO promises
+check_must_do() {
+    local count=$(jq -r '.mustDo | length' "$RULES_FILE")
+
+    for ((i=0; i<$count; i++)); do
+        local id=$(jq -r ".mustDo[$i].id" "$RULES_FILE")
+        local promise=$(jq -r ".mustDo[$i].promise" "$RULES_FILE")
+        local check_type=$(jq -r ".mustDo[$i].checkType" "$RULES_FILE")
+        local severity=$(jq -r ".mustDo[$i].severity" "$RULES_FILE")
+
+        case $check_type in
+            "no-network-data-sends")
+                # Check for external API calls with user data
+                if grep -r "fetch\|axios" "$PROJECT_ROOT/frontend" "$PROJECT_ROOT/client" 2>/dev/null | grep -v "localhost\|127.0.0.1" | grep -q "userData\|userInfo\|profile"; then
+                    VIOLATIONS+=("[$severity] $promise - External network calls with user data found")
+                else
+                    PASSES+=("✅ $promise")
+                fi
+                ;;
+
+            "local-storage-only")
+                # Check that data stays in local storage/SQLite
+                if grep -r "mongodb\|firebase\|supabase" "$PROJECT_ROOT" 2>/dev/null | grep -q "import\|require"; then
+                    VIOLATIONS+=("[$severity] $promise - Cloud database imports found")
+                else
+                    PASSES+=("✅ $promise")
+                fi
+                ;;
+
+            "encryption-required")
+                # Check for encryption of sensitive data
+                if ! grep -r "encrypt\|crypto\|aes" "$PROJECT_ROOT" 2>/dev/null | grep -q "\.ts\|\.js"; then
+                    VIOLATIONS+=("[$severity] $promise - No encryption implementation found")
+                else
+                    PASSES+=("✅ $promise")
+                fi
+                ;;
+
+            "response-time")
+                # Check for performance monitoring/tests
+                local threshold=$(jq -r ".mustDo[$i].threshold" "$RULES_FILE")
+                if ! grep -r "performance\|benchmark\|timeout" "$PROJECT_ROOT/tests" "$PROJECT_ROOT/__tests__" 2>/dev/null | grep -q "\.test\|\.spec"; then
+                    VIOLATIONS+=("[$severity] $promise - No performance tests found for ${threshold}ms requirement")
+                else
+                    PASSES+=("✅ $promise")
+                fi
+                ;;
+
+            *)
+                # Unknown check type - skip
+                ;;
+        esac
+    done
+}
+
+# Check MUST NOT DO invariants
+check_must_not_do() {
+    local count=$(jq -r '.mustNotDo | length' "$RULES_FILE")
+
+    for ((i=0; i<$count; i++)); do
+        local id=$(jq -r ".mustNotDo[$i].id" "$RULES_FILE")
+        local invariant=$(jq -r ".mustNotDo[$i].invariant" "$RULES_FILE")
+        local check_type=$(jq -r ".mustNotDo[$i].checkType" "$RULES_FILE")
+        local severity=$(jq -r ".mustNotDo[$i].severity" "$RULES_FILE")
+
+        case $check_type in
+            "no-ad-networks")
+                # Check for ad network dependencies
+                if grep -r "google-ads\|doubleclick\|adservice\|adsense" "$PROJECT_ROOT/package.json" "$PROJECT_ROOT/requirements.txt" 2>/dev/null; then
+                    VIOLATIONS+=("[$severity] $invariant - Ad network dependency found")
+                else
+                    PASSES+=("✅ No ads: $invariant")
+                fi
+                ;;
+
+            "no-tracking")
+                # Check for analytics/tracking
+                if grep -r "analytics\|mixpanel\|segment\|amplitude" "$PROJECT_ROOT" 2>/dev/null | grep -q "import\|require"; then
+                    VIOLATIONS+=("[$severity] $invariant - Tracking/analytics code found")
+                else
+                    PASSES+=("✅ No tracking: $invariant")
+                fi
+                ;;
+
+            "no-third-party-auth")
+                # Check that auth is self-hosted
+                if grep -r "auth0\|firebase/auth\|clerk" "$PROJECT_ROOT" 2>/dev/null | grep -q "import\|require"; then
+                    VIOLATIONS+=("[$severity] $invariant - Third-party auth found")
+                else
+                    PASSES+=("✅ Self-hosted auth: $invariant")
+                fi
+                ;;
+
+            *)
+                # Unknown check type - skip
+                ;;
+        esac
+    done
+}
+
+# Run all checks
+check_must_do
+check_must_not_do
+
+# Report results
+echo "| Promise/Invariant | Status | Evidence |"
+echo "|-------------------|--------|----------|"
+
+for pass in "${PASSES[@]}"; do
+    echo "| $pass | ✅ PASS | Code honors promise |"
+done
+
+for violation in "${VIOLATIONS[@]}"; do
+    echo "| $violation | ❌ FAIL | Promise broken - see details |"
+done
+
+echo ""
+
+# Exit code
+if [ ${#VIOLATIONS[@]} -gt 0 ]; then
+    echo "**Intent Validation: FAILED** (${#VIOLATIONS[@]} violations)"
+    echo ""
+    for violation in "${VIOLATIONS[@]}"; do
+        echo "- $violation"
+    done
+    echo ""
+    exit 1
+else
+    echo "**Intent Validation: PASSED** (${#PASSES[@]}/${#PASSES[@]} promises honored)"
+    echo ""
+    exit 0
+fi

@@ -18,6 +18,7 @@ REQUIRED_AGENTS=(
     "test-engineer"
     "code-reviewer"
     "debugger"
+    "ci-cd-engineer"
 )
 
 # Check each agent

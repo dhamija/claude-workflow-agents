@@ -112,7 +112,40 @@ install_to() {
         fi
     done
 
-    echo -e "${GREEN}  Installed $AGENT_COUNT agents, $COMMAND_COUNT commands to $TARGET_NAME${NC}"
+    # Copy templates (used by agents like ci-cd-engineer)
+    if [ -d "$SCRIPT_DIR/templates" ]; then
+        mkdir -p "$TARGET/templates"
+
+        # Copy CI/CD templates
+        if [ -d "$SCRIPT_DIR/templates/ci" ]; then
+            mkdir -p "$TARGET/templates/ci/validators"
+            for template in "$SCRIPT_DIR/templates/ci/"*.template; do
+                if [ -f "$template" ]; then
+                    cp "$template" "$TARGET/templates/ci/"
+                fi
+            done
+            for template in "$SCRIPT_DIR/templates/ci/validators/"*.template; do
+                if [ -f "$template" ]; then
+                    cp "$template" "$TARGET/templates/ci/validators/"
+                fi
+            done
+        fi
+
+        # Copy docs templates
+        if [ -d "$SCRIPT_DIR/templates/docs" ]; then
+            mkdir -p "$TARGET/templates/docs/plans/overview"
+            mkdir -p "$TARGET/templates/docs/plans/features"
+            mkdir -p "$TARGET/templates/docs/changes"
+            # Note: Most docs templates are created by agents, not copied
+        fi
+
+        # Copy CLAUDE.md template
+        if [ -f "$SCRIPT_DIR/templates/CLAUDE.md.template" ]; then
+            cp "$SCRIPT_DIR/templates/CLAUDE.md.template" "$TARGET/templates/"
+        fi
+    fi
+
+    echo -e "${GREEN}  Installed $AGENT_COUNT agents, $COMMAND_COUNT commands, and templates to $TARGET_NAME${NC}"
 
     # If installing to project, also install CLAUDE.md template
     if [[ "$TARGET" == "./.claude" ]]; then

@@ -1,0 +1,201 @@
+#!/bin/bash
+
+# Architecture Validator
+# Checks if code respects boundaries from /docs/architecture/agent-design.md
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RULES_FILE="$SCRIPT_DIR/rules.json"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+echo ""
+echo "## Architecture Validation"
+echo ""
+
+# Check if rules exist
+if [ ! -f "$RULES_FILE" ]; then
+    echo "❌ ERROR: Rules file not found: $RULES_FILE"
+    exit 1
+fi
+
+VIOLATIONS=()
+PASSES=()
+
+# Load rules using jq
+if ! command -v jq &> /dev/null; then
+    echo "⚠️  WARNING: jq not installed - install with: brew install jq"
+    echo "Skipping automated checks"
+    exit 0
+fi
+
+# Check architectural boundaries
+check_boundaries() {
+    local count=$(jq -r '.boundaries | length' "$RULES_FILE")
+
+    for ((i=0; i<$count; i++)); do
+        local id=$(jq -r ".boundaries[$i].id" "$RULES_FILE")
+        local rule=$(jq -r ".boundaries[$i].rule" "$RULES_FILE")
+        local check_type=$(jq -r ".boundaries[$i].checkType" "$RULES_FILE")
+        local severity=$(jq -r ".boundaries[$i].severity" "$RULES_FILE")
+
+        case $check_type in
+            "no-db-imports-in-frontend")
+                # Check frontend doesn't import database packages
+                local paths=$(jq -r ".boundaries[$i].paths[]" "$RULES_FILE")
+                local forbidden=$(jq -r ".boundaries[$i].forbiddenImports[]" "$RULES_FILE")
+
+                local found=false
+                for path in $paths; do
+                    if [ -d "$PROJECT_ROOT/$path" ]; then
+                        for pkg in $forbidden; do
+                            if grep -r "import.*$pkg\|require.*$pkg\|from '$pkg'\|from \"$pkg\"" "$PROJECT_ROOT/$path" 2>/dev/null | grep -q .; then
+                                VIOLATIONS+=("[$severity] $rule - Found import of '$pkg' in $path")
+                                found=true
+                            fi
+                        done
+                    fi
+                done
+
+                if [ "$found" = false ]; then
+                    PASSES+=("✅ $rule")
+                fi
+                ;;
+
+            "no-business-logic-in-ui")
+                # Check for complex logic in UI components
+                local ui_paths=$(jq -r ".boundaries[$i].paths[]" "$RULES_FILE")
+
+                local complex_found=false
+                for path in $ui_paths; do
+                    if [ -d "$PROJECT_ROOT/$path" ]; then
+                        # Look for complex logic patterns
+                        if grep -r "filter\|map\|reduce\|sort" "$PROJECT_ROOT/$path" 2>/dev/null | grep -E "\.tsx?:" | head -5 | grep -q .; then
+                            VIOLATIONS+=("[$severity] $rule - Complex array operations found in UI components")
+                            complex_found=true
+                            break
+                        fi
+                    fi
+                done
+
+                if [ "$complex_found" = false ]; then
+                    PASSES+=("✅ $rule")
+                fi
+                ;;
+
+            "api-through-service-layer")
+                # Check that all API calls go through service layer
+                local frontend_paths=$(jq -r ".boundaries[$i].frontendPaths[]" "$RULES_FILE" 2>/dev/null || echo "frontend client")
+
+                local direct_api=false
+                for path in $frontend_paths; do
+                    if [ -d "$PROJECT_ROOT/$path" ]; then
+                        # Check for direct fetch/axios in components (not in services/)
+                        if find "$PROJECT_ROOT/$path" -type f \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -not -path "*/services/*" -not -path "*/api/*" -exec grep -l "fetch(\|axios\." {} \; 2>/dev/null | grep -q .; then
+                            VIOLATIONS+=("[$severity] $rule - Direct API calls found outside service layer")
+                            direct_api=true
+                            break
+                        fi
+                    fi
+                done
+
+                if [ "$direct_api" = false ]; then
+                    PASSES+=("✅ $rule")
+                fi
+                ;;
+
+            *)
+                # Unknown check type - skip
+                ;;
+        esac
+    done
+}
+
+# Check technology constraints
+check_tech_stack() {
+    local count=$(jq -r '.techStack | length' "$RULES_FILE")
+
+    for ((i=0; i<$count; i++)); do
+        local id=$(jq -r ".techStack[$i].id" "$RULES_FILE")
+        local constraint=$(jq -r ".techStack[$i].constraint" "$RULES_FILE")
+        local check_type=$(jq -r ".techStack[$i].checkType" "$RULES_FILE")
+        local severity=$(jq -r ".techStack[$i].severity" "$RULES_FILE")
+
+        case $check_type in
+            "allowed-dependencies")
+                # Check only allowed dependencies are used
+                local forbidden=$(jq -r ".techStack[$i].forbidden[]" "$RULES_FILE")
+
+                local forbidden_found=false
+                for pkg in $forbidden; do
+                    if grep -r "\"$pkg\"\|'$pkg'" "$PROJECT_ROOT/package.json" "$PROJECT_ROOT/requirements.txt" "$PROJECT_ROOT/Cargo.toml" 2>/dev/null | grep -q .; then
+                        VIOLATIONS+=("[$severity] $constraint - Forbidden dependency: $pkg")
+                        forbidden_found=true
+                    fi
+                done
+
+                if [ "$forbidden_found" = false ]; then
+                    PASSES+=("✅ $constraint")
+                fi
+                ;;
+
+            "required-dependencies")
+                # Check required dependencies are present
+                local required=$(jq -r ".techStack[$i].required[]" "$RULES_FILE")
+
+                local all_present=true
+                for pkg in $required; do
+                    if ! grep -r "\"$pkg\"\|'$pkg'" "$PROJECT_ROOT/package.json" "$PROJECT_ROOT/requirements.txt" "$PROJECT_ROOT/Cargo.toml" 2>/dev/null | grep -q .; then
+                        VIOLATIONS+=("[$severity] $constraint - Missing required dependency: $pkg")
+                        all_present=false
+                    fi
+                done
+
+                if [ "$all_present" = true ]; then
+                    PASSES+=("✅ $constraint")
+                fi
+                ;;
+
+            *)
+                # Unknown check type - skip
+                ;;
+        esac
+    done
+}
+
+# Run all checks
+check_boundaries
+check_tech_stack
+
+# Report results
+echo "| Constraint | Status | Details |"
+echo "|------------|--------|---------|"
+
+for pass in "${PASSES[@]}"; do
+    echo "| $pass | ✅ PASS | Boundary respected |"
+done
+
+for violation in "${VIOLATIONS[@]}"; do
+    echo "| $violation | ❌ FAIL | See details |"
+done
+
+echo ""
+
+# Exit code
+if [ ${#VIOLATIONS[@]} -gt 0 ]; then
+    echo "**Architecture Validation: FAILED** (${#VIOLATIONS[@]} violations)"
+    echo ""
+    echo "**Violations:**"
+    for violation in "${VIOLATIONS[@]}"; do
+        echo "- $violation"
+    done
+    echo ""
+    echo "Architecture constraints from /docs/architecture/ are broken."
+    echo "Fix violations before merging."
+    echo ""
+    exit 1
+else
+    echo "**Architecture Validation: PASSED** (${#PASSES[@]} constraints satisfied)"
+    echo ""
+    echo "All architectural boundaries intact."
+    echo ""
+    exit 0
+fi

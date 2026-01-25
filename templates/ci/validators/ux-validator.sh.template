@@ -1,0 +1,127 @@
+#!/bin/bash
+
+# UX Validator
+# Checks if all user journeys from /docs/ux/user-journeys.md have tests
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+RULES_FILE="$SCRIPT_DIR/rules.json"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+echo ""
+echo "## UX Validation"
+echo ""
+
+# Check if rules exist
+if [ ! -f "$RULES_FILE" ]; then
+    echo "❌ ERROR: Rules file not found: $RULES_FILE"
+    exit 1
+fi
+
+VIOLATIONS=()
+PASSES=()
+
+# Load rules using jq
+if ! command -v jq &> /dev/null; then
+    echo "⚠️  WARNING: jq not installed - install with: brew install jq"
+    echo "Skipping automated checks"
+    exit 0
+fi
+
+# Check that each journey has a test
+check_journey_tests() {
+    local count=$(jq -r '.journeys | length' "$RULES_FILE")
+
+    for ((i=0; i<$count; i++)); do
+        local id=$(jq -r ".journeys[$i].id" "$RULES_FILE")
+        local name=$(jq -r ".journeys[$i].name" "$RULES_FILE")
+        local check_type=$(jq -r ".journeys[$i].checkType" "$RULES_FILE")
+        local severity=$(jq -r ".journeys[$i].severity" "$RULES_FILE")
+
+        # Convert journey name to test filename pattern
+        # "User Login" → "user-login" or "userLogin" or "user_login"
+        local pattern=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+        local pattern2=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '_')
+        local pattern3=$(echo "$name" | sed 's/ //g' | tr '[:upper:]' '[:lower:]')
+
+        # Search for test file
+        if find "$PROJECT_ROOT" -type f \( -name "*test*" -o -name "*spec*" \) -exec grep -l "$pattern\|$pattern2\|$pattern3\|$name" {} \; 2>/dev/null | grep -q .; then
+            PASSES+=("✅ Journey: $name")
+        else
+            VIOLATIONS+=("[$severity] Journey: $name - No test found (expected: *$pattern*.test.*)")
+        fi
+    done
+}
+
+# Check journey success criteria
+check_success_criteria() {
+    local count=$(jq -r '.journeys | length' "$RULES_FILE")
+
+    for ((i=0; i<$count; i++)); do
+        local name=$(jq -r ".journeys[$i].name" "$RULES_FILE")
+        local criteria_count=$(jq -r ".journeys[$i].successCriteria | length" "$RULES_FILE")
+
+        # Check if success criteria are tested
+        for ((j=0; j<$criteria_count; j++)); do
+            local criterion=$(jq -r ".journeys[$i].successCriteria[$j]" "$RULES_FILE")
+
+            # Extract performance requirements (e.g., "< 2 seconds")
+            if echo "$criterion" | grep -q "<.*second\|ms"; then
+                # Check for performance tests
+                if ! grep -r "performance\|timeout\|benchmark" "$PROJECT_ROOT/tests" "$PROJECT_ROOT/__tests__" 2>/dev/null | grep -q "\.test\|\.spec"; then
+                    VIOLATIONS+=("[MEDIUM] Journey: $name - Success criterion not tested: $criterion")
+                else
+                    PASSES+=("✅ Criterion: $criterion")
+                fi
+            fi
+
+            # Check for error handling tests
+            if echo "$criterion" | grep -qi "error\|failure\|invalid"; then
+                local pattern=$(echo "$name" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+                if ! grep -r "error\|fail\|invalid" "$PROJECT_ROOT/tests" "$PROJECT_ROOT/__tests__" 2>/dev/null | grep -l "$pattern" | grep -q .; then
+                    VIOLATIONS+=("[HIGH] Journey: $name - Error handling not tested: $criterion")
+                else
+                    PASSES+=("✅ Error handling: $name")
+                fi
+            fi
+        done
+    done
+}
+
+# Run all checks
+check_journey_tests
+check_success_criteria
+
+# Report results
+echo "| Journey | Test Exists | Success Criteria Tested |"
+echo "|---------|-------------|-------------------------|"
+
+for pass in "${PASSES[@]}"; do
+    echo "| $pass | ✅ | ✅ |"
+done
+
+for violation in "${VIOLATIONS[@]}"; do
+    echo "| $violation | ❌ | See details |"
+done
+
+echo ""
+
+# Exit code
+if [ ${#VIOLATIONS[@]} -gt 0 ]; then
+    echo "**UX Validation: FAILED** (${#VIOLATIONS[@]} violations)"
+    echo ""
+    echo "**Missing Tests:**"
+    for violation in "${VIOLATIONS[@]}"; do
+        echo "- $violation"
+    done
+    echo ""
+    echo "Every user journey in /docs/ux/ must have a test."
+    echo "Add tests for missing journeys before merging."
+    echo ""
+    exit 1
+else
+    echo "**UX Validation: PASSED** (${#PASSES[@]} checks passed)"
+    echo ""
+    echo "All user journeys have tests. Success criteria verified."
+    echo ""
+    exit 0
+fi

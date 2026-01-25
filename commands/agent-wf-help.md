@@ -1,7 +1,7 @@
 ---
 name: agent-wf-help
 description: Show help about the agent workflow system - workflow, agents, commands, and development patterns
-argument-hint: "[topic] - workflow | agents | commands | patterns | parallel | brownfield"
+argument-hint: "[topic] - workflow | agents | commands | patterns | parallel | brownfield | cicd"
 ---
 
 # Claude Workflow Agents - Help System
@@ -12,11 +12,12 @@ Display help based on the topic requested.
 ```bash
 /agent-wf-help              # Quick overview
 /agent-wf-help workflow     # Two-level workflow
-/agent-wf-help agents       # All 11 agents
+/agent-wf-help agents       # All 12 agents
 /agent-wf-help commands     # Available commands
 /agent-wf-help patterns     # Development patterns
 /agent-wf-help parallel     # Parallel development
 /agent-wf-help brownfield   # Improving existing code
+/agent-wf-help cicd         # CI/CD validation setup
 ```
 
 ---
@@ -62,11 +63,12 @@ Just talk naturally. Claude handles the rest.
 │ MORE HELP                                                       │
 │                                                                 │
 │   /agent-wf-help workflow    - How the two-level workflow works │
-│   /agent-wf-help agents      - All 11 specialized agents        │
+│   /agent-wf-help agents      - All 12 specialized agents        │
 │   /agent-wf-help commands    - Available commands               │
 │   /agent-wf-help patterns    - Development patterns & examples  │
 │   /agent-wf-help parallel    - Parallel development guide       │
 │   /agent-wf-help brownfield  - Improving existing code          │
+│   /agent-wf-help cicd        - CI/CD validation setup           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -215,6 +217,12 @@ LEVEL 2 AGENTS (Feature-level)
   │ DEBUGGER                                                    │
   │ Does: Root cause analysis, minimal fix, regression test     │
   │ Triggers: "Broken", "error", "bug", "doesn't work"          │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ CI-CD-ENGINEER                                              │
+  │ Sets up: Automated validation, rules, GitHub Actions        │
+  │ Triggers: "Set up CI/CD", "validate", after L1 planning     │
   └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -796,6 +804,175 @@ FULL DETAILS
   conversation transcripts and detailed explanations.
 ```
 
+### If topic = "cicd" or "ci" or "cd" or "validation":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                    CI/CD VALIDATION                              ║
+║              (Automated Promise Protection)                      ║
+╚══════════════════════════════════════════════════════════════════╝
+
+CI/CD validation automatically checks if your code honors the promises
+made in /docs/intent/, /docs/ux/, and /docs/architecture/.
+
+
+WHEN TO SET IT UP
+─────────────────
+
+  ✅ After L1 planning (intent, UX, architecture docs exist)
+  ✅ Before production deployment
+  ✅ When working with a team
+  ✅ User asks: "set up CI/CD", "validate", "protect the intent"
+
+  ❌ During active development (unless docs changed)
+  ❌ Small prototypes/learning projects
+
+
+WHAT IT DOES
+────────────
+
+  1. Reads /docs/intent/, /docs/ux/, /docs/architecture/
+  2. Generates validation rules from your promises
+  3. Runs validators on every commit/PR
+  4. Reports violations with references to broken promises
+  5. Auto-updates rules when docs change
+
+
+WHAT IT CREATES
+───────────────
+
+  /ci/
+  ├── validate.sh              # Master validation script
+  ├── rules.json               # Generated from /docs (auto-updated)
+  ├── validators/
+  │   ├── intent-validator.sh  # Checks promises and invariants
+  │   ├── ux-validator.sh      # Checks journeys have tests
+  │   ├── arch-validator.sh    # Checks boundaries and patterns
+  │   └── test-validator.sh    # Checks test coverage
+  └── reports/
+      └── latest.md            # Last validation report
+
+  .git/hooks/
+  ├── pre-commit               # Quick checks before commit
+  └── pre-push                 # Full validation before push
+
+  .github/workflows/
+  └── validate.yml             # GitHub Actions workflow
+
+
+HOW TO USE IT
+─────────────
+
+  After L1 planning, just ask:
+
+    "Set up CI/CD validation"
+
+  Claude will:
+  1. Read your intent, UX, and architecture docs
+  2. Generate validation rules
+  3. Create validators and git hooks
+  4. Set up GitHub Actions workflow
+  5. Test the setup
+
+  Then every commit/PR will automatically check:
+  • Are all promises from intent being kept?
+  • Do all user journeys have tests?
+  • Are architectural boundaries intact?
+  • Is test coverage adequate?
+
+
+VALIDATION REPORT
+─────────────────
+
+  Every run creates a report like this:
+
+  ════════════════════════════════════════
+  🔍 VALIDATION REPORT
+  ════════════════════════════════════════
+
+  ✅ Intent Validation: PASS (8/8 promises honored)
+  ✅ UX Validation: PASS (3/3 journeys have tests)
+  ✅ Architecture Validation: PASS (7/7 boundaries intact)
+
+  ════════════════════════════════════════
+  VERDICT: ALL CLEAR ✅
+  ════════════════════════════════════════
+
+
+BLOCKING MERGES
+───────────────
+
+  If CRITICAL promises are broken, CI/CD blocks the merge:
+
+  ❌ CRITICAL VIOLATION DETECTED
+
+  Promise: "User data never leaves device"
+  Source: /docs/intent/product-intent.md:12
+
+  Violation:
+    File: frontend/src/api/sync.ts:45
+    Code: fetch('https://api.example.com/sync', { body: userData })
+
+  This breaks a CRITICAL promise. Deployment blocked.
+
+
+AUTO-UPDATE
+───────────
+
+  When you update /docs/intent/, /docs/ux/, or /docs/architecture/,
+  CI/CD automatically regenerates validation rules to stay in sync.
+
+
+EXAMPLE
+───────
+
+  User: Set up CI/CD to protect our intent
+
+  Claude: Reading your documentation...
+
+          Extracted promises:
+          - Privacy: User data never leaves device (CRITICAL)
+          - Performance: All operations < 200ms (HIGH)
+          - No ads ever (CRITICAL)
+
+          Extracted journeys:
+          - User Login (4 steps)
+          - Create Todo (3 steps)
+
+          Creating validation infrastructure...
+          ✅ /ci/rules.json (15 rules generated)
+          ✅ /ci/validators/*
+          ✅ Git hooks
+          ✅ GitHub Actions workflow
+
+          Testing...
+          ✅ All checks pass
+
+          CI/CD is now protecting your project intent.
+          Every commit will be validated automatically.
+
+
+OPT-IN, NOT MANDATORY
+─────────────────────
+
+  CI/CD validation is OPTIONAL. Claude may offer to set it up
+  after L1 planning, but you can:
+
+  • Say "yes" - Set it up now
+  • Say "no" - Skip it
+  • Say "later" - Ask for it anytime
+
+  It's valuable for production projects but not required for
+  prototypes or learning.
+
+
+MORE INFO
+─────────
+
+  The ci-cd-engineer agent handles all setup automatically.
+  You just ask for it - Claude does the rest.
+```
+
 ### If topic not recognized:
 
 ```
@@ -804,11 +981,12 @@ I don't have specific help for "<topic>".
 Available topics:
   /agent-wf-help              - Quick overview
   /agent-wf-help workflow     - How the two-level workflow works
-  /agent-wf-help agents       - All 11 specialized agents
+  /agent-wf-help agents       - All 12 specialized agents
   /agent-wf-help commands     - Available commands
   /agent-wf-help patterns     - Development patterns & examples
   /agent-wf-help parallel     - Parallel development guide
   /agent-wf-help brownfield   - Improving existing code
+  /agent-wf-help cicd         - CI/CD validation setup
   /agent-wf-help examples     - Practical examples
 
 Or just ask me what you want to know!

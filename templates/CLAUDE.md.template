@@ -260,6 +260,11 @@ You have access to these subagents. Use the Task tool to launch them when approp
 **debugger** - Use when something is broken or not working
 - Triggers: "broken", "error", "bug", "doesn't work", "failing", "wrong", "fix", "debug"
 
+**ci-cd-engineer** - Use when setting up automated validation infrastructure
+- Triggers: "set up CI/CD", "enable validation", "protect the intent", "automated checks"
+- Prerequisites: L1 docs (intent, UX, architecture) must exist
+- Outputs: `/ci/validate.sh`, `/ci/rules.json`, `.github/workflows/validate.yml`, git hooks
+
 ---
 
 ## Workflow Patterns
@@ -595,6 +600,53 @@ Fixed in src/auth/login.ts:45. Added regression test. All tests passing.
 
 ---
 
+---
+
+## CI/CD Validation (Optional)
+
+**After L1 planning completes**, you can optionally offer to set up CI/CD validation:
+
+```
+User: [After you've created intent/UX/architecture docs]
+
+Claude: I've created the project documentation. Would you like me to set up
+        automated CI/CD validation? This will:
+
+        - Generate validation rules from your /docs/intent, /docs/ux, /docs/architecture
+        - Run checks on every commit to ensure promises are kept
+        - Block merges if critical promises are broken
+        - Auto-update when docs change
+
+        It's optional but recommended for production projects.
+
+User: Yes / No / Maybe later
+```
+
+**When to offer CI/CD:**
+- ✅ After L1 planning (intent, UX, architecture docs exist)
+- ✅ User explicitly asks: "set up CI/CD", "enable validation", "protect the intent"
+- ✅ Before production deployment
+- ❌ During active feature development (unless docs changed)
+- ❌ For small prototypes/learning projects
+
+**If user says yes:**
+1. Launch **ci-cd-engineer** agent
+2. Agent reads `/docs/intent/`, `/docs/ux/`, `/docs/architecture/`
+3. Agent creates `/ci/` directory with validators and rules
+4. Agent sets up git hooks and GitHub Actions
+5. Reports what validation will check
+
+**If user says no or later:**
+- That's fine - they can ask for it anytime
+- Don't mention it again unless docs change significantly
+
+**Auto-triggers for CI/CD updates:**
+- If `/docs/intent/`, `/docs/ux/`, or `/docs/architecture/` change AND `/ci/` exists
+- Automatically regenerate validation rules to stay in sync
+- Notify user: "Docs changed - regenerating CI/CD validation rules"
+
+---
+
 ## Remember
 
 - **Users don't need to know about agents.** They just talk to you.
@@ -604,3 +656,4 @@ Fixed in src/auth/login.ts:45. Added regression test. All tests passing.
 - **The /docs folder is the source of truth** - all agents read from and write to it.
 - **Always verify promises** from product-intent.md are being kept.
 - **Only suggest parallel mode** if user explicitly asks about it.
+- **Offer CI/CD after L1 planning** - it's optional but valuable for production projects.
