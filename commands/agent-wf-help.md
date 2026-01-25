@@ -79,7 +79,7 @@ Just talk naturally. Claude handles the rest.
 │ MORE HELP                                                       │
 │                                                                 │
 │   /agent-wf-help workflow    - How the two-level workflow works │
-│   /agent-wf-help agents      - All 14 specialized agents        │
+│   /agent-wf-help agents      - All 15 specialized agents        │
 │   /agent-wf-help docs        - Documentation management         │
 │   /agent-wf-help commands    - Available commands               │
 │   /agent-wf-help design      - Design system & visual styling   │
@@ -89,6 +89,7 @@ Just talk naturally. Claude handles the rest.
 │   /agent-wf-help parallel    - Parallel development guide       │
 │   /agent-wf-help brownfield  - Improving existing code          │
 │   /agent-wf-help cicd        - CI/CD validation setup           │
+│   /agent-wf-help enforce     - Documentation enforcement        │
 │   /agent-wf-help sync        - Project state & maintenance      │
 └─────────────────────────────────────────────────────────────────┘
 ```
@@ -155,7 +156,7 @@ DOCUMENTS CREATED
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║                       THE 14 AGENTS                              ║
+║                       THE 15 AGENTS                              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Claude automatically selects agents. You don't call them directly.
@@ -258,6 +259,12 @@ LEVEL 2 AGENTS (Feature-level)
   │ Maintains: Project docs, state, and test coverage           │
   │ Triggers: After features, "/sync", "save state"             │
   └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ PROJECT-ENFORCER                                            │
+  │ Sets up: Git hooks, CI, enforcement for doc sync            │
+  │ Triggers: After L1, "/enforce setup", "protect docs"        │
+  └─────────────────────────────────────────────────────────────┘
 ```
 
 ### If topic = "commands":
@@ -274,7 +281,7 @@ HELP
 ────
   /agent-wf-help [topic]     This help system
                              Topics: workflow, agents, commands,
-                                     patterns, parallel, sync
+                                     patterns, parallel, enforce, sync
 
 
 MAIN COMMANDS
@@ -290,6 +297,8 @@ MAIN COMMANDS
                              Modes: verify, update, generate, status
   /sync [mode]               Update project state & docs
                              Modes: full (default), quick, report
+  /enforce [action]          Manage documentation enforcement
+                             Actions: setup, status, verify, disable
 
 
 PARALLEL DEVELOPMENT (Advanced, Opt-In)
@@ -1008,6 +1017,170 @@ MORE INFO
 ─────────
 
   The ci-cd-engineer agent handles all setup automatically.
+  You just ask for it - Claude does the rest.
+```
+
+### If topic = "enforce" or "enforcement" or "hooks" or "protect docs":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                      DOCUMENTATION ENFORCEMENT                   ║
+║                  (Keep Docs In Sync Automatically)               ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Automatic enforcement keeps your documentation in sync with code.
+OPTIONAL - enable after L1 planning for production projects.
+
+
+WHAT IT DOES
+────────────
+
+  Git pre-commit hook:
+    • Runs before every commit
+    • Checks docs are in sync
+    • Blocks commit if issues found
+
+  CI workflow:
+    • Runs on every PR
+    • Verifies promises, state, tests
+    • Fails PR if out of sync
+
+
+WHAT'S CHECKED
+──────────────
+
+  ✓ CLAUDE.md has current state
+  ✓ No BROKEN promises without reason
+  ✓ Tests exist for features
+  ✓ Code changes → docs updated
+
+
+COMMANDS
+────────
+
+  /enforce setup     Set up enforcement
+  /enforce status    Check if active
+  /enforce verify    Run verification manually
+  /enforce disable   Remove enforcement
+
+
+SETUP
+─────
+
+  After L1 planning, run:
+
+    /enforce setup
+
+  This creates:
+    • /scripts/verify-project.sh
+    • /scripts/hooks/pre-commit
+    • /.github/workflows/verify.yml
+
+
+WHAT HAPPENS
+────────────
+
+  On commit:
+    1. Hook runs verification
+    2. If issues → COMMIT BLOCKED
+    3. Fix issues, commit again
+
+  On PR:
+    1. CI runs verification
+    2. If issues → PR FAILS
+    3. Must fix before merge
+
+
+WHEN TO ENABLE
+──────────────
+
+  ✅ After L1 planning completes (Claude will suggest)
+  ✅ Before adding team members
+  ✅ Before production deployment
+  ✅ When documentation accuracy is critical
+
+  ❌ Small prototypes
+  ❌ Learning projects
+  ❌ Solo throwaway code
+
+
+EMERGENCY BYPASS
+────────────────
+
+  git commit --no-verify
+
+  Use sparingly! CI will still check on PR.
+
+
+DIFFERENCE FROM CI/CD
+─────────────────────
+
+  /enforce    → Ensures DOCS stay in sync
+              → Blocks stale documentation
+              → Checks promise statuses
+
+  CI/CD       → Ensures CODE honors promises
+              → Validates implementation
+              → Runs custom validators
+
+
+EXAMPLE
+───────
+
+  User: /enforce setup
+
+  Claude: Setting up enforcement...
+
+          ✓ Created verification script
+          ✓ Installed git hook
+          ✓ Created CI workflow
+
+          Enforcement active! Every commit will be verified.
+
+  [Later, user tries to commit code without updating docs]
+
+  $ git commit -m "Add search feature"
+
+  ═══════════════════════════════════════════════════════
+                   PRE-COMMIT VERIFICATION
+  ═══════════════════════════════════════════════════════
+
+  [1/5] Checking Intent Compliance...
+    ✓ 5/6 promises kept
+
+  [2/5] Checking UX Journeys...
+    ✓ 4 journeys implemented
+
+  [3/5] Checking CLAUDE.md State...
+    ⚠ Feature "search" shows "In Progress" but looks complete
+
+  [+] Checking staged changes...
+    ⚠ Code changed but documentation not updated
+
+  ═══════════════════════════════════════════════════════
+                         VERDICT
+  ═══════════════════════════════════════════════════════
+
+  ⚠ COMMIT ALLOWED WITH 2 WARNINGS
+
+     Consider updating CLAUDE.md feature status.
+
+
+OPT-IN, NOT MANDATORY
+─────────────────────
+
+  Enforcement is OPTIONAL. Claude may suggest it after L1
+  planning, but you can:
+
+  • Say "yes" - Set it up now
+  • Say "no" - Skip it
+  • Say "later" - Enable anytime with /enforce setup
+
+
+MORE INFO
+─────────
+
+  The project-enforcer agent handles all setup automatically.
   You just ask for it - Claude does the rest.
 ```
 

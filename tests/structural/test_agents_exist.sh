@@ -21,6 +21,7 @@ REQUIRED_AGENTS=(
     "debugger"
     "ci-cd-engineer"
     "project-maintainer"
+    "project-enforcer"
 )
 
 # Check each agent

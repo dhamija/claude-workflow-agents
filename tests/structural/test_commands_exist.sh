@@ -14,6 +14,7 @@ REQUIRED_COMMANDS=(
     "debug"
     "design"
     "docs"
+    "enforce"
     "gap"
     "implement"
     "improve"

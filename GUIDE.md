@@ -47,7 +47,7 @@ Most common actions - no commands needed:
 ```
 /agent-wf-help              # Quick overview
 /agent-wf-help workflow     # Two-level workflow
-/agent-wf-help agents       # All 14 agents
+/agent-wf-help agents       # All 15 agents
 /agent-wf-help commands     # All commands
 /agent-wf-help design       # Design system & UI consistency
 /agent-wf-help patterns     # Usage patterns
@@ -124,7 +124,7 @@ Improve (fix by priority: Critical → High → Medium → Low)
 | Topic | Shows |
 |-------|-------|
 | `workflow` | Two-level workflow (App → Features) |
-| `agents` | All 11 agents and when they run |
+| `agents` | All 15 agents and when they run |
 | `commands` | All available commands |
 | `patterns` | Common development patterns |
 | `parallel` | Parallel development (teams) |
@@ -160,6 +160,7 @@ Improve (fix by priority: Critical → High → Medium → Low)
 |-------|------|---------|
 | **ci-cd-engineer** | CI/CD setup & validation | CI/CD tasks |
 | **project-maintainer** | Sync state, update docs | "/sync" command |
+| **project-enforcer** | Set up doc enforcement | "/enforce" command |
 
 ---
 

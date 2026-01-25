@@ -192,7 +192,7 @@ claude-workflow-agents/
 
 ⚠️ **UPDATE THIS SECTION** when adding/removing agents, commands, or features.
 
-### Agents: 14 total
+### Agents: 15 total
 
 **L1 Analysis** (run once at project start):
 - **intent-guardian** - Define promises to users
@@ -216,8 +216,9 @@ claude-workflow-agents/
 **Setup & Maintenance**:
 - **ci-cd-engineer** - Set up CI/CD in user projects
 - **project-maintainer** - Keep user project docs and state in sync
+- **project-enforcer** - Set up git hooks and enforcement in user projects
 
-### Commands: 25 total
+### Commands: 26 total
 
 | Command | Purpose |
 |---------|---------|
@@ -226,11 +227,16 @@ claude-workflow-agents/
 | `/audit` | Audit existing codebase (brownfield) |
 | `/change` | Analyze change impact |
 | `/debug` | Launch debugger |
+| `/design` | Manage design system |
+| `/docs` | Manage project documentation |
+| `/enforce` | Set up documentation enforcement |
 | `/gap` | Find gaps in brownfield project |
 | `/implement` | Implement from plans |
 | `/improve` | Improve brownfield gaps |
 | `/intent` | Run intent-guardian |
 | `/intent-audit` | Audit existing intent |
+| `/llm` | Manage LLM integration |
+| `/mcp` | Manage MCP servers |
 | `/parallel` | Parallel development with worktrees |
 | `/plan` | Show/create implementation plans |
 | `/replan` | Regenerate plans after changes |

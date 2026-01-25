@@ -1,0 +1,168 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# PROJECT VERIFICATION CI
+#
+# Runs on every push and PR to ensure:
+# - Documentation is in sync with code
+# - Intent promises are tracked
+# - Tests pass
+# ═══════════════════════════════════════════════════════════════════════════════
+
+name: Verify Project
+
+on:
+  push:
+    branches: [main, master, develop]
+  pull_request:
+    branches: [main, master, develop]
+
+jobs:
+  verify-docs:
+    name: Verify Documentation Sync
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/*.sh 2>/dev/null || true
+          chmod +x scripts/hooks/* 2>/dev/null || true
+
+      - name: Run project verification
+        run: |
+          if [ -f "./scripts/verify-project.sh" ]; then
+            ./scripts/verify-project.sh
+          else
+            echo "⚠️ No verification script found"
+            echo "   Run: /enforce setup"
+            exit 1
+          fi
+
+  check-intent:
+    name: Check Intent Promises
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check for broken promises
+        run: |
+          INTENT_FILE="docs/intent/product-intent.md"
+
+          if [ -f "$INTENT_FILE" ]; then
+            # Fail if there are BROKEN promises without justification
+            BROKEN=$(grep -c "Status:.*BROKEN" "$INTENT_FILE" 2>/dev/null || echo "0")
+
+            if [ "$BROKEN" -gt 0 ]; then
+              echo "⚠️ Found $BROKEN BROKEN promise(s)"
+              echo ""
+              grep -B5 "Status:.*BROKEN" "$INTENT_FILE" || true
+              echo ""
+
+              # Check if justified
+              JUSTIFIED=$(grep -A2 "Status:.*BROKEN" "$INTENT_FILE" | grep -c "Reason:" || echo "0")
+
+              if [ "$BROKEN" -gt "$JUSTIFIED" ]; then
+                echo "❌ BROKEN promises must have justification"
+                echo "   Add 'Reason: ...' after each BROKEN promise"
+                exit 1
+              else
+                echo "✓ All broken promises are justified"
+              fi
+            fi
+
+            # Report promise status
+            KEPT=$(grep -c "Status:.*KEPT" "$INTENT_FILE" 2>/dev/null || echo "0")
+            AT_RISK=$(grep -c "Status:.*AT_RISK" "$INTENT_FILE" 2>/dev/null || echo "0")
+
+            echo ""
+            echo "Promise Status:"
+            echo "  ✓ KEPT:    $KEPT"
+            echo "  ⚠ AT_RISK: $AT_RISK"
+            echo "  ❌ BROKEN:  $BROKEN"
+          else
+            echo "⚠️ No intent file found at $INTENT_FILE"
+            echo "   This is optional for new projects"
+          fi
+
+  check-claude-md:
+    name: Check CLAUDE.md State
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify CLAUDE.md
+        run: |
+          if [ -f "CLAUDE.md" ]; then
+            echo "✓ CLAUDE.md exists"
+
+            # Check for required sections
+            if grep -q "## Current State" CLAUDE.md; then
+              echo "✓ Has 'Current State' section"
+            else
+              echo "❌ Missing 'Current State' section"
+              exit 1
+            fi
+
+            # Check for stale markers
+            IN_PROGRESS=$(grep -c "In Progress\|🔄" CLAUDE.md 2>/dev/null || echo "0")
+            if [ "$IN_PROGRESS" -gt 5 ]; then
+              echo "⚠️ $IN_PROGRESS items marked 'In Progress'"
+              echo "   Verify these are accurate, not stale"
+            fi
+
+            # Check for sync timestamp
+            if grep -q "Last.*sync\|Last.*updated" CLAUDE.md; then
+              echo "✓ Has sync timestamp"
+            else
+              echo "⚠️ No sync timestamp - consider adding one"
+            fi
+          else
+            echo "❌ CLAUDE.md not found"
+            exit 1
+          fi
+
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+        if: hashFiles('package.json') != ''
+
+      - name: Install dependencies
+        run: npm ci
+        if: hashFiles('package.json') != ''
+
+      - name: Run tests
+        run: npm test
+        if: hashFiles('package.json') != ''
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          cache: 'pip'
+        if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ]; then pip install -e .; fi
+        if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''
+
+      - name: Run Python tests
+        run: pytest
+        if: hashFiles('requirements.txt') != '' || hashFiles('pyproject.toml') != ''

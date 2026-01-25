@@ -175,6 +175,68 @@ For each feature in implementation-order.md:
 
 ---
 
+## 🔒 Enforcement (Optional)
+
+> Documentation sync can be **enforced** by git hooks and CI.
+> This is OPTIONAL - enable with `/enforce setup` after L1 planning.
+
+### What's Enforced
+
+When enabled, the following checks run on every commit and PR:
+
+| Check | Blocks Commit | Fails CI |
+|-------|:-------------:|:--------:|
+| CLAUDE.md has current state | ⚠ Warning | ❌ Yes |
+| No unjustified BROKEN promises | ❌ Yes | ❌ Yes |
+| Tests pass | ⚠ Warning | ❌ Yes |
+| New code has tests | ⚠ Warning | ⚠ Warning |
+
+### Commands
+
+```bash
+/enforce setup      # Enable enforcement (recommended after L1)
+/enforce status     # Check if active
+/enforce verify     # Run verification manually
+/enforce disable    # Remove enforcement
+
+# Manual verification
+./scripts/verify-project.sh     # Check compliance
+./scripts/verify-project.sh -v  # Verbose output
+```
+
+### After Code Changes
+
+When enforcement is enabled:
+
+1. **Update CLAUDE.md** "Current State" if feature status changed
+2. **Update /docs/intent/** if promises affected
+3. **Add tests** for new code
+4. **Run verification**: `./scripts/verify-project.sh`
+5. **Commit** - hook will verify before allowing
+
+### Bypassing (Emergency Only)
+
+```bash
+git commit --no-verify -m "Emergency fix: [reason]"
+```
+
+This bypasses hooks but CI will still run. Document why bypass was needed.
+
+### When to Enable
+
+**Recommended times:**
+- ✓ After L1 planning completes (Claude will suggest)
+- ✓ Before adding team members
+- ✓ Before production deployment
+- ✓ When documentation accuracy is critical
+
+**Not needed for:**
+- Small prototypes
+- Learning projects
+- Solo throwaway code
+
+---
+
 ## Detecting Project Type
 
 ### Greenfield (New Project)

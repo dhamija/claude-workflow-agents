@@ -543,6 +543,70 @@ project-maintainer: [Periodic sync]
   - No new test gaps
 ```
 
+### Integration with Enforcement
+
+When enforcement is enabled, check compliance before syncing:
+
+```
+User: /sync
+
+project-maintainer:
+  Checking enforcement compliance...
+
+  ✓ CLAUDE.md state is current
+  ✓ No broken promises
+  ⚠ 1 warning: Feature "search" has no tests yet
+
+  Sync will complete. Commit should pass hooks.
+
+  Syncing CLAUDE.md...
+  ✓ Current State updated
+  ✓ Feature statuses accurate
+  ✓ Test coverage tracked
+
+  Ready to commit.
+```
+
+If enforcement would fail:
+```
+User: /sync
+
+project-maintainer:
+  Checking enforcement compliance...
+
+  ❌ Promise "Search < 500ms" may be broken
+     Last search query took 800ms in tests
+
+  ⚠️ If you commit now, the pre-commit hook will BLOCK it.
+
+  Action needed:
+    a) Fix the performance issue
+    b) Mark promise as AT_RISK with reason
+    c) Mark promise as BROKEN with justification
+
+  Which would you like to do?
+
+User: Mark as at risk - working on optimization
+
+project-maintainer:
+  Updating product-intent.md...
+  ✓ Promise marked AT_RISK
+     Reason: Performance optimization in progress
+
+  Now syncing CLAUDE.md...
+  ✓ All updates complete
+
+  Commit will now pass enforcement hooks.
+```
+
+### Auto-Fix Common Issues
+
+When syncing, automatically fix:
+- Update "In Progress" to "Complete" for finished features
+- Add test coverage warnings to CLAUDE.md
+- Update promise statuses based on test results
+- Mark journeys IMPLEMENTED when routes/components exist
+
 ---
 
 ## Output Examples

@@ -316,6 +316,8 @@ Claude: [Fixes only security-related gaps]
 | `/sync` | Update project state & docs | `/sync` |
 | `/sync quick` | Quick state update | `/sync quick` |
 | `/sync report` | Check sync status | `/sync report` |
+| `/enforce setup` | Enable doc enforcement | `/enforce setup` |
+| `/enforce status` | Check if enforcement active | `/enforce status` |
 
 ### Parallel Development
 

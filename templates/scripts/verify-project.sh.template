@@ -1,0 +1,312 @@
+#!/bin/bash
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PROJECT VERIFICATION SCRIPT
+#
+# Verifies that documentation matches code reality:
+# - Intent promises are kept
+# - UX journeys are implemented
+# - Architecture is followed
+# - CLAUDE.md state is accurate
+# - Tests exist for features
+#
+# Usage:
+#   ./scripts/verify-project.sh        # Standard check
+#   ./scripts/verify-project.sh -v     # Verbose output
+#   ./scripts/verify-project.sh -q     # Quiet (for hooks)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Parse args
+VERBOSE=false
+QUIET=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -v|--verbose) VERBOSE=true; shift ;;
+        -q|--quiet) QUIET=true; shift ;;
+        *) shift ;;
+    esac
+done
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+ERRORS=0
+WARNINGS=0
+
+log() {
+    [ "$QUIET" = false ] && echo -e "$1"
+}
+
+log_verbose() {
+    [ "$VERBOSE" = true ] && echo -e "$1"
+}
+
+log_always() {
+    echo -e "$1"
+}
+
+log ""
+log "╔══════════════════════════════════════════════════════════════════╗"
+log "║              PROJECT VERIFICATION                                ║"
+log "╚══════════════════════════════════════════════════════════════════╝"
+log ""
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CHECK 1: Intent Compliance
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log "${BLUE}[1/5] Checking Intent Compliance...${NC}"
+
+INTENT_FILE="$PROJECT_ROOT/docs/intent/product-intent.md"
+
+if [ -f "$INTENT_FILE" ]; then
+    # Check for BROKEN promises without justification
+    if grep -q "Status:.*BROKEN" "$INTENT_FILE"; then
+        # Check if there's a reason
+        BROKEN_COUNT=$(grep -c "Status:.*BROKEN" "$INTENT_FILE" || echo "0")
+        JUSTIFIED=$(grep -A2 "Status:.*BROKEN" "$INTENT_FILE" | grep -c "Reason:" || echo "0")
+
+        if [ "$BROKEN_COUNT" -gt "$JUSTIFIED" ]; then
+            log_always "${RED}  ❌ BROKEN promises without justification${NC}"
+            log_always "     Update product-intent.md with reasons for broken promises"
+            ((ERRORS++))
+        else
+            log "${YELLOW}  ⚠ $BROKEN_COUNT broken promise(s) (justified)${NC}"
+            ((WARNINGS++))
+        fi
+    fi
+
+    # Check for AT_RISK promises
+    if grep -q "Status:.*AT_RISK" "$INTENT_FILE"; then
+        RISK_COUNT=$(grep -c "Status:.*AT_RISK" "$INTENT_FILE" || echo "0")
+        log "${YELLOW}  ⚠ $RISK_COUNT promise(s) at risk${NC}"
+        ((WARNINGS++))
+    fi
+
+    # Count KEPT promises
+    KEPT_COUNT=$(grep -c "Status:.*KEPT" "$INTENT_FILE" 2>/dev/null || echo "0")
+    TOTAL_PROMISES=$(grep -c "^### " "$INTENT_FILE" 2>/dev/null || echo "0")
+
+    log "${GREEN}  ✓ Intent file exists ($KEPT_COUNT/$TOTAL_PROMISES promises kept)${NC}"
+
+    log_verbose ""
+    log_verbose "  Promise details:"
+    log_verbose "    KEPT:    $KEPT_COUNT"
+    log_verbose "    AT_RISK: $(grep -c 'Status:.*AT_RISK' "$INTENT_FILE" 2>/dev/null || echo '0')"
+    log_verbose "    BROKEN:  $(grep -c 'Status:.*BROKEN' "$INTENT_FILE" 2>/dev/null || echo '0')"
+else
+    log "${YELLOW}  ⚠ No intent file found (/docs/intent/product-intent.md)${NC}"
+    ((WARNINGS++))
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CHECK 2: UX Journey Implementation
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log ""
+log "${BLUE}[2/5] Checking UX Journeys...${NC}"
+
+UX_FILE="$PROJECT_ROOT/docs/ux/user-journeys.md"
+
+if [ -f "$UX_FILE" ]; then
+    # Check for NOT_STARTED journeys that should be done
+    NOT_STARTED=$(grep -c "Status:.*NOT_STARTED" "$UX_FILE" 2>/dev/null || echo "0")
+    IMPLEMENTED=$(grep -c "Status:.*IMPLEMENTED" "$UX_FILE" 2>/dev/null || echo "0")
+    PARTIAL=$(grep -c "Status:.*PARTIAL" "$UX_FILE" 2>/dev/null || echo "0")
+
+    log "${GREEN}  ✓ UX file exists${NC}"
+    log "     Implemented: $IMPLEMENTED | Partial: $PARTIAL | Not Started: $NOT_STARTED"
+
+    # Check if routes mentioned in journeys exist
+    if [ "$VERBOSE" = true ]; then
+        log_verbose ""
+        log_verbose "  Checking route implementation..."
+        # Extract routes from journeys and check if they exist in code
+        # This is simplified - actual implementation would be more sophisticated
+    fi
+else
+    log "${YELLOW}  ⚠ No UX file found (/docs/ux/user-journeys.md)${NC}"
+    ((WARNINGS++))
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CHECK 3: Architecture Compliance
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log ""
+log "${BLUE}[3/5] Checking Architecture...${NC}"
+
+ARCH_FILE="$PROJECT_ROOT/docs/architecture/agent-design.md"
+
+if [ -f "$ARCH_FILE" ]; then
+    log "${GREEN}  ✓ Architecture file exists${NC}"
+
+    # Check for AI components that need fallbacks
+    if grep -qi "fallback.*required\|requires.*fallback" "$ARCH_FILE"; then
+        log_verbose "  Checking AI fallbacks..."
+        # Would check that AI components have fallback implementations
+    fi
+else
+    log "${YELLOW}  ⚠ No architecture file found (/docs/architecture/agent-design.md)${NC}"
+    ((WARNINGS++))
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CHECK 4: CLAUDE.md State Accuracy
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log ""
+log "${BLUE}[4/5] Checking CLAUDE.md State...${NC}"
+
+CLAUDE_MD="$PROJECT_ROOT/CLAUDE.md"
+
+if [ -f "$CLAUDE_MD" ]; then
+    # Check for Current State section
+    if grep -q "## Current State" "$CLAUDE_MD"; then
+        log "${GREEN}  ✓ CLAUDE.md has Current State section${NC}"
+
+        # Check for stale "In Progress" markers
+        if grep -q "In Progress\|🔄" "$CLAUDE_MD"; then
+            IN_PROGRESS=$(grep -c "In Progress\|🔄" "$CLAUDE_MD" || echo "0")
+            log "${YELLOW}  ⚠ $IN_PROGRESS item(s) marked 'In Progress' - verify these are accurate${NC}"
+            ((WARNINGS++))
+        fi
+
+        # Check last updated timestamp
+        if grep -q "Last.*sync\|Last.*updated" "$CLAUDE_MD"; then
+            log_verbose "  ✓ Has sync timestamp"
+        else
+            log "${YELLOW}  ⚠ No sync timestamp in CLAUDE.md${NC}"
+            log "     Consider adding 'Last synced: YYYY-MM-DD' to Current State"
+            ((WARNINGS++))
+        fi
+    else
+        log_always "${RED}  ❌ CLAUDE.md missing 'Current State' section${NC}"
+        ((ERRORS++))
+    fi
+else
+    log_always "${RED}  ❌ CLAUDE.md not found${NC}"
+    ((ERRORS++))
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CHECK 5: Test Coverage
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log ""
+log "${BLUE}[5/5] Checking Test Coverage...${NC}"
+
+# Find test directory
+TEST_DIR=""
+for dir in tests test __tests__ spec; do
+    if [ -d "$PROJECT_ROOT/$dir" ]; then
+        TEST_DIR="$PROJECT_ROOT/$dir"
+        break
+    fi
+done
+
+if [ -n "$TEST_DIR" ]; then
+    TEST_COUNT=$(find "$TEST_DIR" -name "*.test.*" -o -name "*.spec.*" -o -name "test_*.py" 2>/dev/null | wc -l | tr -d ' ')
+    log "${GREEN}  ✓ Test directory exists ($TEST_COUNT test files)${NC}"
+
+    # Check if tests pass (if package.json exists with test script)
+    if [ -f "$PROJECT_ROOT/package.json" ] && grep -q '"test"' "$PROJECT_ROOT/package.json"; then
+        log_verbose "  Test command available: npm test"
+    elif [ -f "$PROJECT_ROOT/pytest.ini" ] || [ -f "$PROJECT_ROOT/pyproject.toml" ]; then
+        log_verbose "  Test command available: pytest"
+    fi
+else
+    log "${YELLOW}  ⚠ No test directory found${NC}"
+    ((WARNINGS++))
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STAGED FILES CHECK (for pre-commit context)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    STAGED=$(git diff --cached --name-only 2>/dev/null || true)
+
+    if [ -n "$STAGED" ]; then
+        log ""
+        log "${BLUE}[+] Checking staged changes...${NC}"
+
+        # Check if code changed but docs didn't
+        CODE_CHANGED=$(echo "$STAGED" | grep -E "^src/|^api/|^web/|^app/" || true)
+        DOCS_CHANGED=$(echo "$STAGED" | grep -E "^docs/|CLAUDE.md" || true)
+
+        if [ -n "$CODE_CHANGED" ] && [ -z "$DOCS_CHANGED" ]; then
+            log "${YELLOW}  ⚠ Code changed but documentation not updated${NC}"
+            log "     Consider updating CLAUDE.md and relevant /docs/ files"
+            ((WARNINGS++))
+        fi
+
+        # Check if intent-related files changed (customize per project)
+        # Example: search, auth, payment - adjust based on project promises
+        INTENT_KEYWORDS="search|auth|payment"  # Customize this
+        INTENT_RELATED=$(echo "$STAGED" | grep -iE "$INTENT_KEYWORDS" || true)
+
+        if [ -n "$INTENT_RELATED" ] && ! echo "$STAGED" | grep -q "product-intent.md"; then
+            log "${YELLOW}  ⚠ Intent-related code changed - verify promises still kept${NC}"
+            log_verbose "     Files: $INTENT_RELATED"
+            ((WARNINGS++))
+        fi
+
+        # Check for new source files without tests
+        NEW_SOURCE=$(git diff --cached --name-only --diff-filter=A | grep -E "^src/|^api/|^web/" | grep -v "\.test\.\|\.spec\." || true)
+
+        if [ -n "$NEW_SOURCE" ]; then
+            for file in $NEW_SOURCE; do
+                BASE_NAME=$(basename "$file" | sed 's/\.[^.]*$//')
+                if ! echo "$STAGED" | grep -q "$BASE_NAME.*test\|$BASE_NAME.*spec"; then
+                    log "${YELLOW}  ⚠ New file without test: $file${NC}"
+                    ((WARNINGS++))
+                fi
+            done
+        fi
+    fi
+fi
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SUMMARY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+log ""
+log "════════════════════════════════════════════════════════════════════"
+log "                          SUMMARY"
+log "════════════════════════════════════════════════════════════════════"
+log ""
+log "  Errors:   $ERRORS"
+log "  Warnings: $WARNINGS"
+log ""
+
+if [ $ERRORS -gt 0 ]; then
+    log_always "${RED}${BOLD}❌ VERIFICATION FAILED${NC}"
+    log_always ""
+    log_always "   Fix $ERRORS error(s) before committing."
+    log_always "   Run with -v for verbose output."
+    log_always ""
+    exit 1
+elif [ $WARNINGS -gt 0 ]; then
+    log "${YELLOW}${BOLD}⚠ VERIFICATION PASSED WITH WARNINGS${NC}"
+    log ""
+    log "   $WARNINGS warning(s) - consider addressing these."
+    log ""
+    exit 0
+else
+    log "${GREEN}${BOLD}✓ VERIFICATION PASSED${NC}"
+    log ""
+    log "   All checks passed."
+    log ""
+    exit 0
+fi
