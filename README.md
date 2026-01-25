@@ -69,7 +69,7 @@ cd /path/to/your/project
 
 ### Verify Installation
 ```bash
-ls ~/.claude/agents/  # Should show 13 .md files
+ls ~/.claude/agents/  # Should show 11 .md files
 ```
 
 ---
@@ -96,10 +96,10 @@ Claude figures out what to do. No commands needed.
 
 For more control, use optional commands:
 ```
-/status              # See progress
-/next                # Continue building
+/project status      # See progress
+/project sync        # Update docs
 /review auth         # Review specific code
-/agent-wf-help       # Get help
+/help                # Get help
 ```
 
 **Best for:** Medium projects, when you want visibility
@@ -305,54 +305,55 @@ Claude: [Fixes only security-related gaps]
 
 ## Commands Reference
 
-### Everyday Commands
+### Project Operations
 
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `/status` | See project progress | `/status` |
-| `/next` | Continue building | `/next` |
-| `/review [target]` | Review code quality | `/review auth` |
+| `/project setup` | Initialize project infrastructure | `/project setup` |
+| `/project sync` | Update docs and state | `/project sync` |
+| `/project sync quick` | Quick state update | `/project sync quick` |
+| `/project verify` | Check compliance | `/project verify` |
+| `/project docs <action>` | Manage documentation | `/project docs generate` |
+| `/project ai <action>` | LLM integration | `/project ai setup` |
+| `/project mcp <action>` | MCP servers | `/project mcp setup` |
+| `/project status` | Show project health | `/project status` |
+
+### Analysis & Planning
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `/analyze` | Run all L1 analysis agents | `/analyze` |
 | `/plan show` | Display current plans | `/plan show` |
-| `/sync` | Update project state & docs | `/sync` |
-| `/sync quick` | Quick state update | `/sync quick` |
-| `/sync report` | Check sync status | `/sync report` |
-| `/enforce setup` | Enable doc enforcement | `/enforce setup` |
-| `/enforce status` | Check if enforcement active | `/enforce status` |
+| `/audit` | Audit existing codebase | `/audit` |
+| `/gap` | Find gaps in brownfield | `/gap` |
+| `/change <description>` | Analyze change impact | `/change add comments` |
 
-### Parallel Development
+### Development
 
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `/parallel setup` | Create feature worktrees | `/parallel setup` |
-| `/parallel status` | Check all features | `/parallel status` |
-| `/parallel merge` | Merge completed features | `/parallel merge` |
-| `/parallel clean` | Remove merged worktrees | `/parallel clean` |
+| `/implement` | Implement from plans | `/implement` |
+| `/review [target]` | Review code quality | `/review auth` |
+| `/debug` | Launch debugger | `/debug` |
 
-### Enhancement
+### Parallel Development (Advanced)
 
-| Command | Purpose |
-|---------|---------|
-| `/mcp recommend` | Get MCP server recommendations for your project |
-| `/mcp setup <servers...>` | Generate MCP configuration |
-| `/design create` | Set up design system for UI consistency |
-| `/llm setup` | Configure LLM providers for AI features |
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `/parallel <feature>` | Create worktree for feature | `/parallel auth` |
 
 ### Help
 
 | Command | Purpose |
 |---------|---------|
-| `/agent-wf-help` | Quick overview |
-| `/agent-wf-help workflow` | How the system works |
-| `/agent-wf-help agents` | All 13 agents |
-| `/agent-wf-help commands` | All commands |
-| `/agent-wf-help patterns` | Usage patterns |
-| `/agent-wf-help design` | Design system & UI consistency |
-| `/agent-wf-help mcp` | MCP servers for enhanced development |
-| `/agent-wf-help llm` | LLM integration & AI components |
-| `/agent-wf-help parallel` | Parallel development |
-| `/agent-wf-help brownfield` | Existing codebases |
-| `/agent-wf-help sync` | Project state & maintenance |
-| `/agent-wf-help examples` | Practical examples |
+| `/help` | Quick overview |
+| `/help workflow` | How the system works |
+| `/help agents` | All 11 agents |
+| `/help commands` | All commands |
+| `/help patterns` | Usage patterns |
+| `/help parallel` | Parallel development |
+| `/help brownfield` | Existing codebases |
+| `/help examples` | Practical examples |
 
 ---
 
@@ -372,25 +373,26 @@ Intent → UX → Architecture → Plans
 Backend → Frontend → Tests → Verify
 ```
 
-See `/agent-wf-help workflow` for details.
+See `/help workflow` for details.
 
 ### The 11 Agents
 
 | Agent | Purpose | Used When |
 |-------|---------|-----------|
 | intent-guardian | Define what we're building | New project, changes |
-| ux-architect | Design user experience | New project, UX changes |
+| ux-architect | Design user experience & design system | New project, UX changes |
 | agentic-architect | Design system architecture | New project, system changes |
 | implementation-planner | Create build plans | After analysis |
 | change-analyzer | Assess change impact | Adding/changing features |
 | gap-analyzer | Find issues in existing code | Brownfield projects |
 | backend-engineer | Build server-side code | Implementation |
-| frontend-engineer | Build UI | Implementation |
+| frontend-engineer | Build UI (follows design system) | Implementation |
 | test-engineer | Write tests, verify | Implementation |
 | code-reviewer | Review code quality | Before milestones |
 | debugger | Fix bugs | When things break |
+| project-ops | Setup, sync, verify, docs, AI | Project operations |
 
-See `/agent-wf-help agents` for details.
+See `/help agents` for details.
 
 ### Documents Created
 ```

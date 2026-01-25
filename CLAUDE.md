@@ -35,7 +35,7 @@
 
 Run this to verify you're compliant:
 ```bash
-./scripts/verify-sync.sh
+./scripts/verify.sh
 ```
 
 If it fails, your commit will be blocked.
@@ -55,8 +55,7 @@ This is a **multi-agent workflow system for Claude Code** that helps users build
 1. **Specialized Agents** - Each handles a specific part of software development
 2. **Commands** - Optional shortcuts for common actions
 3. **Project Templates** - CLAUDE.md template and docs structure for user projects
-4. **CI/CD System** - Intent-aware validation (optional)
-5. **Help System** - Comprehensive in-app help via `/agent-wf-help`
+4. **Help System** - Comprehensive in-app help via `/help`
 
 When users install this in their project, Claude automatically orchestrates the agents based on natural conversation.
 
@@ -66,10 +65,10 @@ When users install this in their project, Claude automatically orchestrates the 
 
 Traditional development with Claude Code is ad-hoc. This system provides structure for:
 - Capturing and preserving intent
-- Designing user experience
+- Designing user experience with visual consistency
 - Planning architecture
 - Building systematically
-- Validating changes don't break promises
+- Maintaining documentation automatically
 
 While keeping the experience conversational.
 
@@ -80,56 +79,60 @@ While keeping the experience conversational.
 ```
 claude-workflow-agents/
 │
-├── agents/                    # 14 specialized agents
+├── agents/                    # 11 specialized agents
 │   ├── intent-guardian.md     # L1: Define promises to users
-│   ├── ux-architect.md        # L1: Design user experience
+│   ├── ux-architect.md        # L1: Design user experience & visual system
 │   ├── agentic-architect.md   # L1: Design system architecture
 │   ├── implementation-planner.md  # L1: Create build plans
-│   ├── documentation-engineer.md # L1: Create comprehensive docs
 │   ├── change-analyzer.md     # L1: Assess change impact
 │   ├── gap-analyzer.md        # L1: Find issues in existing code
 │   ├── backend-engineer.md    # L2: Build server-side code
-│   ├── frontend-engineer.md   # L2: Build UI
+│   ├── frontend-engineer.md   # L2: Build UI (follows design system)
 │   ├── test-engineer.md       # L2: Write tests, verify
 │   ├── code-reviewer.md       # L2: Review code quality
 │   ├── debugger.md            # L2: Fix bugs
-│   ├── ci-cd-engineer.md      # Setup: CI/CD for user projects
-│   └── project-maintainer.md  # Setup: Sync project state & docs
+│   └── project-ops.md         # Operations: Setup, sync, docs, AI, verify
 │
-├── commands/                  # 25 optional commands
-│   ├── agent-wf-help.md       # Comprehensive help system
+├── commands/                  # 9 commands
+│   ├── help.md                # Comprehensive help system (was agent-wf-help)
+│   ├── project.md             # Project operations (consolidated)
 │   ├── analyze.md             # Run L1 analysis agents
 │   ├── audit.md               # Audit existing codebase
 │   ├── change.md              # Analyze change impact
 │   ├── debug.md               # Launch debugger
-│   ├── docs.md                # Manage project documentation
-│   ├── gap.md                 # Find gaps in brownfield
 │   ├── implement.md           # Implement from plans
-│   ├── improve.md             # Improve brownfield gaps
-│   ├── intent.md              # Run intent-guardian
-│   ├── intent-audit.md        # Audit existing intent
 │   ├── parallel.md            # Parallel development
-│   ├── plan.md                # Show/create plans
-│   ├── replan.md              # Regenerate plans
-│   ├── review.md              # Code review
-│   ├── update.md              # Update docs after changes
-│   ├── sync.md                # Sync project state & docs
-│   ├── ux.md                  # Run ux-architect
-│   ├── ux-audit.md            # Audit existing UX
-│   ├── verify.md              # Verify current phase
-│   ├── aa.md                  # Run agentic-architect
-│   └── aa-audit.md            # Audit for agentic opportunities
+│   └── review.md              # Code review
 │
 ├── templates/                 # Templates for user projects
-│   ├── CLAUDE.md.template     # Main project orchestrator
-│   ├── docs/                  # Document structure template
-│   │   ├── intent/
-│   │   ├── ux/
+│   ├── project/               # Project-level files
+│   │   ├── CLAUDE.md.template
+│   │   ├── PROJECT_BRIEF.md
+│   │   └── FEATURE.md.template
+│   ├── docs/                  # Documentation templates
+│   │   ├── USAGE.md.template
+│   │   ├── README.md.template
 │   │   ├── architecture/
-│   │   ├── plans/
-│   │   ├── gaps/
-│   │   └── changes/
+│   │   │   ├── README.md.template
+│   │   │   ├── llm-integration.md.template
+│   │   │   └── mcp-integration.md.template
+│   │   ├── guides/
+│   │   │   ├── developer-guide.md.template
+│   │   │   └── deployment-guide.md.template
+│   │   └── ux/
+│   │       ├── design-system.md.template
+│   │       └── presets/
+│   │           ├── modern-clean.md
+│   │           ├── minimal.md
+│   │           ├── playful.md
+│   │           ├── corporate.md
+│   │           └── glassmorphism.md
+│   ├── infrastructure/        # Setup scripts
+│   │   ├── verify.sh.template
+│   │   └── hooks/
+│   │       └── pre-commit.template
 │   ├── ci/                    # CI/CD templates
+│   │   ├── verify.yml.template
 │   │   ├── validate.sh.template
 │   │   ├── github-workflow.yml.template
 │   │   └── validators/
@@ -137,51 +140,47 @@ claude-workflow-agents/
 │   │       ├── ux-validator.sh.template
 │   │       ├── arch-validator.sh.template
 │   │       └── test-validator.sh.template
-│   └── scripts/               # Utility scripts for user projects
-│       └── verify-project-sync.sh.template
+│   └── integrations/          # LLM/MCP code
+│       ├── llm/
+│       │   ├── client.ts
+│       │   ├── config.ts
+│       │   ├── json-parser.ts
+│       │   ├── base-provider.ts
+│       │   ├── retry.ts
+│       │   ├── providers/
+│       │   │   ├── ollama.ts
+│       │   │   ├── openai.ts
+│       │   │   └── anthropic.ts
+│       │   ├── examples.ts
+│       │   └── README.md
+│       └── mcp/
 │
 ├── tests/                     # Automated tests
 │   ├── run_all_tests.sh       # Master test runner
 │   ├── test_utils.sh          # Shared test utilities
 │   ├── structural/            # File existence tests
-│   │   ├── test_agents_exist.sh
-│   │   ├── test_commands_exist.sh
-│   │   ├── test_docs_exist.sh
-│   │   └── test_directory_structure.sh
 │   ├── content/               # Content validation tests
-│   │   ├── test_agent_frontmatter.sh
-│   │   ├── test_agent_sections.sh
-│   │   ├── test_command_frontmatter.sh
-│   │   └── test_template_completeness.sh
 │   ├── consistency/           # Sync verification tests
-│   │   ├── test_agent_references.sh
-│   │   ├── test_help_coverage.sh
-│   │   ├── test_doc_links.sh
-│   │   └── test_full_sync.sh
 │   ├── documentation/         # Doc completeness tests
-│   │   ├── test_readme_sections.sh
-│   │   ├── test_guide_accuracy.sh
-│   │   └── test_examples_valid.sh
 │   ├── integration/           # Script functionality tests
-│   │   ├── test_install_script.sh
-│   │   └── test_workflow_simulation.sh
 │   ├── MANUAL_TEST_CHECKLIST.md
 │   ├── TEST_REPORT_TEMPLATE.md
 │   └── README.md
 │
 ├── scripts/                   # Maintenance scripts
-│   ├── verify-sync.sh         # Check all docs in sync
+│   ├── verify.sh              # Check all docs in sync (was verify.sh)
 │   ├── update-claude-md.sh    # Auto-update this file
 │   ├── install-dev-hooks.sh   # Install git hooks
 │   └── hooks/
 │       └── pre-commit         # Pre-commit verification
 │
 ├── CLAUDE.md                  # THIS FILE - complete context
-├── STATE.md                   # Current state tracking
 ├── README.md                  # User documentation
 ├── GUIDE.md                   # Quick reference
 ├── WORKFLOW.md                # Detailed workflow docs
 ├── EXAMPLES.md                # Usage examples
+├── PATTERNS.md                # Common usage patterns
+├── MIGRATION.md               # Upgrade guide for v2
 ├── install.sh                 # Installation script
 └── uninstall.sh               # Removal script
 ```
@@ -192,11 +191,11 @@ claude-workflow-agents/
 
 ⚠️ **UPDATE THIS SECTION** when adding/removing agents, commands, or features.
 
-### Agents: 15 total
+### Agents: 12 total
 
 **L1 Analysis** (run once at project start):
 - **intent-guardian** - Define promises to users
-- **ux-architect** - Design user experience
+- **ux-architect** - Design user experience & visual design system
 - **agentic-architect** - Design system architecture
 - **implementation-planner** - Create feature-based build plans
 
@@ -206,52 +205,48 @@ claude-workflow-agents/
 
 **L2 Building** (run per feature):
 - **backend-engineer** - Build APIs, database, services
-- **frontend-engineer** - Build pages, components, state
+- **frontend-engineer** - Build pages, components (follows design system)
 - **test-engineer** - Write tests and verify
 
 **L2 Support** (run as needed):
 - **code-reviewer** - Review code quality
 - **debugger** - Fix bugs
 
-**Setup & Maintenance**:
-- **ci-cd-engineer** - Set up CI/CD in user projects
-- **project-maintainer** - Keep user project docs and state in sync
-- **project-enforcer** - Set up git hooks and enforcement in user projects
+**Operations**:
+- **project-ops** - Setup, sync, verify, docs, AI integration
 
-### Commands: 26 total
+### Commands: 22 total
 
 | Command | Purpose |
 |---------|---------|
-| `/agent-wf-help` | Comprehensive help system |
+| `/help` | Comprehensive help system |
+| `/project` | Project operations (consolidated) |
+| `/project setup` | Initialize infrastructure |
+| `/project sync` | Update docs and state |
+| `/project verify` | Check compliance |
+| `/project docs` | Manage documentation |
+| `/project ai` | LLM integration |
+| `/project mcp` | MCP servers |
+| `/project status` | Show project health |
 | `/analyze` | Run all L1 analysis agents |
 | `/audit` | Audit existing codebase (brownfield) |
 | `/change` | Analyze change impact |
 | `/debug` | Launch debugger |
-| `/design` | Manage design system |
-| `/docs` | Manage project documentation |
-| `/enforce` | Set up documentation enforcement |
-| `/gap` | Find gaps in brownfield project |
 | `/implement` | Implement from plans |
-| `/improve` | Improve brownfield gaps |
-| `/intent` | Run intent-guardian |
-| `/intent-audit` | Audit existing intent |
-| `/llm` | Manage LLM integration |
-| `/mcp` | Manage MCP servers |
 | `/parallel` | Parallel development with worktrees |
-| `/plan` | Show/create implementation plans |
-| `/replan` | Regenerate plans after changes |
 | `/review` | Code review |
-| `/sync` | Sync project state and docs |
-| `/update` | Update docs after changes |
-| `/ux` | Run ux-architect |
-| `/ux-audit` | Audit existing UX |
-| `/verify` | Verify current phase |
-| `/aa` | Run agentic-architect |
-| `/aa-audit` | Audit for agentic opportunities |
+
+**Deprecated (still work with warnings):**
+- `/agent-wf-help` → Use `/help`
+- `/sync` → Use `/project sync`
+- `/enforce` → Use `/project setup`
+- `/docs` → Use `/project docs`
+- `/llm` → Use `/project ai`
+- `/mcp` → Use `/project mcp`
 
 ### Help Topics
 
-The `/agent-wf-help` command covers:
+The `/help` command covers:
 - overview (default)
 - workflow
 - agents
@@ -259,7 +254,6 @@ The `/agent-wf-help` command covers:
 - patterns
 - parallel
 - brownfield
-- cicd
 - examples
 
 ### Features
@@ -270,7 +264,10 @@ The `/agent-wf-help` command covers:
 - ✅ Sequential development (default)
 - ✅ Parallel development (opt-in)
 - ✅ Feature-based planning
-- ✅ CI/CD engineer for user projects
+- ✅ Design system integration
+- ✅ LLM integration (dual provider: local + commercial)
+- ✅ MCP server support
+- ✅ Project operations (setup, sync, verify)
 - ✅ Comprehensive help system
 - ✅ Self-maintenance system with CLAUDE.md tracking
 - ✅ Automated test suite
@@ -298,7 +295,8 @@ Runs **ONCE** at project start:
 ┌─────────────────────────────────────────┐
 │ 2. UX-ARCHITECT                         │
 │    → /docs/ux/user-journeys.md          │
-│    Personas, journeys, screens, states  │
+│    → /docs/ux/design-system.md          │
+│    Personas, journeys, visual specs     │
 └─────────────────────────────────────────┘
          │
          ▼
@@ -314,6 +312,13 @@ Runs **ONCE** at project start:
 │    → /docs/plans/overview/*             │
 │    → /docs/plans/features/*             │
 │    Feature plans, dependencies          │
+└─────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│ 5. PROJECT-OPS (optional)               │
+│    Suggest: /project setup              │
+│    Initialize infrastructure            │
 └─────────────────────────────────────────┘
 ```
 
@@ -333,7 +338,8 @@ For feature (e.g., auth):
          ▼
 ┌─────────────────────────────────────────┐
 │ 2. FRONTEND-ENGINEER                    │
-│    Pages, components, state             │
+│    Pages, components (follows design)   │
+│    Reads /docs/ux/design-system.md FIRST│
 └─────────────────────────────────────────┘
          │
          ▼
@@ -346,6 +352,13 @@ For feature (e.g., auth):
 ┌─────────────────────────────────────────┐
 │ 4. VERIFY                               │
 │    Run tests, check feature works       │
+└─────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────┐
+│ 5. PROJECT-OPS (automatic)              │
+│    Suggest: /project sync               │
+│    Update docs and state                │
 └─────────────────────────────────────────┘
          │
          ▼
@@ -394,9 +407,11 @@ Feature complete → Next feature
 1. **Conversation-Driven** - Users talk naturally, Claude selects agents
 2. **Documents as Truth** - Everything documented for verification
 3. **Feature-Based Planning** - Vertical slices, not horizontal layers
-4. **Verification at Every Step** - Each feature verified before next
-5. **Opt-in Complexity** - Simple path works, advanced is opt-in
-6. **Self-Maintaining** - CLAUDE.md tracks changes, hooks enforce sync
+4. **Design System First** - Visual consistency enforced from planning
+5. **Verification at Every Step** - Each feature verified before next
+6. **Opt-in Complexity** - Simple path works, advanced is opt-in
+7. **Self-Maintaining** - CLAUDE.md tracks changes, hooks enforce sync
+8. **Consolidated Operations** - One project-ops agent, one /project command
 
 ---
 
@@ -406,9 +421,9 @@ Feature complete → Next feature
 |-----------------|------------------|
 | `/agents/*.md` | CLAUDE.md, help, README, GUIDE, tests |
 | `/commands/*.md` | CLAUDE.md, help, README, GUIDE, tests |
-| `templates/CLAUDE.md.template` | WORKFLOW.md, help "workflow" |
+| `templates/project/CLAUDE.md.template` | WORKFLOW.md, help "workflow" |
 | Any workflow change | CLAUDE.md, help, WORKFLOW.md, README |
-| Any feature addition | CLAUDE.md, help, README, GUIDE, EXAMPLES |
+| Any feature addition | CLAUDE.md, help, README, GUIDE |
 
 ---
 
@@ -422,7 +437,7 @@ Feature complete → Next feature
 |-------------|----------------------------|
 | Add/remove agent | "Current State" agents list, count, structure diagram |
 | Add/remove command | "Current State" commands table, count, structure diagram |
-| Add help topic | "Current State" help topics list |
+| Add help topic | Help topics list |
 | Add feature | "Current State" features checklist |
 | Change workflow | "Two-Level Workflow" section |
 | Change design decision | "Key Design Decisions" section |
@@ -459,7 +474,7 @@ After changes, verify CLAUDE.md is accurate:
   □ Update relevant sections if behavior changed
 
 □ STEP 3: Update Help System
-  □ /commands/agent-wf-help.md reflects changes
+  □ /commands/help.md reflects changes
   □ All agents listed in "agents" topic
   □ All commands listed in "commands" topic
   □ New topics added if needed
@@ -468,7 +483,8 @@ After changes, verify CLAUDE.md is accurate:
   □ README.md tables and descriptions
   □ GUIDE.md quick reference
   □ WORKFLOW.md if workflow changed
-  □ EXAMPLES.md if new patterns
+  □ PATTERNS.md if new patterns
+  □ MIGRATION.md if breaking changes
 
 □ STEP 5: Update Tests
   □ tests/structural/ - REQUIRED_AGENTS, REQUIRED_COMMANDS arrays
@@ -476,7 +492,7 @@ After changes, verify CLAUDE.md is accurate:
   □ Update existing tests if behavior changed
 
 □ STEP 6: Verify Everything
-  □ Run: ./scripts/verify-sync.sh
+  □ Run: ./scripts/verify.sh
   □ Run: ./tests/run_all_tests.sh
   □ All checks pass
 
@@ -495,7 +511,7 @@ After changes, verify CLAUDE.md is accurate:
 ./scripts/update-claude-md.sh
 
 # Verify everything is in sync
-./scripts/verify-sync.sh
+./scripts/verify.sh
 
 # Run all tests
 ./tests/run_all_tests.sh
@@ -505,7 +521,7 @@ After changes, verify CLAUDE.md is accurate:
 ```
 
 **Recommended:** Run `./scripts/update-system-docs.sh` after adding agents/commands.
-It detects undocumented items and reminds you to update README.md, COMMANDS.md, etc.
+It detects undocumented items and reminds you to update README.md, etc.
 
 ---
 
@@ -523,7 +539,7 @@ vim agents/new-agent.md
 #    - Update structure diagram if needed
 
 # 3. Update help
-vim commands/agent-wf-help.md
+vim commands/help.md
 #    - Add to "agents" topic
 #    - Add triggers
 
@@ -536,7 +552,7 @@ vim tests/structural/test_agents_exist.sh
 #    - Add to REQUIRED_AGENTS array
 
 # 6. Verify
-./scripts/verify-sync.sh
+./scripts/verify.sh
 ./tests/run_all_tests.sh
 
 # 7. Commit all together
@@ -556,7 +572,7 @@ vim commands/new-command.md
 #    - Update structure diagram if needed
 
 # 3. Update help
-vim commands/agent-wf-help.md
+vim commands/help.md
 #    - Add to "commands" topic
 
 # 4. Update docs
@@ -578,7 +594,7 @@ git commit -m "feat: add /new-command for X"
 
 ```bash
 # 1. Update source of truth
-vim templates/CLAUDE.md.template
+vim templates/project/CLAUDE.md.template
 
 # 2. Update CLAUDE.md
 #    - Update "Two-Level Workflow" section
@@ -586,12 +602,12 @@ vim templates/CLAUDE.md.template
 
 # 3. Update related docs
 vim WORKFLOW.md                  # Must match template
-vim commands/agent-wf-help.md    # Update "workflow" topic
+vim commands/help.md             # Update "workflow" topic
 vim README.md                    # Update if significant
-vim EXAMPLES.md                  # Update if patterns changed
+vim PATTERNS.md                  # Update if patterns changed
 
 # 4. Verify and commit
-./scripts/verify-sync.sh
+./scripts/verify.sh
 ./tests/run_all_tests.sh
 git add -A
 git commit -m "feat: update workflow to support X"
@@ -613,7 +629,7 @@ git commit -m "feat: update workflow to support X"
 ./tests/run_all_tests.sh --integration
 
 # Verify sync only
-./scripts/verify-sync.sh
+./scripts/verify.sh
 ```
 
 ---
@@ -679,7 +695,7 @@ When making changes:
 
 1. **Update this file** - Keep it current (it's in the checklist!)
 2. **Update related docs** - Follow checklist for each change type
-3. **Run verify-sync.sh** - Catch missing updates
+3. **Run verify.sh** - Catch missing updates
 4. **Run tests** - Ensure everything still works
 
 This file is the **source of truth** for understanding the repository. Keep it updated!

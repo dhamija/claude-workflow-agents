@@ -95,7 +95,7 @@ fi
 log ""
 log "${BLUE}[2/7] Checking help command...${NC}"
 
-HELP_FILE="$REPO_ROOT/commands/agent-wf-help.md"
+HELP_FILE="$REPO_ROOT/commands/help.md"
 
 if [ ! -f "$HELP_FILE" ]; then
     log_always "${RED}  ✗ agent-wf-help.md not found${NC}"
@@ -225,7 +225,7 @@ fi
 log ""
 log "${BLUE}[6/7] Checking help topics...${NC}"
 
-REQUIRED_TOPICS=("workflow" "agents" "commands" "patterns" "parallel" "brownfield" "cicd")
+REQUIRED_TOPICS=("workflow" "agents" "commands" "patterns" "parallel" "brownfield" "examples")
 
 for topic in "${REQUIRED_TOPICS[@]}"; do
     if grep -qiE "### If.*topic.*=.*\"$topic\"|If topic.*\"$topic\"" "$HELP_FILE" 2>/dev/null; then
@@ -243,7 +243,7 @@ done
 log ""
 log "${BLUE}[7/7] Checking template...${NC}"
 
-TEMPLATE="$REPO_ROOT/templates/CLAUDE.md.template"
+TEMPLATE="$REPO_ROOT/templates/project/CLAUDE.md.template"
 
 if [ ! -f "$TEMPLATE" ]; then
     log_always "${RED}  ✗ CLAUDE.md.template not found${NC}"

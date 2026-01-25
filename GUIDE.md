@@ -24,37 +24,41 @@ Most common actions - no commands needed:
 
 ## Optional Commands
 
-### Everyday
+### Project Operations
 ```
-/status              # See project progress
-/next                # Continue building
+/project setup       # Initialize infrastructure
+/project sync        # Update project state & docs
+/project sync quick  # Quick state update
+/project verify      # Check compliance
+/project docs        # Manage documentation
+/project ai          # LLM integration
+/project mcp         # MCP servers
+/project status      # Show project health
+```
+
+### Development
+```
 /review [target]     # Review code (file, dir, or "staged")
 /plan show           # Display current plans
-/sync                # Update project state & docs
-/sync quick          # Quick state update
-/sync report         # Check sync status
+/debug               # Launch debugger
+/implement           # Implement from plans
 ```
 
 ### Parallel Development (Teams Only)
 ```
-/parallel setup      # Create feature worktrees
-/parallel status     # Check all features
-/parallel merge      # Merge completed features
-/parallel clean      # Remove merged worktrees
+/parallel <feature>  # Create worktree for feature
 ```
 
 ### Help
 ```
-/agent-wf-help              # Quick overview
-/agent-wf-help workflow     # Two-level workflow
-/agent-wf-help agents       # All 15 agents
-/agent-wf-help commands     # All commands
-/agent-wf-help design       # Design system & UI consistency
-/agent-wf-help patterns     # Usage patterns
-/agent-wf-help parallel     # Parallel development
-/agent-wf-help brownfield   # Existing codebases
-/agent-wf-help sync         # Project state & maintenance
-/agent-wf-help examples     # Practical examples
+/help                # Quick overview
+/help workflow       # Two-level workflow
+/help agents         # All 11 agents
+/help commands       # All commands
+/help patterns       # Usage patterns
+/help parallel       # Parallel development
+/help brownfield     # Existing codebases
+/help examples       # Practical examples
 ```
 
 ---
@@ -124,7 +128,7 @@ Improve (fix by priority: Critical → High → Medium → Low)
 | Topic | Shows |
 |-------|-------|
 | `workflow` | Two-level workflow (App → Features) |
-| `agents` | All 15 agents and when they run |
+| `agents` | All 11 agents and when they run |
 | `commands` | All available commands |
 | `patterns` | Common development patterns |
 | `parallel` | Parallel development (teams) |
@@ -133,7 +137,7 @@ Improve (fix by priority: Critical → High → Medium → Low)
 
 ---
 
-## The 14 Agents
+## The 11 Agents
 
 ### Level 1: App Analysis (Run Once)
 | Agent | Creates | Trigger |
@@ -144,7 +148,6 @@ Improve (fix by priority: Critical → High → Medium → Low)
 | **implementation-planner** | Implementation plans | After analysis |
 | **change-analyzer** | Change impact analysis | "add", "change", "also need" |
 | **gap-analyzer** | Gap analysis & migration plan | "analyze", "improve", existing code |
-| **documentation-engineer** | README, USAGE, API docs | After L1 analysis |
 
 ### Level 2: Feature Work (Run Per Feature)
 | Agent | Does | Trigger |
@@ -155,12 +158,10 @@ Improve (fix by priority: Critical → High → Medium → Low)
 | **code-reviewer** | Code quality & security | "review", before milestone |
 | **debugger** | Fix bugs & errors | "broken", "error", "bug" |
 
-### Setup & Maintenance
+### Operations
 | Agent | Does | Trigger |
 |-------|------|---------|
-| **ci-cd-engineer** | CI/CD setup & validation | CI/CD tasks |
-| **project-maintainer** | Sync state, update docs | "/sync" command |
-| **project-enforcer** | Set up doc enforcement | "/enforce" command |
+| **project-ops** | Setup, sync, verify, docs, AI | "/project" command |
 
 ---
 

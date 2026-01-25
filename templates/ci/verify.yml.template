@@ -1,0 +1,87 @@
+name: Verify Documentation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  verify-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run verification
+        run: ./scripts/verify.sh
+
+  verify-intent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check for broken promises
+        run: |
+          if [ -f "docs/intent/product-intent.md" ]; then
+            BROKEN=$(grep -c "Status:.*BROKEN" docs/intent/product-intent.md || echo "0")
+            JUSTIFIED=$(grep -A2 "Status:.*BROKEN" docs/intent/product-intent.md | grep -c "Reason:" || echo "0")
+
+            if [ "$BROKEN" -gt "$JUSTIFIED" ]; then
+              echo "❌ Found $((BROKEN - JUSTIFIED)) unjustified BROKEN promises"
+              exit 1
+            fi
+            echo "✓ All broken promises are justified"
+          fi
+
+  verify-claude-md:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check CLAUDE.md exists
+        run: |
+          if [ ! -f "CLAUDE.md" ]; then
+            echo "❌ CLAUDE.md missing"
+            exit 1
+          fi
+          echo "✓ CLAUDE.md exists"
+
+      - name: Check required sections
+        run: |
+          if ! grep -q "## Current State" CLAUDE.md; then
+            echo "❌ CLAUDE.md missing 'Current State' section"
+            exit 1
+          fi
+          echo "✓ CLAUDE.md has required sections"
+
+  run-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project-type: [node, python]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: matrix.project-type == 'node' && hashFiles('package.json')
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node dependencies
+        if: matrix.project-type == 'node' && hashFiles('package.json')
+        run: npm install
+
+      - name: Run Node tests
+        if: matrix.project-type == 'node' && hashFiles('package.json')
+        run: npm test
+
+      - name: Setup Python
+        if: matrix.project-type == 'python' && (hashFiles('requirements.txt') || hashFiles('pyproject.toml'))
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        if: matrix.project-type == 'python' && hashFiles('requirements.txt')
+        run: pip install -r requirements.txt
+
+      - name: Run Python tests
+        if: matrix.project-type == 'python' && (hashFiles('requirements.txt') || hashFiles('pyproject.toml'))
+        run: pytest

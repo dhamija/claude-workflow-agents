@@ -1,0 +1,746 @@
+---
+name: help
+description: Show help about the workflow system - agents, commands, patterns, and usage
+argument-hint: "[topic]"
+---
+
+# Help System
+
+Get help on any aspect of the Claude Workflow Agents system.
+
+---
+
+## Usage
+
+```
+/help                    # Quick overview
+/help workflow           # Two-level workflow
+/help agents             # All specialized agents
+/help commands           # Available commands
+/help patterns           # Development patterns
+/help [topic]            # Specific topic
+```
+
+---
+
+## Available Topics
+
+| Topic | Description |
+|-------|-------------|
+| `workflow` | Two-level workflow (app → features) |
+| `agents` | All specialized agents |
+| `commands` | Available commands |
+| `patterns` | Development patterns & examples |
+| `parallel` | Parallel development (teams) |
+| `brownfield` | Improving existing code |
+| `examples` | Practical examples |
+
+---
+
+## Implementation
+
+Read `$ARGUMENTS` (topic) and display appropriate help:
+
+### If empty or no argument:
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                    CLAUDE WORKFLOW AGENTS                        ║
+║                         Quick Start                              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Just talk naturally. Claude handles the rest.
+
+┌─────────────────────────────────────────────────────────────────┐
+│ START A PROJECT                                                 │
+│                                                                 │
+│   "Build me a recipe app where I can save and search recipes"   │
+│                                                                 │
+│   Claude will:                                                  │
+│   1. Define what we're building (intent)                        │
+│   2. Design user experience (journeys & design system)          │
+│   3. Design the system (architecture)                           │
+│   4. Create implementation plans                                │
+│   5. Build features one by one                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ COMMON ACTIONS                                                  │
+│                                                                 │
+│   "Continue" / "Next"      → Keep building                      │
+│   "Add [feature]"          → Add new capability                 │
+│   "It's broken" / "Error"  → Debug and fix                      │
+│   "Review the code"        → Quality check                      │
+│   "Status?"                → See progress                       │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│ MORE HELP                                                       │
+│                                                                 │
+│   /help workflow     - How the two-level workflow works         │
+│   /help agents       - All specialized agents                   │
+│   /help commands     - Available commands                       │
+│   /help patterns     - Development patterns & examples          │
+│   /help parallel     - Parallel development guide               │
+│   /help brownfield   - Improving existing code                  │
+│   /help examples     - Practical examples                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### If topic = "workflow":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                      THE TWO-LEVEL WORKFLOW                      ║
+╚══════════════════════════════════════════════════════════════════╝
+
+LEVEL 1: APP WORKFLOW (runs once at start)
+──────────────────────────────────────────
+
+  "Build me an app..."
+        │
+        ▼
+  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+  │  Intent  │ → │    UX    │ → │  System  │ → │  Planner │
+  │ Guardian │   │ Architect│   │ Architect│   │          │
+  └──────────┘   └──────────┘   └──────────┘   └──────────┘
+        │
+        ▼
+  Creates: Intent doc, User journeys, Architecture, Feature plans
+
+
+LEVEL 2: FEATURE WORKFLOW (runs for each feature)
+─────────────────────────────────────────────────
+
+  For each feature in sequence:
+
+  ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+  │ Backend  │ → │ Frontend │ → │   Test   │ → │  Verify  │
+  │ Engineer │   │ Engineer │   │ Engineer │   │          │
+  └──────────┘   └──────────┘   └──────────┘   └──────────┘
+        │
+        ▼
+  Feature complete ✓ → Move to next feature
+
+
+WHY TWO LEVELS?
+───────────────
+
+  Level 1 = "What are we building?" (big picture)
+  Level 2 = "How do we build this piece?" (execution)
+
+  • Every feature aligns with the overall vision
+  • Every feature is verified before moving on
+  • Changes trigger re-analysis at the right level
+
+
+DOCUMENTS CREATED
+─────────────────
+
+  /docs/intent/product-intent.md      - What we promise users
+  /docs/ux/user-journeys.md           - How users interact
+  /docs/ux/design-system.md           - Visual specifications
+  /docs/architecture/agent-design.md  - System design
+  /docs/plans/overview/               - Full system specs
+  /docs/plans/features/               - Per-feature plans
+  /docs/plans/implementation-order.md - Build sequence
+```
+
+### If topic = "agents":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                       THE 11 AGENTS                              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Claude automatically selects agents. You don't call them directly.
+
+
+LEVEL 1 AGENTS (App-level)
+──────────────────────────
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ INTENT-GUARDIAN                                             │
+  │ "What are we promising users?"                              │
+  │ Creates: /docs/intent/product-intent.md                     │
+  │ Triggers: New project, "what should it do", "guarantee"     │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ UX-ARCHITECT                                                │
+  │ "How will users interact?"                                  │
+  │ Creates: /docs/ux/user-journeys.md, design-system.md       │
+  │ Triggers: New project, "user flow", "UX", "journey"         │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ AGENTIC-ARCHITECT                                           │
+  │ "How should the system work?"                               │
+  │ Creates: /docs/architecture/agent-design.md                 │
+  │ Triggers: New project, "architecture", "system design"      │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ IMPLEMENTATION-PLANNER                                      │
+  │ "What's the build plan?"                                    │
+  │ Creates: /docs/plans/overview/*, features/*                 │
+  │ Triggers: After L1 analysis, "plan", "how to build"         │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ CHANGE-ANALYZER                                             │
+  │ "What's the impact of this change?"                         │
+  │ Creates: /docs/changes/change-*.md                          │
+  │ Triggers: "Add", "change", "also need", "what if"           │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ GAP-ANALYZER                                                │
+  │ "What's wrong with existing code?"                          │
+  │ Creates: /docs/gaps/gap-analysis.md, migration-plan.md      │
+  │ Triggers: Existing codebase, "improve", "technical debt"    │
+  └─────────────────────────────────────────────────────────────┘
+
+
+LEVEL 2 AGENTS (Feature-level)
+──────────────────────────────
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ BACKEND-ENGINEER                                            │
+  │ Implements: APIs, database, services, business logic        │
+  │ Triggers: Backend tasks, "API", "endpoint", "database"      │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ FRONTEND-ENGINEER                                           │
+  │ Implements: Pages, components (follows design system)       │
+  │ Triggers: Frontend tasks, "UI", "page", "component"         │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ TEST-ENGINEER                                               │
+  │ Implements: Unit, integration, E2E tests + verification     │
+  │ Triggers: "Test", "verify", after implementation            │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ CODE-REVIEWER                                               │
+  │ Reviews: Security, bugs, performance, maintainability       │
+  │ Triggers: "Review", "check code", before milestone          │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ DEBUGGER                                                    │
+  │ Does: Root cause analysis, minimal fix, regression test     │
+  │ Triggers: "Broken", "error", "bug", "doesn't work"          │
+  └─────────────────────────────────────────────────────────────┘
+
+
+OPERATIONS AGENT (Project Management)
+─────────────────────────────────────
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ PROJECT-OPS                                                 │
+  │ Manages: Setup, sync, docs, verification, AI integration    │
+  │ Triggers: /project commands, "save state", after features   │
+  └─────────────────────────────────────────────────────────────┘
+```
+
+### If topic = "commands":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                      AVAILABLE COMMANDS                          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Most of the time, just talk naturally. Commands are optional.
+
+
+HELP
+────
+  /help [topic]              This help system
+
+
+PROJECT OPERATIONS
+──────────────────
+  /project setup             Initialize project infrastructure
+  /project sync              Update docs and state
+  /project sync quick        Quick state update
+  /project verify            Check compliance
+  /project docs <action>     Manage documentation
+  /project ai <action>       LLM integration
+  /project mcp <action>      MCP servers
+  /project status            Show project health
+
+
+ANALYSIS & PLANNING
+───────────────────
+  /analyze                   Run all analysis agents
+  /plan                      Generate implementation plans
+  /audit                     Audit existing codebase
+  /gap                       Find gaps and create migration plan
+  /change <description>      Analyze change impact
+
+
+DEVELOPMENT
+───────────
+  /implement                 Implement features
+  /debug                     Launch debugger
+  /review [target]           Code review (file, dir, or "staged")
+
+
+PARALLEL (Advanced, Opt-In)
+───────────────────────────
+  /parallel <feature>        Create worktree for a feature
+                             Only for multi-developer teams
+
+
+TIPS
+────
+  • Commands are shortcuts, not requirements
+  • "Continue" works without commands
+  • "What's the status" works naturally
+  • "Review the auth code" works naturally
+  • Claude understands natural language
+```
+
+### If topic = "patterns":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                    DEVELOPMENT PATTERNS                          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+
+PATTERN 1: NEW PROJECT (Greenfield)
+───────────────────────────────────
+
+  You:    "Build me a task manager with AI prioritization"
+
+  Claude: [Analyzes] Creating intent, UX, architecture...
+          [Plans] Identified features: auth, tasks, AI priority...
+          [Builds] Starting with auth feature...
+
+  You:    "Continue"
+
+  Claude: [Builds] Auth complete ✓. Starting tasks feature...
+
+  (repeat until done)
+
+
+PATTERN 2: ADD FEATURES (Iteration)
+───────────────────────────────────
+
+  You:    "Add comments on posts"
+
+  Claude: [Analyzes impact]
+          This adds:
+          - New journey: Add comment
+          - Backend: 2 endpoints
+          - Frontend: Comment component
+
+          Updating plans and continuing...
+
+
+PATTERN 3: EXISTING CODE (Brownfield)
+─────────────────────────────────────
+
+  You:    "Analyze this codebase and improve it"
+
+  Claude: [Audits existing code]
+
+          Analyzing codebase...
+
+          Inferred intent:
+          - This appears to be a task management app
+          - Users can create, assign, and track tasks
+
+          Inferred journeys:
+          - Create task, Assign task, Complete task
+          - Some journeys seem incomplete
+
+          Is this understanding correct?
+
+  You:    "Yes, but it's also for team collaboration"
+
+  Claude: [Updates inferred docs]
+          [Runs gap analysis]
+
+          Found 12 gaps:
+          - 2 Critical (security)
+          - 4 High (broken features)
+          - 6 Medium (tech debt)
+
+          Start with critical fixes?
+
+  You:    "Yes"
+
+  Claude: [Fixes GAP-001: SQL injection in search]
+          [Fixes GAP-002: Missing auth on admin routes]
+
+          Critical gaps fixed ✓
+          Continue with high priority?
+
+
+PATTERN 4: BUG FIX
+──────────────────
+
+  You:    "The checkout shows wrong totals"
+
+  Claude: [Debugs]
+          Found: Tax calculation wrong
+          Fixed: cart/service.py:45
+          Added: Regression test
+
+          Continuing...
+
+
+PATTERN 5: CODE REVIEW
+──────────────────────
+
+  You:    "Review auth before deploy"
+
+  Claude: [Reviews]
+
+          Summary: APPROVED with suggestions
+
+          🟠 High: Reset token doesn't expire
+          🟡 Medium: Missing rate limit
+          🟢 Suggestion: Extract validation
+
+          Want me to fix high-priority?
+
+
+PATTERN 6: RESUME WORK
+──────────────────────
+
+  You:    "Where were we?"
+
+  Claude: Project: Recipe App
+
+          ✓ auth - complete
+          🔄 recipes - in progress
+          ○ search - not started
+
+          Continue with recipes?
+
+
+PATTERN 7: FOCUSED WORK
+───────────────────────
+
+  You:    "Just build the API, I'll do frontend"
+
+  Claude: [Builds only backend for each feature]
+
+          Auth API complete:
+          - POST /api/auth/signup
+          - POST /api/auth/login
+          - GET /api/auth/me
+
+          Tests in /tests/auth/
+
+
+PATTERN 8: SAVE STATE
+─────────────────────
+
+  You:    "Save state before I go"
+
+  Claude: [Runs /project sync]
+          ✓ CLAUDE.md updated with current task
+          ✓ Documentation synced
+          ✓ Test coverage recorded
+
+          Session state saved ✓
+
+          Next session, just say "continue" and I'll know
+          exactly where we left off.
+```
+
+### If topic = "parallel":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                   PARALLEL DEVELOPMENT                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Build multiple features simultaneously in separate terminals.
+This is OPT-IN. Default is sequential (single terminal).
+
+
+WHEN TO USE
+───────────
+  ✓ Multiple developers on team
+  ✓ Independent features
+  ✓ Want faster development
+  ✓ Comfortable with git worktrees
+
+  ✗ Single developer
+  ✗ Tightly coupled features
+  ✗ Still learning the system
+
+
+HOW IT WORKS
+────────────
+
+  1. Claude creates feature plans with dependencies
+
+  2. /parallel <feature> creates isolated folder:
+     ../myapp-auth/
+
+  3. Each folder has scoped CLAUDE.md
+     Claude there ONLY works on that feature
+
+  4. You open terminal in that folder
+
+  5. When done, merge back to main
+
+
+STEP BY STEP
+────────────
+
+  # In main project
+  You: /parallel user-authentication
+
+  Claude: Created worktree: ../user-authentication/
+          cd ../user-authentication
+
+  # New terminal
+  $ cd ../user-authentication
+  $ claude  # or your Claude Code command
+
+  You: "Implement this feature"
+
+  Claude: [Reads FEATURE.md]
+          [Implements backend → frontend → tests]
+          ✓ Complete. Ready to merge.
+
+  # Back in main project
+  $ cd ../main-project
+  $ git worktree remove ../user-authentication
+  $ git merge feature/user-authentication
+
+
+DEPENDENCY BATCHES
+──────────────────
+
+  From implementation-order.md:
+
+  Batch 0: auth               (foundation, sequential)
+      ↓
+  Batch 1: recipes, profiles  (independent, parallel OK)
+      ↓
+  Batch 2: search             (depends on Batch 1)
+
+
+COMMANDS
+────────
+  /parallel <feature>        Create worktree for feature
+```
+
+### If topic = "brownfield":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                   BROWNFIELD DEVELOPMENT                         ║
+║                  (Improving Existing Code)                       ║
+╚══════════════════════════════════════════════════════════════════╝
+
+For existing codebases, Claude uses AUDIT mode to understand
+what exists before suggesting improvements.
+
+
+THE PROCESS
+───────────
+
+  "Analyze this codebase"
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  1. AUDIT PHASE                         │
+  │     Claude reads your code and infers:  │
+  │     • Intent (what it's supposed to do) │
+  │     • UX (how users interact)           │
+  │     • Architecture (how it's built)     │
+  │                                         │
+  │     All marked [INFERRED]               │
+  └─────────────────────────────────────────┘
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  2. REVIEW                              │
+  │     Claude asks you to confirm:         │
+  │     "Is this understanding correct?"    │
+  │                                         │
+  │     You can correct any misunderstandings│
+  └─────────────────────────────────────────┘
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  3. GAP ANALYSIS                        │
+  │     Claude compares current vs ideal:   │
+  │     • What's broken?                    │
+  │     • What's missing?                   │
+  │     • What's risky?                     │
+  │                                         │
+  │     Creates prioritized migration plan  │
+  └─────────────────────────────────────────┘
+          │
+          ▼
+  ┌─────────────────────────────────────────┐
+  │  4. IMPROVE                             │
+  │     Fix gaps in priority order:         │
+  │     • Phase 0: Critical (security)      │
+  │     • Phase 1: High (broken features)   │
+  │     • Phase 2: Medium (tech debt)       │
+  │     • Phase 3: Low (polish)             │
+  └─────────────────────────────────────────┘
+
+
+TRIGGER PHRASES
+───────────────
+
+  Claude enters brownfield mode when you say:
+
+  • "Analyze this codebase"
+  • "Improve this project"
+  • "What's wrong with this code"
+  • "Audit this"
+  • "Fix the technical debt"
+  • "Review existing code"
+
+
+INFERRED DOCS
+─────────────
+
+  In brownfield mode, docs are marked [INFERRED]:
+
+  /docs/intent/product-intent.md [INFERRED]
+  /docs/ux/user-journeys.md [INFERRED]
+  /docs/architecture/agent-design.md [INFERRED]
+
+  This means Claude guessed based on code.
+  Review and correct before proceeding.
+
+
+TIPS
+────
+
+  • Let Claude audit first before asking for fixes
+  • Review [INFERRED] docs - Claude might misunderstand
+  • Start with security (Phase 0)
+  • Fix one thing at a time, verify, then continue
+  • Use /project status to track remaining gaps
+```
+
+### If topic = "examples":
+
+```
+PRACTICAL EXAMPLES
+══════════════════
+
+See EXAMPLES.md for 7 complete real-world scenarios.
+
+Quick summaries:
+
+
+📝 EXAMPLE 1: SIMPLE TODO APP (Greenfield)
+─────────────────────────────────────────
+
+  You:    "Build me a simple todo app"
+
+  Claude: [Analyzes → Plans → Builds 3 features]
+          ✅ user-authentication
+          ✅ task-management
+          ✅ task-filtering
+
+  Time: ~10 minutes
+  Learn: Basic greenfield workflow
+
+
+🏢 EXAMPLE 2: E-COMMERCE PLATFORM (Greenfield + Parallel)
+──────────────────────────────────────────────────────────
+
+  You:    "Build me an e-commerce platform"
+          "We have 3 developers"
+
+  Claude: [Plans 11 features in 4 batches]
+          [Sets up git worktrees for parallel dev]
+          [3 developers work simultaneously]
+
+  Time: ~15 hours with 3 devs (vs 40 hours solo)
+  Learn: Parallel development for teams
+
+
+🔧 EXAMPLE 3: IMPROVING EXISTING CODE (Brownfield)
+───────────────────────────────────────────────────
+
+  You:    "Analyze this codebase"
+
+  Claude: [Infers intent/UX/architecture]
+          [Finds 12 gaps: 2 critical, 4 high, 6 medium]
+          [Fixes critical + high priority issues]
+
+  Time: ~8 hours
+  Learn: Brownfield audit and gap fixing
+
+
+➕ EXAMPLE 4: ADDING FEATURES (Change Management)
+──────────────────────────────────────────────────
+
+  You:    "Add meal planning to my recipe app"
+
+  Claude: [Analyzes impact]
+          [Updates docs and plans]
+          [Implements new feature]
+          ✅ No regressions
+
+  Time: ~6 hours
+  Learn: Change management workflow
+
+
+KEY TAKEAWAYS
+─────────────
+
+  Pattern 1: Just talk - no commands needed
+  Pattern 2: Greenfield = Analyze → Plan → Build
+  Pattern 3: Brownfield = Audit → Gap → Improve
+  Pattern 4: Changes = Analyze Impact → Update
+  Pattern 5: Verification at every step
+  Pattern 6: Parallel for teams, sequential for solo
+  Pattern 7: Save state between sessions
+
+
+FULL DETAILS
+────────────
+
+  See EXAMPLES.md in project root for complete
+  conversation transcripts and detailed explanations.
+```
+
+### If topic not recognized:
+
+```
+I don't have specific help for "<topic>".
+
+Available topics:
+  /help                - Quick overview
+  /help workflow       - How the two-level workflow works
+  /help agents         - All specialized agents
+  /help commands       - Available commands
+  /help patterns       - Development patterns & examples
+  /help parallel       - Parallel development guide
+  /help brownfield     - Improving existing code
+  /help examples       - Practical examples
+
+Or just ask me what you want to know!
+```
+
+---
+
+## Migration Note
+
+This command replaces `/agent-wf-help`. The old command will still work but shows a deprecation warning:
+
+```
+⚠ /agent-wf-help is deprecated. Use /help instead.
+```

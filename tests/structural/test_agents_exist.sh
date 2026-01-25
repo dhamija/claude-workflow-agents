@@ -11,7 +11,6 @@ REQUIRED_AGENTS=(
     "ux-architect"
     "agentic-architect"
     "implementation-planner"
-    "documentation-engineer"
     "change-analyzer"
     "gap-analyzer"
     "backend-engineer"
@@ -19,9 +18,7 @@ REQUIRED_AGENTS=(
     "test-engineer"
     "code-reviewer"
     "debugger"
-    "ci-cd-engineer"
-    "project-maintainer"
-    "project-enforcer"
+    "project-ops"
 )
 
 # Check each agent
