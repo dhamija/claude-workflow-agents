@@ -1,6 +1,25 @@
 ---
 name: test-engineer
-description: Test implementation and verification specialist. Writes unit/integration/E2E tests AND verifies system correctness after each phase. Ensures promises are kept and journeys work.
+description: |
+  WHEN TO USE:
+  - Writing tests (unit, integration, E2E)
+  - Verifying a phase is complete
+  - User asks to verify, test, or check something
+  - After implementation, before moving to next phase
+
+  WHAT IT DOES:
+  - Writes unit tests for functions/components
+  - Writes integration tests for APIs
+  - Writes E2E tests for user journeys
+  - Verifies system correctness (smoke tests, regression checks)
+  - Validates promises from intent are kept
+  - Produces verification reports
+
+  OUTPUTS: Test code, /docs/verification/phase-N-report.md
+
+  READS: /docs/plans/test-plan.md, /docs/intent/product-intent.md, /docs/ux/user-journeys.md
+
+  TRIGGERS: "test", "verify", "check", "does it work", "phase complete", "ready for next"
 tools: Read, Edit, Bash, Glob, Grep
 ---
 

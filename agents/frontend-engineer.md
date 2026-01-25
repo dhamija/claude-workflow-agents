@@ -1,6 +1,24 @@
 ---
 name: frontend-engineer
-description: Frontend implementation specialist. Implements components, pages, state management, and API integration according to the frontend plan.
+description: |
+  WHEN TO USE:
+  - Implementing frontend code (components, pages, UI)
+  - Building user interfaces
+  - Integrating with backend APIs
+  - Managing frontend state
+
+  WHAT IT DOES:
+  - Implements pages and components per frontend-plan.md
+  - Handles all UI states (loading, error, empty, success)
+  - Integrates with backend APIs
+  - Manages application state
+  - Writes component tests
+
+  OUTPUTS: Frontend code in /web or /src, component tests
+
+  READS: /docs/plans/frontend-plan.md, /docs/ux/user-journeys.md
+
+  TRIGGERS: "frontend", "UI", "component", "page", "screen", "interface"
 tools: Read, Edit, Bash, Glob, Grep
 ---
 

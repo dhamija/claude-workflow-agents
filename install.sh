@@ -40,6 +40,8 @@ while [[ $# -gt 0 ]]; do
             echo "  --force, -f     Overwrite existing files"
             echo "  --help, -h      Show this help"
             echo ""
+            echo "When installing to --project, also creates CLAUDE.md orchestrator config"
+            echo ""
             echo "Examples:"
             echo "  ./install.sh --user           # Global installation"
             echo "  ./install.sh --project        # Project installation"
@@ -111,6 +113,53 @@ install_to() {
     done
 
     echo -e "${GREEN}  Installed $AGENT_COUNT agents, $COMMAND_COUNT commands to $TARGET_NAME${NC}"
+
+    # If installing to project, also install CLAUDE.md template
+    if [[ "$TARGET" == "./.claude" ]]; then
+        install_claude_md
+    fi
+}
+
+# Function to install CLAUDE.md orchestrator
+install_claude_md() {
+    local CLAUDE_MD="./CLAUDE.md"
+
+    if [ -f "$CLAUDE_MD" ] && [ "$FORCE" = false ]; then
+        echo -e "${YELLOW}  CLAUDE.md already exists (use --force to overwrite)${NC}"
+        echo -e "${YELLOW}  To use conversation-driven mode, ensure CLAUDE.md includes AI Workflow Instructions${NC}"
+    else
+        echo -e "${GREEN}Creating CLAUDE.md orchestrator...${NC}"
+
+        # Try to detect project name and type
+        local PROJECT_NAME=$(basename "$PWD")
+        local ONE_LINE_DESC="[Describe your project in one line]"
+        local TECH_STACK="[Your tech stack - e.g., TypeScript, React, Node.js, PostgreSQL]"
+        local CONVENTIONS="[Your code conventions - e.g., Use functional components, Prisma for DB, Zod for validation]"
+
+        # Try to detect tech stack from package.json
+        if [ -f "package.json" ]; then
+            if grep -q '"react"' package.json; then
+                TECH_STACK="TypeScript, React"
+            fi
+            if grep -q '"express"' package.json; then
+                TECH_STACK="$TECH_STACK, Express"
+            fi
+            if grep -q '"fastapi"' package.json || [ -f "requirements.txt" ]; then
+                TECH_STACK="Python, FastAPI"
+            fi
+        fi
+
+        # Copy template and replace placeholders
+        sed -e "s/\[PROJECT_NAME\]/$PROJECT_NAME/g" \
+            -e "s/\[ONE_LINE_DESCRIPTION\]/$ONE_LINE_DESC/g" \
+            -e "s/\[TECH_STACK_PLACEHOLDER[^]]*\]/$TECH_STACK/g" \
+            -e "s/\[CONVENTIONS_PLACEHOLDER[^]]*\]/$CONVENTIONS/g" \
+            -e "s/\[CUSTOMIZATIONS_PLACEHOLDER[^]]*\]/[Specify any agent customizations]/g" \
+            "$SCRIPT_DIR/templates/CLAUDE.md.template" > "$CLAUDE_MD"
+
+        echo -e "${GREEN}  ✓ Created CLAUDE.md${NC}"
+        echo -e "${YELLOW}  📝 Edit CLAUDE.md to customize for your project${NC}"
+    fi
 }
 
 # Install to user directory
@@ -126,9 +175,28 @@ fi
 echo ""
 echo -e "${GREEN}✅ Installation complete!${NC}"
 echo ""
-echo "Next steps:"
-echo "  1. Restart Claude Code to load new commands"
-echo "  2. Try: /analyze <your app idea>"
+
+if [ "$INSTALL_PROJECT" = true ]; then
+    echo "Conversation-driven mode is ready!"
+    echo ""
+    echo "You can now just talk to Claude naturally:"
+    echo "  'I want to build a task manager with AI suggestions'"
+    echo "  'Help me improve this codebase'"
+    echo "  'The login endpoint is broken'"
+    echo ""
+    echo "Claude will automatically select and run the right agents."
+    echo ""
+    echo "Optional: Edit CLAUDE.md to customize for your project"
+    echo ""
+    echo "Power users can still use slash commands:"
+    echo "  /analyze, /plan, /implement, /debug, /review, etc."
+else
+    echo "Next steps:"
+    echo "  1. Restart Claude Code to load new agents"
+    echo "  2. Install to a project: cd your-project && ./install.sh --project"
+    echo "  3. Start a conversation: 'I want to build...'"
+fi
+
 echo ""
 echo "Documentation:"
 echo "  - README.md   - Quick start"

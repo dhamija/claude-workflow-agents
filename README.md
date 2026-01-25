@@ -1,6 +1,8 @@
 # Claude Workflow Agents
 
-A comprehensive multi-agent system for Claude Code that provides structured workflows for both greenfield and brownfield software projects.
+A conversation-driven multi-agent system for Claude Code. Just talk naturally - Claude automatically orchestrates specialized agents to design, plan, implement, and verify your software projects.
+
+**No slash commands required.** Claude understands your intent and runs the right agents at the right time.
 
 ## What's Included
 
@@ -46,45 +48,179 @@ A comprehensive multi-agent system for Claude Code that provides structured work
 git clone https://github.com/YOUR_USERNAME/claude-workflow-agents.git
 cd claude-workflow-agents
 
-# Install globally (available in all projects)
-./install.sh --user
+# Install to your project
+cd your-project
+/path/to/claude-workflow-agents/install.sh --project
 
-# OR install for current project only
-./install.sh --project
+# This creates:
+# - ./.claude/agents/ (11 specialized agents)
+# - ./.claude/commands/ (18 optional commands for power users)
+# - ./CLAUDE.md (orchestrator configuration)
 ```
 
-### Greenfield Project (New)
+### Usage: Just Talk to Claude
+
+**Greenfield (New Project)**
+```
+You: I want to build a food delivery app connecting restaurants with customers
+
+Claude: I'll help design this system. Let me start by defining what we're
+        promising users and designing the user experience.
+        [Automatically launches intent-guardian and ux-architect in parallel]
+
+        I've defined the product intent and user journeys. Key promises:
+        - Customers order in under 60 seconds
+        - Real-time delivery tracking
+        - Restaurants never miss an order
+
+        Next, let me design the system architecture...
+        [Launches agentic-architect]
+
+        Ready to create implementation plans?
+
+You: Yes, use FastAPI, React, and PostgreSQL
+
+Claude: [Launches implementation-planner with tech stack]
+
+        Implementation plan ready. I'll start with Phase 1: database + auth +
+        restaurant onboarding. Should I begin?
+
+You: Go ahead
+
+Claude: [Launches backend-engineer and frontend-engineer in parallel]
+```
+
+**Brownfield (Existing Project)**
+```
+You: This codebase has technical debt. Help me improve it.
+
+Claude: I'll analyze the current state and create a migration plan.
+        [Launches gap-analyzer]
+
+        Found gaps in 3 areas:
+        1. No error handling (High priority)
+        2. Inconsistent state management (Medium)
+        3. Missing tests (High)
+
+        Created a 3-phase migration plan. Should we start with Phase 1:
+        Add error boundaries and logging?
+
+You: Yes
+
+Claude: [Launches implementation-planner and backend-engineer]
+```
+
+**Mid-Project Changes**
+```
+You: Actually, we also need user roles - admin, editor, viewer
+
+Claude: Let me analyze the impact of adding user roles.
+        [Launches change-analyzer]
+
+        Adding roles affects:
+        - Database schema (users table needs role field)
+        - Auth system (role-based permissions)
+        - 3 existing APIs (need authorization checks)
+        - 2 frontend pages (teacher-only views)
+
+        This is a medium-sized change. Should I update the plans and implement it?
+
+You: Yes
+
+Claude: [Updates L1 artifacts, regenerates plans, implements changes]
+```
+
+**Debugging**
+```
+You: The login endpoint is returning 500 errors
+
+Claude: I'll investigate this error.
+        [Launches debugger]
+
+        Found the issue. Root cause: Password comparison using = instead of ===
+        (type coercion bug).
+
+        Fixed in src/auth/login.ts:45. Added regression test. All tests passing.
+```
+
+### Optional: Power User Commands
+
+While conversation mode works automatically, power users can use slash commands:
+
 ```bash
-/analyze food delivery app connecting restaurants with customers
-/plan fastapi react postgres
-/implement phase 1
-/implement phase 2
-/verify final
+/analyze <idea>        # Run all analysis agents in parallel
+/plan <tech stack>     # Generate implementation plans
+/implement phase N     # Implement specific phase
+/verify phase N        # Verify correctness
+/debug                 # Launch debugger
+/review                # Code review
+/change <description>  # Analyze change impact
+/audit                 # Audit existing codebase
+/gap                   # Analyze technical debt
+/improve phase N       # Execute migration phase
 ```
 
-### Brownfield Project (Existing)
-```bash
-/audit
-/gap
-/improve phase 0
-/improve phase 1
-/verify final
+## How It Works
+
+1. **You talk naturally** - No need to memorize commands or agent names
+2. **Claude understands intent** - Detects trigger words and context
+3. **Agents auto-selected** - Right agents for the job, run in parallel when possible
+4. **Results presented** - Claude synthesizes outputs and asks what's next
+
+The system uses:
+- **CLAUDE.md** - Project orchestrator configuration (created during install)
+- **11 specialized agents** - Each handles specific tasks (analysis, planning, implementation, testing)
+- **/docs/** - Documentation artifacts created and used by agents
+- **Optional commands** - For power users who prefer explicit control
+
+## Agent Auto-Selection
+
+Claude automatically picks agents based on what you say:
+
+| You say... | Claude launches... |
+|------------|-------------------|
+| "I want to build..." | intent-guardian + ux-architect + agentic-architect |
+| "How will users..." | ux-architect |
+| "How should this work..." | agentic-architect |
+| "Ready to build" | implementation-planner |
+| "Implement the backend" | backend-engineer |
+| "Implement the UI" | frontend-engineer |
+| "Write tests" or "Verify this works" | test-engineer |
+| "Review this code" | code-reviewer |
+| "It's broken" or "Error" | debugger |
+| "Actually, also need..." | change-analyzer |
+| "Improve existing code" | gap-analyzer |
+
+## Documentation Structure
+
+Agents create and use `/docs` as the source of truth:
+
+```
+/docs
+├── intent/
+│   └── product-intent.md          # What we promise users
+├── ux/
+│   └── user-journeys.md           # How users accomplish goals
+├── architecture/
+│   ├── system-design.md           # System architecture
+│   └── agent-topology.md          # Agent design
+├── plans/
+│   ├── backend-plan.md            # Backend implementation spec
+│   ├── frontend-plan.md           # Frontend implementation spec
+│   ├── test-plan.md               # Test strategy
+│   └── implementation-order.md    # Phased rollout
+├── verification/
+│   └── phase-N-report.md          # Verification results
+├── changes/
+│   └── change-[timestamp].md      # Change impact analysis
+└── migration/
+    └── migration-plan.md          # Brownfield improvement plan
 ```
 
-### Change Management (Mid-Flight Changes)
-```bash
-# After initial planning/implementation
-/change add user roles and permissions with admin, editor, viewer levels
-# Reviews impact analysis
-/update
-# Automatically updates artifacts and replans
-/implement phase 2  # Continue with updated plans
-```
+## Further Reading
 
-## Documentation
-
-- [WORKFLOW.md](WORKFLOW.md) - Detailed workflow explanation
-- [USAGE.md](USAGE.md) - Usage guide with examples
+- [WORKFLOW.md](WORKFLOW.md) - Detailed workflow patterns
+- [USAGE.md](USAGE.md) - Extended examples
 - [AGENTS.md](AGENTS.md) - Agent reference
 - [COMMANDS.md](COMMANDS.md) - Command reference
 

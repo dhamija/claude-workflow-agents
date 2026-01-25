@@ -1,6 +1,22 @@
 ---
 name: debugger
-description: Debugging specialist for errors, test failures, and unexpected behavior. Systematically diagnoses root causes and implements minimal fixes with verification.
+description: |
+  WHEN TO USE:
+  - Something is broken or not working
+  - Tests are failing
+  - Errors occurring
+  - Unexpected behavior
+
+  WHAT IT DOES:
+  - Gathers error information and reproduction steps
+  - Systematically diagnoses root cause
+  - Implements minimal fix
+  - Adds regression test to prevent recurrence
+  - Documents the fix
+
+  OUTPUTS: Fixed code, regression test, debug report
+
+  TRIGGERS: "broken", "error", "bug", "doesn't work", "failing", "wrong", "fix", "debug"
 tools: Read, Edit, Bash, Glob, Grep
 ---
 

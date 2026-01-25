@@ -1,6 +1,24 @@
 ---
 name: code-reviewer
-description: Code quality and security reviewer. Reviews code for bugs, security issues, performance problems, and adherence to project conventions. Use after implementation or before merging.
+description: |
+  WHEN TO USE:
+  - Reviewing code quality before merge
+  - User asks for review, feedback on code
+  - Before major milestones
+  - Security or quality concerns
+
+  WHAT IT DOES:
+  - Reviews for security vulnerabilities (critical)
+  - Reviews for bugs and logic errors (high)
+  - Reviews for performance issues (medium)
+  - Reviews for maintainability (suggestions)
+  - Checks intent compliance (promises kept?)
+
+  OUTPUTS: Review report with issues by severity
+
+  READS: Code files, /docs/intent/product-intent.md
+
+  TRIGGERS: "review", "check code", "is this good", "security", "before merge"
 tools: Read, Glob, Grep
 ---
 

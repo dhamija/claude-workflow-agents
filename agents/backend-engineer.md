@@ -1,6 +1,24 @@
 ---
 name: backend-engineer
-description: Backend implementation specialist. Implements APIs, database models, services, and agent integrations according to the backend plan.
+description: |
+  WHEN TO USE:
+  - Implementing backend code (APIs, database, services)
+  - Writing server-side business logic
+  - Creating database schemas and migrations
+  - Integrating AI/agent components on backend
+
+  WHAT IT DOES:
+  - Implements API endpoints per backend-plan.md
+  - Creates database models and migrations
+  - Writes service layer and business logic
+  - Implements agent integrations with fallbacks
+  - Writes unit tests alongside implementation
+
+  OUTPUTS: Backend code in /api or /src, tests
+
+  READS: /docs/plans/backend-plan.md, /docs/intent/product-intent.md
+
+  TRIGGERS: "backend", "API", "endpoint", "database", "server", "service"
 tools: Read, Edit, Bash, Glob, Grep
 ---
 

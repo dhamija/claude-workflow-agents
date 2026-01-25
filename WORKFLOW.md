@@ -1,5 +1,39 @@
 # Workflow Documentation
 
+## Conversation-Driven Orchestration
+
+**You don't need to know this workflow.** Just talk to Claude naturally, and it will orchestrate the right agents automatically.
+
+This document explains how the system works internally.
+
+---
+
+## How Claude Selects Agents
+
+When you talk to Claude, it:
+1. Analyzes your message for **trigger words** and **context**
+2. Selects appropriate agent(s) based on intent
+3. Launches agents in parallel when possible
+4. Presents synthesized results
+
+### Trigger Word Mapping
+
+| Your Intent | Trigger Words | Claude Launches |
+|-------------|---------------|-----------------|
+| Start new project | "build", "create", "make" | intent-guardian + ux-architect + agentic-architect (parallel) |
+| Design UX | "user flow", "screens", "journey" | ux-architect |
+| Design system | "architecture", "how will it work" | agentic-architect |
+| Create plans | "plan", "ready to build" | implementation-planner (after L1 complete) |
+| Implement backend | "backend", "API", "database" | backend-engineer |
+| Implement frontend | "frontend", "UI", "component" | frontend-engineer |
+| Write tests | "test", "verify", "check" | test-engineer |
+| Review code | "review", "is this good", "security" | code-reviewer |
+| Fix bugs | "broken", "error", "bug", "fix" | debugger |
+| Add features | "also need", "add feature", "change" | change-analyzer |
+| Improve existing | "technical debt", "improve" | gap-analyzer |
+
+---
+
 ## Architecture Overview
 
 ```
@@ -174,48 +208,215 @@ Implement in phases (foundation → features → polish) rather than all at once
 ### 7. Documentation as Source of Truth
 All analysis, plans, and gaps are documented in `/docs/`. Code implements the docs; docs don't follow the code.
 
-## Workflow Variants
+---
 
-### Minimal Workflow (Proof of Concept)
+## Conversation Examples
+
+### Example 1: Greenfield Project
+
+```
+You: I want to build a food delivery app
+
+Claude: I'll help design this. Let me define product intent and UX...
+        [Launches intent-guardian + ux-architect in parallel]
+
+        Intent and UX complete. Designing architecture...
+        [Launches agentic-architect]
+
+        Ready to create implementation plans?
+
+You: Yes, use FastAPI, React, PostgreSQL
+
+Claude: [Launches implementation-planner]
+
+        Plans ready. Starting Phase 1: Database + Auth
+        [Launches backend-engineer + frontend-engineer in parallel]
+```
+
+**What happened:**
+- Claude detected "build" trigger → ran analysis agents
+- Completed L1 → automatically suggested L2 (planning)
+- User confirmed tech stack → ran planner
+- Planner output showed Phase 1 → started implementation
+
+**Equivalent command workflow:**
 ```bash
-/analyze simple todo app
-/plan python flask react
+/analyze food delivery app
+/plan fastapi react postgres
 /implement phase 1
 ```
 
-### Standard Workflow (Production App)
-```bash
-/analyze comprehensive app description
-/plan detailed tech stack
-/implement phase 1
-/verify phase 1
-/implement phase 2
-/verify phase 2
-# ... continue for all phases
-/verify final
+### Example 2: Brownfield Improvement
+
+```
+You: This codebase has technical debt. Help me improve it.
+
+Claude: I'll analyze current state and create migration plan...
+        [Launches gap-analyzer]
+
+        Found gaps in 3 areas:
+        1. No error handling (High)
+        2. Inconsistent state (Medium)
+        3. Missing tests (High)
+
+        Created 3-phase plan. Start with Phase 1: Error handling?
+
+You: Yes
+
+Claude: [Launches backend-engineer for error handling improvements]
 ```
 
-### Audit-Only Workflow (Understanding Existing Code)
+**What happened:**
+- Claude detected "technical debt", "improve" → launched gap-analyzer
+- Gap-analyzer audited codebase → created migration plan
+- User approved Phase 1 → implementation started
+
+**Equivalent command workflow:**
 ```bash
 /audit
-# Review output, no further action
+/gap
+/improve phase 1
 ```
 
-### Focused Improvement (Single Gap)
-```bash
-/audit security practices
-/gap security
-/improve GAP-SEC-001
-/verify security
+### Example 3: Mid-Project Change
+
+```
+You: Actually, we also need user roles - admin, editor, viewer
+
+Claude: Let me analyze the impact...
+        [Launches change-analyzer]
+
+        This affects:
+        - Database (users table needs role field)
+        - Auth system (permissions)
+        - 3 APIs (authorization checks)
+        - 2 pages (role-based UI)
+
+        Medium-sized change. Should I update plans and implement?
+
+You: Yes
+
+Claude: Updating intent, UX, architecture...
+        Regenerating plans...
+        [Launches implementation-planner]
+
+        Implementing role-based auth...
+        [Launches backend-engineer]
 ```
 
-### Agentic Migration (Add AI Capabilities)
+**What happened:**
+- Claude detected "actually", "also need" → launched change-analyzer
+- Change-analyzer assessed impact → presented to user
+- User approved → updated L1 artifacts → regenerated plans → implemented
+
+**Equivalent command workflow:**
 ```bash
-/aa-audit
-# Review suggestions
-/implement content-classifier agent
-/verify content-classifier
+/change add user roles admin editor viewer
+/update
+# /replan automatically triggered
+/implement phase 2
 ```
+
+### Example 4: Debugging
+
+```
+You: The login endpoint is returning 500 errors
+
+Claude: I'll investigate...
+        [Launches debugger]
+
+        Found it. Root cause: Password comparison bug (= vs ===)
+
+        Fixed in src/auth/login.ts:45
+        Added regression test
+        All tests passing
+```
+
+**What happened:**
+- Claude detected "error" → immediately launched debugger
+- Debugger handled full cycle: diagnose → fix → test → verify
+
+**Equivalent command workflow:**
+```bash
+/debug login endpoint 500 error
+```
+
+---
+
+## Power User: Command Reference
+
+While conversation mode is recommended, power users can use explicit commands:
+
+### Greenfield Commands
+```bash
+/analyze <app idea>          # Run L1 analysis (parallel)
+/plan <optional tech stack>  # Run L2 planning (sequential)
+/implement phase N           # Run L3 implementation for phase N
+/verify phase N              # Verify phase N correctness
+```
+
+### Brownfield Commands
+```bash
+/audit <optional focus>      # Audit existing codebase
+/gap <optional focus>        # Analyze gaps and create migration plan
+/improve phase N             # Execute migration phase N
+```
+
+### Change Management Commands
+```bash
+/change <description>        # Analyze change impact
+/update                      # Apply changes to L1 artifacts
+/replan                      # Regenerate L2 plans (auto-triggered by /update)
+```
+
+### Quality Commands
+```bash
+/review <file/directory>     # Code review
+/debug <description>         # Debug issue
+```
+
+### Individual Agent Commands (Advanced)
+```bash
+/intent <app idea>           # Just run intent-guardian
+/ux <app idea>               # Just run ux-architect
+/aa <app idea>               # Just run agentic-architect
+/intent-audit                # Just audit intent compliance
+/ux-audit                    # Just audit UX
+/aa-audit                    # Just audit architecture
+```
+
+---
+
+## CLAUDE.md Orchestrator
+
+When you install with `--project`, a `CLAUDE.md` file is created in your project root. This file:
+
+1. **Instructs Claude** to automatically select agents based on conversation
+2. **Documents available agents** with their trigger words
+3. **Provides workflow patterns** for greenfield, brownfield, changes, debugging
+4. **Contains project-specific config** (tech stack, conventions, customizations)
+
+### Customizing CLAUDE.md
+
+Edit `CLAUDE.md` to customize agent behavior for your project:
+
+```markdown
+### Tech Stack
+TypeScript, React, Node.js, PostgreSQL, Prisma
+
+### Code Conventions
+- Use functional components
+- Prisma for database access
+- Zod for validation
+- TailwindCSS for styling
+
+### Agent Customizations
+- Always use Claude Sonnet for complex agents
+- Prefer Ollama for simple tasks to save costs
+- Never use GPT-4 (project policy)
+```
+
+Claude reads this configuration and follows it when orchestrating agents.
 
 ### Change Management (Mid-Flight Requirement Changes)
 ```bash

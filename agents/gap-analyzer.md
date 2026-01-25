@@ -1,6 +1,22 @@
 ---
 name: gap-analyzer
-description: Analyzes gaps between current implementation and ideal state. Compares audit outputs against best practices and creates prioritized migration plan.
+description: |
+  WHEN TO USE:
+  - Analyzing existing codebase (brownfield)
+  - After auditing, need to create improvement plan
+  - User asks "what's wrong", "how to improve", "technical debt"
+
+  WHAT IT DOES:
+  - Compares current state against ideal
+  - Categorizes gaps by severity (critical, high, medium, low)
+  - Prioritizes by impact and effort
+  - Creates phased migration plan
+
+  OUTPUTS: /docs/gaps/gap-analysis.md, migration-plan.md
+
+  PREREQUISITES: Audit docs should exist first
+
+  TRIGGERS: "gaps", "improvements", "technical debt", "what's wrong", "how to fix", "migration"
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 

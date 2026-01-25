@@ -1,6 +1,22 @@
 ---
 name: intent-guardian
-description: Product intent and behavioral contract designer. Use to define what the app MUST do, MUST NOT do, and how to verify it's serving its original purpose. Creates criteria that preserve product integrity beyond just tests.
+description: |
+  WHEN TO USE:
+  - Starting a new project (define what we're promising users)
+  - User asks "what are we building", "what's the goal", "what do we promise"
+  - Need to verify implementation matches original intent
+  - Auditing existing project for intent compliance (brownfield)
+
+  WHAT IT DOES:
+  - Defines core problem and target user
+  - Documents promises/commitments to users
+  - Sets invariants (things that must always be true)
+  - Defines boundaries (what the app is NOT)
+  - Creates success criteria
+
+  OUTPUTS: /docs/intent/product-intent.md
+
+  TRIGGERS: "build", "create", "make", "what should", "promise", "guarantee", "must always", "never should"
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 

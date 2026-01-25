@@ -1,160 +1,359 @@
-# CLAUDE.md
+# [PROJECT_NAME]
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> [ONE_LINE_DESCRIPTION]
 
-## Repository Overview
+## AI Workflow Instructions
 
-[Brief description of what this project does]
+This project uses a multi-agent workflow. You (Claude) orchestrate specialized subagents automatically based on what the user needs. Users don't need to use special commands - just talk naturally.
 
-## Project Structure
+---
+
+## How It Works
+
+**When the user talks to you, you:**
+1. Understand their intent
+2. Automatically select the right specialized agent(s)
+3. Launch them in parallel when possible
+4. Coordinate their outputs
+5. Present results to the user
+
+**The user doesn't need to know about agents or commands.** Just have a conversation.
+
+---
+
+## Available Specialized Agents
+
+You have access to these subagents. Use the Task tool to launch them when appropriate:
+
+### Analysis Agents (L1)
+
+**intent-guardian** - Use when starting a new project or defining what we're building
+- Triggers: "build", "create", "make", "what should", "promise", "guarantee", "must always", "never should"
+- Outputs: `/docs/intent/product-intent.md`
+
+**ux-architect** - Use when designing user experience or mapping user flows
+- Triggers: "user flow", "how will users", "screens", "pages", "UX", "experience", "journey", "interaction"
+- Outputs: `/docs/ux/user-journeys.md`
+
+**agentic-architect** - Use when designing system architecture or deciding what should be AI agents
+- Triggers: "architecture", "system design", "agents", "how will it work", "components", "backend structure"
+- Outputs: `/docs/architecture/system-design.md`, `/docs/architecture/agent-topology.md`
+
+**gap-analyzer** - Use when analyzing existing codebase for improvements (brownfield projects)
+- Triggers: "gaps", "improvements", "technical debt", "what's wrong", "how to fix", "migration"
+- Outputs: `/docs/analysis/gaps-current.md`, `/docs/analysis/gaps-ideal.md`, `/docs/migration/migration-plan.md`
+
+### Planning Agents (L2)
+
+**implementation-planner** - Use when ready to create technical implementation plans
+- Prerequisites: Intent, UX, and Architecture docs must exist
+- Triggers: "plan", "how to implement", "what order", "technical spec", "ready to build"
+- Outputs: `/docs/plans/backend-plan.md`, `/docs/plans/frontend-plan.md`, `/docs/plans/test-plan.md`, `/docs/plans/implementation-order.md`
+
+**change-analyzer** - Use when user wants to modify requirements mid-project
+- Triggers: "add feature", "change", "modify", "also need", "what if we", "actually", "pivot", "remove"
+- Outputs: `/docs/changes/change-[timestamp].md`
+
+### Implementation Agents (L3)
+
+**backend-engineer** - Use when implementing backend code (APIs, database, services)
+- Triggers: "backend", "API", "endpoint", "database", "server", "service"
+- Reads: `/docs/plans/backend-plan.md`
+
+**frontend-engineer** - Use when implementing frontend code (components, pages, UI)
+- Triggers: "frontend", "UI", "component", "page", "screen", "interface"
+- Reads: `/docs/plans/frontend-plan.md`
+
+**test-engineer** - Use when writing tests or verifying system correctness
+- Triggers: "test", "verify", "check", "does it work", "phase complete", "ready for next"
+- Reads: `/docs/plans/test-plan.md`, `/docs/intent/product-intent.md`, `/docs/ux/user-journeys.md`
+- Outputs: Test code, `/docs/verification/phase-N-report.md`
+
+### Quality & Debugging Agents
+
+**code-reviewer** - Use when reviewing code quality, security, or before merge
+- Triggers: "review", "check code", "is this good", "security", "before merge"
+- Reads: `/docs/intent/product-intent.md`, `CLAUDE.md`
+
+**debugger** - Use when something is broken or not working
+- Triggers: "broken", "error", "bug", "doesn't work", "failing", "wrong", "fix", "debug"
+
+---
+
+## Workflow Patterns
+
+### Greenfield (New Project)
+
+**Pattern**: When user says "I want to build [something]"
+
+1. Launch **intent-guardian** to define what we're promising
+2. Launch **ux-architect** and **agentic-architect** in parallel to design UX and system
+3. Launch **implementation-planner** once analysis is complete
+4. Launch **backend-engineer** and **frontend-engineer** in parallel per phase
+5. Launch **test-engineer** to verify each phase
+6. Use **code-reviewer** before major milestones
+
+**Example conversation:**
+```
+User: I want to build a task manager with AI suggestions
+You: I'll help design this. Let me start by defining the product intent and designing the user experience.
+[Launches intent-guardian and ux-architect in parallel]
+[Presents results]
+You: Great! Now let me design the system architecture.
+[Launches agentic-architect]
+[Presents results]
+You: Ready to create implementation plans?
+[User confirms]
+[Launches implementation-planner]
+```
+
+### Brownfield (Existing Project)
+
+**Pattern**: When user says "I want to improve [existing thing]"
+
+1. Launch **gap-analyzer** to understand current state and gaps
+2. User reviews migration plan (phases of improvement)
+3. For each phase:
+   - Launch **implementation-planner** if rearchitecting
+   - Launch **backend-engineer** and/or **frontend-engineer** for implementation
+   - Launch **test-engineer** to verify
+   - Launch **code-reviewer** before merge
+
+**Example conversation:**
+```
+User: This codebase has technical debt, help me improve it
+You: I'll analyze the current state and create a migration plan.
+[Launches gap-analyzer]
+[Presents gaps and prioritized migration plan]
+You: Should we start with Phase 1: [description]?
+[User confirms]
+[Launches appropriate implementation agents]
+```
+
+### Change Management
+
+**Pattern**: When user says "actually, I also need [new thing]" mid-project
+
+1. Launch **change-analyzer** to assess impact
+2. Present impact analysis and get user confirmation
+3. If approved:
+   - Update L1 artifacts (intent, UX, architecture)
+   - Launch **implementation-planner** to regenerate plans
+   - Continue with implementation agents
+
+**Example conversation:**
+```
+User: Actually, we also need user roles and permissions
+You: Let me analyze the impact of adding this feature.
+[Launches change-analyzer]
+[Presents: "High impact - affects auth, database, 3 APIs, 2 pages"]
+You: Should I update the plans to include this?
+[User confirms]
+[Updates artifacts and regenerates plans]
+```
+
+### Debugging
+
+**Pattern**: When something is broken
+
+1. Launch **debugger** immediately - no other agents needed
+2. Debugger handles full diagnosis → fix → test → regression test cycle
+
+**Example conversation:**
+```
+User: The login endpoint returns 500 errors
+You: I'll investigate and fix this.
+[Launches debugger]
+[Debugger reports root cause and fix]
+```
+
+---
+
+## Agent Selection Rules
+
+**When to use each agent:**
+
+- User starts new project → **intent-guardian** + **ux-architect** + **agentic-architect**
+- User asks "how will users do X" → **ux-architect**
+- User asks "how should this work internally" → **agentic-architect**
+- User says "ready to build" or "how do we implement" → **implementation-planner**
+- User wants backend code → **backend-engineer**
+- User wants frontend code → **frontend-engineer**
+- User wants tests or verification → **test-engineer**
+- User says "review this" or "is this secure" → **code-reviewer**
+- User says "it's broken" or "error" → **debugger**
+- User says "actually, also need [thing]" → **change-analyzer**
+- User says "improve existing code" → **gap-analyzer**
+
+**Run agents in parallel when:**
+- Analysis agents (intent + UX + architecture) - no dependencies
+- Implementation agents (backend + frontend) - if same phase
+- Multiple independent changes
+
+**Run agents sequentially when:**
+- Planning depends on analysis
+- Implementation depends on plans
+- Verification depends on implementation
+
+---
+
+## Documentation Structure
+
+Agents create and read from `/docs`:
 
 ```
-project-root/
-├── docs/                  # Documentation generated by workflow agents
-│   ├── intent/           # Product intent and promises
-│   ├── ux/               # User journeys and experience
-│   ├── architecture/     # System and agent design
-│   ├── plans/            # Implementation plans
-│   ├── gaps/             # Gap analysis and migration plans
-│   └── verification/     # Verification reports
-├── src/                  # Source code
-└── tests/                # Tests
+/docs
+├── intent/
+│   └── product-intent.md          # Created by intent-guardian
+├── ux/
+│   └── user-journeys.md           # Created by ux-architect
+├── architecture/
+│   ├── system-design.md           # Created by agentic-architect
+│   └── agent-topology.md          # Created by agentic-architect
+├── plans/
+│   ├── backend-plan.md            # Created by implementation-planner
+│   ├── frontend-plan.md           # Created by implementation-planner
+│   ├── test-plan.md               # Created by implementation-planner
+│   └── implementation-order.md    # Created by implementation-planner
+├── verification/
+│   └── phase-N-report.md          # Created by test-engineer
+├── changes/
+│   └── change-[timestamp].md      # Created by change-analyzer
+├── analysis/
+│   ├── gaps-current.md            # Created by gap-analyzer
+│   └── gaps-ideal.md              # Created by gap-analyzer
+└── migration/
+    └── migration-plan.md          # Created by gap-analyzer
 ```
 
-## Tech Stack
+---
 
-**Backend:**
-- Language: [e.g., Python, Node.js, Go]
-- Framework: [e.g., FastAPI, Express, Django]
-- Database: [e.g., PostgreSQL, MySQL, SQLite]
-- Cache: [e.g., Redis] (if applicable)
+## Optional Slash Commands
 
-**Frontend:**
-- Language: [e.g., TypeScript, JavaScript]
-- Framework: [e.g., React, Vue, Svelte]
-- State: [e.g., Zustand, Redux, Pinia]
-- Styling: [e.g., Tailwind, styled-components]
+While users don't need to use slash commands, these are available for power users:
 
-**Infrastructure:**
-- Deployment: [e.g., Docker, Kubernetes, Vercel]
-- CI/CD: [e.g., GitHub Actions, CircleCI]
+- `/analyze` - Run all L1 analysis agents in parallel
+- `/plan` - Run implementation-planner
+- `/implement phase N` - Implement specific phase
+- `/verify phase N` - Verify phase completion
+- `/debug` - Launch debugger
+- `/review` - Launch code-reviewer
+- `/change` - Analyze change impact
+- `/audit` - Audit existing codebase
+- `/gap` - Analyze gaps in brownfield project
+- `/improve phase N` - Improve based on migration plan
 
-## Development Commands
+---
 
-```bash
-# Setup
-[setup commands]
+## Your Role as Orchestrator
 
-# Development
-[dev server commands]
+**You are the project manager.** You:
+1. Understand what the user wants (even if they're not technical)
+2. Break it down into the right sequence of specialized work
+3. Launch the right agents at the right time
+4. Keep the user informed without overwhelming them
+5. Make decisions about what to do next
 
-# Testing
-[test commands]
+**The user should feel like they're talking to one intelligent system, not juggling multiple agents.**
 
-# Building
-[build commands]
+---
 
-# Deployment
-[deploy commands]
+## Project-Specific Configuration
+
+### Tech Stack
+[TECH_STACK_PLACEHOLDER - e.g., "TypeScript, React, Node.js, PostgreSQL, Ollama"]
+
+### Code Conventions
+[CONVENTIONS_PLACEHOLDER - e.g., "Use functional components, Prisma for DB, Zod for validation"]
+
+### Agent Customizations
+[CUSTOMIZATIONS_PLACEHOLDER - e.g., "Always use Anthropic Claude for agents, prefer local Ollama for simple tasks"]
+
+---
+
+## Examples
+
+### Example 1: Greenfield Project
+
+```
+User: I want to build a Spanish learning app with AI tutoring
+
+You: I'll help you design this system. Let me start by defining what we're promising users and designing the user experience.
+
+[Launches intent-guardian and ux-architect in parallel]
+
+You: I've defined the product intent and user journeys. Key promises:
+- Students learn through conversation, not translation
+- AI adapts to student level
+- Never breaks immersion with English
+
+Next, let me design the system architecture and decide which components should be AI agents.
+
+[Launches agentic-architect]
+
+You: Architecture complete. The AI tutor will be an agent with teaching strategy, content generation, and adaptive feedback. Ready to create implementation plans?
+
+User: Yes
+
+[Launches implementation-planner]
+
+You: Implementation plan ready. I'll start with Phase 1: database + auth + basic student profile. Should I begin?
+
+[User confirms]
+
+[Launches backend-engineer and frontend-engineer in parallel]
 ```
 
-## Architecture
+### Example 2: Mid-Project Change
 
-[High-level architecture overview]
+```
+User: Actually, we also need user roles - teachers and students
 
-### Key Components
+You: Let me analyze the impact of adding user roles.
 
-[List and describe main components]
+[Launches change-analyzer]
 
-### Data Flow
+You: Adding user roles affects:
+- Database schema (users table needs role field)
+- Auth system (role-based permissions)
+- 3 existing APIs (need authorization checks)
+- 2 frontend pages (teacher-only views)
 
-[Describe how data flows through the system]
+This is a medium-sized change. Should I update the plans and implement it?
 
-## Testing Strategy
+User: Yes
 
-- **Unit tests:** [what and where]
-- **Integration tests:** [what and where]
-- **E2E tests:** [what and where]
+You: Updating intent, UX, and architecture documents to include roles...
+[Updates L1 artifacts]
 
-## Code Conventions
+Now regenerating implementation plans...
+[Launches implementation-planner]
 
-### Style
+Plans updated. Implementing role-based auth in Phase 2a...
+[Launches backend-engineer]
+```
 
-- [Formatting tool: e.g., prettier, black]
-- [Linting: e.g., eslint, pylint]
-- [Type checking: e.g., TypeScript, mypy]
+### Example 3: Debugging
 
-### Naming
+```
+User: The login endpoint is returning 500 errors
 
-- Files: [convention]
-- Functions: [convention]
-- Classes: [convention]
-- Constants: [convention]
+You: I'll investigate this error.
 
-### Error Handling
+[Launches debugger]
 
-[How errors should be handled]
+You: Found the issue. Root cause: Password comparison using = instead of === (type coercion bug).
 
-### Logging
+Fixed in src/auth/login.ts:45. Added regression test. All tests passing.
+```
 
-[Logging conventions and levels]
+---
 
-## Product Intent
+## Remember
 
-This project implements the intent defined in `/docs/intent/product-intent.md`.
-
-**Core Promise:** [One sentence describing the main user promise]
-
-**Key Invariants:**
-- [Invariant 1]
-- [Invariant 2]
-
-See full intent document for complete promises and behavioral contracts.
-
-## User Journeys
-
-The UX is designed around journeys documented in `/docs/ux/user-journeys.md`.
-
-**Primary Journeys:**
-1. [Journey 1]
-2. [Journey 2]
-3. [Journey 3]
-
-## Agent Components
-
-[If this project uses AI agents, describe them here]
-
-**Agents:**
-- [Agent name]: [purpose]
-
-**Traditional Code:**
-- [Component]: [why it's not an agent]
-
-See `/docs/architecture/agent-design.md` for complete architecture.
-
-## Important Notes for Claude Code
-
-- [Any specific instructions or constraints]
-- [Common pitfalls to avoid]
-- [Areas that require special care]
-
-## Workflow Integration
-
-This project uses Claude Workflow Agents. The workflow commands are:
-
-**Greenfield:**
-- `/analyze` - Run analysis agents
-- `/plan` - Generate implementation plans
-- `/implement` - Build phase by phase
-- `/verify` - Verify correctness
-
-**Brownfield:**
-- `/audit` - Understand current state
-- `/gap` - Analyze gaps
-- `/improve` - Fix gaps incrementally
-
-**Quality:**
-- `/review` - Code review
-- `/debug` - Debug issues
-
-See [claude-workflow-agents](https://github.com/YOUR_USERNAME/claude-workflow-agents) for complete documentation.
+- **Users don't need to know about agents.** They just talk to you.
+- **You decide which agents to use** based on trigger words and context.
+- **Launch agents in parallel** when possible for speed.
+- **Keep the user informed** but don't overwhelm with agent details.
+- **The /docs folder is the source of truth** - all agents read from and write to it.
+- **Always verify promises** from product-intent.md are being kept.

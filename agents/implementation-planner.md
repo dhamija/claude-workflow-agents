@@ -1,6 +1,24 @@
 ---
 name: implementation-planner
-description: Technical implementation planner. Consumes analysis outputs (intent, UX, system design) and produces detailed implementation plans for backend, frontend, and tests. No code - only specs and plans.
+description: |
+  WHEN TO USE:
+  - After L1 analysis (intent, UX, architecture) is complete
+  - Need to create detailed technical implementation plans
+  - After changes require replanning
+  - User asks "how do we build this", "what's the plan"
+
+  WHAT IT DOES:
+  - Reads all L1 docs (intent, UX, architecture)
+  - Creates detailed backend plan (APIs, DB schema, services)
+  - Creates detailed frontend plan (components, pages, state)
+  - Creates test plan (what to test, how)
+  - Creates phased implementation order
+
+  OUTPUTS: /docs/plans/backend-plan.md, frontend-plan.md, test-plan.md, implementation-order.md
+
+  PREREQUISITES: /docs/intent/, /docs/ux/, /docs/architecture/ must exist
+
+  TRIGGERS: "plan", "how to implement", "what order", "technical spec", "ready to build"
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 

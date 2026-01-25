@@ -1,6 +1,21 @@
 ---
 name: change-analyzer
-description: Analyzes impact of requirement changes across all project artifacts. Determines what needs updating when the user iterates on the idea.
+description: |
+  WHEN TO USE:
+  - User wants to add, modify, or remove features
+  - Requirements are changing mid-project
+  - User says "actually", "also need", "what if", "change", "add", "remove"
+
+  WHAT IT DOES:
+  - Analyzes impact of change across all artifacts
+  - Identifies which docs need updating
+  - Checks for conflicts with existing decisions
+  - Assesses impact on completed work
+  - Recommends update sequence
+
+  OUTPUTS: /docs/changes/change-[timestamp].md
+
+  TRIGGERS: "add feature", "change", "modify", "also need", "what if we", "actually", "pivot", "remove"
 tools: Read, Glob, Grep
 ---
 

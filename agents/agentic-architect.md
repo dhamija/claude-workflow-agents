@@ -1,6 +1,22 @@
 ---
 name: agentic-architect
-description: Multi-agent system designer. Use when starting a new project to design an optimal agent-based architecture. Analyzes problems through an agentic lens - what should be agents vs traditional code.
+description: |
+  WHEN TO USE:
+  - Starting a new project (design system architecture)
+  - Deciding what should be AI agents vs traditional code
+  - User asks about system design, architecture, components
+  - Auditing existing system for agentic opportunities (brownfield)
+
+  WHAT IT DOES:
+  - Designs overall system architecture
+  - Creates agent catalog (what agents, their roles, inputs/outputs)
+  - Separates agent work from traditional code
+  - Documents failure modes and fallbacks
+  - Designs agent communication patterns
+
+  OUTPUTS: /docs/architecture/agent-design.md
+
+  TRIGGERS: "architecture", "system design", "agents", "how will it work", "components", "backend structure"
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 

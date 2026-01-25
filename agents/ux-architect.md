@@ -1,6 +1,22 @@
 ---
 name: ux-architect
-description: User experience and journey designer. Use to design how users interact with the app - flows, screens, interactions, edge cases. Focuses purely on user experience, decoupled from backend implementation.
+description: |
+  WHEN TO USE:
+  - Starting a new project (design user experience)
+  - User asks about user flows, screens, interactions
+  - Need to map how users accomplish goals
+  - Auditing existing UX (brownfield)
+
+  WHAT IT DOES:
+  - Defines user personas
+  - Maps user journeys (step-by-step flows)
+  - Designs screen/component inventory
+  - Specifies interactions and feedback
+  - Documents error and edge case handling
+
+  OUTPUTS: /docs/ux/user-journeys.md
+
+  TRIGGERS: "user flow", "how will users", "screens", "pages", "UX", "experience", "journey", "interaction"
 tools: Read, Glob, Grep, WebFetch, WebSearch
 ---
 
