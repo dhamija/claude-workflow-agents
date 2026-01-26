@@ -62,7 +62,29 @@ rm -rf "$TEMP_DIR"
 
 # Create symlinks for Claude Code to find agents and commands
 mkdir -p "$CLAUDE_DIR"
+
+# Handle agents directory/symlink
+if [ -d "$CLAUDE_DIR/agents" ] && [ ! -L "$CLAUDE_DIR/agents" ]; then
+    # Real directory exists with user's own agents - back it up
+    echo ""
+    echo "⚠ Found existing agents in ~/.claude/agents/"
+    echo "  Moving to ~/.claude/agents.user (preserving your files)"
+    mv "$CLAUDE_DIR/agents" "$CLAUDE_DIR/agents.user"
+fi
+# Remove old workflow symlink or create new
+[ -L "$CLAUDE_DIR/agents" ] && rm -f "$CLAUDE_DIR/agents"
 ln -sf "$INSTALL_DIR/agents" "$CLAUDE_DIR/agents"
+
+# Handle commands directory/symlink
+if [ -d "$CLAUDE_DIR/commands" ] && [ ! -L "$CLAUDE_DIR/commands" ]; then
+    # Real directory exists with user's own commands - back it up
+    echo ""
+    echo "⚠ Found existing commands in ~/.claude/commands/"
+    echo "  Moving to ~/.claude/commands.user (preserving your files)"
+    mv "$CLAUDE_DIR/commands" "$CLAUDE_DIR/commands.user"
+fi
+# Remove old workflow symlink or create new
+[ -L "$CLAUDE_DIR/commands" ] && rm -f "$CLAUDE_DIR/commands"
 ln -sf "$INSTALL_DIR/commands" "$CLAUDE_DIR/commands"
 
 # Create bin directory
@@ -273,6 +295,113 @@ SCRIPT
 chmod +x "$INSTALL_DIR/bin/workflow-version"
 
 # ─────────────────────────────────────────────────────────────────
+# Create: workflow-toggle
+# ─────────────────────────────────────────────────────────────────
+cat > "$INSTALL_DIR/bin/workflow-toggle" << 'SCRIPT'
+#!/bin/bash
+
+# Toggle workflow agents/commands on or off
+
+INSTALL_DIR="$HOME/.claude-workflow-agents"
+CLAUDE_DIR="$HOME/.claude"
+
+# Check installation
+if [ ! -d "$INSTALL_DIR" ]; then
+    echo "Error: Workflow not installed"
+    exit 1
+fi
+
+# Check current status
+if [ -L "$CLAUDE_DIR/agents" ] && readlink "$CLAUDE_DIR/agents" | grep -q "workflow-agents"; then
+    STATUS="enabled"
+else
+    STATUS="disabled"
+fi
+
+# Parse command
+CMD="${1:-status}"
+
+case "$CMD" in
+    status)
+        echo ""
+        echo "Workflow Status: $STATUS"
+        if [ "$STATUS" = "enabled" ]; then
+            echo "  Agents:   ~/.claude/agents/ -> workflow agents"
+            echo "  Commands: ~/.claude/commands/ -> workflow commands"
+            echo ""
+            echo "To disable: workflow-toggle off"
+        else
+            echo "  Agents:   not linked"
+            echo "  Commands: not linked"
+            echo ""
+            echo "To enable: workflow-toggle on"
+        fi
+        echo ""
+        ;;
+
+    on|enable)
+        if [ "$STATUS" = "enabled" ]; then
+            echo "Already enabled"
+            exit 0
+        fi
+
+        # Check for user's own agents/commands
+        if [ -d "$CLAUDE_DIR/agents" ] && [ ! -L "$CLAUDE_DIR/agents" ]; then
+            echo "Warning: ~/.claude/agents/ exists (not a symlink)"
+            echo "Moving to ~/.claude/agents.user"
+            mv "$CLAUDE_DIR/agents" "$CLAUDE_DIR/agents.user"
+        fi
+        if [ -d "$CLAUDE_DIR/commands" ] && [ ! -L "$CLAUDE_DIR/commands" ]; then
+            echo "Warning: ~/.claude/commands/ exists (not a symlink)"
+            echo "Moving to ~/.claude/commands.user"
+            mv "$CLAUDE_DIR/commands" "$CLAUDE_DIR/commands.user"
+        fi
+
+        # Create symlinks
+        ln -sf "$INSTALL_DIR/agents" "$CLAUDE_DIR/agents"
+        ln -sf "$INSTALL_DIR/commands" "$CLAUDE_DIR/commands"
+
+        echo "✓ Workflow enabled"
+        echo "  Agents and commands are now active"
+        ;;
+
+    off|disable)
+        if [ "$STATUS" = "disabled" ]; then
+            echo "Already disabled"
+            exit 0
+        fi
+
+        # Remove only workflow symlinks
+        if [ -L "$CLAUDE_DIR/agents" ]; then
+            TARGET=$(readlink "$CLAUDE_DIR/agents")
+            if [[ "$TARGET" == *"workflow-agents"* ]]; then
+                rm -f "$CLAUDE_DIR/agents"
+            fi
+        fi
+        if [ -L "$CLAUDE_DIR/commands" ]; then
+            TARGET=$(readlink "$CLAUDE_DIR/commands")
+            if [[ "$TARGET" == *"workflow-agents"* ]]; then
+                rm -f "$CLAUDE_DIR/commands"
+            fi
+        fi
+
+        # Restore user's files if backed up
+        [ -d "$CLAUDE_DIR/agents.user" ] && mv "$CLAUDE_DIR/agents.user" "$CLAUDE_DIR/agents"
+        [ -d "$CLAUDE_DIR/commands.user" ] && mv "$CLAUDE_DIR/commands.user" "$CLAUDE_DIR/commands"
+
+        echo "✓ Workflow disabled"
+        echo "  Standard Claude Code mode"
+        ;;
+
+    *)
+        echo "Usage: workflow-toggle [on|off|status]"
+        exit 1
+        ;;
+esac
+SCRIPT
+chmod +x "$INSTALL_DIR/bin/workflow-toggle"
+
+# ─────────────────────────────────────────────────────────────────
 # Create: workflow-uninstall
 # ─────────────────────────────────────────────────────────────────
 cat > "$INSTALL_DIR/bin/workflow-uninstall" << 'SCRIPT'
@@ -296,15 +425,32 @@ if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
     exit 0
 fi
 
-# Remove symlinks from ~/.claude/
+# Remove symlinks from ~/.claude/ (only if they're workflow symlinks)
 if [ -L "$CLAUDE_DIR/agents" ]; then
-    rm -f "$CLAUDE_DIR/agents"
-    echo "✓ Removed agents symlink"
+    TARGET=$(readlink "$CLAUDE_DIR/agents")
+    if [[ "$TARGET" == *"workflow-agents"* ]]; then
+        rm -f "$CLAUDE_DIR/agents"
+        echo "✓ Removed agents symlink"
+    fi
 fi
 
 if [ -L "$CLAUDE_DIR/commands" ]; then
-    rm -f "$CLAUDE_DIR/commands"
-    echo "✓ Removed commands symlink"
+    TARGET=$(readlink "$CLAUDE_DIR/commands")
+    if [[ "$TARGET" == *"workflow-agents"* ]]; then
+        rm -f "$CLAUDE_DIR/commands"
+        echo "✓ Removed commands symlink"
+    fi
+fi
+
+# Restore user's backed up files if they exist
+if [ -d "$CLAUDE_DIR/agents.user" ]; then
+    echo "✓ Restoring your agents from backup"
+    mv "$CLAUDE_DIR/agents.user" "$CLAUDE_DIR/agents"
+fi
+
+if [ -d "$CLAUDE_DIR/commands.user" ]; then
+    echo "✓ Restoring your commands from backup"
+    mv "$CLAUDE_DIR/commands.user" "$CLAUDE_DIR/commands"
 fi
 
 # Remove from PATH in shell configs
