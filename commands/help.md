@@ -31,6 +31,7 @@ Get help on any aspect of the Claude Workflow Agents system.
 | `agents` | All specialized agents |
 | `commands` | Available commands |
 | `patterns` | Development patterns & examples |
+| `git` | Git workflow & conventions |
 | `parallel` | Parallel development (teams) |
 | `brownfield` | Improving existing code |
 | `examples` | Practical examples |
@@ -81,6 +82,7 @@ Just talk naturally. Claude handles the rest.
 │   /help agents       - All specialized agents                   │
 │   /help commands     - Available commands                       │
 │   /help patterns     - Development patterns & examples          │
+│   /help git          - Git workflow & conventions               │
 │   /help parallel     - Parallel development guide               │
 │   /help brownfield   - Improving existing code                  │
 │   /help examples     - Practical examples                       │
@@ -271,6 +273,9 @@ PROJECT OPERATIONS
   /project ai <action>       LLM integration
   /project mcp <action>      MCP servers
   /project status            Show project health
+  /project commit [msg]      Create conventional commit
+  /project push              Push current branch
+  /project pr                Create pull request (needs GitHub MCP)
 
 
 ANALYSIS & PLANNING
@@ -307,6 +312,198 @@ TIPS
   • "What's the status" works naturally
   • "Review the auth code" works naturally
   • Claude understands natural language
+```
+
+### If topic = "git":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                    GIT WORKFLOW & CONVENTIONS                    ║
+╚══════════════════════════════════════════════════════════════════╝
+
+project-ops handles git workflow with conventional commits,
+branch naming, and PR creation.
+
+
+CONVENTIONAL COMMITS
+────────────────────
+
+Format: <type>: <description>
+
+  Types:
+  • feat       - New feature
+  • fix        - Bug fix
+  • refactor   - Code restructuring (no behavior change)
+  • docs       - Documentation only
+  • test       - Add/update tests
+  • chore      - Maintenance (deps, config)
+
+  Examples:
+    feat: add user authentication
+    fix: resolve login timeout issue
+    refactor: extract validation logic
+    docs: update API reference
+    test: add unit tests for auth
+    chore: upgrade to Node 20
+
+
+BRANCH NAMING
+─────────────
+
+Format: <type>/<short-description>
+
+  Examples:
+    feature/user-authentication
+    feature/password-reset
+    fix/login-timeout
+    fix/null-user-crash
+    refactor/database-layer
+    docs/api-reference
+
+  Guidelines:
+  • Use lowercase with hyphens
+  • Keep description short (2-4 words)
+  • Match commit type when possible
+
+
+COMMANDS
+────────
+
+  /project commit [message]    Create conventional commit (guided)
+  /project push                Push current branch to remote
+  /project pr                  Create pull request (needs GitHub MCP)
+
+
+WORKFLOW
+────────
+
+  Standard flow:
+
+    1. Create feature branch:
+       git checkout -b feature/my-feature
+
+    2. Make changes, commit:
+       /project commit
+
+    3. Push to remote:
+       /project push
+
+    4. Create PR:
+       /project pr
+
+
+COMMIT HELPER
+─────────────
+
+  With message:
+
+    You:    /project commit "add user auth"
+    Claude: Type: feat, fix, refactor, docs, test, or chore?
+    You:    feat
+    Claude: ✓ Committed: feat: add user auth
+
+
+  Guided (no message):
+
+    You:    /project commit
+    Claude: What type of change?
+            1. feat - New feature
+            2. fix - Bug fix
+            3. refactor - Code restructuring
+            4. docs - Documentation
+            5. test - Tests
+            6. chore - Maintenance
+
+    You:    1
+    Claude: Describe the change (short, imperative):
+    You:    add user authentication
+    Claude: ✓ Committed: feat: add user authentication
+
+
+  Smart suggestion:
+
+    You:    /project commit
+    Claude: Staged files: README.md, docs/API.md
+            Suggested type: docs
+
+            Continue with "docs"? [y/n]
+
+
+PULL REQUEST HELPER
+───────────────────
+
+  With GitHub MCP (recommended):
+
+    You:    /project pr
+    Claude: Analyzing branch...
+
+            Generated PR:
+            Title: Add user authentication
+
+            Body:
+            ## Changes
+            - Implemented login/logout
+            - Added JWT handling
+            - Created auth middleware
+
+            ## Testing
+            - 15 new tests passing
+            - Manual testing verified
+
+            Create PR? [y/n]
+
+    You:    y
+    Claude: ✓ PR created: https://github.com/user/repo/pull/42
+
+
+  Without GitHub MCP:
+
+    You:    /project pr
+    Claude: GitHub MCP not configured. Setup now? [y/n]
+    You:    n
+    Claude: Manual PR instructions:
+
+            1. git push -u origin feature/my-feature
+            2. Visit: https://github.com/user/repo/compare/...
+            3. Or: gh pr create --title "..." --body "..."
+
+            Push branch for you? [y/n]
+
+
+GITHUB INTEGRATION
+──────────────────
+
+  For automatic PR creation, setup GitHub MCP:
+
+    /project mcp setup
+
+  Select "github" and provide your GitHub token.
+
+  Benefits:
+  • Auto-generate PR title/body from commits
+  • Create PRs without leaving Claude
+  • Check PR status
+  • Streamlined workflow
+
+
+PHILOSOPHY
+──────────
+
+  1. Conventional commits → Clear, searchable history
+  2. Descriptive branches → Easy to track work
+  3. Guided helpers → Reduce cognitive load
+  4. MCP integration → Streamline PR creation
+  5. Always optional → Use raw git if preferred
+
+
+TIPS
+────
+
+  • Smart suggestions based on changed files
+  • Git commands work alongside /project commands
+  • Commit helper prevents malformed commits
+  • PR helper generates comprehensive descriptions
+  • Setup GitHub MCP for best experience
 ```
 
 ### If topic = "patterns":
@@ -733,6 +930,7 @@ Available topics:
   /help agents         - All specialized agents
   /help commands       - Available commands
   /help patterns       - Development patterns & examples
+  /help git            - Git workflow & conventions
   /help parallel       - Parallel development guide
   /help brownfield     - Improving existing code
   /help examples       - Practical examples

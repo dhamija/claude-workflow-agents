@@ -9,8 +9,8 @@
 |-----------|-------|--------------|
 | Agents | 12 | 2026-01-25 |
 | Commands | 23 | 2026-01-25 |
-| Help Topics | 11 | 2026-01-25 |
-| Tests | 23 | 2026-01-25 |
+| Help Topics | 12 | 2026-01-25 |
+| Tests | 24 | 2026-01-25 |
 
 ## Agents List
 
@@ -64,6 +64,10 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-25 | Added git workflow conventions to project-ops agent | Claude |
+| 2026-01-25 | Added /project commit, /project push, /project pr subcommands | Claude |
+| 2026-01-25 | Added /help git topic with conventional commits and branch naming | Claude |
+| 2026-01-25 | Created test_git_workflow_docs.sh test (24 tests total) | Claude |
 | 2026-01-25 | Global install system with per-project activation | Claude |
 | 2026-01-25 | Added /workflow command for enable/disable toggle | Claude |
 | 2026-01-25 | Created bin/ commands: workflow-init, workflow-remove, workflow-update, workflow-uninstall | Claude |

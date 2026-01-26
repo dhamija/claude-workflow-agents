@@ -1533,6 +1533,235 @@ Claude: [Running verification...]
 
 ---
 
+## Git Workflow
+
+project-ops handles git conventions and workflow integration.
+
+### Commit Conventions
+
+Use conventional commit format for clear history:
+
+**Format:** `<type>: <description>`
+
+| Type | When to Use | Example |
+|------|-------------|---------|
+| `feat` | New feature | `feat: add user authentication` |
+| `fix` | Bug fix | `fix: resolve login timeout issue` |
+| `refactor` | Code restructuring (no behavior change) | `refactor: extract validation logic` |
+| `docs` | Documentation only | `docs: update API reference` |
+| `test` | Add/update tests | `test: add unit tests for auth` |
+| `chore` | Maintenance (deps, config) | `chore: update dependencies` |
+
+**Examples:**
+```bash
+feat: add password reset flow
+fix: handle null user in dashboard
+refactor: simplify database queries
+docs: add deployment guide
+test: add integration tests for checkout
+chore: upgrade to Node 20
+```
+
+### Branch Naming
+
+Use descriptive, type-prefixed branch names:
+
+**Format:** `<type>/<short-description>`
+
+**Examples:**
+```bash
+feature/user-authentication
+feature/password-reset
+fix/login-timeout
+fix/null-user-crash
+refactor/database-layer
+refactor/extract-validators
+docs/api-reference
+test/integration-suite
+```
+
+**Guidelines:**
+- Use lowercase with hyphens
+- Keep description short (2-4 words)
+- Match commit type when possible
+- Use `feature/` for new capabilities
+- Use `fix/` for bug fixes
+- Use `refactor/` for code improvements
+
+### Workflow
+
+**Standard Flow:**
+```bash
+# 1. Create feature branch
+git checkout -b feature/my-feature
+
+# 2. Make changes, commit with convention
+git add .
+git commit -m "feat: add my feature"
+
+# 3. Push to remote
+git push -u origin feature/my-feature
+
+# 4. Create PR
+# (via GitHub UI or /project pr if GitHub MCP is configured)
+```
+
+**Using project-ops helpers:**
+```bash
+# Guided conventional commit
+/project commit
+
+# Push current branch
+/project push
+
+# Create PR (requires GitHub MCP)
+/project pr
+```
+
+### Commands
+
+| Command | Purpose | Example |
+|---------|---------|---------|
+| `/project commit [message]` | Create conventional commit (guided if no message) | `/project commit` |
+| `/project push` | Push current branch to remote | `/project push` |
+| `/project pr` | Create pull request (requires GitHub MCP) | `/project pr` |
+
+### Commit Helper
+
+When user runs `/project commit`, guide them through conventional commit:
+
+**If message provided:**
+```bash
+/project commit "add user auth"
+
+Claude: Creating commit with conventional format...
+
+        Type: feat, fix, refactor, docs, test, or chore?
+
+You: feat
+
+Claude: [Runs git commit -m "feat: add user auth"]
+        ✓ Committed: feat: add user auth
+```
+
+**If no message:**
+```bash
+/project commit
+
+Claude: Let's create a conventional commit.
+
+        What type of change is this?
+        1. feat - New feature
+        2. fix - Bug fix
+        3. refactor - Code restructuring
+        4. docs - Documentation
+        5. test - Tests
+        6. chore - Maintenance
+
+You: 1
+
+Claude: Describe the change (short, imperative):
+
+You: add user authentication
+
+Claude: [Runs git commit -m "feat: add user authentication"]
+        ✓ Committed: feat: add user authentication
+```
+
+**Smart defaults:**
+- If only docs changed → suggest `docs:`
+- If tests/ changed → suggest `test:`
+- If package.json changed → suggest `chore:`
+- Otherwise → ask user
+
+### PR Helper
+
+When user runs `/project pr`, create pull request:
+
+**With GitHub MCP (recommended):**
+```bash
+/project pr
+
+Claude: Creating pull request...
+
+        [Reads recent commits on branch]
+        [Generates PR title from commits]
+        [Generates PR body from changes]
+
+        Title: Add user authentication
+        Body:
+        ## Changes
+        - Implemented login/logout flow
+        - Added JWT token handling
+        - Created auth middleware
+
+        ## Testing
+        - Added unit tests for auth service
+        - Tested login/logout manually
+
+        Create PR? [y/n]
+
+You: y
+
+Claude: [Uses GitHub MCP to create PR]
+        ✓ PR created: https://github.com/user/repo/pull/123
+```
+
+**Without GitHub MCP:**
+```bash
+/project pr
+
+Claude: To create a PR, I need the GitHub MCP server.
+
+        Setup GitHub MCP? [y/n]
+
+You: n
+
+Claude: No problem. To create PR manually:
+
+        1. Push your branch:
+           git push -u origin feature/my-feature
+
+        2. Visit GitHub:
+           https://github.com/user/repo/compare/feature/my-feature
+
+        3. Or use GitHub CLI:
+           gh pr create --title "Add user authentication" --body "..."
+
+        Want me to push the branch for you? [y/n]
+```
+
+**Implementation:**
+```typescript
+// When /project pr is invoked
+async function handleProjectPR() {
+  // Check if GitHub MCP is available
+  const hasMCP = await checkMCPServer('github');
+
+  if (hasMCP) {
+    // Use MCP to create PR
+    const commits = await git.log(['main..HEAD']);
+    const title = generatePRTitle(commits);
+    const body = generatePRBody(commits);
+
+    await github.createPR({ title, body });
+  } else {
+    // Offer to setup MCP or show manual instructions
+    askToSetupMCP() || showManualInstructions();
+  }
+}
+```
+
+### Git Workflow Philosophy
+
+1. **Conventional commits** → Clear, searchable history
+2. **Descriptive branches** → Easy to track parallel work
+3. **Guided helpers** → Reduce cognitive load
+4. **MCP integration** → Streamline PR creation
+5. **Always optional** → Users can use raw git if preferred
+
+---
+
 ## Summary
 
 This agent provides comprehensive project operations:
@@ -1543,5 +1772,6 @@ This agent provides comprehensive project operations:
 4. **Docs** - Generate documentation from code
 5. **AI** - Setup LLM/MCP integration
 6. **Status** - Always know project health
+7. **Git Workflow** - Conventional commits, branches, PRs
 
 **Core Philosophy:** Automation catches drift, humans maintain quality.

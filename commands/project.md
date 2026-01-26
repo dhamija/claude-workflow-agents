@@ -20,6 +20,9 @@ Unified command for all project operations. Consolidates setup, sync, verificati
 /project ai <action>              # LLM integration
 /project mcp <action>             # MCP servers
 /project status                   # Show project health
+/project commit [message]         # Create conventional commit (guided)
+/project push                     # Push current branch to remote
+/project pr                       # Create pull request (requires GitHub MCP)
 ```
 
 ---
@@ -845,6 +848,366 @@ Claude: ════════════════════════
 
 ---
 
+### /project commit [message]
+
+Create a conventional commit with guided workflow.
+
+**What it does:**
+- Prompts for commit type if not provided
+- Suggests type based on file changes
+- Creates properly formatted commit message
+- Follows conventional commit standard
+
+**When to use:**
+- When ready to commit changes
+- To ensure consistent commit messages
+- For better git history and changelog generation
+
+**Process:**
+
+```
+TASK: User ran /project commit [$MESSAGE]
+
+Invoke the project-ops agent with these instructions:
+
+---
+CAPABILITY: Git Workflow
+ACTION: Commit Helper
+MESSAGE: $MESSAGE (if provided)
+
+STEPS:
+1. Run git status to see what's staged
+2. If nothing staged, show error and suggest "git add"
+3. If MESSAGE provided:
+   - Ask: "Type: feat, fix, refactor, docs, test, or chore?"
+   - Format as: "<type>: <message>"
+   - Run git commit
+4. If NO MESSAGE:
+   - Analyze changed files to suggest type:
+     • Only docs/ → suggest "docs"
+     • Only tests/ → suggest "test"
+     • Only package.json/deps → suggest "chore"
+     • Otherwise → ask user
+   - Show menu:
+     1. feat - New feature
+     2. fix - Bug fix
+     3. refactor - Code restructuring
+     4. docs - Documentation
+     5. test - Tests
+     6. chore - Maintenance
+   - Ask: "Describe the change (short, imperative):"
+   - Format as: "<type>: <description>"
+   - Run git commit
+5. Show commit confirmation
+
+OUTPUT:
+Display commit message and hash.
+---
+```
+
+**Example (with message):**
+
+```
+You: /project commit "add user authentication"
+
+Claude: Type: feat, fix, refactor, docs, test, or chore?
+
+You: feat
+
+Claude: [Runs: git commit -m "feat: add user authentication"]
+
+        ✓ Committed: feat: add user authentication
+        Hash: a3f5b2c
+```
+
+**Example (guided):**
+
+```
+You: /project commit
+
+Claude: Analyzing changes...
+
+        Staged files:
+          • src/auth/login.ts
+          • src/auth/logout.ts
+          • tests/auth.test.ts
+
+        What type of change is this?
+        1. feat - New feature
+        2. fix - Bug fix
+        3. refactor - Code restructuring
+        4. docs - Documentation
+        5. test - Tests
+        6. chore - Maintenance
+
+You: 1
+
+Claude: Describe the change (short, imperative):
+
+You: add user authentication
+
+Claude: [Runs: git commit -m "feat: add user authentication"]
+
+        ✓ Committed: feat: add user authentication
+        Hash: a3f5b2c
+```
+
+**Example (smart suggestion):**
+
+```
+You: /project commit
+
+Claude: Analyzing changes...
+
+        Staged files:
+          • README.md
+          • docs/API.md
+
+        Suggested type: docs (only documentation changed)
+
+        Continue with "docs"? [y/n]
+
+You: y
+
+Claude: Describe the change:
+
+You: update API documentation
+
+Claude: [Runs: git commit -m "docs: update API documentation"]
+
+        ✓ Committed: docs: update API documentation
+        Hash: b7e9c1a
+```
+
+---
+
+### /project push
+
+Push current branch to remote repository.
+
+**What it does:**
+- Gets current branch name
+- Pushes to remote (with -u flag if first push)
+- Shows push result
+
+**When to use:**
+- After committing changes
+- Before creating PR
+- To backup work to remote
+
+**Process:**
+
+```
+TASK: User ran /project push
+
+Invoke the project-ops agent with these instructions:
+
+---
+CAPABILITY: Git Workflow
+ACTION: Push Branch
+STEPS:
+1. Get current branch: git rev-parse --abbrev-ref HEAD
+2. Check if branch has upstream: git rev-parse --abbrev-ref @{u}
+3. If NO upstream:
+   - Run: git push -u origin <branch>
+4. If HAS upstream:
+   - Run: git push
+5. Show push result (commits pushed, branch URL)
+
+OUTPUT:
+Display push confirmation and branch info.
+---
+```
+
+**Example (first push):**
+
+```
+You: /project push
+
+Claude: [Runs: git push -u origin feature/user-auth]
+
+        ✓ Pushed feature/user-auth to origin
+        ✓ Upstream branch set
+
+        2 commits pushed:
+          • feat: add user authentication (a3f5b2c)
+          • test: add auth tests (b7e9c1a)
+
+        Branch: https://github.com/user/repo/tree/feature/user-auth
+```
+
+**Example (subsequent push):**
+
+```
+You: /project push
+
+Claude: [Runs: git push]
+
+        ✓ Pushed feature/user-auth to origin
+
+        1 commit pushed:
+          • fix: resolve login timeout (c8d2e4f)
+```
+
+---
+
+### /project pr
+
+Create a pull request from current branch.
+
+**What it does:**
+- Generates PR title from recent commits
+- Generates PR body with changes summary
+- Creates PR via GitHub MCP (if available)
+- Provides manual instructions if MCP not configured
+
+**When to use:**
+- After pushing feature branch
+- When ready for code review
+- Before merging to main
+
+**Prerequisites:**
+- GitHub MCP server configured (recommended)
+- OR manual PR creation via GitHub UI
+
+**Process:**
+
+```
+TASK: User ran /project pr
+
+Invoke the project-ops agent with these instructions:
+
+---
+CAPABILITY: Git Workflow
+ACTION: Create Pull Request
+
+STEPS:
+1. Check if GitHub MCP server is available
+2. Get current branch
+3. Get commits on branch (vs main): git log main..HEAD
+4. Generate PR title from commits
+5. Generate PR body:
+   - ## Changes (list of changes)
+   - ## Testing (what was tested)
+   - ## Notes (if any breaking changes)
+
+IF GitHub MCP available:
+  6. Show preview: "Title: ... Body: ..."
+  7. Ask: "Create PR? [y/n]"
+  8. If yes: Use GitHub MCP to create PR
+  9. Show PR URL
+
+IF GitHub MCP NOT available:
+  6. Ask: "GitHub MCP not configured. Setup now? [y/n]"
+  7. If yes: Run /project mcp setup (select github)
+  8. If no: Show manual instructions:
+     - git push command
+     - GitHub compare URL
+     - gh CLI command (if available)
+  9. Ask: "Push branch for you? [y/n]"
+
+OUTPUT:
+Display PR URL or manual instructions.
+---
+```
+
+**Example (with GitHub MCP):**
+
+```
+You: /project pr
+
+Claude: Analyzing branch feature/user-auth...
+
+        Found 3 commits:
+          • feat: add user authentication (a3f5b2c)
+          • test: add auth tests (b7e9c1a)
+          • docs: update auth documentation (c8d2e4f)
+
+        Generated PR:
+
+        Title: Add user authentication
+
+        Body:
+        ## Changes
+        - Implemented login/logout flow
+        - Added JWT token handling
+        - Created auth middleware
+        - Added authentication tests
+        - Updated documentation
+
+        ## Testing
+        - Unit tests: 15 new tests passing
+        - Manual testing: Login/logout flows verified
+        - Token expiration tested
+
+        Create PR? [y/n]
+
+You: y
+
+Claude: [Using GitHub MCP to create PR]
+
+        ✓ PR created: https://github.com/user/repo/pull/42
+
+        Title: Add user authentication
+        Branch: feature/user-auth → main
+        Status: Open
+```
+
+**Example (without GitHub MCP):**
+
+```
+You: /project pr
+
+Claude: To create a PR, I need the GitHub MCP server.
+
+        GitHub MCP provides:
+        - Automatic PR creation
+        - Branch status checking
+        - PR template integration
+
+        Setup GitHub MCP now? [y/n]
+
+You: n
+
+Claude: No problem. To create PR manually:
+
+        1. Push your branch (if not already pushed):
+           git push -u origin feature/user-auth
+
+        2. Visit GitHub to create PR:
+           https://github.com/user/repo/compare/feature/user-auth
+
+        3. Or use GitHub CLI:
+           gh pr create --title "Add user authentication" --body "..."
+
+        Suggested PR content:
+        ──────────────────────────────────────────
+        Title: Add user authentication
+
+        Body:
+        ## Changes
+        - Implemented login/logout flow
+        - Added JWT token handling
+        - Created auth middleware
+
+        ## Testing
+        - Unit tests: 15 new tests passing
+        - Manual testing: Login/logout flows verified
+        ──────────────────────────────────────────
+
+        Want me to push the branch for you? [y/n]
+
+You: y
+
+Claude: [Runs: git push -u origin feature/user-auth]
+
+        ✓ Pushed to origin
+
+        Create PR at: https://github.com/user/repo/compare/feature/user-auth
+```
+
+---
+
 ## Command Routing Logic
 
 When user runs `/project <subcommand>`, route to appropriate capability:
@@ -875,6 +1238,16 @@ def handle_project_command(subcommand: str, args: str):
 
     elif subcommand == "status":
         invoke_agent("project-ops", capability="status")
+
+    elif subcommand == "commit":
+        message = args  # optional commit message
+        invoke_agent("project-ops", capability="git-commit", message=message)
+
+    elif subcommand == "push":
+        invoke_agent("project-ops", capability="git-push")
+
+    elif subcommand == "pr":
+        invoke_agent("project-ops", capability="git-pr")
 
     else:
         show_help()
@@ -990,5 +1363,6 @@ The `/project` command is your central hub for:
 4. **Docs** - Generate documentation from code
 5. **AI** - Setup LLM/MCP integration
 6. **Status** - Always know project health
+7. **Git Workflow** - Conventional commits, push, PR creation
 
-**Philosophy:** One command, six capabilities, comprehensive project management.
+**Philosophy:** One command, comprehensive project management from setup to deployment.
