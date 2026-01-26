@@ -14,15 +14,20 @@ echo "Claude Workflow Agents - Install"
 echo "================================="
 echo ""
 
-# Check if already installed
-if [ -d "$INSTALL_DIR" ]; then
+# Check if workflow agents already installed
+if [ -f "$INSTALL_DIR/version.txt" ]; then
     CURRENT_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "unknown")
     echo "Already installed (version: $CURRENT_VERSION)"
     echo ""
     read -p "Update to version $VERSION? [y/N] " update
     if [[ "$update" =~ ^[Yy]$ ]]; then
         echo "Updating..."
-        rm -rf "$INSTALL_DIR"
+        # Only remove workflow-specific files, not entire ~/.claude/
+        rm -rf "$INSTALL_DIR/agents"
+        rm -rf "$INSTALL_DIR/commands"
+        rm -rf "$INSTALL_DIR/templates"
+        rm -rf "$INSTALL_DIR/bin"
+        rm -f "$INSTALL_DIR/version.txt"
     else
         echo ""
         echo "Keeping current installation."
