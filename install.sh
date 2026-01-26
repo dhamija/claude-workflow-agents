@@ -5,8 +5,8 @@
 
 set -e
 
-VERSION="1.0.0"
-INSTALL_DIR="$HOME/.claude-workflow-agents"
+VERSION="1.2.0"
+INSTALL_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
 
 echo ""
@@ -66,7 +66,7 @@ cat > "$INSTALL_DIR/bin/workflow-init" << 'SCRIPT'
 
 # Initialize workflow in current project
 
-WORKFLOW_HOME="$HOME/.claude-workflow-agents"
+WORKFLOW_HOME="$HOME/.claude"
 
 if [ ! -d "$WORKFLOW_HOME" ]; then
     echo "Error: Workflow agents not installed globally."
@@ -188,7 +188,7 @@ cat > "$INSTALL_DIR/bin/workflow-update" << 'SCRIPT'
 
 # Update global installation
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
+INSTALL_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
 
 echo "Updating Claude Workflow Agents..."
@@ -232,7 +232,7 @@ cat > "$INSTALL_DIR/bin/workflow-version" << 'SCRIPT'
 
 # Show version information
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
+INSTALL_DIR="$HOME/.claude"
 
 echo ""
 echo "Claude Workflow Agents"
@@ -270,7 +270,7 @@ cat > "$INSTALL_DIR/bin/workflow-uninstall" << 'SCRIPT'
 
 # Uninstall globally
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
+INSTALL_DIR="$HOME/.claude"
 
 echo ""
 echo "Uninstall Claude Workflow Agents"
@@ -312,7 +312,7 @@ chmod +x "$INSTALL_DIR/bin/workflow-uninstall"
 # ─────────────────────────────────────────────────────────────────
 # Add to PATH
 # ─────────────────────────────────────────────────────────────────
-PATH_LINE='export PATH="$HOME/.claude-workflow-agents/bin:$PATH"'
+PATH_LINE='export PATH="$HOME/.claude/bin:$PATH"'
 
 add_to_path() {
     local rc="$1"

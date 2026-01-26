@@ -53,7 +53,7 @@ When creating files for user projects, use templates from the global installatio
 
 ### Template Location
 
-Templates are in: `~/.claude-workflow-agents/templates/`
+Templates are in: `~/.claude/templates/`
 
 ```
 templates/

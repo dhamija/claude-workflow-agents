@@ -13,7 +13,7 @@ Workflow Status
 ───────────────
 Project:  my-app
 Status:   enabled
-Home:     ~/.claude-workflow-agents/
+Home:     ~/.claude/
 
 Agents:   12 available
 Commands: 23 available
@@ -29,7 +29,7 @@ Workflow Status
 ───────────────
 Project:  my-app
 Status:   disabled
-Home:     ~/.claude-workflow-agents/
+Home:     ~/.claude/
 
 Claude is in standard mode.
 Toggle: /workflow on

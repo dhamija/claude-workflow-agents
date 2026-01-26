@@ -7,7 +7,7 @@
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 source ~/.bashrc  # or restart terminal
 ```
-Installs to `~/.claude-workflow-agents/` (global, used by all projects).
+Installs to `~/.claude/` (global, used by all projects).
 
 ### Per-Project Activation
 ```bash
@@ -190,11 +190,11 @@ git worktree add ../myapp-web feature/web
 
 ### "Unknown slash command"
 - Restart Claude Code after installation
-- Check files are in correct location: `ls ~/.claude-workflow-agents/commands/`
+- Check files are in correct location: `ls ~/.claude/commands/`
 - Verify workflow-init was run in the project
 
 ### "Agent not found"
-- Verify agent file exists: `ls ~/.claude-workflow-agents/agents/`
+- Verify agent file exists: `ls ~/.claude/agents/`
 - Check agent name in command matches filename
 - Ensure CLAUDE.md has workflow markers
 
@@ -321,10 +321,10 @@ cd ../web
 ## Troubleshooting
 
 ### Commands Don't Appear
-1. Check global installation: `ls ~/.claude-workflow-agents/commands/`
+1. Check global installation: `ls ~/.claude/commands/`
 2. Check workflow-init was run: `grep workflow-home CLAUDE.md`
 3. Restart Claude Code completely
-4. Verify file permissions: `chmod 644 ~/.claude-workflow-agents/commands/*.md`
+4. Verify file permissions: `chmod 644 ~/.claude/commands/*.md`
 
 ### Agents Fail to Read Files
 1. Agents can only read files, not directories
