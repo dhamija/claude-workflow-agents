@@ -30,7 +30,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | Metric | Count |
 |--------|-------|
 | Agents | 12 |
-| Commands | 22 |
+| Commands | 9 |
 
 ### Agents
 
@@ -54,26 +54,13 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | Command | Purpose |
 |---------|---------|
 | /help | Help system |
-| /analyze | Run all L1 agents |
-| /audit | Audit existing code |
-| /plan | View/create plans |
-| /implement | Build features |
-| /verify | Verify phase complete |
+| /status | Show progress |
+| /next | Continue building |
+| /plan | View plans |
+| /verify | Verify phase |
 | /review | Code review |
-| /debug | Fix issues |
-| /change | Assess change impact |
-| /gap | Find gaps (brownfield) |
-| /improve | Fix gaps |
-| /intent | Define product intent |
-| /intent-audit | Audit intent compliance |
-| /ux | Design user experience |
-| /ux-audit | Audit UX |
-| /aa | Design agent system |
-| /aa-audit | Audit agent opportunities |
 | /parallel | Parallel development |
-| /design | Manage design system |
-| /update | Update docs after changes |
-| /replan | Regenerate plans |
+| /design | Design system |
 | /project | Project operations |
 
 ---
@@ -82,7 +69,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 ```
 ├── agents/           # Agent definitions (12)
-├── commands/         # Command definitions (22)
+├── commands/         # Command definitions (9)
 ├── templates/        # User project templates
 ├── scripts/
 │   ├── verify.sh     # Verify docs in sync
@@ -115,29 +102,3 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 5. Add to `tests/structural/test_commands_exist.sh`
 6. Run `./scripts/verify.sh`
 7. Commit all files together
-
----
-
-## Workflow
-
-When users start Claude Code in a project with this system installed:
-
-1. **Natural conversation**: User describes what they want
-2. **Auto-orchestration**: Claude selects and runs appropriate agents
-3. **L1 (once)**: Create intent, UX design, architecture, build plans
-4. **L2 (per feature)**: Implement, test, verify, repeat
-5. **Continuous**: Sync state, review code, fix issues as needed
-
-Users don't call agents directly - they talk naturally. Commands are shortcuts for common operations.
-
----
-
-## For User Projects
-
-When users run `./install.sh --project`, a simplified CLAUDE.md is created in their project with:
-- Workflow status (enabled/disabled)
-- Feature progress tracking
-- Current task and next steps
-- Session continuity notes
-
-This maintains state across sessions and guides Claude's work.
