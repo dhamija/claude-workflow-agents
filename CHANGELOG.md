@@ -9,12 +9,14 @@ Format: [Semantic Versioning](https://semver.org/)
 ## [1.2.0] - 2026-01-25
 
 ### Changed
-- **Installation with Symlinks** - Clean separation using symlinks
+- **Installation with Individual File Symlinks** - Clean coexistence with user's own files
   - Installs to `~/.claude-workflow-agents/` (keeps files separate)
-  - Creates symlinks in `~/.claude/`:
-    - `~/.claude/agents/` → `~/.claude-workflow-agents/agents/`
-    - `~/.claude/commands/` → `~/.claude-workflow-agents/commands/`
-  - Claude Code detects agents/commands via symlinks
+  - Creates individual symlinks in `~/.claude/`:
+    - Each workflow agent: `~/.claude/agents/agent-name.md` → `~/.claude-workflow-agents/agents/agent-name.md`
+    - Each workflow command: `~/.claude/commands/command.md` → `~/.claude-workflow-agents/commands/command.md`
+  - User's own agents/commands coexist in same directories
+  - Toggle on/off with `workflow-toggle` command
+  - Disable removes only workflow symlinks, preserves user files
   - Uninstall removes symlinks and installation directory
   - Never mixes workflow files with Claude Code's own data
 

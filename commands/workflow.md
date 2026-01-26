@@ -78,7 +78,10 @@ Output:
 
 **The Mechanism:**
 - Workflow files installed to: `~/.claude-workflow-agents/`
-- Symlinks created: `~/.claude/agents/` → `~/.claude-workflow-agents/agents/`
+- Individual symlinks created for each file:
+  - `~/.claude/agents/agent-name.md` → `~/.claude-workflow-agents/agents/agent-name.md`
+  - `~/.claude/commands/command.md` → `~/.claude-workflow-agents/commands/command.md`
+- User's own files coexist in same directories
 - Enable/disable by creating/removing symlinks
 
 **CLAUDE.md markers** (`<!-- workflow: enabled -->`) are **documentation only**.
