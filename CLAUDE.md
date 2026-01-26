@@ -15,6 +15,78 @@
 
 ---
 
+## Installation Architecture
+
+**Global-only model. No per-project enable/disable.**
+
+### Directory Structure
+
+```
+~/.claude-workflow-agents/           # Installation directory
+├── agents/                          # 12 agent definitions
+├── commands/                        # 23 command definitions
+├── templates/                       # Templates for user projects
+├── bin/                            # CLI commands
+│   ├── workflow-toggle             # Enable/disable globally
+│   ├── workflow-update             # Update from git
+│   ├── workflow-uninstall          # Remove installation
+│   └── workflow-version            # Show version
+└── version.txt                     # Current version
+
+~/.claude/                           # Claude Code's directory
+├── agents/                          # Individual file symlinks
+│   ├── intent-guardian.md -> ~/.claude-workflow-agents/agents/intent-guardian.md
+│   ├── ux-architect.md -> ~/.claude-workflow-agents/agents/ux-architect.md
+│   └── ... (12 total)
+└── commands/                        # Individual file symlinks
+    ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
+    ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
+    └── ... (23 total)
+```
+
+### How It Works
+
+1. **Install** (`install.sh`):
+   - Downloads to `~/.claude-workflow-agents/`
+   - Creates individual file symlinks in `~/.claude/agents/` and `~/.claude/commands/`
+   - Claude Code automatically loads from `~/.claude/`
+   - Workflow immediately active for all projects
+
+2. **Enable/Disable** (`workflow-toggle on|off|status`):
+   - **Global operation** - affects all Claude Code sessions
+   - `on`: Creates individual file symlinks
+   - `off`: Removes only workflow symlinks, preserves user's own files
+   - `status`: Shows count of workflow symlinks
+
+3. **Update** (`workflow-update`):
+   - Pulls latest from git
+   - Re-creates symlinks
+   - Preserves user's own agents/commands
+
+4. **Uninstall** (`workflow-uninstall`):
+   - Removes workflow symlinks from `~/.claude/`
+   - Removes `~/.claude-workflow-agents/` directory
+   - Preserves user's own agents/commands
+
+### Key Design Decisions
+
+1. **No per-project control**: Claude Code loads agents globally from `~/.claude/`. Project-local agents don't work reliably.
+
+2. **Individual file symlinks**: User's own agents/commands coexist with workflow files in same directories.
+
+3. **No CLAUDE.md markers**: Earlier versions used `<!-- workflow: enabled -->` markers in project files. These were vestigial - Claude Code doesn't read them. Removed in v1.3.0.
+
+4. **Global toggle only**: `workflow-toggle` affects all projects simultaneously. Cannot enable workflow for only some projects.
+
+### User Experience
+
+- **Install once**: `curl -fsSL ... | bash`
+- **Use everywhere**: All projects immediately have access to workflow agents
+- **Disable when not needed**: `workflow-toggle off` (global)
+- **No per-project setup**: No need to run commands in each project
+
+---
+
 ## Multi-Agent Workflow System
 
 Multi-agent workflow system for Claude Code

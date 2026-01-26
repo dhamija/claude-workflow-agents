@@ -6,6 +6,29 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [1.3.0] - 2026-01-25
+
+### Changed
+- **Simplified to Global-Only Model** - Removed per-project concepts
+  - **Removed commands**: `workflow-init`, `workflow-remove` (no longer needed)
+  - **Added command**: `workflow-toggle on/off/status` for global enable/disable
+  - Installation automatically enables workflow globally
+  - No per-project setup required
+  - CLAUDE.md markers removed (were non-functional)
+
+### Rationale
+- Claude Code loads agents globally from `~/.claude/` only
+- Project-local `.claude/` directories don't work reliably for agents
+- Per-project enable/disable was confusing and non-functional
+- Simpler user experience: install once, use everywhere
+
+### Migration
+- Existing users: No action needed, workflow continues to work
+- CLAUDE.md markers (`<!-- workflow: enabled -->`) can be safely removed
+- Use `workflow-toggle off` to disable globally if needed
+
+---
+
 ## [1.2.0] - 2026-01-25
 
 ### Changed

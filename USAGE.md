@@ -2,24 +2,22 @@
 
 ## Installation
 
-### Global Install (Once)
+### Global Install (One-Time)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 source ~/.bashrc  # or restart terminal
 ```
-Installs to `~/.claude-workflow-agents/` (global, used by all projects).
 
-### Per-Project Activation
-```bash
-cd your-project
-workflow-init
-```
-Creates `CLAUDE.md` with workflow markers. Agents live globally.
+**What this does:**
+- Installs to `~/.claude-workflow-agents/` (global location)
+- Creates individual file symlinks in `~/.claude/agents/` and `~/.claude/commands/`
+- Workflow immediately active for **all** Claude Code sessions
+- No per-project setup required
 
 ### Commands Available
-- `workflow-init` - Initialize workflow in current project
-- `workflow-remove` - Remove workflow from current project
-- `workflow-update` - Update global installation
+- `workflow-toggle on/off/status` - Enable, disable, or check workflow status (global)
+- `workflow-update` - Update global installation from git
+- `workflow-version` - Show current version
 - `workflow-uninstall` - Remove global installation
 
 ## Greenfield Workflow Examples
@@ -191,12 +189,14 @@ git worktree add ../myapp-web feature/web
 ### "Unknown slash command"
 - Restart Claude Code after installation
 - Check files are in correct location: `ls ~/.claude-workflow-agents/commands/`
-- Verify workflow-init was run in the project
+- Verify symlinks exist: `ls -la ~/.claude/commands/`
+- Try `workflow-toggle status` to check if workflow is enabled
 
 ### "Agent not found"
 - Verify agent file exists: `ls ~/.claude-workflow-agents/agents/`
 - Check agent name in command matches filename
-- Ensure CLAUDE.md has workflow markers
+- Verify symlinks exist: `ls -la ~/.claude/agents/`
+- Try `workflow-toggle on` to recreate symlinks
 
 ### "File read error"
 - Agents can't read directories, only files
@@ -277,20 +277,17 @@ By default, agents create docs in `docs/`. To use a different location, modify t
 
 ### Team Workflows
 ```bash
-# Each team member installs globally
+# Each team member installs globally (one-time)
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 
-# In shared project, initialize once
-cd your-project
-workflow-init
+# Workflow is immediately available for all team members
+# No per-project setup needed
 
-# Commit CLAUDE.md to git
-git add CLAUDE.md
-git commit -m "Initialize workflow agents"
-git push
+# Optional: Disable when not needed
+workflow-toggle off
 
-# Teammates pull and have workflow enabled
-# (They need global install, but CLAUDE.md is shared)
+# Re-enable anytime
+workflow-toggle on
 ```
 
 ### CI/CD Integration
@@ -307,10 +304,9 @@ git push
 # Global install (once)
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 
-# Initialize in monorepo root
-workflow-init
+# Workflow immediately available everywhere
+# Use commands in any package directory
 
-# Each package can use the commands (they reference global agents)
 cd packages/api
 /implement auth service
 
@@ -322,9 +318,10 @@ cd ../web
 
 ### Commands Don't Appear
 1. Check global installation: `ls ~/.claude-workflow-agents/commands/`
-2. Check workflow-init was run: `grep workflow-home CLAUDE.md`
-3. Restart Claude Code completely
-4. Verify file permissions: `chmod 644 ~/.claude-workflow-agents/commands/*.md`
+2. Check symlinks exist: `ls -la ~/.claude/commands/`
+3. Check workflow status: `workflow-toggle status`
+4. Restart Claude Code completely
+5. If symlinks missing: `workflow-toggle on`
 
 ### Agents Fail to Read Files
 1. Agents can only read files, not directories

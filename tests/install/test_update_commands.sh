@@ -18,16 +18,10 @@ else
 fi
 
 # Check each command is defined
-if grep -q "workflow-init" "$INSTALL_SCRIPT"; then
-    pass "workflow-init defined in install.sh"
+if grep -q "workflow-toggle" "$INSTALL_SCRIPT"; then
+    pass "workflow-toggle defined in install.sh"
 else
-    fail "workflow-init missing from install.sh"
-fi
-
-if grep -q "workflow-remove" "$INSTALL_SCRIPT"; then
-    pass "workflow-remove defined in install.sh"
-else
-    fail "workflow-remove missing from install.sh"
+    fail "workflow-toggle missing from install.sh"
 fi
 
 if grep -q "workflow-update" "$INSTALL_SCRIPT"; then

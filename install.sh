@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="1.2.0"
+VERSION="1.3.0"
 INSTALL_DIR="$HOME/.claude-workflow-agents"
 CLAUDE_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
@@ -88,128 +88,6 @@ echo "✓ Created symlinks for workflow agents and commands"
 mkdir -p "$INSTALL_DIR/bin"
 
 # ─────────────────────────────────────────────────────────────────
-# Create: workflow-init
-# ─────────────────────────────────────────────────────────────────
-cat > "$INSTALL_DIR/bin/workflow-init" << 'SCRIPT'
-#!/bin/bash
-
-# Initialize workflow in current project
-
-WORKFLOW_HOME="$HOME/.claude-workflow-agents"
-
-if [ ! -d "$WORKFLOW_HOME" ]; then
-    echo "Error: Workflow agents not installed globally."
-    echo "Run: curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash"
-    exit 1
-fi
-
-# Already initialized?
-if [ -f "CLAUDE.md" ] && grep -q "<!-- workflow:" "CLAUDE.md"; then
-    STATUS=$(grep "<!-- workflow:" "CLAUDE.md" | sed 's/.*: \(.*\) -->.*/\1/')
-    echo "Already initialized (status: $STATUS)"
-    echo ""
-    echo "Commands:"
-    echo "  /workflow on      Enable"
-    echo "  /workflow off     Disable"
-    echo "  /workflow status  Check status"
-    exit 0
-fi
-
-# Create or update CLAUDE.md
-PROJECT_NAME=$(basename "$(pwd)")
-TEMPLATE="$WORKFLOW_HOME/templates/project/CLAUDE.md.template"
-
-if [ -f "CLAUDE.md" ]; then
-    echo "Found existing CLAUDE.md - adding workflow markers"
-    TEMP=$(mktemp)
-    echo "<!-- workflow: enabled -->" > "$TEMP"
-    echo "<!-- workflow-home: $WORKFLOW_HOME -->" >> "$TEMP"
-    echo "" >> "$TEMP"
-    cat "CLAUDE.md" >> "$TEMP"
-    mv "$TEMP" "CLAUDE.md"
-else
-    # Use template
-    if [ -f "$TEMPLATE" ]; then
-        sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
-            -e "s/{{PROJECT_DESCRIPTION}}/Describe your project here/g" \
-            "$TEMPLATE" > "CLAUDE.md"
-    else
-        # Fallback if template missing
-        cat > "CLAUDE.md" << EOF
-<!-- workflow: enabled -->
-<!-- workflow-home: $WORKFLOW_HOME -->
-
-# $PROJECT_NAME
-
-> Describe your project here
-
-## Project Context
-
-[Your project notes, decisions, context for Claude]
-EOF
-    fi
-fi
-
-echo ""
-echo "✓ Workflow initialized"
-echo ""
-echo "  Status:  enabled"
-echo "  Agents:  $WORKFLOW_HOME/agents/"
-echo ""
-echo "  Other files created on demand:"
-echo "    /project setup    → scripts/, .github/"
-echo "    /project docs     → README.md, /docs/"
-echo "    /project release  → CHANGELOG.md, version.txt"
-echo ""
-echo "  Commands:"
-echo "    /workflow off     Disable workflow"
-echo "    /workflow on      Enable workflow"
-echo "    /workflow status  Check status"
-echo ""
-SCRIPT
-chmod +x "$INSTALL_DIR/bin/workflow-init"
-
-# ─────────────────────────────────────────────────────────────────
-# Create: workflow-remove
-# ─────────────────────────────────────────────────────────────────
-cat > "$INSTALL_DIR/bin/workflow-remove" << 'SCRIPT'
-#!/bin/bash
-
-# Remove workflow from current project
-
-if [ ! -f "CLAUDE.md" ]; then
-    echo "No CLAUDE.md in current directory"
-    exit 1
-fi
-
-if ! grep -q "<!-- workflow:" "CLAUDE.md"; then
-    echo "Workflow not active in this project"
-    exit 0
-fi
-
-echo "Removing workflow from this project..."
-
-# Remove workflow markers, keep content
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    sed -i '' '/^<!-- workflow:/d' "CLAUDE.md"
-    sed -i '' '/^<!-- workflow-home:/d' "CLAUDE.md"
-    # Remove leading blank lines
-    sed -i '' '/./,$!d' "CLAUDE.md"
-else
-    sed -i '/^<!-- workflow:/d' "CLAUDE.md"
-    sed -i '/^<!-- workflow-home:/d' "CLAUDE.md"
-    # Remove leading blank lines
-    sed -i '/./,$!d' "CLAUDE.md"
-fi
-
-echo ""
-echo "✓ Workflow removed"
-echo "  Your CLAUDE.md content is preserved."
-echo ""
-SCRIPT
-chmod +x "$INSTALL_DIR/bin/workflow-remove"
-
-# ─────────────────────────────────────────────────────────────────
 # Create: workflow-update
 # ─────────────────────────────────────────────────────────────────
 cat > "$INSTALL_DIR/bin/workflow-update" << 'SCRIPT'
@@ -261,7 +139,7 @@ cat > "$INSTALL_DIR/bin/workflow-version" << 'SCRIPT'
 
 # Show version information
 
-INSTALL_DIR="$HOME/.claude"
+INSTALL_DIR="$HOME/.claude-workflow-agents"
 
 echo ""
 echo "Claude Workflow Agents"
@@ -282,11 +160,10 @@ echo "Agents:    $AGENTS"
 echo "Commands:  $COMMANDS"
 echo ""
 echo "Commands:"
-echo "  workflow-init       Initialize project"
-echo "  workflow-remove     Remove from project"
-echo "  workflow-update     Update installation"
-echo "  workflow-version    Show version"
-echo "  workflow-uninstall  Remove installation"
+echo "  workflow-toggle on/off/status  Enable, disable, or check status"
+echo "  workflow-update                Update installation"
+echo "  workflow-version               Show version"
+echo "  workflow-uninstall             Remove installation"
 echo ""
 SCRIPT
 chmod +x "$INSTALL_DIR/bin/workflow-version"
@@ -546,16 +423,16 @@ echo ""
 echo "✓ Installed successfully"
 echo ""
 echo "  Location: $INSTALL_DIR"
-echo "  Symlinks: ~/.claude/agents/ -> $INSTALL_DIR/agents/"
-echo "            ~/.claude/commands/ -> $INSTALL_DIR/commands/"
+echo "  Symlinks: Individual files in ~/.claude/agents/ and ~/.claude/commands/"
 echo "  Version:  $VERSION"
 echo ""
+echo "  Workflow is now globally enabled for all Claude Code sessions."
+echo ""
 echo "  Commands (after restarting terminal):"
-echo "    workflow-init       Initialize in a project"
-echo "    workflow-remove     Remove from a project"
-echo "    workflow-update     Update to latest version"
-echo "    workflow-version    Show version info"
-echo "    workflow-uninstall  Remove global installation"
+echo "    workflow-toggle on/off/status  Enable, disable, or check status"
+echo "    workflow-update                Update to latest version"
+echo "    workflow-version               Show version info"
+echo "    workflow-uninstall             Remove global installation"
 echo ""
 if [ -n "$ADDED_TO" ]; then
     echo "  PATH updated in: $ADDED_TO"
@@ -566,7 +443,6 @@ else
     echo "    $PATH_LINE"
 fi
 echo ""
-echo "  Quick start:"
-echo "    cd your-project"
-echo "    workflow-init"
+echo "  To disable workflow:"
+echo "    workflow-toggle off"
 echo ""

@@ -21,19 +21,15 @@ A multi-agent system for Claude Code that helps you build software systematicall
 
 ## Quick Start
 
-### 1. Install Globally (Once)
+### 1. Install (One-Time)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 source ~/.bashrc  # or restart terminal
 ```
 
-### 2. Activate in Your Project
-```bash
-cd your-project
-workflow-init
-```
+Workflow is immediately active for all Claude Code sessions.
 
-### 3. Use
+### 2. Use
 
 Just describe what you want:
 ```
@@ -55,15 +51,11 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 
 Then restart your terminal (or `source ~/.bashrc`).
 
-This installs to `~/.claude-workflow-agents/` (global, used by all projects).
-
-### Initialize a Project
-```bash
-cd your-project
-workflow-init
-```
-
-This creates only `CLAUDE.md` in your project. Agents live globally.
+**What this does:**
+- Installs to `~/.claude-workflow-agents/` (global location)
+- Creates individual file symlinks in `~/.claude/agents/` and `~/.claude/commands/`
+- Workflow immediately active for **all** Claude Code sessions
+- No per-project setup required
 
 ### Commands
 
@@ -71,9 +63,9 @@ This creates only `CLAUDE.md` in your project. Agents live globally.
 
 | Command | Description |
 |---------|-------------|
-| `workflow-init` | Initialize workflow in current project |
-| `workflow-remove` | Remove workflow from current project |
-| `workflow-update` | Update global installation |
+| `workflow-toggle on/off/status` | Enable, disable, or check workflow status (global) |
+| `workflow-update` | Update global installation from git |
+| `workflow-version` | Show current version |
 | `workflow-uninstall` | Remove global installation |
 
 #### In-Project Commands (Claude)
@@ -101,23 +93,16 @@ Edit the first line:
 
 ### Uninstall
 
-**From a Project:**
-```bash
-cd your-project
-workflow-remove
-```
-Your CLAUDE.md content is preserved.
-
-**Global Uninstall:**
 ```bash
 workflow-uninstall
 ```
-CLAUDE.md files in your projects are not affected.
+Removes symlinks and installation directory. Preserves user's own agents/commands.
 
 ### Verify Installation
 ```bash
 ls ~/.claude-workflow-agents/agents/  # Should show 12 .md files
-which workflow-init  # Should show path to command
+ls -la ~/.claude/agents/               # Should show symlinks
+workflow-toggle status                 # Should show "enabled"
 ```
 
 ---
@@ -134,17 +119,16 @@ Output:
 ```
 Claude Workflow Agents
 ──────────────────────
-Version:   v1.0.0
+Version:   v1.3.0
 Location:  ~/.claude-workflow-agents
 Agents:    12
 Commands:  23
 
 Commands:
-  workflow-init       Initialize project
-  workflow-remove     Remove from project
-  workflow-update     Update installation
-  workflow-version    Show version
-  workflow-uninstall  Remove installation
+  workflow-toggle on/off/status  Enable, disable, or check status
+  workflow-update                Update installation
+  workflow-version               Show version
+  workflow-uninstall             Remove installation
 ```
 
 ### Update to Latest
