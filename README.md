@@ -649,6 +649,51 @@ For details, see [tests/README.md](tests/README.md).
 
 ---
 
+## Releasing (Maintainers)
+
+### Quick Release
+
+Bump version and prepare release:
+
+```bash
+# Bug fix (1.0.0 → 1.0.1)
+./scripts/release.sh patch
+
+# New feature (1.0.0 → 1.1.0)
+./scripts/release.sh minor
+
+# Breaking change (1.0.0 → 2.0.0)
+./scripts/release.sh major
+```
+
+This updates `version.txt` and creates a new section in `CHANGELOG.md`.
+
+### Finish Release
+
+Edit `CHANGELOG.md` with actual changes, then:
+
+```bash
+./scripts/release-finish.sh
+```
+
+This commits, tags, and pushes to GitHub. GitHub Actions automatically creates the release.
+
+### Release Process
+
+1. **Prepare**: `./scripts/release.sh [major|minor|patch]`
+2. **Edit**: Update `CHANGELOG.md` with actual changes
+3. **Finish**: `./scripts/release-finish.sh`
+4. **Automatic**: GitHub Actions creates the release from tag
+5. **Users**: Run `workflow-update` to get new version
+
+### Semantic Versioning
+
+- **MAJOR**: Breaking changes (incompatible API)
+- **MINOR**: New features (backward compatible)
+- **PATCH**: Bug fixes (backward compatible)
+
+---
+
 ## License
 
 MIT
