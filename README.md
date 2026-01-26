@@ -23,7 +23,7 @@ A multi-agent system for Claude Code that helps you build software systematicall
 
 ### 1. Install Globally (Once)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 source ~/.bashrc  # or restart terminal
 ```
 
@@ -50,7 +50,7 @@ That's it. Claude handles the rest.
 
 ### Quick Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 ```
 
 Then restart your terminal (or `source ~/.bashrc`).

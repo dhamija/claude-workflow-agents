@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install claude-workflow-agents globally
-# Usage: curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 
 set -e
 
@@ -59,7 +59,7 @@ WORKFLOW_HOME="$HOME/.claude-workflow-agents"
 
 if [ ! -d "$WORKFLOW_HOME" ]; then
     echo "Error: Workflow agents not installed globally."
-    echo "Run: curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash"
+    echo "Run: curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash"
     exit 1
 fi
 

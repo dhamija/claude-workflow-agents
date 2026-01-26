@@ -4,7 +4,7 @@
 
 ```bash
 # Once (global)
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 
 # Per project
 cd your-project

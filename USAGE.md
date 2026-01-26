@@ -4,7 +4,7 @@
 
 ### Global Install (Once)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 source ~/.bashrc  # or restart terminal
 ```
 Installs to `~/.claude-workflow-agents/` (global, used by all projects).
@@ -278,7 +278,7 @@ By default, agents create docs in `docs/`. To use a different location, modify t
 ### Team Workflows
 ```bash
 # Each team member installs globally
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 
 # In shared project, initialize once
 cd your-project
@@ -305,7 +305,7 @@ git push
 ### Monorepo Usage
 ```bash
 # Global install (once)
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 
 # Initialize in monorepo root
 workflow-init
