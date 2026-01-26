@@ -1,6 +1,15 @@
 # Quick Reference
 
-> **Getting Started:** `./install.sh --user` → `cd your-project` → `claude` → Just talk!
+> **Getting Started:** Install once globally → `workflow-init` in your project → Just talk!
+
+```bash
+# Once (global)
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+
+# Per project
+cd your-project
+workflow-init
+```
 
 ---
 

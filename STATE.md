@@ -1,16 +1,16 @@
 # Project State
 
 > **Auto-updated by**: `./scripts/update-claude-md.sh`
->  **Last updated**: 2026-01-25 02:30:40
+>  **Last updated**: 2026-01-25 18:30:00
 
 ## Component Counts
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
 | Agents | 12 | 2026-01-25 |
-| Commands | 22 | 2026-01-25 |
+| Commands | 23 | 2026-01-25 |
 | Help Topics | 11 | 2026-01-25 |
-| Tests | 17 | 2026-01-25 |
+| Tests | 23 | 2026-01-25 |
 
 ## Agents List
 
@@ -55,6 +55,7 @@
 | ux | ✓ Complete |
 | ux-audit | ✓ Complete |
 | verify | ✓ Complete |
+| workflow | ✓ Complete |
 | aa | ✓ Complete |
 | aa-audit | ✓ Complete |
 | mcp | ✓ Complete |
@@ -63,11 +64,19 @@
 
 | Date | Change | By |
 |------|--------|-----|
-| 2026-01-25 | Added MCP server integration support and /mcp command | Claude |
-| 2026-01-25 | Added LLM integration patterns (dual provider architecture) | Claude |
-| 2026-01-25 | Added /llm command and BACKEND.md | Claude |
-| 2026-01-25 | Added design system support and /design command | Claude |
-| 2026-01-25 | Added self-maintenance system | Claude |
+| 2026-01-25 | Global install system with per-project activation | Claude |
+| 2026-01-25 | Added /workflow command for enable/disable toggle | Claude |
+| 2026-01-25 | Created bin/ commands: workflow-init, workflow-remove, workflow-update, workflow-uninstall | Claude |
+| 2026-01-25 | Removed per-project tests, simplified to global install | Claude |
+| 2026-01-25 | Added version.txt for version tracking | Claude |
+
+## Installation Model
+
+**Global + Per-Project:**
+- Install once to `~/.claude-workflow-agents/`
+- Per-project: `workflow-init` adds markers to CLAUDE.md
+- Lightweight: Projects reference global installation
+- Commands in PATH: `workflow-init`, `workflow-remove`, `workflow-update`, `workflow-uninstall`
 
 ## Test Results
 
@@ -77,8 +86,7 @@
 
 ## Known Issues
 
-- Some documentation tests have case-sensitivity issues (non-critical)
-- Install script tests have false failures due to grep patterns (non-critical)
+None currently
 
 ## Planned Work
 

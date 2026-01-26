@@ -1,3 +1,11 @@
+# ARCHIVED - Migration Guide v1 → v2
+
+**Note:** This migration guide is for historical reference only. It documents the v1→v2 agent consolidation that occurred in January 2025.
+
+For current installation instructions, see README.md.
+
+---
+
 # Migration Guide: v1 → v2
 
 Guide for upgrading to the consolidated agent/command structure.
