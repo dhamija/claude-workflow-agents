@@ -64,7 +64,7 @@ run_category() {
 }
 
 # Parse arguments
-CATEGORIES=("structural" "content" "consistency" "documentation" "integration")
+CATEGORIES=("structural" "content" "consistency" "documentation" "integration" "install" "workflow")
 SELECTED_CATEGORIES=()
 
 while [[ $# -gt 0 ]]; do
@@ -89,6 +89,14 @@ while [[ $# -gt 0 ]]; do
             SELECTED_CATEGORIES+=("integration")
             shift
             ;;
+        --install)
+            SELECTED_CATEGORIES+=("install")
+            shift
+            ;;
+        --workflow)
+            SELECTED_CATEGORIES+=("workflow")
+            shift
+            ;;
         --all)
             SELECTED_CATEGORIES=("${CATEGORIES[@]}")
             shift
@@ -102,6 +110,8 @@ while [[ $# -gt 0 ]]; do
             echo "  --consistency     Run consistency tests"
             echo "  --documentation   Run documentation tests"
             echo "  --integration     Run integration tests"
+            echo "  --install         Run install/uninstall tests"
+            echo "  --workflow        Run workflow toggle tests"
             echo "  --all             Run all tests (default)"
             echo "  --help            Show this help"
             exit 0

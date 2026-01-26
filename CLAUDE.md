@@ -30,7 +30,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | Metric | Count |
 |--------|-------|
 | Agents | 12 |
-| Commands | 9 |
+| Commands | 23 |
 
 ### Agents
 
@@ -54,6 +54,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | Command | Purpose |
 |---------|---------|
 | /help | Help system |
+| /workflow | Enable/disable/status |
 | /status | Show progress |
 | /next | Continue building |
 | /plan | View plans |
@@ -69,7 +70,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 ```
 ├── agents/           # Agent definitions (12)
-├── commands/         # Command definitions (9)
+├── commands/         # Command definitions (23)
 ├── templates/        # User project templates
 ├── scripts/
 │   ├── verify.sh     # Verify docs in sync

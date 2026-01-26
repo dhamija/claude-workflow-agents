@@ -1,33 +1,24 @@
+<!-- workflow: enabled -->
+
 # {{PROJECT_NAME}}
 
 > {{PROJECT_DESCRIPTION}}
 
-## Project Notes
+## Project Context
 
-[Your notes, context, decisions here]
+{{PROJECT_CONTEXT}}
+
+## Notes
+
+[Your notes here]
 
 ---
 
-## Workflow
+## Workflow Status
 
-Status: **enabled** (change to "disabled" to turn off, or `/workflow off`)
+**Status:** enabled
 
-When enabled, Claude uses specialized agents for development.
+To disable: `/workflow off` or change first line to `<!-- workflow: disabled -->`
+
 When disabled, Claude operates as standard Claude Code.
-
----
-
-## Current State
-
-> Last sync: {{TIMESTAMP}}
-
-### Features
-
-| Feature | Status |
-|---------|--------|
-| (none yet) | - |
-
-### Progress
-
-**Phase:** Planning
-**Current:** Waiting for project description
+Your content here is always preserved.

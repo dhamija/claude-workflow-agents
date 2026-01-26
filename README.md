@@ -23,18 +23,18 @@ A multi-agent system for Claude Code that helps you build software systematicall
 
 ### 1. Install
 ```bash
-git clone https://github.com/YOUR_USERNAME/claude-workflow-agents.git
-cd claude-workflow-agents
-./install.sh --user
+cd your-project
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+```
+
+Or manually:
+```bash
+git clone https://github.com/dhamija/claude-workflow-agents.git .workflow
 ```
 
 ### 2. Use
-```bash
-cd your-project
-claude
-```
 
-Then just talk:
+Just describe what you want:
 ```
 You: Build me a recipe app where I can save and search my favorite recipes
 
@@ -47,29 +47,46 @@ That's it. Claude handles the rest.
 
 ## Installation
 
-### Option A: Global Install (Recommended)
-
-Makes agents available in ALL your projects:
+Install to your project directory:
 ```bash
-./install.sh --user
+cd your-project
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
 ```
 
-### Option B: Project Install
+This creates:
+- `.workflow/` - Agent and command definitions
+- `CLAUDE.md` - Your project context (preserves existing content)
 
-For a specific project only (can commit to git for team sharing):
+### Enable / Disable
+
 ```bash
-cd /path/to/your/project
-/path/to/claude-workflow-agents/install.sh --project
+# Check status
+/workflow status
+
+# Disable (use standard Claude)
+/workflow off
+
+# Enable (use workflow agents)
+/workflow on
 ```
 
-### Option C: Both
-```bash
-./install.sh --user --project
+Or edit `CLAUDE.md` directly - change the first line:
+```markdown
+<!-- workflow: enabled -->   ← Workflow active
+<!-- workflow: disabled -->  ← Standard Claude
 ```
+
+### Uninstall
+
+```bash
+./.workflow/scripts/uninstall.sh
+```
+
+Your `CLAUDE.md` content and `docs/` are preserved.
 
 ### Verify Installation
 ```bash
-ls ~/.claude/agents/  # Should show 11 .md files
+ls .workflow/agents/  # Should show 12 .md files
 ```
 
 ---

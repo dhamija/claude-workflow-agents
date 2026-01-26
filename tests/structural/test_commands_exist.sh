@@ -8,6 +8,7 @@ COMMANDS_DIR="$REPO_ROOT/commands"
 # Required commands
 REQUIRED_COMMANDS=(
     "help"
+    "workflow"
     "project"
     "analyze"
     "audit"

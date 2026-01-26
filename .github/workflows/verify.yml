@@ -26,3 +26,42 @@ jobs:
         run: |
           chmod +x tests/run_all_tests.sh
           ./tests/run_all_tests.sh
+
+  install-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod -R +x scripts/ tests/
+
+      - name: Test fresh install
+        run: |
+          cd /tmp
+          mkdir test-project
+          cd test-project
+          $GITHUB_WORKSPACE/install.sh
+          [ -d ".workflow" ] || exit 1
+          [ -f "CLAUDE.md" ] || exit 1
+          grep -q "workflow: enabled" CLAUDE.md || exit 1
+          echo "Fresh install: OK"
+
+      - name: Test install with existing CLAUDE.md
+        run: |
+          cd /tmp
+          mkdir test-existing
+          cd test-existing
+          echo "# My Project" > CLAUDE.md
+          echo "My content" >> CLAUDE.md
+          $GITHUB_WORKSPACE/install.sh
+          grep -q "My content" CLAUDE.md || exit 1
+          grep -q "workflow: enabled" CLAUDE.md || exit 1
+          echo "Install with existing: OK"
+
+      - name: Test uninstall preserves content
+        run: |
+          cd /tmp/test-existing
+          echo "y" | ./.workflow/scripts/uninstall.sh
+          [ ! -d ".workflow" ] || exit 1
+          grep -q "My content" CLAUDE.md || exit 1
+          echo "Uninstall: OK"
