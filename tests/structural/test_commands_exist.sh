@@ -23,7 +23,6 @@ REQUIRED_COMMANDS=(
     "parallel"
     "plan"
     "replan"
-    "release"
     "review"
     "update"
     "ux"

@@ -30,7 +30,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | Metric | Count |
 |--------|-------|
 | Agents | 12 |
-| Commands | 24 |
+| Commands | 23 |
 
 ### Agents
 
@@ -63,7 +63,6 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | /parallel | Parallel development |
 | /design | Design system |
 | /project | Project operations |
-| /release | Release new version (maintainers) |
 
 ---
 
