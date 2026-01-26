@@ -1,4 +1,5 @@
 <!-- workflow: enabled -->
+<!-- workflow-home: ~/.claude-workflow-agents -->
 
 # {{PROJECT_NAME}}
 
@@ -11,14 +12,3 @@
 ## Notes
 
 [Your notes here]
-
----
-
-## Workflow Status
-
-**Status:** enabled
-
-To disable: `/workflow off` or change first line to `<!-- workflow: disabled -->`
-
-When disabled, Claude operates as standard Claude Code.
-Your content here is always preserved.

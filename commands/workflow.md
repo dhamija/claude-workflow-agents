@@ -3,87 +3,102 @@ description: Enable, disable, or check workflow status
 argument-hint: <on | off | status>
 ---
 
-Control the workflow system.
+Toggle the workflow system in current project.
 
-## Usage
-
-### `/workflow status`
+## `/workflow status`
 
 Shows current status:
 ```
 Workflow Status
 ───────────────
+Project:  my-app
 Status:   enabled
-Location: .workflow/
-Agents:   12 available
-Commands: 22 available
+Home:     ~/.claude-workflow-agents/
 
-Toggle: /workflow off
+Agents:   12 available
+Commands: 23 available
+
+Toggle:
+  /workflow off    Disable
+  /workflow on     Enable
 ```
 
 Or if disabled:
 ```
 Workflow Status
 ───────────────
+Project:  my-app
 Status:   disabled
-Location: .workflow/
+Home:     ~/.claude-workflow-agents/
 
 Claude is in standard mode.
 Toggle: /workflow on
 ```
 
-### `/workflow on`
+## `/workflow on`
 
-Enables the workflow system:
-
-- Changes `<!-- workflow: disabled -->` to `<!-- workflow: enabled -->`
-- Agents and commands become active
-- Project operations resume
+Enables workflow:
+```bash
+# Changes in CLAUDE.md:
+<!-- workflow: disabled -->
+# becomes:
+<!-- workflow: enabled -->
+```
 
 Output:
 ```
-Workflow enabled ✓
+✓ Workflow enabled
 
 Agents and commands are now active.
 ```
 
-### `/workflow off`
+## `/workflow off`
 
-Disables the workflow system:
-
-- Changes `<!-- workflow: enabled -->` to `<!-- workflow: disabled -->`
-- Agents and commands ignored
-- Claude operates as standard Claude Code
+Disables workflow:
+```bash
+# Changes in CLAUDE.md:
+<!-- workflow: enabled -->
+# becomes:
+<!-- workflow: disabled -->
+```
 
 Output:
 ```
 Workflow disabled
 
 Claude is now in standard mode.
-Your CLAUDE.md content is unchanged.
+Your content is unchanged.
+
+Re-enable: /workflow on
 ```
 
 ## How It Works
 
-The toggle is a single line at the top of CLAUDE.md:
+CLAUDE.md contains two marker lines:
 ```markdown
 <!-- workflow: enabled -->
+<!-- workflow-home: ~/.claude-workflow-agents -->
 ```
 
-When Claude sees this file:
-
-- If **enabled** → Use agents, commands, workflow
-- If **disabled** → Ignore .workflow/, operate normally
+When Claude reads CLAUDE.md:
+- `enabled` → Load agents from workflow-home path, use commands
+- `disabled` → Ignore workflow, operate as standard Claude
 - `/workflow` command always works (to re-enable)
 
 ## Implementation
 
-To toggle, just change that line in CLAUDE.md:
+To toggle, just change the first line in CLAUDE.md:
 ```bash
-# Enable
+# Enable (macOS)
+sed -i '' 's/<!-- workflow: disabled -->/<!-- workflow: enabled -->/' CLAUDE.md
+
+# Disable (macOS)
+sed -i '' 's/<!-- workflow: enabled -->/<!-- workflow: disabled -->/' CLAUDE.md
+
+# Enable (Linux)
 sed -i 's/<!-- workflow: disabled -->/<!-- workflow: enabled -->/' CLAUDE.md
 
-# Disable
+# Disable (Linux)
 sed -i 's/<!-- workflow: enabled -->/<!-- workflow: disabled -->/' CLAUDE.md
 ```
 

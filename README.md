@@ -21,18 +21,19 @@ A multi-agent system for Claude Code that helps you build software systematicall
 
 ## Quick Start
 
-### 1. Install
+### 1. Install Globally (Once)
+```bash
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+source ~/.bashrc  # or restart terminal
+```
+
+### 2. Activate in Your Project
 ```bash
 cd your-project
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
+workflow-init
 ```
 
-Or manually:
-```bash
-git clone https://github.com/dhamija/claude-workflow-agents.git .workflow
-```
-
-### 2. Use
+### 3. Use
 
 Just describe what you want:
 ```
@@ -47,46 +48,76 @@ That's it. Claude handles the rest.
 
 ## Installation
 
-Install to your project directory:
+### Quick Install
 ```bash
-cd your-project
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/main/install.sh | bash
 ```
 
-This creates:
-- `.workflow/` - Agent and command definitions
-- `CLAUDE.md` - Your project context (preserves existing content)
+Then restart your terminal (or `source ~/.bashrc`).
+
+This installs to `~/.claude-workflow-agents/` (global, used by all projects).
+
+### Initialize a Project
+```bash
+cd your-project
+workflow-init
+```
+
+This creates only `CLAUDE.md` in your project. Agents live globally.
+
+### Commands
+
+#### Terminal Commands
+
+| Command | Description |
+|---------|-------------|
+| `workflow-init` | Initialize workflow in current project |
+| `workflow-remove` | Remove workflow from current project |
+| `workflow-update` | Update global installation |
+| `workflow-uninstall` | Remove global installation |
+
+#### In-Project Commands (Claude)
+
+| Command | Description |
+|---------|-------------|
+| `/workflow on` | Enable workflow |
+| `/workflow off` | Disable workflow |
+| `/workflow status` | Check status |
 
 ### Enable / Disable
 
-```bash
-# Check status
-/workflow status
-
-# Disable (use standard Claude)
-/workflow off
-
-# Enable (use workflow agents)
-/workflow on
+**Via Command:**
+```
+/workflow off    # Use standard Claude
+/workflow on     # Use workflow agents
 ```
 
-Or edit `CLAUDE.md` directly - change the first line:
+**Via CLAUDE.md:**
+Edit the first line:
 ```markdown
-<!-- workflow: enabled -->   ← Workflow active
+<!-- workflow: enabled -->   ← Agents active
 <!-- workflow: disabled -->  ← Standard Claude
 ```
 
 ### Uninstall
 
+**From a Project:**
 ```bash
-./.workflow/scripts/uninstall.sh
+cd your-project
+workflow-remove
 ```
+Your CLAUDE.md content is preserved.
 
-Your `CLAUDE.md` content and `docs/` are preserved.
+**Global Uninstall:**
+```bash
+workflow-uninstall
+```
+CLAUDE.md files in your projects are not affected.
 
 ### Verify Installation
 ```bash
-ls .workflow/agents/  # Should show 12 .md files
+ls ~/.claude-workflow-agents/agents/  # Should show 12 .md files
+which workflow-init  # Should show path to command
 ```
 
 ---

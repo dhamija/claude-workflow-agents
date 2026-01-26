@@ -77,10 +77,26 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 │   └── fix-sync.sh   # Helper for fixing
 ├── tests/            # Automated tests
 ├── .github/workflows/# CI (actual enforcement)
+├── install.sh        # Global installer
+├── version.txt       # Current version
 ├── CLAUDE.md         # This file
 ├── README.md         # User documentation
 └── GUIDE.md          # Quick reference
 ```
+
+## Installation Model
+
+**Global Install + Per-Project Activation**
+
+- Install once: `~/.claude-workflow-agents/` (agents, commands, scripts)
+- Per project: Just `CLAUDE.md` with workflow markers
+- Lightweight: Projects reference global installation
+
+**Commands created by install.sh:**
+- `workflow-init` - Initialize project
+- `workflow-remove` - Remove from project
+- `workflow-update` - Update global install
+- `workflow-uninstall` - Remove global install
 
 ---
 
