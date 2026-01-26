@@ -205,6 +205,44 @@ SCRIPT
 chmod +x "$INSTALL_DIR/bin/workflow-update"
 
 # ─────────────────────────────────────────────────────────────────
+# Create: workflow-version
+# ─────────────────────────────────────────────────────────────────
+cat > "$INSTALL_DIR/bin/workflow-version" << 'SCRIPT'
+#!/bin/bash
+
+# Show version information
+
+INSTALL_DIR="$HOME/.claude-workflow-agents"
+
+echo ""
+echo "Claude Workflow Agents"
+echo "──────────────────────"
+
+if [ ! -d "$INSTALL_DIR" ]; then
+    echo "Status: Not installed"
+    exit 1
+fi
+
+VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "unknown")
+AGENTS=$(find "$INSTALL_DIR/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+COMMANDS=$(find "$INSTALL_DIR/commands" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
+
+echo "Version:   v$VERSION"
+echo "Location:  $INSTALL_DIR"
+echo "Agents:    $AGENTS"
+echo "Commands:  $COMMANDS"
+echo ""
+echo "Commands:"
+echo "  workflow-init       Initialize project"
+echo "  workflow-remove     Remove from project"
+echo "  workflow-update     Update installation"
+echo "  workflow-version    Show version"
+echo "  workflow-uninstall  Remove installation"
+echo ""
+SCRIPT
+chmod +x "$INSTALL_DIR/bin/workflow-version"
+
+# ─────────────────────────────────────────────────────────────────
 # Create: workflow-uninstall
 # ─────────────────────────────────────────────────────────────────
 cat > "$INSTALL_DIR/bin/workflow-uninstall" << 'SCRIPT'
@@ -291,6 +329,7 @@ echo "  Commands (after restarting terminal):"
 echo "    workflow-init       Initialize in a project"
 echo "    workflow-remove     Remove from a project"
 echo "    workflow-update     Update to latest version"
+echo "    workflow-version    Show version info"
 echo "    workflow-uninstall  Remove global installation"
 echo ""
 if [ -n "$ADDED_TO" ]; then

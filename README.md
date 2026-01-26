@@ -122,6 +122,50 @@ which workflow-init  # Should show path to command
 
 ---
 
+## Updating
+
+### Check Version
+
+```bash
+workflow-version
+```
+
+Output:
+```
+Claude Workflow Agents
+──────────────────────
+Version:   v1.0.0
+Location:  ~/.claude-workflow-agents
+Agents:    12
+Commands:  23
+
+Commands:
+  workflow-init       Initialize project
+  workflow-remove     Remove from project
+  workflow-update     Update installation
+  workflow-version    Show version
+  workflow-uninstall  Remove installation
+```
+
+### Update to Latest
+
+```bash
+workflow-update
+```
+
+The update command:
+- Checks for new version
+- Shows changelog
+- Prompts for confirmation
+- Updates global installation
+- All projects automatically use new version
+
+### Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+
+---
+
 ## Usage Levels
 
 This system supports multiple levels of usage. Start simple, go deeper when needed.
