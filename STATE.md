@@ -65,7 +65,7 @@
 
 | Date | Change | By |
 |------|--------|-----|
-| 2026-01-25 | Changed installation path to ~/.claude/ (where Claude Code looks) | Claude |
+| 2026-01-25 | Changed installation path to ~/.claude-workflow-agents/ (where Claude Code looks) | Claude |
 | 2026-01-25 | Separated repo files from user templates (templates/ directory) | Claude |
 | 2026-01-25 | Added git workflow conventions to project-ops agent | Claude |
 | 2026-01-25 | Added /project commit, /project push, /project pr subcommands | Claude |
@@ -80,7 +80,7 @@
 ## Installation Model
 
 **Global + Per-Project:**
-- Install once to `~/.claude/`
+- Install once to `~/.claude-workflow-agents/`
 - Per-project: `workflow-init` adds markers to CLAUDE.md
 - Lightweight: Projects reference global installation
 - Commands in PATH: `workflow-init`, `workflow-remove`, `workflow-update`, `workflow-uninstall`

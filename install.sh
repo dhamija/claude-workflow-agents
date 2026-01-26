@@ -6,7 +6,8 @@
 set -e
 
 VERSION="1.2.0"
-INSTALL_DIR="$HOME/.claude"
+INSTALL_DIR="$HOME/.claude-workflow-agents"
+CLAUDE_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
 
 echo ""
@@ -15,19 +16,18 @@ echo "================================="
 echo ""
 
 # Check if workflow agents already installed
-if [ -f "$INSTALL_DIR/version.txt" ]; then
+if [ -d "$INSTALL_DIR" ]; then
     CURRENT_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "unknown")
     echo "Already installed (version: $CURRENT_VERSION)"
     echo ""
     read -p "Update to version $VERSION? [y/N] " update
     if [[ "$update" =~ ^[Yy]$ ]]; then
         echo "Updating..."
-        # Only remove workflow-specific files, not entire ~/.claude/
-        rm -rf "$INSTALL_DIR/agents"
-        rm -rf "$INSTALL_DIR/commands"
-        rm -rf "$INSTALL_DIR/templates"
-        rm -rf "$INSTALL_DIR/bin"
-        rm -f "$INSTALL_DIR/version.txt"
+        # Remove symlinks
+        [ -L "$CLAUDE_DIR/agents" ] && rm -f "$CLAUDE_DIR/agents"
+        [ -L "$CLAUDE_DIR/commands" ] && rm -f "$CLAUDE_DIR/commands"
+        # Remove installation
+        rm -rf "$INSTALL_DIR"
     else
         echo ""
         echo "Keeping current installation."
@@ -60,6 +60,11 @@ cp "$TEMP_DIR/version.txt" "$INSTALL_DIR/"
 # Cleanup temp
 rm -rf "$TEMP_DIR"
 
+# Create symlinks for Claude Code to find agents and commands
+mkdir -p "$CLAUDE_DIR"
+ln -sf "$INSTALL_DIR/agents" "$CLAUDE_DIR/agents"
+ln -sf "$INSTALL_DIR/commands" "$CLAUDE_DIR/commands"
+
 # Create bin directory
 mkdir -p "$INSTALL_DIR/bin"
 
@@ -71,7 +76,7 @@ cat > "$INSTALL_DIR/bin/workflow-init" << 'SCRIPT'
 
 # Initialize workflow in current project
 
-WORKFLOW_HOME="$HOME/.claude"
+WORKFLOW_HOME="$HOME/.claude-workflow-agents"
 
 if [ ! -d "$WORKFLOW_HOME" ]; then
     echo "Error: Workflow agents not installed globally."
@@ -275,7 +280,8 @@ cat > "$INSTALL_DIR/bin/workflow-uninstall" << 'SCRIPT'
 
 # Uninstall globally
 
-INSTALL_DIR="$HOME/.claude"
+INSTALL_DIR="$HOME/.claude-workflow-agents"
+CLAUDE_DIR="$HOME/.claude"
 
 echo ""
 echo "Uninstall Claude Workflow Agents"
@@ -288,6 +294,17 @@ read -p "Continue? [y/N] " confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
     echo "Cancelled"
     exit 0
+fi
+
+# Remove symlinks from ~/.claude/
+if [ -L "$CLAUDE_DIR/agents" ]; then
+    rm -f "$CLAUDE_DIR/agents"
+    echo "✓ Removed agents symlink"
+fi
+
+if [ -L "$CLAUDE_DIR/commands" ]; then
+    rm -f "$CLAUDE_DIR/commands"
+    echo "✓ Removed commands symlink"
 fi
 
 # Remove from PATH in shell configs
@@ -317,7 +334,7 @@ chmod +x "$INSTALL_DIR/bin/workflow-uninstall"
 # ─────────────────────────────────────────────────────────────────
 # Add to PATH
 # ─────────────────────────────────────────────────────────────────
-PATH_LINE='export PATH="$HOME/.claude/bin:$PATH"'
+PATH_LINE='export PATH="$HOME/.claude-workflow-agents/bin:$PATH"'
 
 add_to_path() {
     local rc="$1"
@@ -348,6 +365,8 @@ echo ""
 echo "✓ Installed successfully"
 echo ""
 echo "  Location: $INSTALL_DIR"
+echo "  Symlinks: ~/.claude/agents/ -> $INSTALL_DIR/agents/"
+echo "            ~/.claude/commands/ -> $INSTALL_DIR/commands/"
 echo "  Version:  $VERSION"
 echo ""
 echo "  Commands (after restarting terminal):"

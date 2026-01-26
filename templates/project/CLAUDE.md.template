@@ -1,5 +1,5 @@
 <!-- workflow: enabled -->
-<!-- workflow-home: ~/.claude -->
+<!-- workflow-home: ~/.claude-workflow-agents -->
 
 # {{PROJECT_NAME}}
 

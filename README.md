@@ -55,7 +55,7 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 
 Then restart your terminal (or `source ~/.bashrc`).
 
-This installs to `~/.claude/` (global, used by all projects).
+This installs to `~/.claude-workflow-agents/` (global, used by all projects).
 
 ### Initialize a Project
 ```bash
@@ -116,7 +116,7 @@ CLAUDE.md files in your projects are not affected.
 
 ### Verify Installation
 ```bash
-ls ~/.claude/agents/  # Should show 12 .md files
+ls ~/.claude-workflow-agents/agents/  # Should show 12 .md files
 which workflow-init  # Should show path to command
 ```
 

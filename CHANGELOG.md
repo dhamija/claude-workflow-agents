@@ -9,12 +9,14 @@ Format: [Semantic Versioning](https://semver.org/)
 ## [1.2.0] - 2026-01-25
 
 ### Changed
-- **Installation Path** - Now installs to `~/.claude/` (where Claude Code looks for agents/commands)
-  - **BREAKING**: Changed from `~/.claude-workflow-agents/` to `~/.claude/`
-  - Agents now properly detected by Claude Code in `~/.claude/agents/`
-  - Commands now properly detected by Claude Code in `~/.claude/commands/`
-  - CLI tools in `~/.claude/bin/` (workflow-init, workflow-update, etc.)
-- Updated all documentation to reference `~/.claude/` instead of `~/.claude-workflow-agents/`
+- **Installation with Symlinks** - Clean separation using symlinks
+  - Installs to `~/.claude-workflow-agents/` (keeps files separate)
+  - Creates symlinks in `~/.claude/`:
+    - `~/.claude/agents/` → `~/.claude-workflow-agents/agents/`
+    - `~/.claude/commands/` → `~/.claude-workflow-agents/commands/`
+  - Claude Code detects agents/commands via symlinks
+  - Uninstall removes symlinks and installation directory
+  - Never mixes workflow files with Claude Code's own data
 
 ---
 

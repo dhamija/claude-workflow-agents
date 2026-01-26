@@ -95,7 +95,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 │   ├── tests/                 # Repo tests
 │   └── .github/workflows/     # Repo CI
 │
-├── INSTALLED FILES (copied to ~/.claude/)
+├── INSTALLED FILES (copied to ~/.claude-workflow-agents/)
 │   ├── agents/                # Agent definitions (12)
 │   ├── commands/              # Command definitions (23)
 │   ├── templates/             # User project templates
@@ -119,9 +119,9 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 ### What Gets Installed Where
 
-**Global Install (~/.claude/):**
+**Global Install (~/.claude-workflow-agents/):**
 ```bash
-~/.claude/
+~/.claude-workflow-agents/
 ├── agents/              # From repo agents/
 ├── commands/            # From repo commands/
 ├── templates/           # From repo templates/
@@ -145,7 +145,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 **Global Install + Per-Project Activation**
 
-- Install once: `~/.claude/` (agents, commands, scripts)
+- Install once: `~/.claude-workflow-agents/` (agents, commands, scripts)
 - Per project: Just `CLAUDE.md` with workflow markers
 - Lightweight: Projects reference global installation
 
