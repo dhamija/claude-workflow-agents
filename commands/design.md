@@ -1,19 +1,3 @@
-<!--
-╔══════════════════════════════════════════════════════════════════════════════╗
-║ 🔧 MAINTENANCE REQUIRED                                                      ║
-║                                                                              ║
-║ After editing this file, you MUST also update:                               ║
-║   □ CLAUDE.md        → "Current State" section (command count, list)         ║
-║   □ commands/help.md → "commands" topic                             ║
-║   □ README.md        → commands table                                        ║
-║   □ GUIDE.md         → commands list                                         ║
-║   □ tests/structural/test_commands_exist.sh → REQUIRED_COMMANDS array        ║
-║                                                                              ║
-║ Git hooks will BLOCK your commit if these are not updated.                   ║
-║ Run: ./scripts/verify.sh to check compliance.                           ║
-╚══════════════════════════════════════════════════════════════════════════════╝
--->
-
 ---
 name: design
 description: Manage design system for visual consistency across your project

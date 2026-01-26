@@ -1,0 +1,28 @@
+name: Verify
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify docs in sync
+        run: |
+          chmod +x scripts/verify.sh
+          ./scripts/verify.sh
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run tests
+        run: |
+          chmod +x tests/run_all_tests.sh
+          ./tests/run_all_tests.sh
