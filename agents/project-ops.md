@@ -47,6 +47,74 @@ This agent is the central hub for project maintenance operations. It consolidate
 
 ---
 
+## Template Usage
+
+When creating files for user projects, use templates from the global installation.
+
+### Template Location
+
+Templates are in: `~/.claude-workflow-agents/templates/`
+
+```
+templates/
+├── project/
+│   ├── CLAUDE.md.template        # User project CLAUDE.md
+│   └── README.md.template         # User project README
+├── docs/
+│   ├── intent/
+│   │   └── product-intent.md.template
+│   ├── ux/
+│   │   └── user-journeys.md.template
+│   └── architecture/
+│       └── agent-design.md.template
+├── infrastructure/
+│   ├── scripts/
+│   │   └── verify.sh.template     # User project verify script
+│   └── github/workflows/
+│       └── verify.yml.template    # User project CI
+└── release/
+    ├── CHANGELOG.md.template      # User project changelog
+    └── version.txt.template       # User project version
+```
+
+### Template Variables
+
+Replace these placeholders when using templates:
+- `{{PROJECT_NAME}}` - Project directory name
+- `{{PROJECT_DESCRIPTION}}` - Brief description
+- `{{DATE}}` - Current date (YYYY-MM-DD format)
+
+### Creating Files from Templates
+
+```bash
+# Read workflow home from CLAUDE.md
+WORKFLOW_HOME=$(grep "workflow-home:" CLAUDE.md | sed 's/.*: \(.*\) -->.*/\1/')
+
+# Use template with variable substitution
+PROJECT_NAME=$(basename "$(pwd)")
+DATE=$(date +%Y-%m-%d)
+
+sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+    -e "s/{{PROJECT_DESCRIPTION}}/My project description/g" \
+    -e "s/{{DATE}}/$DATE/g" \
+    "$WORKFLOW_HOME/templates/project/README.md.template" > README.md
+```
+
+### Which Commands Use Which Templates
+
+| Command | Creates | From Template |
+|---------|---------|---------------|
+| `/project setup` | scripts/verify.sh | infrastructure/scripts/verify.sh.template |
+| `/project setup` | .github/workflows/verify.yml | infrastructure/github/workflows/verify.yml.template |
+| `/project docs` | README.md | project/README.md.template |
+| `/project docs` | /docs/intent/product-intent.md | docs/intent/product-intent.md.template |
+| `/project docs` | /docs/ux/user-journeys.md | docs/ux/user-journeys.md.template |
+| `/project docs` | /docs/architecture/agent-design.md | docs/architecture/agent-design.md.template |
+| `/project release` | CHANGELOG.md | release/CHANGELOG.md.template |
+| `/project release` | version.txt | release/version.txt.template |
+
+---
+
 ## Capability 1: Project Setup
 
 Initialize all project infrastructure in the correct order.

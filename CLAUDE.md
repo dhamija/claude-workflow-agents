@@ -1,6 +1,23 @@
-# Claude Workflow Agents
+# Claude Workflow Agents - Repository
 
-> Multi-agent workflow system for Claude Code
+> **Instructions for maintaining THIS repository.**
+> **This file is NOT installed to user systems.**
+
+## ⚠️ Important Distinction
+
+| This Repo | User Projects |
+|-----------|---------------|
+| **CLAUDE.md** (this file) | **templates/project/CLAUDE.md.template** |
+| For maintaining workflow-agents | For user projects |
+| NOT installed | Installed and customized |
+
+**Never confuse repo files with user templates!**
+
+---
+
+## Multi-Agent Workflow System
+
+Multi-agent workflow system for Claude Code
 
 ## Maintenance Rules
 
@@ -69,20 +86,60 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 ## Repository Structure
 
 ```
-├── agents/           # Agent definitions (12)
-├── commands/         # Command definitions (23)
-├── templates/        # User project templates
-├── scripts/
-│   ├── verify.sh     # Verify docs in sync
-│   └── fix-sync.sh   # Helper for fixing
-├── tests/            # Automated tests
-├── .github/workflows/# CI (actual enforcement)
-├── install.sh        # Global installer
-├── version.txt       # Current version
-├── CLAUDE.md         # This file
-├── README.md         # User documentation
-└── GUIDE.md          # Quick reference
+├── REPO FILES (for maintaining THIS repo, NOT installed)
+│   ├── CLAUDE.md              # THIS FILE (repo instructions)
+│   ├── README.md              # Repo documentation
+│   ├── CHANGELOG.md           # Repo releases
+│   ├── version.txt            # Repo version
+│   ├── scripts/               # Repo scripts
+│   ├── tests/                 # Repo tests
+│   └── .github/workflows/     # Repo CI
+│
+├── INSTALLED FILES (copied to ~/.claude-workflow-agents/)
+│   ├── agents/                # Agent definitions (12)
+│   ├── commands/              # Command definitions (23)
+│   ├── templates/             # User project templates
+│   └── version.txt            # Workflow version
+│
+└── USER TEMPLATES (in templates/, for user projects)
+    ├── project/
+    │   ├── CLAUDE.md.template     # → user's CLAUDE.md
+    │   └── README.md.template     # → user's README.md
+    ├── docs/
+    │   ├── intent/                # → user's /docs/intent/
+    │   ├── ux/                    # → user's /docs/ux/
+    │   └── architecture/          # → user's /docs/architecture/
+    ├── infrastructure/
+    │   ├── scripts/verify.sh.template      # → user's scripts/
+    │   └── github/workflows/verify.yml.template  # → user's .github/
+    └── release/
+        ├── CHANGELOG.md.template  # → user's CHANGELOG.md
+        └── version.txt.template   # → user's version.txt
 ```
+
+### What Gets Installed Where
+
+**Global Install (~/.claude-workflow-agents/):**
+```bash
+~/.claude-workflow-agents/
+├── agents/              # From repo agents/
+├── commands/            # From repo commands/
+├── templates/           # From repo templates/
+├── version.txt          # Workflow-agents version
+└── bin/                 # Created by install.sh
+    ├── workflow-init
+    ├── workflow-remove
+    ├── workflow-update
+    └── workflow-version
+```
+
+**NOT Installed (Repo-Specific):**
+- CLAUDE.md (this file)
+- README.md (repo docs)
+- CHANGELOG.md (repo changelog)
+- scripts/ (repo scripts)
+- tests/ (repo tests)
+- .github/ (repo CI)
 
 ## Installation Model
 

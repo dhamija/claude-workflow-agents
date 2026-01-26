@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Project verification script
+# Checks docs are in sync with code
+
+set -e
+
+echo "Verifying project..."
+
+ERRORS=0
+
+# Check CLAUDE.md exists
+if [ ! -f "CLAUDE.md" ]; then
+    echo "✗ CLAUDE.md missing"
+    ((ERRORS++))
+else
+    echo "✓ CLAUDE.md exists"
+fi
+
+# Check for workflow marker
+if grep -q "<!-- workflow:" "CLAUDE.md" 2>/dev/null; then
+    STATUS=$(grep "workflow:" "CLAUDE.md" | head -1 | sed 's/.*: \(.*\) -->.*/\1/')
+    echo "✓ Workflow: $STATUS"
+fi
+
+# Add project-specific checks here
+# Example: Check if features in CLAUDE.md match code
+# Example: Check if promises in intent docs are tested
+
+echo ""
+if [ $ERRORS -eq 0 ]; then
+    echo "✓ All checks passed"
+else
+    echo "✗ $ERRORS issue(s) found"
+    exit 1
+fi

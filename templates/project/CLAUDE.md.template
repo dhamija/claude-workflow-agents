@@ -7,8 +7,26 @@
 
 ## Project Context
 
-{{PROJECT_CONTEXT}}
+[Your project notes, decisions, context for Claude]
+
+## Key Decisions
+
+- [Decision 1]
+- [Decision 2]
 
 ## Notes
 
-[Your notes here]
+[Your notes]
+
+---
+
+## Workflow
+
+**Status:** enabled
+
+Commands:
+- `/workflow off` - Disable workflow
+- `/workflow on` - Enable workflow
+- `/workflow status` - Check status
+
+When disabled, Claude operates as standard Claude Code.

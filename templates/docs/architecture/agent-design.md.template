@@ -1,0 +1,50 @@
+# System Architecture
+
+> How the system is designed
+
+## Overview
+
+[High-level description of the system]
+
+## Architecture Style
+
+[e.g., Multi-agent, Microservices, Monolith, etc.]
+
+## Components
+
+### Component 1: [Name]
+
+**Purpose**: [What it does]  
+**Responsibilities**:
+- [Responsibility 1]
+- [Responsibility 2]
+
+**Dependencies**: [What it depends on]
+
+---
+
+### Component 2: [Name]
+
+**Purpose**: [What it does]  
+**Responsibilities**:
+- [Responsibility 1]
+- [Responsibility 2]
+
+**Dependencies**: [What it depends on]
+
+## Data Flow
+
+```
+[User] → [Component A] → [Component B] → [Result]
+```
+
+## Technology Stack
+
+- **Language**: [e.g., Python, TypeScript]
+- **Framework**: [e.g., FastAPI, Express]
+- **Database**: [e.g., PostgreSQL, SQLite]
+- **Other**: [Other key technologies]
+
+## Deployment
+
+[How the system is deployed]

@@ -9,8 +9,9 @@
 |-----------|-------|--------------|
 | Agents | 12 | 2026-01-25 |
 | Commands | 23 | 2026-01-25 |
+| Templates | 27 | 2026-01-25 |
 | Help Topics | 12 | 2026-01-25 |
-| Tests | 24 | 2026-01-25 |
+| Tests | 26 | 2026-01-25 |
 
 ## Agents List
 
@@ -64,6 +65,7 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-25 | Separated repo files from user templates (templates/ directory) | Claude |
 | 2026-01-25 | Added git workflow conventions to project-ops agent | Claude |
 | 2026-01-25 | Added /project commit, /project push, /project pr subcommands | Claude |
 | 2026-01-25 | Added /help git topic with conventional commits and branch naming | Claude |

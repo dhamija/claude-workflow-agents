@@ -33,16 +33,27 @@ fi
 
 # Download
 echo "Downloading..."
+TEMP_DIR=$(mktemp -d)
 if command -v git &> /dev/null; then
-    git clone --depth 1 --quiet "$REPO_URL" "$INSTALL_DIR"
-    rm -rf "$INSTALL_DIR/.git"
+    git clone --depth 1 --quiet "$REPO_URL" "$TEMP_DIR"
 else
     echo "Error: git required. Install git and retry."
+    rm -rf "$TEMP_DIR"
     exit 1
 fi
 
-# Create version file
-echo "$VERSION" > "$INSTALL_DIR/version.txt"
+# Create install directory
+mkdir -p "$INSTALL_DIR"
+
+# Copy ONLY what users need (not repo meta files)
+echo "Installing..."
+cp -r "$TEMP_DIR/agents" "$INSTALL_DIR/"
+cp -r "$TEMP_DIR/commands" "$INSTALL_DIR/"
+cp -r "$TEMP_DIR/templates" "$INSTALL_DIR/"
+cp "$TEMP_DIR/version.txt" "$INSTALL_DIR/"
+
+# Cleanup temp
+rm -rf "$TEMP_DIR"
 
 # Create bin directory
 mkdir -p "$INSTALL_DIR/bin"
@@ -76,8 +87,11 @@ if [ -f "CLAUDE.md" ] && grep -q "<!-- workflow:" "CLAUDE.md"; then
 fi
 
 # Create or update CLAUDE.md
+PROJECT_NAME=$(basename "$(pwd)")
+TEMPLATE="$WORKFLOW_HOME/templates/project/CLAUDE.md.template"
+
 if [ -f "CLAUDE.md" ]; then
-    echo "Found existing CLAUDE.md - preserving your content"
+    echo "Found existing CLAUDE.md - adding workflow markers"
     TEMP=$(mktemp)
     echo "<!-- workflow: enabled -->" > "$TEMP"
     echo "<!-- workflow-home: $WORKFLOW_HOME -->" >> "$TEMP"
@@ -85,8 +99,14 @@ if [ -f "CLAUDE.md" ]; then
     cat "CLAUDE.md" >> "$TEMP"
     mv "$TEMP" "CLAUDE.md"
 else
-    PROJECT_NAME=$(basename "$(pwd)")
-    cat > "CLAUDE.md" << EOF
+    # Use template
+    if [ -f "$TEMPLATE" ]; then
+        sed -e "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" \
+            -e "s/{{PROJECT_DESCRIPTION}}/Describe your project here/g" \
+            "$TEMPLATE" > "CLAUDE.md"
+    else
+        # Fallback if template missing
+        cat > "CLAUDE.md" << EOF
 <!-- workflow: enabled -->
 <!-- workflow-home: $WORKFLOW_HOME -->
 
@@ -96,12 +116,9 @@ else
 
 ## Project Context
 
-Add notes, decisions, or context for Claude.
-
-## Notes
-
-[Your notes]
+[Your project notes, decisions, context for Claude]
 EOF
+    fi
 fi
 
 echo ""
@@ -110,12 +127,15 @@ echo ""
 echo "  Status:  enabled"
 echo "  Agents:  $WORKFLOW_HOME/agents/"
 echo ""
+echo "  Other files created on demand:"
+echo "    /project setup    → scripts/, .github/"
+echo "    /project docs     → README.md, /docs/"
+echo "    /project release  → CHANGELOG.md, version.txt"
+echo ""
 echo "  Commands:"
 echo "    /workflow off     Disable workflow"
 echo "    /workflow on      Enable workflow"
 echo "    /workflow status  Check status"
-echo ""
-echo "  Get started: Describe what you want to build!"
 echo ""
 SCRIPT
 chmod +x "$INSTALL_DIR/bin/workflow-init"

@@ -22,11 +22,13 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 pass() {
     echo -e "${GREEN}✓ PASS${NC}: $1"
     ((PASS++))
+    return 0
 }
 
 fail() {
     echo -e "${RED}✗ FAIL${NC}: $1"
     ((FAIL++))
+    return 1
 }
 
 skip() {

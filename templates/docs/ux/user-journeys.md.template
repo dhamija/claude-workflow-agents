@@ -1,0 +1,40 @@
+# User Journeys
+
+> How users interact with this product
+
+## Primary Journeys
+
+### Journey 1: [Name]
+
+**Who**: [User type]  
+**Goal**: [What they want to achieve]  
+**Frequency**: [How often this happens]
+
+**Steps**:
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+**Success**: [What success looks like]  
+**Failure Modes**: [What can go wrong]
+
+---
+
+### Journey 2: [Name]
+
+**Who**: [User type]  
+**Goal**: [What they want to achieve]  
+**Frequency**: [How often this happens]
+
+**Steps**:
+1. [Step 1]
+2. [Step 2]
+3. [Step 3]
+
+**Success**: [What success looks like]  
+**Failure Modes**: [What can go wrong]
+
+## Edge Cases
+
+- [Edge case 1]
+- [Edge case 2]

@@ -1,0 +1,57 @@
+# {{PROJECT_NAME}}
+
+> {{PROJECT_DESCRIPTION}}
+
+## Overview
+
+[Describe what this project does]
+
+## Getting Started
+
+### Prerequisites
+
+- [Requirement 1]
+- [Requirement 2]
+
+### Installation
+
+```bash
+# Clone and install
+git clone [your-repo-url]
+cd {{PROJECT_NAME}}
+npm install  # or pip install -r requirements.txt
+```
+
+### Running
+
+```bash
+npm run dev  # or python main.py
+```
+
+## Project Structure
+
+```
+{{PROJECT_NAME}}/
+├── src/           # Source code
+├── tests/         # Tests
+└── docs/          # Documentation
+```
+
+## Development
+
+### Testing
+
+```bash
+npm test  # or pytest
+```
+
+### Documentation
+
+See [docs/](./docs/) for detailed documentation:
+- [Product Intent](./docs/intent/product-intent.md)
+- [User Journeys](./docs/ux/user-journeys.md)
+- [Architecture](./docs/architecture/agent-design.md)
+
+## License
+
+[Your license]

@@ -1,0 +1,29 @@
+# Product Intent
+
+> What we promise to users
+
+## Core Promise
+
+[What this product fundamentally promises to deliver]
+
+## User Promises
+
+### Must Do
+- [Core promise 1]
+- [Core promise 2]
+
+### Must NOT Do
+- [Thing we promise NOT to do 1]
+- [Thing we promise NOT to do 2]
+
+## Success Criteria
+
+How we verify we're keeping our promises:
+- [ ] [Verification criterion 1]
+- [ ] [Verification criterion 2]
+
+## Non-Goals
+
+What this product explicitly does NOT try to do:
+- [Non-goal 1]
+- [Non-goal 2]

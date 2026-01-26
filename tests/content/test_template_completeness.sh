@@ -3,7 +3,7 @@ source "$(dirname "$0")/../test_utils.sh"
 
 section "Test: Template Completeness"
 
-TEMPLATE="$REPO_ROOT/templates/CLAUDE.md.template"
+TEMPLATE="$REPO_ROOT/templates/project/CLAUDE.md.template"
 
 if [ ! -f "$TEMPLATE" ]; then
     fail "CLAUDE.md.template not found"
@@ -11,21 +11,18 @@ if [ ! -f "$TEMPLATE" ]; then
     exit 1
 fi
 
-# Check for required sections
+# Check for required markers and sections
 REQUIRED_SECTIONS=(
-    "AI Workflow Instructions"
-    "Development Modes"
-    "Sequential"
-    "Parallel"
-    "Detecting User Intent"
-    "Greenfield"
-    "Brownfield"
-    "Document Structure"
-    "Current State"
+    "workflow:"
+    "workflow-home:"
+    "{{PROJECT_NAME}}"
+    "{{PROJECT_DESCRIPTION}}"
+    "Project Context"
+    "Workflow"
 )
 
 for section in "${REQUIRED_SECTIONS[@]}"; do
-    assert_file_contains "$TEMPLATE" "$section" "Template has section: $section"
+    assert_file_contains "$TEMPLATE" "$section" "Template has: $section"
 done
 
 summary

@@ -1,0 +1,27 @@
+name: Verify
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Verify project
+        run: |
+          if [ -f "scripts/verify.sh" ]; then
+            chmod +x scripts/verify.sh
+            ./scripts/verify.sh
+          fi
+      
+      - name: Run tests
+        run: |
+          if [ -f "package.json" ]; then
+            npm ci
+            npm test
+          fi
