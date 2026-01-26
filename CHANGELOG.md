@@ -6,6 +6,35 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [1.1.0] - 2026-01-25
+
+### Added
+- **Template System** - 27 templates for user projects
+  - `templates/project/` - User project files (CLAUDE.md, README.md)
+  - `templates/docs/` - Documentation templates (intent, ux, architecture)
+  - `templates/infrastructure/` - User project infrastructure (scripts, CI)
+  - `templates/release/` - Version control templates (CHANGELOG.md, version.txt)
+- **New Tests**
+  - `test_separation.sh` - Verifies repo/template file separation
+  - `test_install_separation.sh` - Verifies only correct files installed
+- **Template Usage Documentation** in project-ops.md with examples
+
+### Changed
+- **Clear Separation** - Repo files vs user templates
+  - Repo CLAUDE.md now clearly marked as "for maintaining THIS repository"
+  - User projects get CLAUDE.md from templates/project/CLAUDE.md.template
+- **Install System** - Only copies necessary files to ~/.claude-workflow-agents/
+  - Installs: agents/, commands/, templates/, version.txt
+  - Excludes: repo CLAUDE.md, README.md, tests/, scripts/, .github/
+- **workflow-init** - Now uses templates with variable substitution
+  - Supports {{PROJECT_NAME}}, {{PROJECT_DESCRIPTION}}, {{DATE}}
+  - Shows helpful message about on-demand file creation
+
+### Fixed
+- test_utils.sh pass/fail functions now return proper exit codes
+
+---
+
 ## [1.0.0] - 2026-01-25
 
 ### Added
