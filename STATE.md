@@ -8,9 +8,9 @@
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
 | Agents | 12 | 2026-01-25 |
-| Commands | 23 | 2026-01-25 |
+| Commands | 24 | 2026-01-25 |
 | Help Topics | 12 | 2026-01-25 |
-| Tests | 24 | 2026-01-25 |
+| Tests | 26 | 2026-01-25 |
 
 ## Agents List
 
@@ -49,6 +49,7 @@
 | parallel | ✓ Complete |
 | plan | ✓ Complete |
 | replan | ✓ Complete |
+| release | ✓ Complete |
 | review | ✓ Complete |
 | sync | ✓ Complete |
 | update | ✓ Complete |
@@ -64,6 +65,9 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-25 | Added /release command for maintainers to release new versions | Claude |
+| 2026-01-25 | Added automated release system with scripts and GitHub Actions | Claude |
+| 2026-01-25 | Added update system with workflow-version and workflow-update | Claude |
 | 2026-01-25 | Added git workflow conventions to project-ops agent | Claude |
 | 2026-01-25 | Added /project commit, /project push, /project pr subcommands | Claude |
 | 2026-01-25 | Added /help git topic with conventional commits and branch naming | Claude |
