@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="2.1.0"
+VERSION="3.0.0"
 INSTALL_DIR="$HOME/.claude-workflow-agents"
 CLAUDE_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
