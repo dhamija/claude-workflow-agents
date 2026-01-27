@@ -111,6 +111,8 @@ Multi-agent workflow system for Claude Code
 
 **CRITICAL: Claude MUST follow this protocol after ANY change to `agents/` or `commands/`.**
 
+**See [Documentation Dependency Map](#-documentation-dependency-map) for complete file interdependencies.**
+
 ### Step-by-Step Checklist
 
 When you add, modify, or remove ANY agent or command file:
@@ -184,6 +186,82 @@ If you forgot to run verify.sh and CI fails:
 5. Push again
 
 **Remember: verify.sh is your friend. It prevents mistakes, not creates them.**
+
+---
+
+## 📄 Documentation Dependency Map
+
+**CRITICAL: These files must stay in sync when agents/commands change.**
+
+### Primary Documentation Files
+
+| File | Contains | Must Update When |
+|------|----------|------------------|
+| **CLAUDE.md** | Repo maintenance, agent/command tables, counts | Any agent/command added/removed |
+| **STATE.md** | Current state, agent/command lists, recent changes | Any agent/command added/removed, after major changes |
+| **README.md** | User-facing docs, agent/command counts, tables | Any agent/command added/removed |
+| **commands/help.md** | In-app help system, agent descriptions ("THE X AGENTS") | Any agent/command added/removed |
+| **AGENTS.md** | Detailed agent documentation | Agent capabilities change |
+| **COMMANDS.md** | Detailed command documentation | Command behavior changes |
+
+### Cross-Reference Matrix
+
+When you add/remove an agent, it must be updated in:
+
+1. ✅ **CLAUDE.md** - Current State section → Agents table
+2. ✅ **STATE.md** - Agents List table + Component Counts
+3. ✅ **README.md** - "The X Agents" section + table
+4. ✅ **commands/help.md** - "THE X AGENTS" header + agent sections (L1/L2/Operations/Orchestration)
+5. ✅ **tests/structural/test_agents_exist.sh** - REQUIRED_AGENTS array
+6. ✅ **tests/test_agents.sh** - REQUIRED_AGENTS array
+
+When you add/remove a command, it must be updated in:
+
+1. ✅ **CLAUDE.md** - Directory Structure comment (count)
+2. ✅ **STATE.md** - Component Counts
+3. ✅ **README.md** - Commands count
+4. ✅ **commands/help.md** - Commands section (if user-visible)
+5. ✅ **tests/structural/test_commands_exist.sh** - REQUIRED_COMMANDS array
+6. ✅ **tests/test_commands.sh** - REQUIRED_COMMANDS array
+
+### Verification System
+
+The `./scripts/verify.sh` script automatically checks:
+
+✓ Agent counts consistent (CLAUDE.md, STATE.md, README.md, help.md)
+✓ Command counts consistent (CLAUDE.md, STATE.md, README.md)
+✓ All agents in CLAUDE.md
+✓ All agents in help.md
+✓ All agents in STATE.md agents list
+✓ All agents in test files
+✓ All commands in test files
+
+**If verify.sh passes, your docs are in sync. If it fails, follow the error messages.**
+
+### Documentation Categories
+
+**User-Facing** (affects end users):
+- README.md
+- GUIDE.md
+- EXAMPLES.md
+- WORKFLOW.md
+- USAGE.md
+- commands/help.md
+
+**Developer-Facing** (affects contributors):
+- CLAUDE.md (this file)
+- STATE.md
+- AGENTS.md
+- COMMANDS.md
+- BACKEND.md
+- FRONTEND.md
+
+**Templates** (not direct docs):
+- templates/project/*.template
+- templates/docs/**
+
+**Generated** (created during workflow, not maintained):
+- docs/gaps/*.md (created by gap-analyzer)
 
 ---
 
