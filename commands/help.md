@@ -152,7 +152,7 @@ DOCUMENTS CREATED
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║            SKILLS + SUBAGENTS ARCHITECTURE (v2.1)                ║
+║            SKILLS + SUBAGENTS ARCHITECTURE (v3.0)                ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Claude automatically loads skills and invokes subagents as needed.
@@ -292,7 +292,7 @@ WHY SKILLS + SUBAGENTS?
 
   Context Efficiency:
   - v2.0: 750+ lines loaded every session
-  - v2.1: ~80 lines + skills loaded only when needed
+  - v3.0: ~80 lines + skills loaded only when needed
   - 90% reduction in upfront context
 
   Performance:

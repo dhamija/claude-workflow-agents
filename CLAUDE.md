@@ -1,6 +1,6 @@
 # Claude Workflow Agents - Repository
 
-> **v2.1 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+> **v3.0 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
 
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
@@ -29,7 +29,7 @@
 
 ---
 
-## Installation Architecture (v2.1)
+## Installation Architecture (v3.0)
 
 **Skills + Hooks + Subagents Architecture**
 
@@ -55,7 +55,7 @@
 │   ├── workflow-update             # Update from git
 │   ├── workflow-uninstall          # Remove installation
 │   └── workflow-version            # Show version
-└── version.txt                     # Current version (2.1.0)
+└── version.txt                     # Current version (3.0.0)
 
 ~/.claude/                           # Claude Code's directory
 ├── skills/                          # 9 skills (loaded on-demand by Claude)
@@ -72,7 +72,7 @@
     └── ... (24 total)
 ```
 
-### How It Works (v2.1)
+### How It Works (v3.0)
 
 1. **Install** (`install.sh`):
    - Downloads to `~/.claude-workflow-agents/`

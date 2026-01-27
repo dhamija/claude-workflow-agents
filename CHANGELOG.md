@@ -6,7 +6,7 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
-## [2.1.0] - 2026-01-27
+## [3.0.0] - 2026-01-27
 
 ### MAJOR ARCHITECTURE REFACTOR
 
@@ -22,7 +22,7 @@ This release completely refactors from v2.0's bloated self-contained templates t
 - Manual quality gates
 - All logic in one massive file
 
-**After (v2.1):**
+**After (v3.0):**
 - ~80 line minimal CLAUDE.md with state only
 - 9 Skills loaded on-demand by Claude
 - 3 Subagents for isolated tasks only
@@ -36,7 +36,7 @@ v2.0's self-contained approach caused:
 - **Performance degradation**: Too much upfront context
 - **Not aligned with Claude Code best practices**: Skills are the recommended pattern
 
-v2.1 follows Claude Code's official guidance:
+v3.0 follows Claude Code's official guidance:
 - Skills for domain expertise (on-demand)
 - Subagents for isolated tasks only
 - Hooks for automatic triggers
@@ -79,7 +79,7 @@ v2.1 follows Claude Code's official guidance:
 
 **Context Efficiency**:
 - v2.0: ~750 lines loaded every session
-- v2.1: ~80 lines + skills loaded only when needed
+- v3.0: ~80 lines + skills loaded only when needed
 - 90% reduction in upfront context
 
 ### Removed
