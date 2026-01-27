@@ -41,6 +41,12 @@ jobs:
           [ -d "$HOME/.claude-workflow-agents" ] || exit 1
           [ -d "$HOME/.claude-workflow-agents/agents" ] || exit 1
           [ -d "$HOME/.claude-workflow-agents/templates" ] || exit 1
+          [ -d "$HOME/.claude/skills" ] || exit 1
+          [ -d "$HOME/.claude/skills/workflow" ] || exit 1
+          [ -d "$HOME/.claude/skills/ux-design" ] || exit 1
+          [ -f "$HOME/.claude/agents/code-reviewer.md" ] || exit 1
+          [ -f "$HOME/.claude/agents/debugger.md" ] || exit 1
+          [ -f "$HOME/.claude/agents/ui-debugger.md" ] || exit 1
           [ -f "$HOME/.claude-workflow-agents/version.txt" ] || exit 1
           [ -f "$HOME/.claude-workflow-agents/bin/workflow-init" ] || exit 1
           [ -f "$HOME/.claude-workflow-agents/bin/workflow-update" ] || exit 1

@@ -1,0 +1,75 @@
+# {{PROJECT_NAME}}
+
+> {{PROJECT_DESCRIPTION}}
+
+## 🔄 Workflow Active (Brownfield)
+
+This project uses **Claude Workflow Skills** - on-demand domain expertise for existing codebases.
+
+**Claude:** Load the `brownfield` skill first to analyze this existing codebase, then use `workflow` for ongoing development.
+
+---
+
+## Available Resources
+
+### Skills (Loaded On-Demand)
+- `workflow` - Orchestration and phase management
+- `brownfield` - Existing codebase analysis
+- `gap-analysis` - Find code quality issues
+- `change-analysis` - Assess change impact
+- `backend` - Backend development expertise
+- `frontend` - Frontend + design principles
+- `testing` - Test strategies and coverage
+- `validation` - Promise validation
+- `debugging` - Debug protocols
+- `code-quality` - Review criteria
+- `project-ops` - Project operations
+
+### Subagents (Isolated Context)
+- `code-reviewer` - Code quality review
+- `debugger` - Debug specialist
+- `ui-debugger` - UI debug + browser automation
+
+### Quality Gates
+Automatic reminders via hooks:
+- After code changes → Consider code-reviewer
+- Before marking complete → Check tests, review, state
+
+---
+
+## Workflow State
+
+```yaml
+workflow:
+  version: 2.1
+  type: brownfield              # Existing codebase
+  phase: analysis               # analysis | L2 (building)
+  status: not_started
+  initialized: {{DATE}}
+
+analysis:
+  status: pending               # pending | in_progress | complete
+  tech_stack: null
+  features: null
+  test_coverage: null
+
+l2:
+  current_feature: null
+  features: {}
+
+session:
+  last_updated: {{DATE}}
+  last_action: "Project initialized"
+  next_action: "Load brownfield skill to analyze existing code"
+```
+
+---
+
+## Project Context
+
+### Notes
+- [Add project-specific notes here]
+- [Existing features, known issues]
+
+### Key Decisions
+- [Document important architectural decisions]

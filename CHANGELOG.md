@@ -6,6 +6,136 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [2.1.0] - 2026-01-27
+
+### MAJOR ARCHITECTURE REFACTOR
+
+**Skills + Hooks Architecture** - Context-efficient on-demand expertise loading
+
+This release completely refactors from v2.0's bloated self-contained templates to a modern Skills + Hooks architecture based on Claude Code best practices.
+
+### What Changed
+
+**Before (v2.0):**
+- 750+ line CLAUDE.md templates with all orchestration embedded
+- 16 agents loaded as subagents (context bloat)
+- Manual quality gates
+- All logic in one massive file
+
+**After (v2.1):**
+- ~80 line minimal CLAUDE.md with state only
+- 9 Skills loaded on-demand by Claude
+- 3 Subagents for isolated tasks only
+- Automatic quality gates via Hooks
+- Context-efficient architecture
+
+### Why This Change?
+
+v2.0's self-contained approach caused:
+- **Context bloat**: 750+ lines loaded every session
+- **Performance degradation**: Too much upfront context
+- **Not aligned with Claude Code best practices**: Skills are the recommended pattern
+
+v2.1 follows Claude Code's official guidance:
+- Skills for domain expertise (on-demand)
+- Subagents for isolated tasks only
+- Hooks for automatic triggers
+- Minimal project CLAUDE.md
+
+### Added
+
+**Skills System** (`~/.claude/skills/`):
+- `workflow` - Orchestration logic (was in CLAUDE.md)
+- `ux-design` - Design principles (Fitts's, Hick's, Miller's Laws, etc.)
+- `frontend` - Frontend expertise with auto-applied design principles
+- `backend` - API, database, validation patterns
+- `testing` - Test pyramid, unit/integration/E2E strategies
+- `validation` - Promise acceptance testing (beyond just tests passing)
+- `debugging` - Systematic debugging protocols
+- `code-quality` - Review criteria and standards
+- `brownfield` - Existing codebase analysis
+
+**Hooks System** (`.claude/settings.json`):
+- PostToolUse hook: Reminds to run code-reviewer after code changes
+- Stop hook: Completion checklist before marking done
+- Automatic quality gates without manual intervention
+
+**Minimal Templates**:
+- `CLAUDE.md.minimal.template` - 80 lines (vs 750+)
+- `CLAUDE.md.minimal-brownfield.template` - 85 lines
+- Focus on state only, skills load on-demand
+
+### Changed
+
+**Installation**:
+- Skills copied to `~/.claude/skills/` (loaded on-demand by Claude)
+- Only 3 subagents symlinked: `code-reviewer`, `debugger`, `ui-debugger`
+- Other agents removed (expertise now in skills)
+
+**workflow-init**:
+- Creates minimal CLAUDE.md (~80 lines)
+- Optional hooks setup for quality gates
+- Faster initialization
+
+**Context Efficiency**:
+- v2.0: ~750 lines loaded every session
+- v2.1: ~80 lines + skills loaded only when needed
+- 90% reduction in upfront context
+
+### Removed
+
+**Converted to Skills** (no longer subagents):
+- intent-guardian → `intent-guardian` skill
+- ux-architect → `ux-design` skill
+- agentic-architect → `architecture` skill
+- implementation-planner → `planning` skill
+- frontend-engineer → `frontend` skill
+- backend-engineer → `backend` skill
+- test-engineer → `testing` skill
+- acceptance-validator → `validation` skill
+- change-analyzer → `change-analysis` skill
+- gap-analyzer → `gap-analysis` skill
+- brownfield-analyzer → `brownfield` skill
+- project-ops → `project-ops` skill
+- workflow-orchestrator (reference doc only)
+
+**Kept as Subagents** (isolated tasks):
+- code-reviewer (read-only review)
+- debugger (isolated debugging)
+- ui-debugger (browser automation)
+
+### Benefits
+
+1. **Context Efficiency**: 90% less upfront context (80 lines vs 750)
+2. **On-Demand Loading**: Skills loaded only when needed
+3. **Automatic Quality Gates**: Hooks inject reminders automatically
+4. **Aligned with Best Practices**: Follows Claude Code official patterns
+5. **Better Performance**: Less context = better model performance
+6. **Modular**: Skills can be updated independently
+
+### Migration from v2.0
+
+```bash
+# Update system
+workflow-update
+
+# In each project
+cd /path/to/project
+workflow-patch  # Migrates to minimal template
+
+# Optional: Enable hooks
+# Creates .claude/settings.json automatically if chosen during workflow-init
+```
+
+### Breaking Changes
+
+- CLAUDE.md goes from 750 lines → 80 lines
+- Most agents removed (now skills)
+- Hooks are optional but recommended
+- No backward compatibility with v2.0 templates
+
+---
+
 ## [2.0.0] - 2026-01-26
 
 ### BREAKING CHANGES

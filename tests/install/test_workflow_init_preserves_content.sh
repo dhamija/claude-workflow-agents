@@ -53,6 +53,7 @@ EOF
 # Verify workflow added
 grep -q "🔄 Workflow Active" "CLAUDE.md" && pass "Workflow marker added" || fail "Workflow marker missing"
 grep -q "type: greenfield" "CLAUDE.md" && pass "Type set" || fail "Type missing"
+grep -q "Skills (Loaded On-Demand)" "CLAUDE.md" && pass "Skills section added" || fail "Missing skills section"
 
 # Verify content preserved
 grep -q "Important content that must be preserved" "CLAUDE.md" && pass "Content preserved" || fail "Content lost"

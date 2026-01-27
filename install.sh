@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION="1.3.0"
+VERSION="2.1.0"
 INSTALL_DIR="$HOME/.claude-workflow-agents"
 CLAUDE_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
@@ -60,17 +60,23 @@ cp "$TEMP_DIR/version.txt" "$INSTALL_DIR/"
 # Cleanup temp
 rm -rf "$TEMP_DIR"
 
-# Create individual symlinks for each workflow agent and command
+# Create directories
 mkdir -p "$CLAUDE_DIR/agents"
 mkdir -p "$CLAUDE_DIR/commands"
+mkdir -p "$CLAUDE_DIR/skills"
 
-echo "Creating symlinks for workflow agents and commands..."
+echo "Installing skills and subagents..."
 
-# Symlink each agent file
-for agent_file in "$INSTALL_DIR/agents"/*.md; do
+# Copy skills directly (loaded on-demand by Claude)
+cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
+
+# Symlink ONLY core subagents (isolated-context agents)
+# Other expertise is now in skills (on-demand loading)
+CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
+for agent_name in "${CORE_AGENTS[@]}"; do
+    agent_file="$INSTALL_DIR/agents/${agent_name}.md"
     if [ -f "$agent_file" ]; then
-        filename=$(basename "$agent_file")
-        ln -sf "$agent_file" "$CLAUDE_DIR/agents/$filename"
+        ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
     fi
 done
 
@@ -82,7 +88,7 @@ for command_file in "$INSTALL_DIR/commands"/*.md; do
     fi
 done
 
-echo "✓ Created symlinks for workflow agents and commands"
+echo "✓ Installed skills and subagents"
 
 # Create bin directory
 mkdir -p "$INSTALL_DIR/bin"
@@ -516,9 +522,9 @@ echo ""
 echo "Creating CLAUDE.md..."
 
 if [ "$PROJECT_TYPE" = "greenfield" ]; then
-    TEMPLATE="$TEMPLATES_DIR/CLAUDE.md.greenfield.template"
+    TEMPLATE="$TEMPLATES_DIR/CLAUDE.md.minimal.template"
 else
-    TEMPLATE="$TEMPLATES_DIR/CLAUDE.md.brownfield.template"
+    TEMPLATE="$TEMPLATES_DIR/CLAUDE.md.minimal-brownfield.template"
 fi
 
 if [ -f "$TEMPLATE" ]; then
@@ -632,16 +638,33 @@ if [ "$HAS_EXISTING_CLAUDE_MD" = true ]; then
     echo "$EXISTING_CONTENT" >> "CLAUDE.md"
 fi
 
+# Optional: Setup hooks for quality gates
+echo ""
+read -p "Enable automatic quality gate reminders via hooks? [Y/n] " setup_hooks
+if [[ ! "$setup_hooks" =~ ^[Nn]$ ]]; then
+    HOOKS_TEMPLATE="$WORKFLOW_HOME/templates/hooks/settings.json.template"
+    HOOKS_DIR=".claude"
+
+    if [ -f "$HOOKS_TEMPLATE" ]; then
+        mkdir -p "$HOOKS_DIR"
+        cp "$HOOKS_TEMPLATE" "$HOOKS_DIR/settings.json"
+        echo "  ✓ Hooks configured (.claude/settings.json)"
+        echo "    - Reminds to run code-reviewer after code changes"
+        echo "    - Completion checklist before marking tasks done"
+    fi
+fi
+
 echo ""
 echo "╔═══════════════════════════════════════════════════════════════════════════╗"
 echo "║                         INITIALIZATION COMPLETE                           ║"
 echo "╚═══════════════════════════════════════════════════════════════════════════╝"
 echo ""
-echo "  ✓ CLAUDE.md created"
+echo "  ✓ CLAUDE.md created (~80 lines, context-efficient)"
 echo "  ✓ Workflow state initialized"
 echo "  ✓ Type: $PROJECT_TYPE"
 echo ""
-echo "  Agents location: $WORKFLOW_HOME/agents/"
+echo "  Skills location: ~/.claude/skills/"
+echo "  Subagents: code-reviewer, debugger, ui-debugger"
 echo ""
 
 if [ "$PROJECT_TYPE" = "brownfield" ]; then

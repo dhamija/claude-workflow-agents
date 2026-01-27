@@ -1,0 +1,88 @@
+# {{PROJECT_NAME}}
+
+> {{PROJECT_DESCRIPTION}}
+
+## 🔄 Workflow Active
+
+This project uses **Claude Workflow Skills** - on-demand domain expertise loaded as needed.
+
+**Claude:** You have access to workflow orchestration via the `workflow` skill. It loads automatically when managing project phases.
+
+---
+
+## Available Resources
+
+### Skills (Loaded On-Demand)
+- `workflow` - Orchestration and phase management
+- `intent-guardian` - Capturing promises and requirements
+- `ux-design` - UX principles and design laws
+- `architecture` - System design patterns
+- `planning` - Implementation planning
+- `backend` - Backend development expertise
+- `frontend` - Frontend + design principles
+- `testing` - Test strategies and coverage
+- `validation` - Promise validation (acceptance testing)
+- `brownfield` - Existing codebase analysis
+- `change-analysis` - Change impact assessment
+- `gap-analysis` - Code quality gap analysis
+- `debugging` - Debug protocols
+- `code-quality` - Review criteria
+- `project-ops` - Project operations
+
+### Subagents (Isolated Context)
+- `code-reviewer` - Code quality review
+- `debugger` - Debug specialist
+- `ui-debugger` - UI debug + browser automation
+
+### Quality Gates
+Automatic reminders via hooks:
+- After code changes → Consider code-reviewer
+- Before marking complete → Check tests, review, state
+
+---
+
+## Workflow State
+
+```yaml
+workflow:
+  version: 2.1
+  type: greenfield              # greenfield | brownfield
+  phase: L1                     # L1 (planning) | L2 (building)
+  status: not_started           # not_started | in_progress | paused | complete
+  initialized: {{DATE}}
+
+l1:
+  intent:
+    status: pending             # pending | in_progress | complete
+    output: null
+  ux:
+    status: pending
+    output: null
+  architecture:
+    status: pending
+    output: null
+  planning:
+    status: pending
+    output: null
+
+l2:
+  current_feature: null
+  features: {}
+  # Format: feature_name: {backend, frontend, tests, validation}
+
+session:
+  last_updated: {{DATE}}
+  last_action: "Project initialized"
+  next_action: "User describes project → workflow skill loads automatically"
+```
+
+---
+
+## Project Context
+
+### Notes
+- [Add project-specific notes here]
+- [Decisions, constraints, conventions]
+
+### Key Decisions
+- [Document important architectural decisions]

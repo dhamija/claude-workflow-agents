@@ -1,0 +1,27 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": {
+          "tool_name": "Write|Edit"
+        },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '\n⚠️  [QUALITY REMINDER] Code changed. Consider running code-reviewer subagent after completing current task.\n'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '\n✓ [COMPLETION CHECKLIST]\n  • Tests passing?\n  • Code reviewed?\n  • CLAUDE.md state updated?\n  • Documentation synced?\n'"
+          }
+        ]
+      }
+    ]
+  }
+}
