@@ -1,4 +1,4 @@
-<!--
+><!--
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║ 🔧 MAINTENANCE REQUIRED                                                      ║
 ║ After editing: CLAUDE.md, help, README, tests                                ║
@@ -8,1010 +8,510 @@
 ---
 name: workflow-orchestrator
 description: |
-  WHEN TO USE:
-  - ALWAYS at session start (read CLAUDE.md, check state)
-  - Coordinates all other agents
-  - Maintains workflow state
+  **CONTRIBUTOR REFERENCE DOCUMENTATION**
 
-  WHAT IT DOES:
-  - Reads CLAUDE.md bootstrap and state
-  - Determines next action
-  - Chains agents automatically
-  - Runs quality gates
-  - Updates state after each action
+  This file documents the workflow orchestration system architecture.
+  It is NOT read by Claude during normal operation.
 
-  THIS IS THE PRIMARY ORCHESTRATION AGENT
-tools: Read, Write, Task, Bash
+  Orchestration logic is EMBEDDED in user project CLAUDE.md files.
+  This file explains how the system works for contributors/maintainers.
+
+  See templates/project/CLAUDE.md.*.template for actual orchestration.
+tools: N/A (reference documentation only)
 ---
 
-You are the workflow orchestrator. Your job is to coordinate all workflow agents automatically so the user doesn't have to manually invoke each one.
+# Workflow Orchestration System
+
+**Purpose:** This document explains how the workflow orchestration system works for contributors and maintainers.
+
+**Important:** This is NOT operational documentation. Orchestration logic is embedded directly in user project CLAUDE.md files. See `templates/project/CLAUDE.md.*.template` for the actual implementations.
 
 ---
 
-## Agents Coordinated
+## Architecture Overview
 
-**This orchestrator knows about and coordinates all 15 specialized agents:**
+### Old Architecture (v0.9 - Broken)
 
-### L1 Analysis Agents (App Planning)
+```
+User Project CLAUDE.md
+   ↓
+   HTML comment: "READ workflow-orchestrator.md"
+   ↓
+   Hope Claude reads it
+   ↓
+   No enforcement
+   ↓
+   Can be ignored ❌
+```
+
+**Problem:** Claude Code doesn't auto-read external files. HTML comments can be ignored.
+
+### New Architecture (v1.0 - Self-Contained)
+
+```
+Template: templates/project/CLAUDE.md.greenfield.template
+   ↓
+   Contains ALL orchestration logic embedded
+   ↓
+   workflow-init generates → User Project CLAUDE.md
+   ↓
+   Self-contained, guaranteed to work ✓
+```
+
+**Solution:** All orchestration logic embedded in templates. External agent files are optional reference documentation.
+
+---
+
+## Agent Coordination System
+
+### All 15 Specialized Agents
+
+The orchestration system coordinates these agents automatically:
+
+#### L1 Analysis Agents (App Planning)
 - **intent-guardian** - Define user promises with criticality levels
 - **ux-architect** - Design user experience and design system
 - **agentic-architect** - Design system architecture with promise mapping
 - **implementation-planner** - Create build plans with validation tasks
 
-### L1 Support Agents
+#### L1 Support Agents
 - **change-analyzer** - Assess impact when user requests changes/additions
 - **gap-analyzer** - Find issues in brownfield (existing) codebases
 - **brownfield-analyzer** - Initial scan of existing projects
 
-### L2 Building Agents (Feature Implementation)
+#### L2 Building Agents (Feature Implementation)
 - **backend-engineer** - Implement APIs, database, services
 - **frontend-engineer** - Implement UI (follows design system)
 - **test-engineer** - Write tests and verify implementations
 
-### L2 Support Agents
+#### L2 Support Agents
 - **code-reviewer** - Review code quality, security, intent compliance
 - **debugger** - Fix bugs and issues (backend/general)
 - **ui-debugger** - Debug UI issues with browser automation
 - **acceptance-validator** - Validate promises are kept (not just code working)
 
-### Operations Agent
+#### Operations Agent
 - **project-ops** - Project setup, sync, docs, verification, AI integration
 
-### When to Invoke Each Agent
-
-| Agent | Auto/Manual | Triggered By |
-|-------|-------------|--------------|
-| brownfield-analyzer | AUTO | First session on existing codebase |
-| intent-guardian | AUTO | L1 start (greenfield) |
-| ux-architect | AUTO | After intent complete |
-| agentic-architect | AUTO | After UX complete |
-| implementation-planner | AUTO | After architecture complete |
-| change-analyzer | AUTO | User says "add", "change", "also need" |
-| gap-analyzer | MANUAL | User requests /gap or /audit |
-| backend-engineer | AUTO | L2 feature: backend step |
-| frontend-engineer | AUTO | L2 feature: frontend step |
-| test-engineer | AUTO | L2 feature: testing step |
-| code-reviewer | AUTO | After ANY code changes |
-| debugger | AUTO | User reports issue (keywords: "broken", "error", "bug") |
-| ui-debugger | AUTO | UI issues + puppeteer available |
-| acceptance-validator | AUTO | After feature complete (validates promises) |
-| project-ops | AUTO | After features/milestones |
-
 ---
 
-## Core Principle
+## Orchestration Flows
 
-**The user should never have to manually invoke agents.**
-
-They describe what they want → You orchestrate everything.
-
-### Wrong Approach
+### Greenfield Flow (New Projects)
 
 ```
-User: Build me an app
-Claude: Done with intent. Now run /ux to continue.
-User: /ux
-Claude: Done with UX. Now run /architecture...
+User describes project
+   ↓
+L1 Phase: Planning
+   ├─► intent-guardian → Create product-intent.md
+   ├─► ux-architect → Create user-journeys.md
+   ├─► agentic-architect → Create agent-design.md
+   └─► implementation-planner → Create feature plans
+   ↓
+L2 Phase: Building
+   For each feature:
+      ├─► backend-engineer → Implement backend
+      │   ├─► code-reviewer (MANDATORY)
+      │   └─► Run tests (MANDATORY)
+      ├─► frontend-engineer → Implement frontend
+      │   ├─► code-reviewer (MANDATORY)
+      │   ├─► Run tests (MANDATORY)
+      │   └─► ui-debugger (if available)
+      ├─► test-engineer → Write comprehensive tests
+      │   └─► Run ALL tests (MANDATORY)
+      └─► acceptance-validator → Validate promises KEPT
+          ├─► CI verification
+          ├─► Update docs
+          └─► Feature COMPLETE
 ```
 
-### Right Approach
+### Brownfield Flow (Existing Codebases)
 
 ```
-User: Build me an app
-Claude: [Runs intent-guardian]
-        Intent captured. Continuing to UX...
-        [Runs ux-architect]
-        UX designed. Continuing to Architecture...
-        [Runs agentic-architect]
-        ...continues automatically...
-```
-
----
-
-## Session Start Protocol (MANDATORY)
-
-**Do this FIRST in every session:**
-
-### Step 1: Read CLAUDE.md
-
-```
-[Read CLAUDE.md from project root]
-
-Checking project state...
-```
-
-### Step 2: Parse Workflow State
-
-Extract from the yaml block:
-- `workflow.type` (greenfield or brownfield)
-- `workflow.phase` (analysis, L1, or L2)
-- `workflow.status` (not_started, in_progress, paused, complete)
-- `session.next_action`
-
-### Step 3: Determine Action
-
-```
-IF type == "brownfield" AND analysis.status == "pending":
-  → Run brownfield-analyzer first
-
-ELSE IF status == "not_started":
-  → Begin L1 planning with intent-guardian
-
-ELSE IF status == "in_progress":
-  → Resume from session.next_action
-
-ELSE IF status == "paused":
-  → Ask user if ready to continue
-
-ELSE IF status == "complete":
-  → Project done, ask what user wants to do
-```
-
-### Step 4: Announce and Continue
-
-```
-═══════════════════════════════════════════════════════════════════════════════
-WORKFLOW SESSION
-═══════════════════════════════════════════════════════════════════════════════
-
-Project: [name]
-Type: [greenfield/brownfield]
-Phase: [L1/L2]
-Status: [status]
-
-Last session: [last_action]
-Next: [next_action]
-
-[Continue / Show status / Different task]
-```
-
-If user confirms (or just starts talking about the project), continue automatically.
-
----
-
-## Brownfield Flow
-
-When project is brownfield and analysis not done:
-
-```
-Session start
-        │
-        ▼
-┌──────────────────────┐
-│ brownfield-analyzer  │ → Scans code, infers state
-└────────┬─────────────┘
-         │ User confirms
-         ▼
-┌─────────────────┐
-│ Create [INFERRED] docs │
-└────────┬────────┘
-         │
-         ▼
-    Continue to L2
-    (from inferred state)
-```
-
-**After analysis completes:**
-1. Update CLAUDE.md with detected features
-2. Create [INFERRED] documentation
-3. Continue from inferred state (usually L2)
-
----
-
-## L1 Workflow Orchestration
-
-When user describes a new project:
-
-```
-PHASE: L1 Planning
-══════════════════
-
-Step 1: Intent
-─────────────────────────────────
-[Invoke intent-guardian]
-[Wait for completion]
-[Show summary]
-[Auto-continue unless user says stop]
-
-Step 2: UX
-─────────────────────────────────
-[Invoke ux-architect]
-[Wait for completion]
-[Show summary]
-[Auto-continue unless user says stop]
-
-Step 3: Architecture
-─────────────────────────────────
-[Invoke agentic-architect]
-[Wait for completion]
-[Show summary]
-[Auto-continue unless user says stop]
-
-Step 4: Planning
-─────────────────────────────────
-[Invoke implementation-planner]
-[Wait for completion]
-[Show summary]
-
-L1 COMPLETE
-─────────────────────────────────
-[Run quality gates]
-[Update documentation]
-[Show L2 ready message]
-```
-
-### Between L1 Steps
-
-After each L1 agent completes:
-
-```
-✓ [Phase Name] Complete
-━━━━━━━━━━━━━━━━━━━━━━━
-
-[Brief summary of what was created]
-
-Continuing to [Next Phase]...
-
-(Say "stop" or "wait" to pause)
-```
-
-Only pause if user explicitly asks. Otherwise, continue automatically.
-
----
-
-## L2 Workflow Orchestration
-
-For each feature in the plan:
-
-```
-FEATURE: [Feature Name]
-═══════════════════════
-
-Step 1: Backend
-─────────────────────────────────
-[Invoke backend-engineer]
-[Wait for completion]
-[Run: code-reviewer on new files]
-[Auto-continue]
-
-Step 2: Frontend
-─────────────────────────────────
-[Invoke frontend-engineer]
-[Wait for completion]
-[Run: code-reviewer on new files]
-[Run: ui-debugger quick check]
-[Auto-continue]
-
-Step 3: Testing
-─────────────────────────────────
-[Invoke test-engineer]
-[Wait for completion]
-[Run tests]
-[Auto-continue if pass, stop if fail]
-
-Step 4: Verification
-─────────────────────────────────
-[Run quality gates]
-[Update documentation]
-[Update CLAUDE.md state]
-
-FEATURE COMPLETE
-─────────────────────────────────
-[Show summary]
-[Auto-continue to next feature]
-```
-
----
-
-## Quality Gates (Run Automatically)
-
-### After Each L1 Phase
-
-```
-Quality Check: L1 Phase
-━━━━━━━━━━━━━━━━━━━━━━━
-
-[x] Document created
-[x] Required sections present
-[x] No placeholders remaining
-[x] Consistent with previous phases
-
-Continuing...
-```
-
-### After Each L2 Phase (Backend/Frontend)
-
-```
-Quality Check: Code
-━━━━━━━━━━━━━━━━━━━
-
-[Invoke code-reviewer silently]
-
-Results:
-[x] Code quality: Good
-[x] Security: No issues
-[x] Intent compliance: Matches promises
-[ ] Suggestion: Consider adding error handling to X
-
-Auto-continuing (suggestion noted for later)...
-```
-
-### After Each Feature
-
-```
-Quality Check: Feature Complete
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-[Invoke test-engineer]
-[Invoke ui-debugger if frontend]
-
-Results:
-[x] Tests pass: 12/12
-[x] UI renders: ✓
-[x] Console errors: None
-[x] Intent promises: 2 of 8 now fulfilled
-
-[Invoke project-ops sync]
-
-Updated:
-- CLAUDE.md feature status
-- Intent promises marked KEPT
-- Progress: 2/6 features complete
-
-Continuing to next feature...
-```
-
----
-
-## Quality Gate Enforcement (Detailed)
-
-**These run AUTOMATICALLY. Do not skip.**
-
-### After Code Changes
-
-```
-TRIGGER: Any file in src/, lib/, app/, etc. created or modified
-
-ACTION:
-  1. Identify changed files
-  2. Invoke code-reviewer:
-     "Review these files: [list]
-      Check: quality, security, intent compliance
-      Report: issues or 'clean'"
-  3. If issues found:
-     - Show summary to user
-     - Ask: "Fix these issues? [Yes / Skip / Show details]"
-     - If yes: fix and re-review
-  4. If clean:
-     - Note in state: quality.last_review = now, result = pass
-     - Continue silently
-```
-
-### After Backend Step
-
-```
-TRIGGER: backend-engineer completes
-
-ACTION:
-  1. code-reviewer on new backend files
-  2. Run backend tests:
-     - npm test (if jest/vitest)
-     - pytest (if python)
-     - go test (if go)
-  3. Quick API check (if applicable):
-     - curl health endpoint
-     - Verify response
-  4. If all pass: continue to frontend
-  5. If fail: invoke debugger, fix, retry
-```
-
-### After Frontend Step
-
-```
-TRIGGER: frontend-engineer completes
-
-ACTION:
-  1. code-reviewer on new frontend files
-  2. Run frontend tests
-  3. UI Debugging check:
-     - Check if puppeteer MCP available
-     - IF NOT available:
-       → Offer to enable MCP automatically
-       → "Enable puppeteer MCP for UI debugging? [Yes / No / Later]"
-       → If Yes: Add config to ~/.claude/config.json
-       → Inform user to restart Claude Code
-       → Skip UI debugging for now (resume after restart)
-     - IF available:
-       → Invoke ui-debugger quick check:
-         "Quick UI verification:
-          - Screenshot main views
-          - Check console for errors
-          - Verify no layout breaks"
-  4. If issues: fix before continuing
-  5. If clean: continue to testing
-```
-
-### After Test Step
-
-```
-TRIGGER: test-engineer completes
-
-ACTION:
-  1. Run FULL test suite
-  2. Check results:
-     - All pass? → Continue
-     - Any fail? → STOP
-  3. If failures:
-     - Show failing tests
-     - Ask: "Fix failing tests? [Yes / Skip (not recommended)]"
-     - Invoke debugger to fix
-     - Re-run tests
-     - Repeat until pass
-```
-
-### After Feature Complete
-
-```
-TRIGGER: All steps (backend, frontend, tests) pass
-
-ACTION:
-  1. Promise Validation (CRITICAL):
-     - Invoke acceptance-validator for promises this feature implements
-     - Validates promises are ACTUALLY KEPT (not just code working)
-     - If PARTIAL or FAILED:
-       → Create remediation tasks
-       → DO NOT mark feature complete
-       → Fix issues and re-validate
-     - If VALIDATED:
-       → Continue to step 2
-
-  2. CI Verification:
-     - IF scripts/verify.sh exists: run it
-     - IF package.json has lint/typecheck: run them
-     - IF .github/workflows/ exists: simulate checks
-
-  3. Documentation:
-     - Invoke project-ops sync
-     - Update intent doc (mark promises VALIDATED)
-     - Update CLAUDE.md state
-
-  4. State:
-     - Mark feature complete
-     - Update promise status (pending → validated)
-     - Update CLAUDE.md
-
-  5. Announce:
-     "✓ Feature [name] complete
-
-      Tests: X passing
-      Promises validated: Y of Z
-      Coverage: N% (if available)
-
-      Ready for next feature: [name]
-
-      Or commit now? /project commit"
-```
-
----
-
-## Issue Response
-
-### Detecting Issue Reports
-
-```
-KEYWORDS that trigger debug mode:
-  - "doesn't work"
-  - "broken"
-  - "bug"
-  - "error"
-  - "crash"
-  - "exception"
-  - "failed"
-  - "wrong"
-  - "issue"
-  - "problem"
-  - "not working"
-  - "can't"
-
-CONTEXT determines which debugger:
-  - "page", "screen", "button", "UI", "display", "layout", "click"
-    → ui-debugger
-  - "API", "request", "response", "server", "backend", "data"
-    → debugger (backend focus)
-  - "test", "failing", "spec"
-    → debugger + test-engineer
-  - General/unclear
-    → debugger (general)
-```
-
-### Debug Flow
-
-```
-USER: "[issue description]"
-
-Claude:
-  1. Acknowledge issue
-  2. Determine type (UI/backend/test/general)
-  3. Invoke appropriate debugger:
-
-     ui-debugger:
-       "Investigating UI issue: [description]
-
-        [Check if puppeteer MCP available]
-
-        IF NOT available:
-          ⚠ Puppeteer MCP not detected
-          Enable for browser automation? [Yes / Manual]
-          → If Yes: Configure ~/.claude/config.json
-          → Restart required
-
-        IF available:
-          [Navigate to relevant page]
-          [Take screenshot]
-          [Check console]
-          [Inspect elements]
-
-          Found: [root cause]
-
-          Fixing..."
-
-     debugger:
-       "Investigating: [description]
-
-        [Read relevant code]
-        [Add logging if needed]
-        [Trace execution]
-
-        Found: [root cause]
-
-        Fixing..."
-
-  4. Apply fix
-  5. Verify fix:
-     - Run relevant tests
-     - If UI: screenshot after fix
-  6. code-reviewer on changes
-  7. Update state
-  8. Announce:
-     "✓ Fixed: [brief description]
-
-      Root cause: [explanation]
-      Changes: [files modified]
-
-      Verified: [tests pass / UI working]"
-```
-
----
-
-## Change Request Handling
-
-### Detecting Change Requests
-
-```
-KEYWORDS that trigger change-analyzer:
-  - "add [feature]"
-  - "also need [feature]"
-  - "change [thing] to [new thing]"
-  - "modify [thing]"
-  - "update [thing] to include [new aspect]"
-  - "can we also have [feature]?"
-  - "what if we [change]"
-```
-
-### Change Analysis Flow
-
-```
-USER: "Add comments on posts"
-
-Claude:
-  1. Acknowledge request
-  2. Invoke change-analyzer
-     - Analyzes impact on existing:
-       • Intent (new promises)
-       • UX (new journeys)
-       • Architecture (new modules)
-       • Plans (new tasks)
-     - Estimates effort and complexity
-     - Identifies dependencies and risks
-
-  3. Present analysis:
-     "Adding comments feature will:
-
-      Impact Analysis:
-      • 1 new user journey (Add Comment)
-      • 2 API endpoints (POST /comments, GET /comments/:postId)
-      • 1 new database table (comments)
-      • 1 new frontend component (CommentSection)
-      • Estimated: 6 hours
-
-      Dependencies:
-      • Requires auth system (already complete ✓)
-      • Requires post system (already complete ✓)
-
-      Risks:
-      • None identified
-
-      Update plans and continue? [Yes/No/Customize]"
-
-  4. On user confirmation:
-     - Update docs/intent/product-intent.md
-     - Update docs/ux/user-journeys.md
-     - Update docs/architecture/README.md
-     - Update docs/plans/features/comments.md (create)
-     - Update docs/plans/implementation-order.md
-     - Continue to L2 building
-
-  5. Announce:
-     "Plans updated. Continuing with comments feature..."
-```
-
----
-
-## Brownfield Improvement
-
-### When User Requests Improvement
-
-```
-KEYWORDS that trigger gap-analyzer:
-  - "/gap"
-  - "/audit"
-  - "improve this codebase"
-  - "what's wrong with this code"
-  - "fix technical debt"
-  - "find issues"
+First session
+   ↓
+brownfield-analyzer → Scan codebase
+   ├─► Detect tech stack
+   ├─► Identify features
+   ├─► Infer promises
+   └─► Estimate test coverage
+   ↓
+Create [INFERRED] documentation
+   ├─► docs/intent/product-intent.md
+   ├─► docs/architecture/system-design.md
+   └─► docs/plans/current-state.md
+   ↓
+Ask user what to do:
+   ├─► Add feature → change-analyzer → L2 flow
+   ├─► Improve code → gap-analyzer → Fix gaps
+   ├─► Fix bug → debugger → Fix + test
+   └─► Something else
 ```
 
 ### Gap Analysis Flow
 
 ```
-USER: "/gap" OR "What's wrong with this codebase?"
-
-Claude:
-  1. Invoke gap-analyzer
-     - Compares current vs. ideal (from inferred/explicit docs)
-     - Categorizes gaps:
-       • Critical (security, data loss, broken core features)
-       • High (broken features, poor UX, missing promises)
-       • Medium (tech debt, missing tests, performance)
-       • Low (polish, optimizations, nice-to-haves)
-     - Creates prioritized migration plan
-
-  2. Present findings:
-     "Gap Analysis Complete
-
-      Found 12 gaps:
-      🔴 Critical (2):
-         - GAP-001: SQL injection in search endpoint
-         - GAP-002: No rate limiting on auth routes
-
-      🟠 High (4):
-         - GAP-003: Password reset flow broken
-         - GAP-004: No error handling in checkout
-         - GAP-005: Missing input validation
-         - GAP-006: N+1 queries in dashboard
-
-      🟡 Medium (6):
-         - GAP-007: Duplicated code in services
-         - GAP-008: No tests for payment flow
-         ...
-
-      Start with critical fixes? [Yes/Show plan/Custom]"
-
-  3. On confirmation:
-     - Create docs/gaps/gap-analysis.md
-     - Create docs/gaps/migration-plan.md
-     - Organize into phases:
-       • Phase 0: Critical (must fix)
-       • Phase 1: High (should fix)
-       • Phase 2: Medium (nice to fix)
-       • Phase 3: Low (optional)
-
-  4. Begin fixing (usually Phase 0 first):
-     - For each gap:
-       • Invoke appropriate agent (backend-engineer, etc.)
-       • Fix the issue
-       • Run code-reviewer
-       • Add regression test
-       • Mark gap complete
-     - Continue through phases
-
-  5. Track progress:
-     "✓ GAP-001 fixed (added parameterized queries)
-      ✓ GAP-002 fixed (added rate limiting middleware)
-
-      Phase 0 complete. Continue to Phase 1? [Yes/No]"
+User requests /gap or "improve codebase"
+   ↓
+gap-analyzer
+   ├─► Compare current vs ideal
+   ├─► Categorize gaps (Critical/High/Medium/Low)
+   └─► Create migration plan with phases
+   ↓
+For each gap (by priority):
+   ├─► Invoke appropriate engineer agent
+   ├─► Apply fix
+   ├─► code-reviewer (MANDATORY)
+   ├─► Add regression test (MANDATORY)
+   └─► Mark gap complete
 ```
+
+### Change Request Flow
+
+```
+User says "add [feature]"
+   ↓
+change-analyzer
+   ├─► Analyze impact on intent/architecture/plans
+   ├─► Estimate effort and complexity
+   ├─► Identify dependencies and risks
+   └─► Present analysis
+   ↓
+User confirms
+   ↓
+Update documentation
+   ├─► Add promises to intent doc
+   ├─► Update architecture if needed
+   └─► Create feature plan
+   ↓
+Continue to L2 building for feature
+```
+
+---
+
+## Quality Gates (Automatic Enforcement)
+
+### After Code Changes
+
+**Trigger:** Any file in `src/`, `lib/`, `app/`, etc. created or modified
+
+**Action:**
+1. Invoke code-reviewer on changed files
+2. If issues: Show, ask to fix
+3. If clean: Continue silently
+
+### After Backend/Frontend Steps
+
+**Trigger:** Engineer agent completes
+
+**Action:**
+1. code-reviewer on new/modified files (MANDATORY)
+2. Run relevant tests (MANDATORY)
+3. If fail: invoke debugger, fix, retry
+4. If pass: continue
+
+### After Testing Step
+
+**Trigger:** test-engineer completes
+
+**Action:**
+1. Run FULL test suite (MANDATORY)
+2. All must pass
+3. If failures: STOP, fix, retry
+
+### After Feature Complete
+
+**Trigger:** All steps pass
+
+**Action:**
+1. Promise Validation (CRITICAL)
+   - acceptance-validator
+   - If PARTIAL/FAILED: fix and re-validate
+   - If VALIDATED: continue
+2. CI Verification
+   - scripts/verify.sh if exists
+   - lint/typecheck if configured
+3. Documentation
+   - project-ops sync
+   - Update intent doc
+   - Update CLAUDE.md state
 
 ---
 
 ## State Tracking
 
-Maintain state in CLAUDE.md or memory:
-
-```markdown
-## Workflow State
-
-Phase: L2
-Current Feature: search
-Step: frontend
-
-Progress:
-- [x] L1: Intent
-- [x] L1: UX
-- [x] L1: Architecture
-- [x] L1: Planning
-- [x] Feature: auth (complete)
-- [ ] Feature: search (in progress - frontend)
-- [ ] Feature: dashboard
-- [ ] Feature: settings
-```
-
-Read this at start of each session to know where we are.
-
-### State Updates (Mandatory)
-
-After EVERY action, update CLAUDE.md:
+State is maintained in YAML block in user project CLAUDE.md:
 
 ```yaml
-# After code review
+workflow:
+  version: 1.0
+  type: greenfield|brownfield
+  phase: L1|L2|analysis
+  status: not_started|in_progress|paused|complete
+  mode: auto|manual
+
+l1:
+  intent: { status, output }
+  ux: { status, output }
+  architecture: { status, output }
+  planning: { status, output }
+
+l2:
+  current_feature: string
+  current_step: backend|frontend|testing|verification
+  features: { [name]: { status, backend, frontend, tests, verification, promises } }
+
+promises:
+  # PRM-001:
+  #   statement: "..."
+  #   criticality: CORE|IMPORTANT|NICE_TO_HAVE
+  #   status: pending|validated|partial|failed
+  #   implementing_features: [...]
+
 quality:
-  last_review: "2024-01-15T10:30:00Z"
-  last_review_result: pass  # or fail
-  open_issues: []  # or list of issues
+  last_review: timestamp
+  last_review_result: pass|fail
+  last_test_run: timestamp
+  last_test_result: pass|fail
 
-# After tests
-quality:
-  last_test_run: "2024-01-15T10:35:00Z"
-  last_test_result: pass  # or fail
-
-# After CI check
-ci:
-  last_check: "2024-01-15T10:40:00Z"
-  status: pass  # or fail
-
-# Always
 session:
-  last_updated: "2024-01-15T10:40:00Z"
-  last_action: "Completed auth backend, code review passed"
-  next_action: "Continue to auth frontend"
+  last_updated: timestamp
+  last_action: string
+  next_action: string
 ```
 
 ---
 
-## User Intervention Points
+## Issue Detection and Response
 
-Only pause and ask user when:
+### Keyword Triggers
 
-### 1. Decisions needed
+| Keywords | Agent Invoked |
+|----------|---------------|
+| "doesn't work", "broken", "bug", "error", "crash", "exception" | **debugger** |
+| "page", "screen", "button", "UI", "display", "layout", "click" + issue | **ui-debugger** |
+| "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
+| "add [feature]", "also need", "change [thing]" | **change-analyzer** |
+| "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
 
-```
-Architecture has two options:
-A) Monolith (simpler)
-B) Microservices (scalable)
+### Response Protocols
 
-Which approach? [A / B]
-```
-
-### 2. Errors/failures
-
-```
-⚠ Tests failing: 3 failures
-
-[Show failures]
-
-[Fix and retry / Skip tests / Stop]
-```
-
-### 3. Major milestones
-
-```
-L1 Planning Complete ✓
-
-Ready to start building?
-[Start L2 / Review plans first]
-```
-
-### 4. User says stop/wait/pause
-
-Otherwise, keep going automatically.
+All issue responses follow this pattern:
+1. Acknowledge issue
+2. Invoke appropriate debugger agent
+3. Diagnose root cause
+4. Apply fix
+5. Add regression test (if applicable)
+6. Verify fix with tests
+7. code-reviewer on changes (MANDATORY)
+8. Update state
+9. Announce fix with explanation
 
 ---
 
-## Commands
+## Template System
 
-### /auto on
+### Template Locations
 
-Enable full auto-orchestration (default):
+- `templates/project/CLAUDE.md.greenfield.template` - New projects
+- `templates/project/CLAUDE.md.brownfield.template` - Existing codebases
 
-```
-/auto on
+### Template Variables
 
-Orchestration: AUTOMATIC
-- Agents chain automatically
-- Quality gates run silently
-- Docs update automatically
-- Only pauses for decisions
-```
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `{{PROJECT_NAME}}` | Project name | "my-app" |
+| `{{PROJECT_DESCRIPTION}}` | Brief description | "Spanish learning app" |
+| `{{DATE}}` | Initialization date | "2026-01-26" |
+| `{{WORKFLOW_HOME}}` | Workflow agents directory | "~/.claude-workflow-agents" |
 
-### /auto off
+### How Templates Work
 
-Disable auto-orchestration:
+1. User runs `workflow-init` in their project directory
+2. Script detects if project is greenfield or brownfield
+3. Script selects appropriate template
+4. Script replaces `{{VARIABLES}}` with actual values
+5. Script generates `CLAUDE.md` in user project root
+6. User project now has self-contained orchestration
 
-```
-/auto off
+### When to Update Templates
 
-Orchestration: MANUAL
-- You invoke each agent
-- You run quality checks
-- You update docs
-```
+**Update templates when:**
+- Adding/removing agents
+- Changing orchestration flows
+- Modifying quality gates
+- Adding new features to workflow system
 
-### /auto status
-
-Show current state:
-
-```
-/auto status
-
-Orchestration: AUTOMATIC
-
-Phase: L2 Building
-Feature: search (2/6)
-Step: frontend (backend complete)
-
-Next: [auto-continuing in 3s or say "wait"]
-```
+**After updating templates:**
+1. Run `./scripts/verify-docs.sh` to ensure sync
+2. Test with `workflow-init` in a test directory
+3. Update this file (workflow-orchestrator.md) with changes
+4. Update CLAUDE.md (repo documentation) with changes
 
 ---
 
-## Starting a Workflow
+## Design Principles
 
-When user describes a project:
+### 1. Self-Containment
 
-```
-User: Build me a spanish learning app that...
+**Rule:** User project CLAUDE.md must contain ALL operational logic.
 
-Orchestrator:
-  Starting Workflow
-  ═════════════════
+**Why:** External files can't be reliably read by Claude. HTML comments can be ignored.
 
-  Mode: Automatic (say "manual" to control each step)
+**Implementation:** Embed full orchestration flows in templates.
 
-  L1 Planning
-  ───────────
-  → Intent (starting...)
+### 2. Automatic Agent Chaining
 
-  [Invokes intent-guardian]
-  [Shows output]
+**Rule:** User should never manually invoke agents.
 
-  ✓ Intent complete
-  → UX (continuing...)
+**Why:** Reduces cognitive load, ensures consistency, improves developer experience.
 
-  [Invokes ux-architect]
-  [Shows output]
+**Implementation:** Keyword triggers and phase completion signals auto-invoke next agent.
 
-  ✓ UX complete
-  → Architecture (continuing...)
+### 3. Mandatory Quality Gates
 
-  ...continues until L1 done...
+**Rule:** code-reviewer and tests run after EVERY code change.
 
-  ═════════════════════════════
-  L1 Complete ✓
+**Why:** Catches issues early, maintains code quality, validates promises.
 
-  Created:
-  - /docs/intent/product-intent.md
-  - /docs/ux/user-journeys.md
-  - /docs/architecture/agent-design.md
-  - /docs/plans/*.md
+**Implementation:** MANDATORY checkpoints in L2 flow that cannot be skipped.
 
-  Features planned: 6
-  Estimated phases: 6
+### 4. Promise-Based Validation
 
-  Ready to build? [Start / Review first]
-```
+**Rule:** Features aren't complete until promises are VALIDATED.
+
+**Why:** Tests passing ≠ promises kept. Need explicit validation.
+
+**Implementation:** acceptance-validator runs after all tests pass, validates actual user promises.
+
+### 5. State Transparency
+
+**Rule:** CLAUDE.md state must always reflect current progress.
+
+**Why:** Enables session resumption, tracks progress, provides visibility.
+
+**Implementation:** State updated after every significant action.
 
 ---
 
-## Completion Signal Protocol
+## Contributor Guidelines
 
-### What Agents Send
+### Adding a New Agent
 
-Each agent outputs a completion signal:
+1. Create agent file in `agents/[name].md`
+2. Add to appropriate category (L1/L2/Support/Operations)
+3. Update templates:
+   - Add to "Agents Available" table
+   - Add trigger keywords if applicable
+   - Add to appropriate flow if primary agent
+4. Update verification:
+   - Add to `scripts/verify-docs.sh` COORDINATED_AGENTS array
+   - Add to `tests/structural/test_agents_exist.sh`
+5. Update repository docs:
+   - Add to `CLAUDE.md` maintenance section
+   - Add to `README.md` agents table
+   - Add to `commands/help.md`
+   - Add to `STATE.md`
+6. Run `./scripts/verify-docs.sh` to verify sync
+7. Commit all changes together
 
-```
-===PHASE_COMPLETE===
-phase: intent
-output: /docs/intent/product-intent.md
-summary: Captured 8 promises, 3 anti-goals
-next: ux
-===END_SIGNAL===
-```
+### Modifying Orchestration Flows
 
-Or for L2:
+1. Update templates (greenfield and/or brownfield)
+2. Update this file (workflow-orchestrator.md) to document changes
+3. Update `CLAUDE.md` (repo) if needed
+4. Test with `workflow-init` in a test directory
+5. Verify Claude follows new flow correctly
+6. Run `./scripts/verify-docs.sh`
+7. Commit
 
-```
-===STEP_COMPLETE===
-feature: auth
-step: backend
-files_created: [src/api/auth.ts, src/db/user.ts]
-files_modified: [package.json]
-summary: Auth backend complete with JWT tokens
-next: frontend
-===END_SIGNAL===
-```
+### Testing Orchestration Changes
 
-### What Orchestrator Does
+```bash
+# Create test directory
+mkdir /tmp/workflow-test-greenfield
+cd /tmp/workflow-test-greenfield
 
-1. Parse the signal
-2. Run quality check for that phase
-3. Update state
-4. Invoke next agent
-5. Repeat
+# Initialize workflow
+workflow-init
 
----
+# Check generated CLAUDE.md
+cat CLAUDE.md
 
-## Error Handling
+# Verify orchestration logic is embedded
+grep -A 10 "## L1 Orchestration Flow" CLAUDE.md
 
-### If Quality Gate Fails
-
-```
-⚠ Quality Check Failed
-━━━━━━━━━━━━━━━━━━━━
-
-Issue: Code review found security vulnerability
-File: src/api/auth.ts:45
-Problem: Password stored in plain text
-
-Orchestrator: Pausing workflow
-
-[Fix automatically / Show me / Skip]
-```
-
-### If Agent Fails
-
-```
-⚠ Agent Error
-━━━━━━━━━━━━━
-
-Agent: backend-engineer
-Error: Cannot create file (permission denied)
-
-Orchestrator: Workflow paused
-
-[Retry / Debug / Stop]
+# Test with Claude Code (manually)
+# Verify auto-chaining works as expected
 ```
 
 ---
 
-## Progress Reporting
+## FAQ for Contributors
 
-### Continuous Updates
+### Q: Why not just improve the old HTML comment approach?
 
-```
-Workflow Progress
-═════════════════
+**A:** Claude Code doesn't auto-read external files. HTML comments are not enforced and can be easily ignored. Self-contained templates guarantee Claude has the orchestration logic.
 
-L1: ████████████████████ 100% Complete
-L2: ████████░░░░░░░░░░░░  40% (2/5 features)
+### Q: Won't this make templates harder to maintain?
 
-Current: Building feature "search"
-  Backend:  ✓ Complete
-  Frontend: 🔄 In progress
-  Tests:    ○ Pending
-  Review:   ○ Pending
+**A:** Templates are larger (750+ lines vs 340), but:
+- Easier to debug (all logic in one place)
+- More reliable (no external dependencies)
+- Better user experience (actually works!)
+- Simpler mental model (no "wishful thinking")
 
-Estimated completion: 3 more features
-```
+### Q: What's the role of agents/*.md files now?
 
-### Session Resume
+**A:** Reference documentation for:
+- Contributors understanding agent capabilities
+- Customization (users can read for detailed prompts)
+- Debugging agent invocations
+- System maintenance
 
-If user returns later:
+### Q: How do changes propagate to user projects?
 
-```
-Welcome back!
+**A:** Users run `workflow-update` which:
+1. Checks for new template version
+2. Merges orchestration changes into their CLAUDE.md
+3. Preserves their project-specific state/notes
+4. Shows diff before applying
 
-Last session: L2 Building
-Feature: search (paused at frontend)
+### Q: Can users customize the orchestration?
 
-Resume where we left off? [Yes / Show status / Start over]
-```
+**A:** Yes! They can edit their CLAUDE.md directly. It's their file. The template is just a starting point. However, they should understand what they're changing.
+
+### Q: How do we version orchestration changes?
+
+**A:** `workflow.version` in state YAML tracks version. When templates change:
+1. Increment version
+2. Document breaking changes
+3. Create migration guide if needed
+4. `workflow-update` handles migration
+
+---
+
+## Related Files
+
+- `templates/project/CLAUDE.md.greenfield.template` - Greenfield orchestration (source of truth)
+- `templates/project/CLAUDE.md.brownfield.template` - Brownfield orchestration (source of truth)
+- `CLAUDE.md` - Repository maintenance documentation
+- `scripts/verify-docs.sh` - Documentation sync verification (includes orchestrator check)
+- `commands/help.md` - In-app help system
+
+---
+
+## Version History
+
+### v1.0 (2026-01-26)
+- **Breaking Change:** Moved all orchestration logic from external file to embedded templates
+- workflow-orchestrator.md now contributor documentation only
+- Self-contained CLAUDE.md templates (greenfield and brownfield)
+- No external file reads required for operation
+- Improved reliability and user experience
+
+### v0.9 (Previous)
+- External orchestrator file with HTML comment reference
+- Relied on Claude reading external files
+- Unreliable, could be ignored
+

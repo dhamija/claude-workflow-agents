@@ -1,256 +1,669 @@
-<!--
-═══════════════════════════════════════════════════════════════════════════════
-WORKFLOW BOOTSTRAP - CLAUDE MUST READ THIS FIRST
-═══════════════════════════════════════════════════════════════════════════════
-
-Project Type: GREENFIELD (new project)
-Initialized: {{DATE}}
-
-INSTRUCTIONS FOR CLAUDE:
-
-1. READ the orchestrator: {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
-
-2. CHECK "Workflow State" section below
-
-3. FOLLOW orchestration protocol (auto-chain agents)
-
-4. FOLLOW agent utilization rules below (quality gates, debugging)
-
-5. UPDATE state after each significant action
-
-═══════════════════════════════════════════════════════════════════════════════
--->
-
 # {{PROJECT_NAME}}
-
-## 🔄 WORKFLOW ACTIVE
-
-This project uses **Claude Workflow Agents**.
-
-**Claude: Read the bootstrap comment above, then follow the Agent Utilization Guide below.**
-
----
-
-## Agent Utilization Guide
-
-**Claude: These rules are MANDATORY. Follow them automatically.**
-
-### Quality Gates (Automatic After Code Changes)
-
-```
-AFTER ANY CODE CHANGE:
-│
-├─► code-reviewer
-│   • Review new/modified files
-│   • Check: quality, security, intent compliance
-│   • If issues: show summary, suggest fixes
-│   • If clean: continue silently
-│
-├─► Run tests (if exist)
-│   • npm test / pytest / cargo test
-│   • If fail: STOP, show failures, ask to fix
-│   • If pass: continue
-│
-└─► Update CLAUDE.md state
-```
-
-### L2 Building Flow (Per Feature)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ FEATURE: [name]                                                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  backend-engineer                                                           │
-│       │                                                                     │
-│       ▼                                                                     │
-│  ┌─────────────────┐     ┌─────────────────┐                               │
-│  │  code-reviewer  │ ──► │   Run tests     │                               │
-│  │  (AUTO)         │     │   (if exist)    │                               │
-│  └─────────────────┘     └────────┬────────┘                               │
-│                                   │                                         │
-│                          PASS?────┼────FAIL?                                │
-│                            │      │      │                                  │
-│                            ▼      │      ▼                                  │
-│                       Continue    │   debugger                              │
-│                            │      │   (fix, retry)                          │
-│       ┌────────────────────┘      │                                         │
-│       ▼                           │                                         │
-│  frontend-engineer                │                                         │
-│       │                           │                                         │
-│       ▼                           │                                         │
-│  ┌─────────────────┐     ┌────────┴────────┐     ┌─────────────────┐       │
-│  │  code-reviewer  │ ──► │   Run tests     │ ──► │  ui-debugger    │       │
-│  │  (AUTO)         │     │   (if exist)    │     │  (if puppeteer) │       │
-│  └─────────────────┘     └────────┬────────┘     └────────┬────────┘       │
-│                                   │                       │                 │
-│                          PASS?────┼────FAIL?              │                 │
-│                            │      │      │                │                 │
-│                            ▼      │      ▼                │                 │
-│                       Continue    │   debugger/           │                 │
-│                            │      │   ui-debugger         │                 │
-│       ┌────────────────────┘      │                       │                 │
-│       ▼                           │                       │                 │
-│  test-engineer                    │                       │                 │
-│       │                           │                       │                 │
-│       ▼                           │                       │                 │
-│  ┌─────────────────┐              │                       │                 │
-│  │  Run ALL tests  │              │                       │                 │
-│  └────────┬────────┘              │                       │                 │
-│           │                       │                       │                 │
-│  PASS?────┼────FAIL?              │                       │                 │
-│    │      │      │                │                       │                 │
-│    ▼      │      ▼                │                       │                 │
-│ ┌──────┐  │   ┌──────────┐        │                       │                 │
-│ │DONE  │  │   │Fix tests │        │                       │                 │
-│ └──┬───┘  │   └──────────┘        │                       │                 │
-│    │      │                       │                       │                 │
-├────┼──────┴───────────────────────┴───────────────────────┘                 │
-│    ▼                                                                        │
-│  FEATURE COMPLETE                                                           │
-│    │                                                                        │
-│    ├──► project-ops sync (update docs)                                      │
-│    ├──► Update intent (mark promises KEPT)                                  │
-│    ├──► Update CLAUDE.md state                                              │
-│    ├──► CI verification (if configured)                                     │
-│    └──► Continue to next feature                                            │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Issue Response Protocol
-
-```
-USER REPORTS ISSUE
-       │
-       ├─── "UI doesn't work" / "looks wrong" / "can't click"
-       │           │
-       │           ▼
-       │    ┌─────────────────────────────────────────────────────────────┐
-       │    │ ui-debugger                                                 │
-       │    │  1. Navigate to problem area                                │
-       │    │  2. Take screenshot                                         │
-       │    │  3. Capture console errors                                  │
-       │    │  4. Check network requests                                  │
-       │    │  5. Inspect DOM                                             │
-       │    │  6. Diagnose root cause                                     │
-       │    │  7. Suggest/apply fix                                       │
-       │    │  8. Verify fix                                              │
-       │    └─────────────────────────────────────────────────────────────┘
-       │
-       ├─── "Error" / "crash" / "exception" / "doesn't work"
-       │           │
-       │           ▼
-       │    ┌─────────────────────────────────────────────────────────────┐
-       │    │ debugger                                                    │
-       │    │  1. Understand the error                                    │
-       │    │  2. Reproduce the issue                                     │
-       │    │  3. Add logging if needed                                   │
-       │    │  4. Trace to root cause                                     │
-       │    │  5. Fix the issue                                           │
-       │    │  6. Add test to prevent regression                          │
-       │    │  7. Verify fix                                              │
-       │    └─────────────────────────────────────────────────────────────┘
-       │
-       ├─── "Test failing" / "tests broken"
-       │           │
-       │           ▼
-       │    ┌─────────────────────────────────────────────────────────────┐
-       │    │ debugger + test-engineer                                    │
-       │    │  1. Run failing tests                                       │
-       │    │  2. Analyze failure output                                  │
-       │    │  3. Determine: test wrong OR code wrong?                    │
-       │    │  4. Fix appropriate side                                    │
-       │    │  5. Run tests again                                         │
-       │    │  6. Verify all pass                                         │
-       │    └─────────────────────────────────────────────────────────────┘
-       │
-       └─── After ANY fix:
-                    │
-                    ▼
-             ┌─────────────────────────────────────────────────────────────┐
-             │ code-reviewer on changed files                              │
-             │ Run relevant tests                                          │
-             │ Update state if needed                                      │
-             └─────────────────────────────────────────────────────────────┘
-```
-
-### CI/CD Verification
-
-```
-BEFORE FEATURE COMPLETE:
-
-  ┌─────────────────────────────────────────────────────────────────────────┐
-  │ Local CI Simulation                                                     │
-  │                                                                         │
-  │  IF package.json exists:                                                │
-  │    npm run lint (if script exists)                                      │
-  │    npm run typecheck (if script exists)                                 │
-  │    npm run test                                                         │
-  │    npm run build                                                        │
-  │                                                                         │
-  │  IF pyproject.toml/requirements.txt:                                    │
-  │    ruff check . (if configured)                                         │
-  │    mypy . (if configured)                                               │
-  │    pytest                                                               │
-  │                                                                         │
-  │  IF scripts/verify.sh exists:                                           │
-  │    ./scripts/verify.sh                                                  │
-  │                                                                         │
-  │  ALL MUST PASS before marking complete                                  │
-  └─────────────────────────────────────────────────────────────────────────┘
-
-AFTER FEATURE COMPLETE (suggest to user):
-
-  "Feature complete and verified. Ready to commit?
-
-   /project commit - Create conventional commit
-   /project push   - Push to remote
-   /project pr     - Create PR (requires GitHub MCP)"
-```
-
-### Agent Quick Reference
-
-| Agent | Auto/Manual | Trigger |
-|-------|-------------|---------|
-| code-reviewer | AUTO | After ANY code changes |
-| ui-debugger | AUTO | After frontend (if puppeteer) |
-| debugger | MANUAL | User reports issue |
-| test-engineer | AUTO | L2 testing phase |
-| project-ops | AUTO | After milestones |
-
----
-
-## Project Context
 
 > {{PROJECT_DESCRIPTION}}
 
-### Key Decisions
+## 🔄 Workflow Active
 
-- [Document important decisions here]
+This project uses **Claude Workflow Agents** - an automated orchestration system for building production apps.
 
-### Notes
-
-- [Add project notes, context, constraints]
+**Claude: You are the orchestrator.** Follow the protocols below automatically. The user should never have to manually invoke agents.
 
 ---
 
-## Session Resume
+## Quick Reference
 
-**When starting a new session, Claude should:**
+### Agents Available
 
-1. Read the Workflow State below
-2. Announce: "Resuming [project] - [current state]. Continue?"
-3. On confirmation, continue from saved position
-4. If state is unclear, ask for clarification
+| Agent | Auto/Manual | Triggered By |
+|-------|-------------|--------------|
+| **intent-guardian** | AUTO | L1 start (captures promises) |
+| **ux-architect** | AUTO | After intent complete |
+| **agentic-architect** | AUTO | After UX complete |
+| **implementation-planner** | AUTO | After architecture complete |
+| **change-analyzer** | AUTO | User says "add", "change", "also need" |
+| **backend-engineer** | AUTO | L2 feature: backend step |
+| **frontend-engineer** | AUTO | L2 feature: frontend step |
+| **test-engineer** | AUTO | L2 feature: testing step |
+| **code-reviewer** | AUTO | After ANY code changes |
+| **debugger** | AUTO | User reports issue (keywords: "broken", "error", "bug") |
+| **ui-debugger** | AUTO | UI issues + puppeteer available |
+| **acceptance-validator** | AUTO | After feature complete (validates promises) |
+| **project-ops** | AUTO | After features/milestones |
 
-**Current Status:**
-- Phase: L1 Planning (not started)
-- Next: Begin with intent-guardian to capture promises
+### Issue Detection Keywords
+
+| Keywords | Agent Invoked |
+|----------|---------------|
+| "doesn't work", "broken", "bug", "error", "crash", "exception" | **debugger** |
+| "page", "screen", "button", "UI", "display", "layout", "click" + issue | **ui-debugger** |
+| "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
+| "add [feature]", "also need", "change [thing]" | **change-analyzer** |
+
+---
+
+## Session Start Protocol
+
+**Do this FIRST in every session:**
+
+### Step 1: Read State
+
+Read the "Workflow State" section below to determine:
+- Current phase (L1 planning or L2 building)
+- Current status (not_started, in_progress, paused, complete)
+- Next action
+
+### Step 2: Announce
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+WORKFLOW SESSION
+═══════════════════════════════════════════════════════════════════════════════
+
+Project: {{PROJECT_NAME}}
+Type: Greenfield (new project)
+Phase: [L1/L2]
+Status: [current status]
+
+Last session: [last_action from state]
+Next: [next_action from state]
+
+[Continue / Show status / Different task]
+```
+
+### Step 3: Continue or Await
+
+- If user confirms (or just starts talking about project): Continue automatically
+- If user asks for status: Show detailed progress
+- If user has different request: Handle that first, then resume workflow
+
+---
+
+## L1 Orchestration Flow (Planning Phase)
+
+When user describes a new project, run these phases automatically:
+
+### Phase 1: Intent
+
+**What:** Capture user promises with criticality levels
+
+**Action:**
+1. Invoke **intent-guardian** agent with user's project description
+2. Wait for completion
+3. Verify output created: `docs/intent/product-intent.md`
+4. Show brief summary:
+   ```
+   ✓ Intent Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Captured: X promises (Y CORE, Z IMPORTANT, N NICE_TO_HAVE)
+   Anti-goals: [count]
+
+   Continuing to UX Design...
+
+   (Say "stop" or "wait" to pause)
+   ```
+5. Auto-continue to Phase 2 unless user says stop
+
+### Phase 2: UX Design
+
+**What:** Design user journeys and design system
+
+**Action:**
+1. Invoke **ux-architect** agent with intent document
+2. Wait for completion
+3. Verify output created: `docs/ux/user-journeys.md`
+4. Show brief summary:
+   ```
+   ✓ UX Design Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   User journeys: X
+   Design system defined
+   Responsive guidelines: Yes
+
+   Continuing to Architecture...
+
+   (Say "stop" or "wait" to pause)
+   ```
+5. Auto-continue to Phase 3 unless user says stop
+
+### Phase 3: Architecture
+
+**What:** Design system architecture with promise mapping
+
+**Action:**
+1. Invoke **agentic-architect** agent with intent + UX documents
+2. Wait for completion
+3. Verify output created: `docs/architecture/agent-design.md`
+4. Show brief summary:
+   ```
+   ✓ Architecture Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Modules: X
+   Tech stack defined
+   Promise mapping: X promises → Y modules
+
+   Continuing to Planning...
+
+   (Say "stop" or "wait" to pause)
+   ```
+5. Auto-continue to Phase 4 unless user says stop
+
+### Phase 4: Planning
+
+**What:** Create implementation plans with build order
+
+**Action:**
+1. Invoke **implementation-planner** agent with all L1 documents
+2. Wait for completion
+3. Verify outputs created: `docs/plans/implementation-order.md` and feature plans
+4. Show summary:
+   ```
+   ✓ L1 Planning Complete
+   ═════════════════════════════════════════════════════════════════════════════
+
+   Created:
+   - docs/intent/product-intent.md
+   - docs/ux/user-journeys.md
+   - docs/architecture/agent-design.md
+   - docs/plans/implementation-order.md
+   - docs/plans/features/*.md (X features)
+
+   Features to build: X
+   Estimated phases: X
+
+   Ready to start building? [Start L2 / Review plans first / Pause]
+   ```
+5. Wait for user confirmation before starting L2
+
+### L1 Quality Gate
+
+After each L1 phase, verify:
+- ✓ Document created at expected path
+- ✓ Required sections present (no empty headers)
+- ✓ No placeholder text remaining
+- ✓ Consistent with previous phases
+
+If issues found: Show them, fix automatically, continue.
+
+---
+
+## L2 Orchestration Flow (Building Phase)
+
+For each feature in implementation order, run these steps automatically:
+
+### Feature Start
+
+Announce:
+```
+═══════════════════════════════════════════════════════════════════════════════
+FEATURE: [Feature Name] (X of Y)
+═══════════════════════════════════════════════════════════════════════════════
+
+Implements promises: [PRM-001, PRM-002, ...]
+Dependencies: [list or "None"]
+
+Starting with backend...
+```
+
+### Step 1: Backend Implementation
+
+**Action:**
+1. Invoke **backend-engineer** agent with feature plan
+2. Wait for completion
+3. **MANDATORY:** Run code-reviewer on new/modified files
+   - If issues: Show summary, ask to fix
+   - If clean: Continue silently
+4. **MANDATORY:** Run backend tests (if they exist)
+   - `npm test` / `pytest` / `go test` / etc.
+   - If fail: STOP, invoke debugger, fix, retry
+   - If pass: Continue
+5. Update state: `l2.features.[name].backend = complete`
+6. Announce:
+   ```
+   ✓ Backend Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Files created: [count]
+   Tests: [pass count]
+   Code review: Clean
+
+   Continuing to frontend...
+   ```
+7. Auto-continue to Step 2
+
+### Step 2: Frontend Implementation
+
+**Action:**
+1. Invoke **frontend-engineer** agent with feature plan + UX design
+2. Wait for completion
+3. **MANDATORY:** Run code-reviewer on new/modified files
+   - If issues: Show summary, ask to fix
+   - If clean: Continue silently
+4. **MANDATORY:** Run frontend tests (if they exist)
+   - If fail: STOP, invoke debugger, fix, retry
+   - If pass: Continue
+5. **OPTIONAL:** UI debugging check
+   - Check if puppeteer MCP available
+   - If NOT available:
+     ```
+     ⚠ Puppeteer MCP not detected
+
+     Enable for automated UI debugging?
+     [Yes - I'll configure it / No - skip for now / Later]
+
+     If Yes:
+       → Add to ~/.claude/config.json
+       → Restart Claude Code required
+       → Skip UI debugging this session
+     ```
+   - If available:
+     → Invoke **ui-debugger** for quick verification:
+       - Screenshot main views
+       - Check console for errors
+       - Verify no layout breaks
+     → If issues: Fix before continuing
+6. Update state: `l2.features.[name].frontend = complete`
+7. Announce:
+   ```
+   ✓ Frontend Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Components created: [count]
+   Tests: [pass count]
+   UI verified: [Yes / Skipped]
+   Code review: Clean
+
+   Continuing to testing...
+   ```
+8. Auto-continue to Step 3
+
+### Step 3: Testing
+
+**Action:**
+1. Invoke **test-engineer** agent with feature plan
+2. Wait for completion (writes comprehensive tests)
+3. **MANDATORY:** Run FULL test suite
+   - All tests must pass
+   - If ANY fail: STOP
+     ```
+     ⚠ Tests Failing
+     ━━━━━━━━━━━━━━━━━━━━━━━
+
+     [Show failing tests]
+
+     [Fix automatically / Show details / Skip (not recommended)]
+     ```
+   - Invoke debugger to fix failures
+   - Re-run tests until all pass
+4. Update state: `l2.features.[name].tests = complete`
+5. Announce:
+   ```
+   ✓ Testing Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Tests written: [count]
+   All tests passing: [count]
+   Coverage: [% if available]
+
+   Continuing to verification...
+   ```
+6. Auto-continue to Step 4
+
+### Step 4: Feature Verification
+
+**Action:**
+1. **CRITICAL:** Promise Validation
+   - Invoke **acceptance-validator** for promises this feature implements
+   - Validates promises are ACTUALLY KEPT (not just code working)
+   - If PARTIAL or FAILED:
+     ```
+     ⚠ Promise Validation Failed
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+     [Show which promises failed and why]
+
+     Creating remediation tasks...
+     ```
+     → DO NOT mark feature complete
+     → Fix issues and re-validate
+   - If VALIDATED:
+     → Continue to step 2
+
+2. CI Verification (if configured)
+   - IF `scripts/verify.sh` exists: Run it
+   - IF `package.json` has lint/typecheck scripts: Run them
+   - IF `.github/workflows/` exists: Simulate checks
+   - All must pass
+
+3. Documentation Update
+   - Invoke **project-ops** sync
+   - Update intent doc: Mark promises VALIDATED
+   - Update CLAUDE.md state
+
+4. State Update
+   - Mark feature complete: `l2.features.[name].status = complete`
+   - Update promise status: `pending → validated`
+   - Update `session.last_action` and `session.next_action`
+
+5. Announce:
+   ```
+   ✓ Feature [Name] Complete
+   ═════════════════════════════════════════════════════════════════════════════
+
+   Tests: X passing
+   Promises validated: Y of Z total
+   Coverage: N% (if available)
+
+   Progress: X of Y features complete (Z%)
+
+   Ready for next feature: [Name]
+
+   Or commit now? /project commit
+   ```
+
+6. Auto-continue to next feature (or project complete if last feature)
+
+---
+
+## Issue Response Protocols
+
+### UI Issues
+
+**Trigger:** User says: "page doesn't work", "button not clickable", "UI looks wrong", "display broken", "layout issue"
+
+**Action:**
+1. Acknowledge: "Investigating UI issue: [description]"
+2. Check if puppeteer MCP available
+   - If NOT: Offer to enable (see Frontend step above)
+   - If YES: Continue
+3. Invoke **ui-debugger**:
+   - Navigate to problem area
+   - Take screenshot
+   - Capture console errors
+   - Check network requests
+   - Inspect DOM
+   - Diagnose root cause
+4. Apply fix
+5. Verify fix:
+   - Take new screenshot
+   - Check console clean
+6. **MANDATORY:** Run code-reviewer on changed files
+7. **MANDATORY:** Run relevant tests
+8. Update state
+9. Announce:
+   ```
+   ✓ Fixed: [brief description]
+
+   Root cause: [explanation]
+   Files changed: [list]
+
+   Before: [screenshot if taken]
+   After: [screenshot if taken]
+
+   Verified: Tests pass, UI working
+   ```
+
+### Backend/General Issues
+
+**Trigger:** User says: "error", "crash", "exception", "doesn't work", "broken", "bug", "failed"
+
+**Action:**
+1. Acknowledge: "Investigating: [description]"
+2. Invoke **debugger**:
+   - Understand the error
+   - Reproduce the issue
+   - Add logging if needed
+   - Trace to root cause
+3. Apply fix
+4. Add test to prevent regression
+5. Verify fix:
+   - Run relevant tests
+   - Verify error gone
+6. **MANDATORY:** Run code-reviewer on changed files
+7. Update state
+8. Announce:
+   ```
+   ✓ Fixed: [brief description]
+
+   Root cause: [explanation]
+   Files changed: [list]
+
+   Added regression test: [test name]
+
+   Verified: All tests pass
+   ```
+
+### Test Failures
+
+**Trigger:** User says: "test failing", "tests broken", "spec failed"
+
+**Action:**
+1. Acknowledge: "Investigating test failures"
+2. Run failing tests to see output
+3. Analyze failure output
+4. Determine: Is test wrong OR is code wrong?
+5. Invoke **debugger** + **test-engineer** to fix appropriate side
+6. Re-run tests
+7. Verify all pass
+8. **MANDATORY:** Run code-reviewer on changes
+9. Announce:
+   ```
+   ✓ Tests Fixed
+
+   Issue: [test wrong / code wrong]
+   Root cause: [explanation]
+
+   All tests now passing: [count]
+   ```
+
+---
+
+## Change Request Handling
+
+### Detection
+
+**Trigger Keywords:**
+- "add [feature]"
+- "also need [feature]"
+- "change [thing] to [new thing]"
+- "modify [thing]"
+- "update [thing] to include [new aspect]"
+- "can we also have [feature]?"
+- "what if we [change]"
+
+### Flow
+
+**Action:**
+1. Acknowledge: "Analyzing impact of: [request]"
+2. Invoke **change-analyzer**:
+   - Analyzes impact on existing:
+     • Intent (new promises needed?)
+     • UX (new journeys needed?)
+     • Architecture (new modules needed?)
+     • Plans (new tasks needed?)
+   - Estimates effort and complexity
+   - Identifies dependencies and risks
+3. Present analysis:
+   ```
+   Change Impact Analysis
+   ═════════════════════════════════════════════════════════════════════════════
+
+   Request: [user's request]
+
+   Impact:
+   • [count] new user journeys
+   • [count] API endpoints
+   • [count] database changes
+   • [count] frontend components
+   • Estimated: [time/effort]
+
+   Dependencies:
+   • [list with status: complete ✓ / pending / new]
+
+   Risks:
+   • [list or "None identified"]
+
+   Update plans and continue? [Yes / No / Customize]
+   ```
+4. On user confirmation:
+   - Update `docs/intent/product-intent.md` (add promises if needed)
+   - Update `docs/ux/user-journeys.md` (add journeys if needed)
+   - Update `docs/architecture/README.md` (add modules if needed)
+   - Update/create `docs/plans/features/[feature].md`
+   - Update `docs/plans/implementation-order.md`
+5. Announce: "Plans updated. Continuing with [feature name]..."
+6. Continue to L2 building for new feature
+
+---
+
+## Quality Gates (Automatic Enforcement)
+
+These run AUTOMATICALLY. Do not skip.
+
+### After ANY Code Change
+
+```
+TRIGGER: Any file in src/, lib/, app/, etc. created or modified
+
+ACTION:
+  1. Identify changed files
+  2. Invoke code-reviewer:
+     "Review these files: [list]
+      Check: quality, security, intent compliance
+      Report: issues or 'clean'"
+  3. If issues found:
+     - Show summary to user
+     - Ask: "Fix these issues? [Yes / Skip / Show details]"
+     - If yes: fix and re-review
+  4. If clean:
+     - Note in state: quality.last_review = now, result = pass
+     - Continue silently
+```
+
+### After Backend Step
+
+```
+TRIGGER: backend-engineer completes
+
+ACTION:
+  1. code-reviewer on new backend files (MANDATORY)
+  2. Run backend tests (MANDATORY):
+     - npm test (if jest/vitest)
+     - pytest (if python)
+     - go test (if go)
+     - cargo test (if rust)
+  3. Quick API check (if applicable):
+     - curl health endpoint
+     - Verify response
+  4. If all pass: continue to frontend
+  5. If fail: invoke debugger, fix, retry
+```
+
+### After Frontend Step
+
+```
+TRIGGER: frontend-engineer completes
+
+ACTION:
+  1. code-reviewer on new frontend files (MANDATORY)
+  2. Run frontend tests (MANDATORY)
+  3. UI debugging (OPTIONAL, if puppeteer available):
+     - Screenshot main views
+     - Check console for errors
+     - Verify no layout breaks
+  4. If issues: fix before continuing
+  5. If clean: continue to testing
+```
+
+### After Testing Step
+
+```
+TRIGGER: test-engineer completes
+
+ACTION:
+  1. Run FULL test suite (MANDATORY)
+  2. Check results:
+     - All pass? → Continue
+     - Any fail? → STOP
+  3. If failures:
+     - Show failing tests
+     - Ask: "Fix failing tests? [Yes / Skip (not recommended)]"
+     - Invoke debugger to fix
+     - Re-run tests
+     - Repeat until all pass
+```
+
+### After Feature Complete
+
+```
+TRIGGER: All steps (backend, frontend, tests) pass
+
+ACTION:
+  1. Promise Validation (CRITICAL):
+     - Invoke acceptance-validator for promises this feature implements
+     - Validates promises are ACTUALLY KEPT (not just code working)
+     - If PARTIAL or FAILED:
+       → Create remediation tasks
+       → DO NOT mark feature complete
+       → Fix issues and re-validate
+     - If VALIDATED:
+       → Continue to step 2
+
+  2. CI Verification:
+     - IF scripts/verify.sh exists: run it
+     - IF package.json has lint/typecheck: run them
+     - IF .github/workflows/ exists: simulate checks
+     - All must pass
+
+  3. Documentation:
+     - Invoke project-ops sync
+     - Update intent doc (mark promises VALIDATED)
+     - Update CLAUDE.md state
+
+  4. State:
+     - Mark feature complete
+     - Update promise status (pending → validated)
+     - Update CLAUDE.md
+
+  5. Announce:
+     "✓ Feature [name] complete
+
+      Tests: X passing
+      Promises validated: Y of Z
+      Coverage: N% (if available)
+
+      Ready for next feature: [name]
+
+      Or commit now? /project commit"
+```
+
+---
+
+## Design Principles (Auto-Applied)
+
+When building UI, automatically apply these principles:
+
+| Principle | Rule | Implementation |
+|-----------|------|----------------|
+| **Fitts's Law** | Targets easier when large and close | Interactive elements ≥44px touch target |
+| **Hick's Law** | More choices = slower decisions | Limit options to 5-7 per screen |
+| **Miller's Law** | Working memory: 7±2 items | Chunk information into groups |
+| **Jakob's Law** | Users expect familiar patterns | Follow platform conventions |
+| **Aesthetic-Usability** | Beautiful = perceived as easier | Clean, consistent visual design |
+| **Progressive Disclosure** | Show only what's needed now | Hide advanced features initially |
+| **Recognition > Recall** | Show options, don't make users remember | Use dropdowns, not text inputs |
+
+When frontend-engineer builds UI:
+- Apply these automatically
+- No need to ask user
+- Document in code comments if non-obvious
 
 ---
 
 ## Workflow State
+
 ```yaml
 workflow:
   version: 1.0
@@ -279,6 +692,14 @@ l2:
   current_step: null           # backend, frontend, testing, verification
   features: {}
   # Features will be populated after L1 planning completes
+  # Format:
+  # feature_name:
+  #   status: pending|in_progress|complete
+  #   backend: pending|in_progress|complete
+  #   frontend: pending|in_progress|complete
+  #   tests: pending|in_progress|complete
+  #   verification: pending|in_progress|complete
+  #   promises: [PRM-001, PRM-002]
 
 quality:
   last_review: null
@@ -294,6 +715,7 @@ promises:
   #   statement: "Auto-save every 30 seconds"
   #   criticality: CORE|IMPORTANT|NICE_TO_HAVE
   #   implementing_module: "auto_save_service"
+  #   implementing_features: ["feature_name"]
   #   status: pending|in_progress|validated|partial|failed
   #   validated_at: null
   #   acceptance_results: {}
@@ -322,17 +744,50 @@ session:
 
 ---
 
-## Workflow Commands
+## Commands Reference
 
 | Command | Description |
 |---------|-------------|
-| `/help` | Show all commands |
-| `/status` | Show project progress |
-| `/next` | Continue to next step |
-| `/review [path]` | Code review specific files |
-| `/verify` | Run verification checks |
-| `/debug [issue]` | Start debug session |
-| `/project commit` | Conventional commit |
-| `/project release` | Release workflow |
-| `/workflow status` | Show workflow state |
+| `/help` | Show all available commands |
+| `/status` | Show detailed project progress |
+| `/next` | Continue to next workflow step |
+| `/review [path]` | Run code-reviewer on specific files |
+| `/verify` | Run verification checks (tests, lint, etc.) |
+| `/debug [issue]` | Start debug session for reported issue |
+| `/project commit` | Create conventional commit |
+| `/project push` | Push to remote repository |
+| `/project pr` | Create pull request (requires GitHub MCP) |
+| `/project release` | Start release workflow |
+| `/workflow status` | Show workflow state in detail |
 | `/workflow pause` | Pause auto-orchestration |
+| `/workflow resume` | Resume auto-orchestration |
+
+---
+
+## Project Context
+
+### Key Decisions
+
+- [Document important architectural/technical decisions here]
+- [Add new entries as major decisions are made]
+
+### Notes
+
+- [Add project notes, context, constraints]
+- [Team agreements, conventions]
+- [Known limitations or future considerations]
+
+---
+
+## Agent Implementation Details
+
+**Note:** Detailed prompts for each agent are available in `{{WORKFLOW_HOME}}/agents/*.md`
+
+These files are **reference documentation** - not required for operation, but useful if you need to:
+- Understand agent capabilities in detail
+- Customize agent behavior
+- Debug agent invocations
+- Contribute to workflow system
+
+The Quick Reference table above contains everything needed for orchestration.
+

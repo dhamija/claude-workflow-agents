@@ -103,6 +103,109 @@
 
 ---
 
+## 📋 Template Architecture (v1.0 - Self-Contained)
+
+**CRITICAL DESIGN CHANGE:** As of v1.0, orchestration logic is self-contained in user project CLAUDE.md files.
+
+### How Orchestration Works
+
+#### Old Architecture (v0.9 - Broken) ❌
+
+```
+User Project CLAUDE.md
+   ↓
+   HTML comment: "READ workflow-orchestrator.md"
+   ↓
+   Hope Claude reads it
+   ↓
+   No enforcement → Can be ignored
+```
+
+**Problem:** Claude Code doesn't auto-read external files. HTML comments aren't enforced.
+
+#### New Architecture (v1.0 - Self-Contained) ✓
+
+```
+Template: templates/project/CLAUDE.md.greenfield.template
+   ↓
+   Contains ALL orchestration logic embedded (750+ lines)
+   ↓
+   workflow-init generates → User Project CLAUDE.md
+   ↓
+   Self-contained, guaranteed to work
+```
+
+**Solution:** Orchestration logic embedded directly in templates. External agent files become optional reference documentation.
+
+### Template Files
+
+**Greenfield Template:** `templates/project/CLAUDE.md.greenfield.template` (793 lines)
+- Complete L1 orchestration flow (Intent → UX → Architecture → Planning)
+- Complete L2 orchestration flow (Backend → Frontend → Testing → Verification)
+- Change request handling (change-analyzer integration)
+- Issue response protocols (debugger, ui-debugger flows)
+- Quality gates (automatic enforcement)
+- Design principles (auto-applied)
+- Workflow state tracking (YAML)
+- Commands reference
+
+**Brownfield Template:** `templates/project/CLAUDE.md.brownfield.template` (795 lines)
+- Brownfield analysis flow (brownfield-analyzer)
+- Gap analysis flow (gap-analyzer)
+- Complete L2 orchestration (same as greenfield)
+- Change request handling (same as greenfield)
+- Issue response protocols (same as greenfield)
+- Quality gates (same as greenfield)
+- Design principles (same as greenfield)
+- Workflow state tracking (YAML with analysis phase)
+
+### Role of agents/*.md Files (Changed in v1.0)
+
+**Previous (v0.9):** Required for operation. Claude expected to read these files.
+
+**Current (v1.0):** Optional reference documentation for:
+- Contributors understanding system architecture
+- Users customizing behavior (reading detailed prompts)
+- Debugging agent invocations
+- System maintenance
+
+**Exception:** `agents/workflow-orchestrator.md` is now **contributor documentation only**. It documents the orchestration system architecture for maintainers. It is NOT read by Claude during operation.
+
+### How workflow-init Works
+
+1. User runs `workflow-init` in project directory
+2. Script detects greenfield (empty/new) or brownfield (existing code)
+3. Script selects appropriate template:
+   - `CLAUDE.md.greenfield.template` for new projects
+   - `CLAUDE.md.brownfield.template` for existing codebases
+4. Script replaces template variables:
+   - `{{PROJECT_NAME}}` - from directory name or user input
+   - `{{PROJECT_DESCRIPTION}}` - from user input
+   - `{{DATE}}` - current date
+   - `{{WORKFLOW_HOME}}` - `~/.claude-workflow-agents`
+5. Script generates `CLAUDE.md` in project root
+6. User project now has complete self-contained orchestration
+
+### Template Maintenance
+
+**When to update templates:**
+- Adding/removing agents
+- Changing orchestration flows
+- Modifying quality gates
+- Adding new workflow features
+
+**After updating templates:**
+1. Update `agents/workflow-orchestrator.md` (contributor docs)
+2. Update this file (CLAUDE.md) if architecture changed
+3. Run `./scripts/verify-docs.sh`
+4. Test with `workflow-init` in test directory
+5. Verify Claude follows new flow correctly
+6. Commit all changes together
+
+**Important:** Changes to templates do NOT automatically propagate to existing user projects. Users must run `workflow-update` to merge changes (when that feature is implemented).
+
+---
+
 ## Multi-Agent Workflow System
 
 Multi-agent workflow system for Claude Code
@@ -132,10 +235,12 @@ When you add, modify, or remove ANY agent or command file:
    - Update command count (line ~125)
    - Add new entries to agent/command tables
 
-4. ✅ **Update agents/workflow-orchestrator.md** (CRITICAL!)
-   - Add agent to "Agents Coordinated" section (appropriate category)
-   - Add row to "When to Invoke Each Agent" table
+4. ✅ **Update templates/project/*.template** (CRITICAL!)
+   - Add agent to "Agents Available" table in both greenfield and brownfield templates
+   - Add trigger keywords to "Issue Detection Keywords" table if applicable
    - Add orchestration flow if it's a primary workflow agent (e.g., gap-analyzer, change-analyzer)
+   - Update quality gates if agent requires automatic invocation
+   - Update agents/workflow-orchestrator.md (contributor docs) to reflect changes
 
 5. ✅ **Update tests**
    - `tests/structural/test_agents_exist.sh` - add to REQUIRED_AGENTS array

@@ -1,256 +1,704 @@
-<!--
-═══════════════════════════════════════════════════════════════════════════════
-WORKFLOW BOOTSTRAP - CLAUDE MUST READ THIS FIRST
-═══════════════════════════════════════════════════════════════════════════════
-
-Project Type: BROWNFIELD (existing codebase)
-Initialized: {{DATE}}
-
-INSTRUCTIONS FOR CLAUDE:
-
-1. READ the orchestrator: {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
-
-2. THIS IS EXISTING CODE - Run brownfield-analyzer FIRST
-
-3. FOLLOW agent utilization rules below (quality gates, debugging)
-
-4. UPDATE state after each significant action
-
-═══════════════════════════════════════════════════════════════════════════════
--->
-
 # {{PROJECT_NAME}}
-
-## 🔄 WORKFLOW ACTIVE (Brownfield)
-
-This is an **existing codebase**. Workflow will analyze first.
-
-**Claude: Run brownfield-analyzer FIRST, then follow Agent Utilization Guide.**
-
----
-
-## Brownfield First-Run Protocol
-
-```
-SESSION START (if analysis.status == pending)
-       │
-       ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ brownfield-analyzer                                                         │
-│                                                                             │
-│  1. Scan project structure                                                  │
-│  2. Detect tech stack                                                       │
-│  3. Identify features and completeness                                      │
-│  4. Check existing tests                                                    │
-│  5. Check existing documentation                                            │
-│  6. Present findings to user                                                │
-│                                                                             │
-│  User confirms? ─────┬───────────────────────────────────────┐              │
-│                      │                                       │              │
-│                     YES                                     NO              │
-│                      │                                       │              │
-│                      ▼                                       ▼              │
-│            Update CLAUDE.md state                    User corrects          │
-│            Create [INFERRED] docs                    Re-analyze             │
-│            Continue to L2                                                   │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Agent Utilization Guide
-
-**Claude: These rules are MANDATORY. Follow them automatically.**
-
-### Quality Gates (Same as Greenfield)
-
-```
-AFTER ANY CODE CHANGE:
-│
-├─► code-reviewer
-│   • Review new/modified files
-│   • Check: quality, security, intent compliance
-│
-├─► Run tests (if exist)
-│   • Must pass before continuing
-│
-└─► Update CLAUDE.md state
-```
-
-### L2 Building Flow (Per Feature)
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ FEATURE: [name]                                                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  backend-engineer ──► code-reviewer ──► tests ──► PASS? ──► Continue       │
-│                                                     │                       │
-│                                               FAIL? ▼                       │
-│                                               debugger (fix)                │
-│                                                     │                       │
-│  frontend-engineer ──► code-reviewer ──► tests ──► ui-debugger ──► PASS?   │
-│                                                                     │       │
-│                                                               FAIL? ▼       │
-│                                                         debugger/ui-debugger│
-│                                                                     │       │
-│  test-engineer ──► Run ALL tests ──► PASS? ──► FEATURE COMPLETE            │
-│                                        │                                    │
-│                                  FAIL? ▼                                    │
-│                                  Fix and retry                              │
-│                                                                             │
-├─────────────────────────────────────────────────────────────────────────────┤
-│ FEATURE COMPLETE:                                                           │
-│   • project-ops sync                                                        │
-│   • Update [INFERRED] docs → mark as verified                               │
-│   • CI verification                                                         │
-│   • Continue to next feature                                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### Issue Response Protocol
-
-```
-USER REPORTS ISSUE
-       │
-       ├─── UI issue ──────► ui-debugger
-       │                        │
-       │                        ▼
-       │                     Screenshot, console, diagnose, fix
-       │
-       ├─── Runtime issue ──► debugger
-       │                        │
-       │                        ▼
-       │                     Trace, diagnose, fix, add test
-       │
-       ├─── Test failure ───► debugger + test-engineer
-       │                        │
-       │                        ▼
-       │                     Analyze, fix code or test, verify
-       │
-       └─── After ANY fix:
-                │
-                ▼
-            code-reviewer ──► tests ──► update state
-```
-
-### CI/CD Verification
-
-```
-BEFORE FEATURE COMPLETE:
-
-  Run local CI simulation:
-  • Lint check
-  • Type check
-  • All tests
-  • Build
-
-  ALL MUST PASS
-
-AFTER FEATURE COMPLETE:
-
-  Suggest: /project commit, /project push, /project pr
-```
-
-### Agent Quick Reference
-
-| Agent | Auto/Manual | Trigger |
-|-------|-------------|---------|
-| brownfield-analyzer | AUTO | First run on brownfield |
-| code-reviewer | AUTO | After ANY code changes |
-| ui-debugger | AUTO | After frontend (if puppeteer) |
-| debugger | MANUAL | User reports issue |
-| test-engineer | AUTO | L2 testing phase |
-| project-ops | AUTO | After milestones |
-
----
-
-## Project Context
 
 > {{PROJECT_DESCRIPTION}}
 
-### Key Decisions
+## 🔄 Workflow Active (Brownfield)
 
-- [Document important decisions here]
+This is an **existing codebase**. Workflow will analyze first, then help improve/extend.
 
-### Notes
-
-- [Add project notes, context, constraints]
+**Claude: You are the orchestrator.** Follow the protocols below automatically. The user should never have to manually invoke agents.
 
 ---
 
-## Session Resume
+## Quick Reference
 
-**First session (analysis not done):**
-1. Run brownfield-analyzer
-2. Present findings to user
-3. On confirmation, update state below
-4. Create [INFERRED] documentation
-5. Continue from inferred state
+### Agents Available
 
-**Subsequent sessions:**
-1. Read the Workflow State below
-2. Announce: "Resuming [project] - [current state]. Continue?"
-3. Continue from saved position
+| Agent | Auto/Manual | Triggered By |
+|-------|-------------|--------------|
+| **brownfield-analyzer** | AUTO | First session (analysis phase) |
+| **gap-analyzer** | MANUAL | User requests /gap or /audit |
+| **change-analyzer** | AUTO | User says "add", "change", "also need" |
+| **backend-engineer** | AUTO | L2 feature implementation |
+| **frontend-engineer** | AUTO | L2 feature implementation |
+| **test-engineer** | AUTO | L2 testing step |
+| **code-reviewer** | AUTO | After ANY code changes |
+| **debugger** | AUTO | User reports issue (keywords: "broken", "error", "bug") |
+| **ui-debugger** | AUTO | UI issues + puppeteer available |
+| **acceptance-validator** | AUTO | After feature complete (validates promises) |
+| **project-ops** | AUTO | After features/milestones |
 
-**Current Status:**
-- Analysis: Not done
-- Next: Run brownfield-analyzer to scan codebase
+### Issue Detection Keywords
+
+| Keywords | Agent Invoked |
+|----------|---------------|
+| "doesn't work", "broken", "bug", "error", "crash", "exception" | **debugger** |
+| "page", "screen", "button", "UI", "display", "layout", "click" + issue | **ui-debugger** |
+| "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
+| "add [feature]", "also need", "change [thing]" | **change-analyzer** |
+| "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
+
+---
+
+## Session Start Protocol
+
+**Do this FIRST in every session:**
+
+### Step 1: Read State
+
+Read the "Workflow State" section below to determine:
+- Analysis status (pending, in_progress, complete)
+- Current phase (analysis, L1, L2)
+- Current status
+- Next action
+
+### Step 2: Determine Flow
+
+```
+IF analysis.status == "pending":
+  → Run brownfield-analyzer FIRST
+  → See "Brownfield Analysis Flow" below
+
+ELSE IF status == "not_started":
+  → Analysis done, but work not started
+  → Ask user what they want to do
+
+ELSE IF status == "in_progress":
+  → Resume from session.next_action
+
+ELSE IF status == "paused":
+  → Ask user if ready to continue
+
+ELSE IF status == "complete":
+  → Ask user what to improve/add
+```
+
+### Step 3: Announce
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+WORKFLOW SESSION
+═══════════════════════════════════════════════════════════════════════════════
+
+Project: {{PROJECT_NAME}}
+Type: Brownfield (existing codebase)
+Phase: [Analysis/L1/L2]
+Status: [current status]
+
+Last session: [last_action from state]
+Next: [next_action from state]
+
+[Continue / Show status / Different task]
+```
+
+---
+
+## Brownfield Analysis Flow
+
+**Runs automatically on first session when analysis.status == "pending"**
+
+### Step 1: Initial Analysis
+
+**Action:**
+1. Announce: "Analyzing existing codebase..."
+2. Invoke **brownfield-analyzer**:
+   - Scans project structure
+   - Detects tech stack (frontend, backend, database, etc.)
+   - Identifies existing features and completeness
+   - Checks existing tests (presence, coverage estimate)
+   - Checks existing documentation (README, API docs, etc.)
+   - Infers user promises from existing functionality
+3. Wait for completion
+
+### Step 2: Present Findings
+
+**Action:**
+Show analysis results to user:
+```
+═══════════════════════════════════════════════════════════════════════════════
+BROWNFIELD ANALYSIS COMPLETE
+═══════════════════════════════════════════════════════════════════════════════
+
+Tech Stack Detected:
+• Frontend: [React/Vue/etc. or None]
+• Backend: [Express/FastAPI/etc. or None]
+• Database: [PostgreSQL/MongoDB/etc. or None]
+• Testing: [Jest/pytest/etc. or None]
+
+Features Detected:
+• [Feature 1]: [Complete / Partial / Broken]
+• [Feature 2]: [Complete / Partial / Broken]
+• ...
+
+Inferred Promises:
+• PRM-001: [promise statement] (CORE)
+• PRM-002: [promise statement] (IMPORTANT)
+• ...
+
+Documentation:
+• README: [Yes / No]
+• API Documentation: [Yes / No]
+• Architecture docs: [Yes / No]
+
+Test Coverage: [estimated %]
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Does this look accurate? [Yes / Corrections needed]
+```
+
+### Step 3: Handle User Feedback
+
+**Action:**
+- If user confirms: Continue to Step 4
+- If user has corrections:
+  - Ask: "What needs correcting?"
+  - Update analysis based on user feedback
+  - Re-show findings
+  - Confirm again
+
+### Step 4: Create Inferred Documentation
+
+**Action:**
+1. Announce: "Creating [INFERRED] documentation from existing code..."
+2. Create documentation files:
+   - `docs/intent/product-intent.md` (mark as [INFERRED])
+     - Populate with inferred promises
+     - Mark all as needing user review
+   - `docs/architecture/system-design.md` (mark as [INFERRED])
+     - Document current architecture
+     - Note detected patterns
+   - `docs/plans/current-state.md`
+     - List existing features with status
+     - Note incomplete/broken features
+3. Update CLAUDE.md state:
+   - `analysis.status = complete`
+   - `l1.intent.status = complete, source = inferred`
+   - `l1.architecture.status = complete, source = inferred`
+   - Populate `l2.features` with detected features
+
+### Step 5: Determine Next Steps
+
+**Action:**
+Ask user what they want to do:
+```
+Analysis complete. What would you like to do?
+
+[1] Add new feature - Describe the feature to add
+[2] Improve existing code - Run gap analysis (/gap)
+[3] Fix bugs - Describe the issue
+[4] Review documentation - Show/update inferred docs
+[5] Something else - Tell me what you need
+```
+
+---
+
+## Gap Analysis Flow
+
+**Triggered by:** User says "/gap", "/audit", "improve this codebase", "what's wrong", "fix technical debt", "find issues"
+
+### Step 1: Run Analysis
+
+**Action:**
+1. Acknowledge: "Running gap analysis on codebase..."
+2. Invoke **gap-analyzer**:
+   - Compares current code vs. ideal (from inferred/explicit docs)
+   - Categorizes gaps:
+     • Critical (security, data loss, broken core features)
+     • High (broken features, poor UX, missing promises)
+     • Medium (tech debt, missing tests, performance)
+     • Low (polish, optimizations, nice-to-haves)
+   - Creates prioritized migration plan
+
+### Step 2: Present Findings
+
+**Action:**
+```
+═══════════════════════════════════════════════════════════════════════════════
+GAP ANALYSIS COMPLETE
+═══════════════════════════════════════════════════════════════════════════════
+
+Found X gaps across Y categories:
+
+🔴 Critical (N):
+   - GAP-001: [description]
+   - GAP-002: [description]
+   ...
+
+🟠 High (N):
+   - GAP-00X: [description]
+   ...
+
+🟡 Medium (N):
+   - GAP-00X: [description]
+   ...
+
+⚪ Low (N):
+   - GAP-00X: [description]
+   ...
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Migration Plan:
+• Phase 0: Critical gaps (must fix) - N items
+• Phase 1: High gaps (should fix) - N items
+• Phase 2: Medium gaps (nice to fix) - N items
+• Phase 3: Low gaps (optional) - N items
+
+Start with Phase 0 (critical)? [Yes / Show details / Custom]
+```
+
+### Step 3: Begin Fixing (if confirmed)
+
+**Action:**
+1. Create `docs/gaps/gap-analysis.md` with full findings
+2. Create `docs/gaps/migration-plan.md` with phased approach
+3. Start with Phase 0 (critical gaps):
+   - For each gap:
+     • Announce: "Fixing GAP-00X: [description]"
+     • Invoke appropriate agent (backend-engineer, frontend-engineer, etc.)
+     • Apply fix
+     • **MANDATORY:** Run code-reviewer
+     • **MANDATORY:** Add regression test
+     • **MANDATORY:** Run tests
+     • Mark gap complete
+   - Continue through all Phase 0 gaps
+4. After Phase 0 complete:
+   ```
+   ✓ Phase 0 Complete - All Critical Gaps Fixed
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Fixed:
+   • GAP-001: [brief description]
+   • GAP-002: [brief description]
+   ...
+
+   All tests passing: [count]
+
+   Continue to Phase 1 (high priority)? [Yes / Stop / Skip to Phase N]
+   ```
+5. Continue through phases until user says stop or all complete
+
+---
+
+## Adding New Features (Change Request Flow)
+
+### Detection
+
+**Trigger Keywords:**
+- "add [feature]"
+- "also need [feature]"
+- "change [thing] to [new thing]"
+- "modify [thing]"
+- "update [thing] to include [new aspect]"
+- "can we also have [feature]?"
+- "what if we [change]"
+
+### Flow
+
+**Action:**
+1. Acknowledge: "Analyzing impact of: [request]"
+2. Invoke **change-analyzer**:
+   - Analyzes impact on existing code:
+     • Intent (new promises needed?)
+     • Architecture (new modules? changes to existing?)
+     • Plans (new tasks? dependencies?)
+   - Estimates effort and complexity
+   - Identifies dependencies and risks
+3. Present analysis:
+   ```
+   Change Impact Analysis
+   ═════════════════════════════════════════════════════════════════════════════
+
+   Request: [user's request]
+
+   Impact:
+   • [count] modules modified
+   • [count] new files
+   • [count] API endpoints added/changed
+   • [count] database changes
+   • [count] frontend components affected
+   • Estimated: [time/effort]
+
+   Dependencies:
+   • [list with status: exists ✓ / needs adding]
+
+   Risks:
+   • [list or "None identified"]
+
+   Files affected:
+   • [list of files that will change]
+
+   Update docs and implement? [Yes / No / Customize]
+   ```
+4. On user confirmation:
+   - Update `docs/intent/product-intent.md` (add promises if needed, mark as [USER ADDED])
+   - Update `docs/architecture/system-design.md` (document new modules/changes)
+   - Create `docs/plans/features/[feature].md`
+   - Update `docs/plans/implementation-order.md` (insert at appropriate position)
+5. Announce: "Plans updated. Implementing [feature name]..."
+6. Continue to L2 building for new feature (see below)
+
+---
+
+## L2 Feature Implementation Flow
+
+For new features or modifications, run these steps automatically:
+
+### Feature Start
+
+Announce:
+```
+═══════════════════════════════════════════════════════════════════════════════
+FEATURE: [Feature Name] (X of Y)
+═══════════════════════════════════════════════════════════════════════════════
+
+Type: [New / Enhancement / Fix]
+Implements promises: [PRM-001, PRM-002, ...]
+Affects modules: [list]
+
+Starting with backend...
+```
+
+### Step 1: Backend Implementation
+
+**Action:**
+1. Invoke **backend-engineer** agent with feature plan
+2. Wait for completion
+3. **MANDATORY:** Run code-reviewer on new/modified files
+   - If issues: Show summary, ask to fix
+   - If clean: Continue silently
+4. **MANDATORY:** Run backend tests
+   - `npm test` / `pytest` / `go test` / etc.
+   - If fail: STOP, invoke debugger, fix, retry
+   - If pass: Continue
+5. Update state: `l2.features.[name].backend = complete`
+6. Announce:
+   ```
+   ✓ Backend Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Files modified: [count]
+   Tests: [pass count]
+   Code review: Clean
+
+   Continuing to frontend...
+   ```
+7. Auto-continue to Step 2
+
+### Step 2: Frontend Implementation
+
+**Action:**
+1. Invoke **frontend-engineer** agent with feature plan
+2. Wait for completion
+3. **MANDATORY:** Run code-reviewer on new/modified files
+   - If issues: Show summary, ask to fix
+   - If clean: Continue silently
+4. **MANDATORY:** Run frontend tests
+   - If fail: STOP, invoke debugger, fix, retry
+   - If pass: Continue
+5. **OPTIONAL:** UI debugging check
+   - Check if puppeteer MCP available
+   - If NOT available:
+     ```
+     ⚠ Puppeteer MCP not detected
+
+     Enable for automated UI debugging?
+     [Yes - I'll configure it / No - skip for now / Later]
+     ```
+   - If available:
+     → Invoke **ui-debugger** for verification
+6. Update state: `l2.features.[name].frontend = complete`
+7. Announce:
+   ```
+   ✓ Frontend Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Components modified: [count]
+   Tests: [pass count]
+   UI verified: [Yes / Skipped]
+   Code review: Clean
+
+   Continuing to testing...
+   ```
+8. Auto-continue to Step 3
+
+### Step 3: Testing
+
+**Action:**
+1. Invoke **test-engineer** agent
+2. Wait for completion (writes comprehensive tests)
+3. **MANDATORY:** Run FULL test suite
+   - All tests must pass
+   - If ANY fail: STOP, fix, retry
+4. Update state: `l2.features.[name].tests = complete`
+5. Announce:
+   ```
+   ✓ Testing Complete
+   ━━━━━━━━━━━━━━━━━━━━━━━
+
+   Tests written: [count]
+   All tests passing: [count]
+   Coverage: [% if available]
+
+   Continuing to verification...
+   ```
+6. Auto-continue to Step 4
+
+### Step 4: Feature Verification
+
+**Action:**
+1. **CRITICAL:** Promise Validation
+   - Invoke **acceptance-validator** for promises this feature implements
+   - Validates promises are ACTUALLY KEPT
+   - If PARTIAL or FAILED: Create remediation tasks, fix, re-validate
+   - If VALIDATED: Continue to step 2
+
+2. CI Verification (if configured)
+   - Run `scripts/verify.sh` if exists
+   - Run lint/typecheck if configured
+   - All must pass
+
+3. Documentation Update
+   - Invoke **project-ops** sync
+   - Update intent doc: Mark promises VALIDATED
+   - Update CLAUDE.md state
+
+4. State Update
+   - Mark feature complete
+   - Update promise status: `pending → validated`
+
+5. Announce:
+   ```
+   ✓ Feature [Name] Complete
+   ═════════════════════════════════════════════════════════════════════════════
+
+   Tests: X passing
+   Promises validated: Y of Z total
+   Coverage: N%
+
+   Progress: X of Y features complete
+
+   Ready for next feature: [Name]
+
+   Or commit now? /project commit
+   ```
+
+6. Auto-continue to next feature or await user direction
+
+---
+
+## Issue Response Protocols
+
+### UI Issues
+
+**Trigger:** User says: "page doesn't work", "button not clickable", "UI looks wrong", "display broken", "layout issue"
+
+**Action:**
+1. Acknowledge: "Investigating UI issue: [description]"
+2. Check if puppeteer MCP available
+   - If NOT: Offer to enable
+   - If YES: Continue
+3. Invoke **ui-debugger**:
+   - Navigate to problem area
+   - Take screenshot
+   - Capture console errors
+   - Check network requests
+   - Inspect DOM
+   - Diagnose root cause
+4. Apply fix
+5. Verify fix (screenshot, console)
+6. **MANDATORY:** Run code-reviewer on changed files
+7. **MANDATORY:** Run relevant tests
+8. Update state
+9. Announce fix with before/after
+
+### Backend/General Issues
+
+**Trigger:** User says: "error", "crash", "exception", "doesn't work", "broken", "bug", "failed"
+
+**Action:**
+1. Acknowledge: "Investigating: [description]"
+2. Invoke **debugger**:
+   - Understand the error
+   - Reproduce the issue
+   - Add logging if needed
+   - Trace to root cause
+3. Apply fix
+4. Add regression test
+5. Verify fix
+6. **MANDATORY:** Run code-reviewer
+7. Update state
+8. Announce fix with explanation
+
+### Test Failures
+
+**Trigger:** User says: "test failing", "tests broken", "spec failed"
+
+**Action:**
+1. Run failing tests
+2. Analyze output
+3. Determine: test wrong OR code wrong?
+4. Invoke **debugger** + **test-engineer** to fix
+5. Re-run tests until all pass
+6. **MANDATORY:** Run code-reviewer
+7. Announce fix
+
+---
+
+## Quality Gates (Automatic Enforcement)
+
+These run AUTOMATICALLY. Do not skip.
+
+### After ANY Code Change
+
+```
+TRIGGER: Any file modified
+
+ACTION:
+  1. Invoke code-reviewer on changed files
+  2. If issues: Show, ask to fix
+  3. If clean: Note in state, continue silently
+```
+
+### After Backend/Frontend Steps
+
+```
+TRIGGER: Engineer agent completes
+
+ACTION:
+  1. code-reviewer on new/modified files (MANDATORY)
+  2. Run relevant tests (MANDATORY)
+  3. If fail: invoke debugger, fix, retry
+  4. If pass: continue
+```
+
+### After Testing Step
+
+```
+TRIGGER: test-engineer completes
+
+ACTION:
+  1. Run FULL test suite (MANDATORY)
+  2. All must pass
+  3. If failures: STOP, fix, retry
+```
+
+### After Feature Complete
+
+```
+TRIGGER: All steps pass
+
+ACTION:
+  1. Promise Validation (CRITICAL)
+     - acceptance-validator
+     - If PARTIAL/FAILED: fix and re-validate
+     - If VALIDATED: continue
+
+  2. CI Verification
+     - scripts/verify.sh if exists
+     - lint/typecheck if configured
+
+  3. Documentation
+     - project-ops sync
+     - Update intent doc
+     - Update CLAUDE.md state
+
+  4. Announce completion
+```
+
+---
+
+## Design Principles (Auto-Applied)
+
+When modifying UI, automatically apply:
+
+| Principle | Rule | Implementation |
+|-----------|------|----------------|
+| **Fitts's Law** | Targets easier when large and close | Interactive elements ≥44px touch target |
+| **Hick's Law** | More choices = slower decisions | Limit options to 5-7 per screen |
+| **Miller's Law** | Working memory: 7±2 items | Chunk information into groups |
+| **Jakob's Law** | Users expect familiar patterns | Follow platform conventions |
+| **Aesthetic-Usability** | Beautiful = perceived as easier | Clean, consistent visual design |
+| **Progressive Disclosure** | Show only what's needed now | Hide advanced features initially |
+| **Recognition > Recall** | Show options, don't make users remember | Use dropdowns, not text inputs |
 
 ---
 
 ## Workflow State
+
 ```yaml
 workflow:
   version: 1.0
   type: brownfield
   phase: analysis              # analysis, L1, L2
-  status: not_started
-  mode: auto
+  status: not_started          # not_started, in_progress, paused, complete
+  mode: auto                   # auto (recommended) or manual
   initialized: {{DATE}}
 
 analysis:
   status: pending              # pending, in_progress, complete
   completed_at: null
 
-  # Will be populated by brownfield-analyzer:
+  # Populated by brownfield-analyzer:
   detected:
     stack: null                # { frontend: "React", backend: "Express", ... }
     features: {}               # { auth: { status: "complete", ... }, ... }
     documentation: {}          # { readme: true, api_docs: false, ... }
     test_coverage: null        # estimated percentage
 
-  # User can correct the analysis:
+  # User can provide corrections:
   corrections: []
 
 l1:
   # For brownfield, L1 docs are [INFERRED] from existing code
   intent:
-    status: pending
-    source: inferred           # "inferred" or "created"
+    status: pending            # pending, complete
+    source: null               # "inferred" or "created" or "user_provided"
     output: null
     reviewed: false            # User should review inferred docs
   ux:
     status: pending
-    source: inferred
+    source: null
     output: null
     reviewed: false
   architecture:
     status: pending
-    source: inferred
+    source: null
     output: null
     reviewed: false
   planning:
     status: pending
-    source: inferred
+    source: null
     output: null
     reviewed: false
 
 l2:
   current_feature: null
-  current_step: null
+  current_step: null           # backend, frontend, testing, verification
   features: {}
-  # Will be populated from analysis
+  # Populated from analysis or added by change-analyzer
+  # Format:
+  # feature_name:
+  #   type: existing|new|enhancement
+  #   status: pending|in_progress|complete
+  #   backend: pending|in_progress|complete
+  #   frontend: pending|in_progress|complete
+  #   tests: pending|in_progress|complete
+  #   verification: pending|in_progress|complete
+  #   promises: [PRM-001, PRM-002]
+
+gaps:
+  # Populated by gap-analyzer
+  last_analysis: null
+  migration_plan: null         # Path to migration plan doc
+  phases:
+    phase_0_critical: {}
+    phase_1_high: {}
+    phase_2_medium: {}
+    phase_3_low: {}
+  current_phase: null
+  completed_gaps: []
 
 quality:
   last_review: null
@@ -260,13 +708,15 @@ quality:
   open_issues: []
 
 promises:
-  # Populated from intent doc (inferred or created), tracked through completion
+  # Populated from intent doc (inferred or created)
   # Format:
   # PRM-001:
-  #   statement: "Auto-save every 30 seconds"
+  #   statement: "User can log in with email/password"
   #   criticality: CORE|IMPORTANT|NICE_TO_HAVE
-  #   implementing_module: "auto_save_service"
+  #   implementing_module: "auth_system"
+  #   implementing_features: ["auth"]
   #   status: pending|in_progress|validated|partial|failed
+  #   source: inferred|user_added
   #   validated_at: null
   #   acceptance_results: {}
   #   evidence: []
@@ -294,14 +744,52 @@ session:
 
 ---
 
-## Workflow Commands
+## Commands Reference
 
 | Command | Description |
 |---------|-------------|
-| `/help` | Show all commands |
-| `/status` | Show project progress |
+| `/help` | Show all available commands |
+| `/status` | Show detailed project progress |
+| `/gap` or `/audit` | Run gap analysis on codebase |
 | `/workflow analyze` | Re-run brownfield analysis |
-| `/review [path]` | Code review files |
-| `/debug [issue]` | Start debug session |
-| `/project commit` | Conventional commit |
-| `/workflow status` | Show workflow state |
+| `/next` | Continue to next workflow step |
+| `/review [path]` | Run code-reviewer on specific files |
+| `/verify` | Run verification checks (tests, lint, etc.) |
+| `/debug [issue]` | Start debug session for reported issue |
+| `/project commit` | Create conventional commit |
+| `/project push` | Push to remote repository |
+| `/project pr` | Create pull request (requires GitHub MCP) |
+| `/project release` | Start release workflow |
+| `/workflow status` | Show workflow state in detail |
+| `/workflow pause` | Pause auto-orchestration |
+| `/workflow resume` | Resume auto-orchestration |
+
+---
+
+## Project Context
+
+### Key Decisions
+
+- [Document important architectural/technical decisions here]
+- [Add new entries as major decisions are made]
+
+### Notes
+
+- [Add project notes, context, constraints]
+- [Team agreements, conventions]
+- [Known limitations or future considerations]
+
+---
+
+## Agent Implementation Details
+
+**Note:** Detailed prompts for each agent are available in `{{WORKFLOW_HOME}}/agents/*.md`
+
+These files are **reference documentation** - not required for operation, but useful if you need to:
+- Understand agent capabilities in detail
+- Customize agent behavior
+- Debug agent invocations
+- Contribute to workflow system
+
+The Quick Reference table above contains everything needed for orchestration.
+
