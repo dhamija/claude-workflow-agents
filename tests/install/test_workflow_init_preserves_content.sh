@@ -51,7 +51,7 @@ y
 EOF
 
 # Verify workflow added
-grep -q "WORKFLOW BOOTSTRAP" "CLAUDE.md" && pass "Bootstrap added" || fail "Bootstrap missing"
+grep -q "🔄 Workflow Active" "CLAUDE.md" && pass "Workflow marker added" || fail "Workflow marker missing"
 grep -q "type: greenfield" "CLAUDE.md" && pass "Type set" || fail "Type missing"
 
 # Verify content preserved

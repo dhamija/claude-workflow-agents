@@ -41,10 +41,10 @@ EOF
 
 # Verify
 [ -f "CLAUDE.md" ] && pass "CLAUDE.md created" || fail "CLAUDE.md missing"
-grep -q "WORKFLOW BOOTSTRAP" "CLAUDE.md" && pass "Has bootstrap comment" || fail "Missing bootstrap"
+grep -q "🔄 Workflow Active" "CLAUDE.md" && pass "Has workflow marker" || fail "Missing workflow marker"
 grep -q "type: greenfield" "CLAUDE.md" && pass "Detected as greenfield" || fail "Wrong type"
 grep -q "intent-guardian" "CLAUDE.md" && pass "References intent-guardian" || fail "Missing agent reference"
-grep -q "workflow-orchestrator" "CLAUDE.md" && pass "References orchestrator" || fail "Missing orchestrator"
+grep -q "You are the orchestrator" "CLAUDE.md" && pass "Has orchestration instructions" || fail "Missing orchestration"
 grep -q "status: not_started" "CLAUDE.md" && pass "Initial status correct" || fail "Wrong status"
 grep -q "phase: L1" "CLAUDE.md" && pass "Phase set to L1" || fail "Wrong phase"
 
