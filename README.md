@@ -121,8 +121,8 @@ Claude Workflow Agents
 ──────────────────────
 Version:   v1.3.0
 Location:  ~/.claude-workflow-agents
-Agents:    12
-Commands:  23
+Agents:    16
+Commands:  24
 
 Commands:
   workflow-toggle on/off/status  Enable, disable, or check status
@@ -451,21 +451,25 @@ Backend → Frontend → Tests → Verify
 
 See `/help workflow` for details.
 
-### The 12 Agents
+### The 16 Agents
 
 | Agent | Purpose | Used When |
 |-------|---------|-----------|
-| intent-guardian | Define what we're building | New project, changes |
+| intent-guardian | Define promises with criticality | New project, changes |
 | ux-architect | Design user experience & design system | New project, UX changes |
-| agentic-architect | Design system architecture | New project, system changes |
-| implementation-planner | Create build plans | After analysis |
+| agentic-architect | Design system with promise mapping | New project, system changes |
+| implementation-planner | Create plans with validation tasks | After analysis |
 | change-analyzer | Assess change impact | Adding/changing features |
 | gap-analyzer | Find issues in existing code | Brownfield projects |
+| brownfield-analyzer | Scan existing codebases | Brownfield initialization |
 | backend-engineer | Build server-side code | Implementation |
 | frontend-engineer | Build UI (follows design system) | Implementation |
 | test-engineer | Write tests, verify | Implementation |
-| code-reviewer | Review code quality | Before milestones |
+| code-reviewer | Review code quality | After code changes |
 | debugger | Fix bugs | When things break |
+| ui-debugger | Debug UI with browser automation | UI issues |
+| acceptance-validator | Validate promises are kept | After features |
+| workflow-orchestrator | Auto-chain agents & quality gates | Always (automatic) |
 | project-ops | Setup, sync, verify, docs, AI | Project operations |
 
 See `/help agents` for details.

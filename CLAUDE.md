@@ -23,7 +23,7 @@
 
 ```
 ~/.claude-workflow-agents/           # Installation directory
-├── agents/                          # 15 agent definitions
+├── agents/                          # 16 agent definitions
 ├── commands/                        # 24 command definitions
 ├── templates/                       # Templates for user projects
 │   └── project/                     # Project bootstrap templates
@@ -41,7 +41,7 @@
 ├── agents/                          # Individual file symlinks
 │   ├── intent-guardian.md -> ~/.claude-workflow-agents/agents/intent-guardian.md
 │   ├── ux-architect.md -> ~/.claude-workflow-agents/agents/ux-architect.md
-│   └── ... (15 total)
+│   └── ... (16 total)
 └── commands/                        # Individual file symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
@@ -122,17 +122,17 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 | Metric | Count |
 |--------|-------|
-| Agents | 15 |
+| Agents | 16 |
 | Commands | 24 |
 
 ### Agents
 
 | Agent | Category | Purpose |
 |-------|----------|---------|
-| intent-guardian | L1 | Define user promises |
+| intent-guardian | L1 | Define user promises with criticality |
 | ux-architect | L1 | Design experience |
-| agentic-architect | L1 | Design system |
-| implementation-planner | L1 | Create build plan |
+| agentic-architect | L1 | Design system with promise mapping |
+| implementation-planner | L1 | Create build plan with validation tasks |
 | change-analyzer | L1 Support | Assess changes |
 | gap-analyzer | L1 Support | Find issues |
 | brownfield-analyzer | L1 Support | Scan existing codebases |
@@ -142,6 +142,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | code-reviewer | L2 Support | Review code |
 | debugger | L2 Support | Fix bugs |
 | ui-debugger | L2 Support | Debug UI with browser automation |
+| acceptance-validator | L2 Validation | Validate promises are kept |
 | workflow-orchestrator | Orchestration | Auto-chain agents and quality gates |
 | project-ops | Ops | Setup, sync, docs |
 
