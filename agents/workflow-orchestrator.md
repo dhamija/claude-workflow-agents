@@ -362,12 +362,20 @@ TRIGGER: frontend-engineer completes
 ACTION:
   1. code-reviewer on new frontend files
   2. Run frontend tests
-  3. IF puppeteer MCP available:
-     - Invoke ui-debugger quick check:
-       "Quick UI verification:
-        - Screenshot main views
-        - Check console for errors
-        - Verify no layout breaks"
+  3. UI Debugging check:
+     - Check if puppeteer MCP available
+     - IF NOT available:
+       → Offer to enable MCP automatically
+       → "Enable puppeteer MCP for UI debugging? [Yes / No / Later]"
+       → If Yes: Add config to ~/.claude/config.json
+       → Inform user to restart Claude Code
+       → Skip UI debugging for now (resume after restart)
+     - IF available:
+       → Invoke ui-debugger quick check:
+         "Quick UI verification:
+          - Screenshot main views
+          - Check console for errors
+          - Verify no layout breaks"
   4. If issues: fix before continuing
   5. If clean: continue to testing
 ```
@@ -462,14 +470,23 @@ Claude:
      ui-debugger:
        "Investigating UI issue: [description]
 
-        [Navigate to relevant page]
-        [Take screenshot]
-        [Check console]
-        [Inspect elements]
+        [Check if puppeteer MCP available]
 
-        Found: [root cause]
+        IF NOT available:
+          ⚠ Puppeteer MCP not detected
+          Enable for browser automation? [Yes / Manual]
+          → If Yes: Configure ~/.claude/config.json
+          → Restart required
 
-        Fixing..."
+        IF available:
+          [Navigate to relevant page]
+          [Take screenshot]
+          [Check console]
+          [Inspect elements]
+
+          Found: [root cause]
+
+          Fixing..."
 
      debugger:
        "Investigating: [description]

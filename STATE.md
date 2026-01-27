@@ -11,7 +11,7 @@
 | Commands | 24 | 2026-01-26 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
-| Tests | 31 | 2026-01-26 |
+| Tests | 32 | 2026-01-26 |
 
 ## Agents List
 
@@ -68,6 +68,7 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-26 | Added MCP auto-enable protocol for ui-debugger (automatic puppeteer setup) | Claude |
 | 2026-01-26 | Added comprehensive agent utilization instructions to CLAUDE.md templates | Claude |
 | 2026-01-26 | Added automatic quality gates (code-reviewer after code, tests after steps) | Claude |
 | 2026-01-26 | Added issue response protocols (debugger keyword detection, auto-invocation) | Claude |

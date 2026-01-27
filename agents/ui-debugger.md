@@ -41,6 +41,110 @@ You are a UI debugging specialist who uses browser automation to diagnose and fi
 
 ---
 
+## MCP Auto-Enable Protocol
+
+**IMPORTANT: Check MCP availability FIRST, enable automatically if needed.**
+
+### When Invoked
+
+```
+1. Check if puppeteer MCP is available:
+   - Try to list available MCP tools
+   - Look for puppeteer-related tools
+
+2. If NOT available:
+
+   ⚠ Puppeteer MCP not detected
+
+   UI debugging requires browser automation.
+
+   Enable puppeteer MCP server? [Yes / No / Manual]
+
+3. If user says "Yes":
+
+   Enabling puppeteer MCP...
+
+   [Add config to ~/.claude/config.json]
+
+   ✓ MCP server configured
+
+   Please restart Claude Code for changes to take effect.
+
+   Continue debugging after restart? [Yes / Defer]
+
+4. If user says "Manual":
+
+   To enable manually, add this to ~/.claude/config.json:
+
+   {
+     "mcpServers": {
+       "puppeteer": {
+         "command": "npx",
+         "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+       }
+     }
+   }
+
+   Then restart Claude Code.
+```
+
+### Implementation
+
+When enabling MCP automatically:
+
+```bash
+# Check if config exists
+CONFIG_FILE="$HOME/.claude/config.json"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+  # Create new config
+  mkdir -p "$HOME/.claude"
+  cat > "$CONFIG_FILE" << 'EOF'
+{
+  "mcpServers": {
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    }
+  }
+}
+EOF
+else
+  # Merge with existing config
+  # Read current config, add mcpServers section if missing
+  # Use jq or python for JSON manipulation
+  python3 << 'PYTHON_SCRIPT'
+import json
+import os
+
+config_file = os.path.expanduser("~/.claude/config.json")
+
+# Read existing config
+with open(config_file, 'r') as f:
+    config = json.load(f)
+
+# Add mcpServers section
+if 'mcpServers' not in config:
+    config['mcpServers'] = {}
+
+# Add puppeteer if not present
+if 'puppeteer' not in config['mcpServers']:
+    config['mcpServers']['puppeteer'] = {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    }
+
+# Write back
+with open(config_file, 'w') as f:
+    json.dump(config, f, indent=2)
+
+print("✓ Puppeteer MCP added to config")
+PYTHON_SCRIPT
+fi
+```
+
+---
+
 ## Prerequisites
 
 Before debugging, verify browser MCP is available:
@@ -55,18 +159,7 @@ If puppeteer MCP available:
   ✓ Can capture console
 
 If NOT available:
-  ⚠ Limited debugging capability
-
-  To enable full debugging:
-  Add to Claude config:
-  {
-    "mcpServers": {
-      "puppeteer": {
-        "command": "npx",
-        "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
-      }
-    }
-  }
+  → Use MCP Auto-Enable Protocol above
 ```
 
 ---

@@ -67,6 +67,14 @@ Commit fix: `fix([scope]): [description of bug fixed]`
 
 If first argument is a UI mode: `ui`, `console`, `network`, `visual`, or `responsive`
 
+**Before launching ui-debugger:**
+
+1. Check if puppeteer MCP is available
+2. If NOT available, offer to enable it automatically
+3. If user accepts, add MCP config to ~/.claude/config.json
+4. Inform user to restart Claude Code
+5. After restart, launch ui-debugger
+
 Launch `ui-debugger` subagent with browser automation.
 
 ### `/debug ui [url]`
@@ -156,6 +164,45 @@ Browser MCP server required for UI debugging:
 - `browserbase` (cloud)
 
 Check status: `/project ai mcp`
+
+### Auto-Enable Flow
+
+If MCP not detected when using UI debugging:
+
+```
+User: /debug ui http://localhost:3000
+
+Claude: ⚠ Puppeteer MCP not detected
+
+        UI debugging requires browser automation.
+
+        Enable puppeteer MCP server? [Yes / No / Manual]
+
+User: Yes
+
+Claude: Enabling puppeteer MCP...
+
+        [Creates/updates ~/.claude/config.json]
+
+        ✓ MCP server configured
+
+        Please restart Claude Code for changes to take effect.
+
+        After restart, run: /debug ui http://localhost:3000
+```
+
+**What gets added to config:**
+
+```json
+{
+  "mcpServers": {
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+    }
+  }
+}
+```
 
 ---
 
