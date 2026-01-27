@@ -1,34 +1,45 @@
 ---
-description: Analyze current project and suggest agentic optimizations
-argument-hint: <optional focus area>
+description: Design agentic architecture for a new app idea
+argument-hint: <app idea>
 ---
 
-Analyze THIS codebase for agentic optimization opportunities.
+Design an agentic architecture for a NEW project (greenfield).
 
-## Step 1: Explore the current project structure
-Read these files if they exist (skip if missing):
-- CLAUDE.md
-- README.md  
-- package.json or pyproject.toml
-- /docs/ directory
+**This is for NEW apps, not existing codebases. For existing code, use `/aa-audit` instead.**
 
-Then explore the main source directories to understand the architecture.
+## Requirements
+
+You must provide an app idea. Example: `/aa recipe sharing app with social features`
+
+## Step 1: Understand the app idea
+
+Parse the app description from $ARGUMENTS and clarify:
+- What is the core purpose?
+- Who are the users?
+- What are the main features?
 
 ## Step 2: Use agentic-architect subagent
-Have it analyze what you found and identify:
-- Hardcoded logic that could be agent decisions
-- Brittle rules/heuristics that LLMs could handle
-- Manual processes that could become agent workflows
-- What should stay as traditional code
 
-Focus area (if specified): $ARGUMENTS
+Have it design an architecture that identifies:
+- Which components should be AI agents (vs traditional code)?
+- What decisions should agents make?
+- Where LLMs add value vs where they'd be overkill
+- Agent collaboration patterns
+- Human-in-the-loop touchpoints
 
 ## Step 3: Output
-Create a new file at /docs/architecture/agentic-audit.md with:
-- Current state summary
-- Agentic opportunities table
-- Components to keep as code
-- Migration path recommendations
-- Quick wins vs needs more design
 
-IMPORTANT: You are analyzing the existing codebase, not reading from agentic-audit.md.
+Create `/docs/architecture/agentic-architecture.md` with:
+- App overview
+- Architecture diagram (text)
+- Agent definitions (what each agent does)
+- Traditional code components
+- Data flow and agent interactions
+- Why this agent mix (rationale)
+
+**Usage Examples:**
+```
+/aa food delivery app with smart routing
+/aa customer support platform with ticket classification
+/aa content moderation system
+```

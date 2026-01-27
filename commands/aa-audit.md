@@ -1,39 +1,48 @@
 ---
-description: Analyze current project and suggest agentic optimizations
+description: Analyze existing codebase for agentic optimization opportunities
 argument-hint: <optional focus area>
 ---
 
-Use the agentic-architect subagent to:
+Analyze an EXISTING codebase (brownfield) for agentic optimization opportunities.
 
-1. Read and understand the current codebase:
-   - Read CLAUDE.md, README.md, and /docs/ if they exist
-   - Explore /src or /api and /web directories
-   - Understand the current architecture and data flow
+**This is for existing code. For new apps, use `/aa` instead.**
 
-2. Analyze through an agentic lens:
-   - What is currently hardcoded that could be an agent decision?
-   - Where are brittle heuristics/rules that LLMs could handle better?
-   - What manual processes could become agent workflows?
-   - Where is there implicit "intelligence" buried in if/else chains?
+## Step 1: Explore the current project
 
-3. Propose agentic optimizations:
-   - Which components should become agents?
-   - Which should stay as traditional code?
-   - What new agents could add capabilities?
-   - What's the migration path (not just ideal end state)?
+Read these files if they exist (skip if missing):
+- CLAUDE.md
+- README.md
+- package.json or pyproject.toml
+- /docs/ directory
 
-4. Risk assessment:
-   - Where would adding agents make things WORSE?
-   - What's not ready for agents yet?
-   - What would break during migration?
+Then explore the main source directories to understand:
+- Current architecture and data flow
+- Where business logic lives
+- What patterns are used
+
+## Step 2: Use agentic-architect subagent
+
+Have it analyze through an agentic lens:
+- What is currently hardcoded that could be an agent decision?
+- Where are brittle heuristics/rules that LLMs could handle better?
+- What manual processes could become agent workflows?
+- Where is there implicit "intelligence" buried in if/else chains?
+- Where would adding agents make things WORSE?
 
 Focus area (if specified): $ARGUMENTS
 
-Save analysis to /docs/architecture/agentic-audit.md
-```
+## Step 3: Output
 
-**Usage:**
+Create `/docs/architecture/agentic-audit.md` with:
+- Current state summary
+- Agentic opportunities table (component, current state, proposed agent, benefit, risk)
+- Components to keep as traditional code
+- Migration path recommendations (phases)
+- Quick wins vs needs more design
+
+**Usage Examples:**
 ```
-/aa food delivery app                    # New project
-/aa-audit                                # Analyze current project
+/aa-audit                                # Analyze entire codebase
 /aa-audit the notification system        # Focus on specific area
+/aa-audit authentication and authorization
+```
