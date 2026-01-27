@@ -47,9 +47,9 @@ EOF
 # Verify
 [ -f "CLAUDE.md" ] && pass "CLAUDE.md created" || fail "CLAUDE.md missing"
 grep -q "type: brownfield" "CLAUDE.md" && pass "Detected as brownfield" || fail "Wrong type"
-grep -q "brownfield-analyzer" "CLAUDE.md" && pass "References analyzer" || fail "Missing analyzer reference"
+grep -q "brownfield.*- Existing codebase" "CLAUDE.md" && pass "References brownfield skill" || fail "Missing brownfield skill reference"
 grep -q "phase: analysis" "CLAUDE.md" && pass "Starts in analysis phase" || fail "Wrong phase"
-grep -q "Run brownfield-analyzer" "CLAUDE.md" && pass "Instructions to analyze" || fail "Missing analysis instructions"
+grep -q "Load brownfield skill" "CLAUDE.md" && pass "Instructions to analyze" || fail "Missing analysis instructions"
 
 # Cleanup
 rm -rf "$TEST_DIR"
