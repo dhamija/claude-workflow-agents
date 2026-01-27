@@ -1,0 +1,250 @@
+#!/bin/bash
+
+# workflow-patch - Smart merge of template updates into user CLAUDE.md
+# Preserves user customizations while updating orchestration logic
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKFLOW_HOME="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+# Check if CLAUDE.md exists in current directory
+if [ ! -f "CLAUDE.md" ]; then
+    echo -e "${RED}✗ No CLAUDE.md found in current directory${NC}"
+    echo ""
+    echo "This command must be run from a project directory with workflow initialized."
+    exit 1
+fi
+
+# Check if CLAUDE.md has workflow marker
+if ! grep -q "## 🔄 Workflow Active" CLAUDE.md; then
+    echo -e "${RED}✗ CLAUDE.md does not appear to be a workflow-enabled file${NC}"
+    echo ""
+    echo "Looking for '## 🔄 Workflow Active' marker."
+    exit 1
+fi
+
+# Extract workflow type and version from current CLAUDE.md
+CURRENT_TYPE=$(grep -A 20 "^workflow:" CLAUDE.md | grep "type:" | head -1 | sed 's/.*type: //' | tr -d ' ')
+CURRENT_VERSION=$(grep -A 5 "^workflow:" CLAUDE.md | grep "version:" | head -1 | sed 's/.*version: //' | tr -d ' ')
+
+if [ -z "$CURRENT_TYPE" ]; then
+    echo -e "${YELLOW}⚠ Could not detect workflow type, assuming greenfield${NC}"
+    CURRENT_TYPE="greenfield"
+fi
+
+if [ -z "$CURRENT_VERSION" ]; then
+    echo -e "${YELLOW}⚠ Could not detect version, assuming 0.9${NC}"
+    CURRENT_VERSION="0.9"
+fi
+
+# Determine template to use
+if [ "$CURRENT_TYPE" = "brownfield" ]; then
+    TEMPLATE_FILE="$WORKFLOW_HOME/templates/project/CLAUDE.md.brownfield.template"
+    TEMPLATE_NAME="brownfield"
+else
+    TEMPLATE_FILE="$WORKFLOW_HOME/templates/project/CLAUDE.md.greenfield.template"
+    TEMPLATE_NAME="greenfield"
+fi
+
+if [ ! -f "$TEMPLATE_FILE" ]; then
+    echo -e "${RED}✗ Template not found: $TEMPLATE_FILE${NC}"
+    exit 1
+fi
+
+# Get template version
+TEMPLATE_VERSION=$(grep -A 5 "^workflow:" "$TEMPLATE_FILE" | grep "version:" | head -1 | sed 's/.*version: //' | sed 's/{{DATE}}//')
+
+echo ""
+echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
+echo -e "${BLUE}║     WORKFLOW CLAUDE.MD PATCH UTILITY                          ║${NC}"
+echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+echo "Current version: $CURRENT_VERSION"
+echo "Template version: $TEMPLATE_VERSION"
+echo "Project type: $CURRENT_TYPE"
+echo ""
+
+# Check if already up to date
+if [ "$CURRENT_VERSION" = "$TEMPLATE_VERSION" ]; then
+    echo -e "${GREEN}✓ Already up to date${NC}"
+    echo ""
+    echo "Your CLAUDE.md is already at version $TEMPLATE_VERSION."
+    echo "No patching needed."
+    exit 0
+fi
+
+echo -e "${YELLOW}Update available: $CURRENT_VERSION → $TEMPLATE_VERSION${NC}"
+echo ""
+
+# Create backup
+BACKUP_FILE="CLAUDE.md.backup-$(date +%Y%m%d-%H%M%S)"
+cp CLAUDE.md "$BACKUP_FILE"
+echo -e "${GREEN}✓${NC} Backup created: $BACKUP_FILE"
+echo ""
+
+# Extract user sections from current CLAUDE.md
+# These sections contain user-specific data and must be preserved
+
+# 1. Extract project name and description (first few lines)
+PROJECT_NAME=$(head -1 CLAUDE.md | sed 's/^# //')
+PROJECT_DESC=$(grep "^>" CLAUDE.md | head -1 | sed 's/^> //')
+
+# 2. Extract Project Context section
+CONTEXT_START=$(grep -n "^## Project Context" CLAUDE.md | cut -d: -f1)
+CONTEXT_END=$(grep -n "^## Agent Implementation Details\|^---$" CLAUDE.md | tail -2 | head -1 | cut -d: -f1)
+if [ -n "$CONTEXT_START" ] && [ -n "$CONTEXT_END" ]; then
+    PROJECT_CONTEXT=$(sed -n "${CONTEXT_START},${CONTEXT_END}p" CLAUDE.md | head -n -1)
+else
+    PROJECT_CONTEXT=""
+fi
+
+# 3. Extract Workflow State YAML block (most critical)
+STATE_START=$(grep -n '^```yaml' CLAUDE.md | grep -A 1 "^## Workflow State" | tail -1 | cut -d: -f1)
+STATE_END=$(grep -n '^```$' CLAUDE.md | awk -v start="$STATE_START" '$1 > start {print; exit}' | cut -d: -f1)
+if [ -n "$STATE_START" ] && [ -n "$STATE_END" ]; then
+    # Extract including the ``` delimiters
+    WORKFLOW_STATE=$(sed -n "${STATE_START},${STATE_END}p" CLAUDE.md)
+else
+    echo -e "${RED}✗ Could not extract workflow state${NC}"
+    echo "  Your CLAUDE.md may be corrupted or in an unexpected format."
+    exit 1
+fi
+
+# Create patched version
+PATCHED_FILE="CLAUDE.md.patched"
+
+# Start with template, replace variables, then insert user sections
+cp "$TEMPLATE_FILE" "$PATCHED_FILE"
+
+# Replace template variables
+sed -i.tmp "s/{{PROJECT_NAME}}/$PROJECT_NAME/g" "$PATCHED_FILE"
+sed -i.tmp "s/{{PROJECT_DESCRIPTION}}/$PROJECT_DESC/g" "$PATCHED_FILE"
+sed -i.tmp "s|{{WORKFLOW_HOME}}|$WORKFLOW_HOME|g" "$PATCHED_FILE"
+sed -i.tmp "s/{{DATE}}/$(date +%Y-%m-%d)/g" "$PATCHED_FILE"
+rm "$PATCHED_FILE.tmp"
+
+# Replace Project Context section with user's version
+if [ -n "$PROJECT_CONTEXT" ]; then
+    # Find Project Context section in patched file
+    PATCH_CONTEXT_START=$(grep -n "^## Project Context" "$PATCHED_FILE" | cut -d: -f1)
+    PATCH_CONTEXT_END=$(grep -n "^## Agent Implementation Details\|^---$" "$PATCHED_FILE" | tail -2 | head -1 | cut -d: -f1)
+
+    if [ -n "$PATCH_CONTEXT_START" ] && [ -n "$PATCH_CONTEXT_END" ]; then
+        # Delete template's Project Context section
+        sed -i.tmp "${PATCH_CONTEXT_START},$((PATCH_CONTEXT_END-1))d" "$PATCHED_FILE"
+        # Insert user's Project Context at the same location
+        {
+            head -n $((PATCH_CONTEXT_START-1)) "$PATCHED_FILE"
+            echo "$PROJECT_CONTEXT"
+            tail -n +$PATCH_CONTEXT_START "$PATCHED_FILE"
+        } > "$PATCHED_FILE.tmp2"
+        mv "$PATCHED_FILE.tmp2" "$PATCHED_FILE"
+        rm -f "$PATCHED_FILE.tmp"
+    fi
+fi
+
+# Replace Workflow State YAML with user's actual state
+PATCH_STATE_START=$(grep -n '^```yaml' "$PATCHED_FILE" | tail -1 | cut -d: -f1)
+PATCH_STATE_END=$(grep -n '^```$' "$PATCHED_FILE" | awk -v start="$PATCH_STATE_START" '$1 > start {print; exit}' | cut -d: -f1)
+
+if [ -n "$PATCH_STATE_START" ] && [ -n "$PATCH_STATE_END" ]; then
+    # Delete template's workflow state
+    sed -i.tmp "${PATCH_STATE_START},${PATCH_STATE_END}d" "$PATCHED_FILE"
+    # Insert user's workflow state at the same location
+    {
+        head -n $((PATCH_STATE_START-1)) "$PATCHED_FILE"
+        echo "$WORKFLOW_STATE"
+        tail -n +$PATCH_STATE_START "$PATCHED_FILE"
+    } > "$PATCHED_FILE.tmp2"
+    mv "$PATCHED_FILE.tmp2" "$PATCHED_FILE"
+    rm -f "$PATCHED_FILE.tmp"
+fi
+
+# Update version in workflow state
+sed -i.tmp "s/version: $CURRENT_VERSION/version: $TEMPLATE_VERSION/" "$PATCHED_FILE"
+rm -f "$PATCHED_FILE.tmp"
+
+# Show diff
+echo -e "${BLUE}Changes to be applied:${NC}"
+echo ""
+echo "────────────────────────────────────────────────────────────────"
+
+# Use git diff if available, otherwise regular diff
+if command -v git &> /dev/null; then
+    git diff --no-index --color=always CLAUDE.md "$PATCHED_FILE" | tail -n +5 || true
+else
+    diff -u CLAUDE.md "$PATCHED_FILE" || true
+fi
+
+echo "────────────────────────────────────────────────────────────────"
+echo ""
+
+# Ask for confirmation
+echo -e "${YELLOW}Apply these changes?${NC}"
+echo ""
+echo "  [Y] Yes - Apply patch"
+echo "  [N] No  - Cancel (backup will be kept)"
+echo "  [D] Show detailed diff"
+echo ""
+read -p "Choice [Y/n/d]: " -n 1 -r
+echo ""
+
+if [[ $REPLY =~ ^[Dd]$ ]]; then
+    # Show detailed diff
+    if command -v git &> /dev/null; then
+        git diff --no-index CLAUDE.md "$PATCHED_FILE" | less -R
+    else
+        diff -u CLAUDE.md "$PATCHED_FILE" | less
+    fi
+
+    # Ask again
+    echo ""
+    read -p "Apply patch? [Y/n]: " -n 1 -r
+    echo ""
+fi
+
+if [[ ! $REPLY =~ ^[Yy]$ ]] && [[ ! -z $REPLY ]]; then
+    echo -e "${YELLOW}Patch cancelled${NC}"
+    echo ""
+    echo "Backup preserved: $BACKUP_FILE"
+    echo "Patched version: $PATCHED_FILE (review with: diff CLAUDE.md $PATCHED_FILE)"
+    rm -f "$PATCHED_FILE"
+    exit 0
+fi
+
+# Apply patch
+mv "$PATCHED_FILE" CLAUDE.md
+
+echo ""
+echo -e "${GREEN}✓ Patch applied successfully${NC}"
+echo ""
+echo "  Updated: $CURRENT_VERSION → $TEMPLATE_VERSION"
+echo "  Backup: $BACKUP_FILE"
+echo ""
+echo -e "${BLUE}What was updated:${NC}"
+echo "  • Orchestration flows (L1/L2)"
+echo "  • Quality gates"
+echo "  • Issue response protocols"
+echo "  • Design principles"
+echo "  • Commands reference"
+echo ""
+echo -e "${GREEN}What was preserved:${NC}"
+echo "  • Your project name and description"
+echo "  • Your workflow state (progress, features, promises)"
+echo "  • Your project context (decisions, notes)"
+echo ""
+echo -e "${YELLOW}Next steps:${NC}"
+echo "  1. Review the changes: git diff CLAUDE.md"
+echo "  2. Test that orchestration still works"
+echo "  3. Delete backup if satisfied: rm $BACKUP_FILE"
+echo ""
+

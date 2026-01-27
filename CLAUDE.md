@@ -202,7 +202,115 @@ Template: templates/project/CLAUDE.md.greenfield.template
 5. Verify Claude follows new flow correctly
 6. Commit all changes together
 
-**Important:** Changes to templates do NOT automatically propagate to existing user projects. Users must run `workflow-update` to merge changes (when that feature is implemented).
+**Important:** Changes to templates do NOT automatically propagate to existing user projects. Users must run `workflow-update` (updates repo) and then `workflow-patch` (merges template changes into their CLAUDE.md).
+
+### User Update Workflow
+
+**Users have two commands for keeping their workflow up to date:**
+
+#### 1. workflow-update (Update the Workflow System)
+
+```bash
+# From anywhere (updates the global installation)
+workflow-update
+```
+
+**What it does:**
+- Pulls latest changes from git repository
+- Updates `~/.claude-workflow-agents/` with new agents, commands, templates
+- Recreates symlinks if new agents/commands were added
+- Detects if run from a project directory with CLAUDE.md
+- Offers to run `workflow-patch` if updates affect orchestration
+
+**When to run:**
+- Periodically to get new features and bug fixes
+- After seeing announcement of new workflow version
+- When new agents/commands become available
+
+#### 2. workflow-patch (Update Project CLAUDE.md)
+
+```bash
+# From project directory
+cd /path/to/your/project
+workflow-patch
+```
+
+**What it does:**
+- Detects current CLAUDE.md version and type (greenfield/brownfield)
+- Loads corresponding template from updated workflow system
+- Extracts user sections (preserves your customizations):
+  - Project name and description
+  - Workflow state (progress, features, promises)
+  - Project context (decisions, notes)
+- Replaces template sections (updates orchestration logic):
+  - Quick Reference tables
+  - Session Start Protocol
+  - L1/L2 Orchestration Flows
+  - Issue Response Protocols
+  - Quality Gates
+  - Design Principles
+  - Commands Reference
+- Shows diff preview
+- Requires confirmation
+- Creates backup before applying
+
+**Safety features:**
+- Automatic backup: `CLAUDE.md.backup-<timestamp>`
+- Diff preview before applying
+- Can show detailed diff with `[D]` option
+- Preserves all user customizations
+- Aborts on any errors
+
+**When to run:**
+- After running `workflow-update` and seeing template changes
+- When new orchestration features become available
+- When quality gates or protocols are improved
+
+**Example workflow:**
+
+```bash
+# 1. Update workflow system globally
+workflow-update
+
+# Output:
+#   Updated: 0.9 → 1.0
+#   Changes: New gap-analyzer flows, improved quality gates
+#   Would you like to patch your CLAUDE.md? [Y/n/l]
+
+# 2. Review and apply patches (if run from project directory)
+# Or navigate to project and run manually:
+cd ~/my-project
+workflow-patch
+
+# Shows diff preview:
+#   - Old orchestration flows
+#   + New orchestration flows
+#
+#   Apply patch? [Y/n/d]
+
+# 3. Review changes
+git diff CLAUDE.md
+
+# 4. Test that orchestration still works
+# Claude Code should now use updated flows
+
+# 5. Delete backup if satisfied
+rm CLAUDE.md.backup-20260126-143022
+```
+
+**Troubleshooting:**
+
+If patch fails or produces unexpected results:
+
+```bash
+# Restore from backup
+cp CLAUDE.md.backup-<timestamp> CLAUDE.md
+
+# Report issue with:
+# - Your CLAUDE.md version
+# - Template version you tried to patch to
+# - Error message or unexpected behavior
+```
 
 ---
 
