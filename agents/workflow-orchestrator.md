@@ -24,29 +24,60 @@ tools: N/A (reference documentation only)
 
 **Purpose:** This document explains how the workflow orchestration system works for contributors and maintainers.
 
-**Important:** This is NOT operational documentation. Orchestration logic is embedded directly in user project CLAUDE.md files. See `templates/project/CLAUDE.md.*.template` for the actual implementations.
+**Important (v2.1):** This is NOT operational documentation. Orchestration logic is in the **workflow skill** (`templates/skills/workflow/SKILL.md`), NOT in project CLAUDE.md files.
+
+Project CLAUDE.md files are now minimal (~80 lines) and contain only state tracking.
 
 ---
 
 ## Architecture Overview
 
-### Old Architecture (v0.9 - Broken)
+### Current Architecture (v2.1 - Skills + Hooks)
 
 ```
-User Project CLAUDE.md
+Skills (Domain Expertise)
+   ~/.claude/skills/workflow/SKILL.md     ← Orchestration logic
+   ~/.claude/skills/ux-design/SKILL.md    ← Design principles
+   ~/.claude/skills/frontend/SKILL.md     ← Frontend expertise
+   ~/.claude/skills/backend/SKILL.md      ← Backend patterns
+   ... (9 skills total)
    ↓
-   HTML comment: "READ workflow-orchestrator.md"
+   Loaded ON-DEMAND by Claude (automatic)
    ↓
-   Hope Claude reads it
+Subagents (Isolated Tasks)
+   ~/.claude/agents/code-reviewer.md      ← Isolated review
+   ~/.claude/agents/debugger.md           ← Isolated debugging
+   ~/.claude/agents/ui-debugger.md        ← Browser automation
    ↓
-   No enforcement
+   Invoked via Task tool when needed
    ↓
-   Can be ignored ❌
+Project CLAUDE.md (~80 lines)
+   State only, minimal context
+   ↓
+Hooks (.claude/settings.json - optional)
+   PostToolUse → Quality reminders
+   Stop → Completion checklist
 ```
 
-**Problem:** Claude Code doesn't auto-read external files. HTML comments can be ignored.
+**Benefits:**
+- 90% less upfront context (80 lines vs 750)
+- Skills cached between sessions
+- On-demand loading = better performance
+- Modular and independently updatable
 
-### New Architecture (v1.0 - Self-Contained)
+**Key Change:** Orchestration logic moved FROM project CLAUDE.md TO workflow skill.
+
+### Previous Architectures (Historical Reference)
+
+**v2.0 (Self-Contained Templates):**
+- 750+ line CLAUDE.md with embedded orchestration
+- Problem: Context bloat, poor performance
+- Deprecated in v2.1
+
+**v0.9-v1.0 (External Orchestrator):**
+- HTML comment pointing to orchestrator.md
+- Problem: Unreliable, could be ignored
+- Deprecated in v2.0
 
 ```
 Template: templates/project/CLAUDE.md.greenfield.template
@@ -503,15 +534,23 @@ grep -A 10 "## L1 Orchestration Flow" CLAUDE.md
 
 ## Version History
 
-### v1.0 (2026-01-26)
-- **Breaking Change:** Moved all orchestration logic from external file to embedded templates
-- workflow-orchestrator.md now contributor documentation only
-- Self-contained CLAUDE.md templates (greenfield and brownfield)
-- No external file reads required for operation
-- Improved reliability and user experience
+### v2.1 (2026-01-27)
+- **Breaking Change:** Skills + Hooks architecture
+- Orchestration logic moved FROM CLAUDE.md TO workflow skill
+- 9 skills loaded on-demand by Claude
+- Only 3 subagents (isolated tasks)
+- Minimal CLAUDE.md (~80 lines, state only)
+- Optional hooks for automatic quality gates
+- 90% reduction in upfront context
+- Better performance and modularity
 
-### v0.9 (Previous)
-- External orchestrator file with HTML comment reference
-- Relied on Claude reading external files
-- Unreliable, could be ignored
+### v2.0 (2026-01-26)
+- **Breaking Change:** Self-contained CLAUDE.md templates (750+ lines)
+- All orchestration embedded in project CLAUDE.md
+- Deprecated in v2.1 due to context bloat
+
+### v1.0 / v0.9 (Historical)
+- External orchestrator file with HTML comment
+- Unreliable (could be ignored)
+- Deprecated in v2.0
 
