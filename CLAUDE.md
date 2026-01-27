@@ -368,7 +368,31 @@ When you add, modify, or remove ANY agent or command file:
    - Do NOT skip this step - CI will fail and block merges
    - **Check 7/7 specifically ensures workflow-orchestrator is in sync!**
 
-7. ✅ **Update STATE.md**
+7. ✅ **Update workflow commands in install.sh (if applicable)**
+
+   If your changes affect the workflow commands, update the embedded scripts in `install.sh`:
+
+   - **workflow-version** (line ~137-169)
+     - Update commands list if new commands added
+     - Update agent/command counts if changed
+
+   - **workflow-update** (created in bin/workflow-update, installed by install.sh)
+     - If update process changes
+     - If new features need announcing
+
+   - **workflow-patch** (created in bin/workflow-patch, installed by install.sh)
+     - If patch logic changes
+     - If section extraction needs updating
+
+   - **Install success message** (line ~700-710)
+     - Keep command list in sync with workflow-version output
+
+   **Examples of when to update:**
+   - Adding new agent → Update workflow-version commands list
+   - New workflow command → Add to both workflow-version and install success
+   - Changing template structure → Update workflow-patch logic
+
+8. ✅ **Update STATE.md**
    - Add entry to Recent Changes section
    - Update component counts if changed
    - Update last updated timestamps
@@ -451,6 +475,29 @@ When you add/remove a command, it must be updated in:
 4. ✅ **commands/help.md** - Commands section (if user-visible)
 5. ✅ **tests/structural/test_commands_exist.sh** - REQUIRED_COMMANDS array
 6. ✅ **tests/test_commands.sh** - REQUIRED_COMMANDS array
+
+### Workflow Command Scripts
+
+**When you add/modify workflow commands (workflow-*, bin/*), update:**
+
+| Script Location | What to Update | When |
+|-----------------|----------------|------|
+| **install.sh** (line ~137-169) | `workflow-version` embedded script | New command added, agent/command counts changed |
+| **install.sh** (line ~700-710) | Install success message commands list | New command added |
+| **bin/workflow-update** | Update logic, change detection | Update process changes, new features |
+| **bin/workflow-patch** | Section extraction, merge logic | Template structure changes, new sections |
+| **README.md** | Terminal commands table, updating section | New command added, behavior changes |
+
+**Examples:**
+- **Add new command** → Update workflow-version output + install.sh success message + README.md
+- **Add agent** → Update workflow-version if affects command list
+- **Change templates** → Update workflow-patch section extraction logic
+- **Add feature** → Update workflow-update to announce it
+
+**Why this matters:**
+- workflow-version is the first thing users run to check their installation
+- Out-of-sync command lists confuse users
+- workflow-patch must know template structure to preserve user data
 
 ### Verification System
 
