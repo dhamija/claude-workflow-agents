@@ -152,129 +152,158 @@ DOCUMENTS CREATED
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║                       THE 16 AGENTS                              ║
+║            SKILLS + SUBAGENTS ARCHITECTURE (v2.1)                ║
 ╚══════════════════════════════════════════════════════════════════╝
 
-Claude automatically selects agents. You don't call them directly.
+Claude automatically loads skills and invokes subagents as needed.
+You don't call them directly - just describe what you want.
 
 
-LEVEL 1 AGENTS (App-level)
-──────────────────────────
+ARCHITECTURE OVERVIEW
+─────────────────────
+
+  Skills: Domain expertise (loaded on-demand by Claude)
+          Location: ~/.claude/skills/
+          Count: 9 skills
+
+  Subagents: Isolated execution environments (separate context)
+             Location: ~/.claude/agents/
+             Count: 3 subagents
+
+
+SKILLS (On-Demand Domain Expertise)
+────────────────────────────────────
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ INTENT-GUARDIAN                                             │
-  │ "What are we promising users?"                              │
-  │ Creates: /docs/intent/product-intent.md                     │
-  │ Triggers: New project, "what should it do", "guarantee"     │
+  │ WORKFLOW (Orchestration)                                    │
+  │ Purpose: L1/L2 phase management, auto-chaining              │
+  │ Loads: When managing project phases                         │
+  │ Contains: L1 flow, L2 flow, quality gates, issue protocols  │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ UX-ARCHITECT                                                │
-  │ "How will users interact?"                                  │
-  │ Creates: /docs/ux/user-journeys.md, design-system.md       │
-  │ Triggers: New project, "user flow", "UX", "journey"         │
+  │ UX-DESIGN (Design Principles)                               │
+  │ Purpose: UX laws and design principles                      │
+  │ Loads: When designing interfaces or reviewing UX            │
+  │ Includes: Fitts, Hick, Miller's Laws, accessibility         │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ AGENTIC-ARCHITECT                                           │
-  │ "How should the system work?"                               │
-  │ Creates: /docs/architecture/agent-design.md                 │
-  │ Triggers: New project, "architecture", "system design"      │
+  │ FRONTEND (UI Development)                                   │
+  │ Purpose: Frontend patterns with auto-applied design         │
+  │ Loads: When implementing UI                                 │
+  │ Includes: Components, state, TypeScript, accessibility      │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ IMPLEMENTATION-PLANNER                                      │
-  │ "What's the build plan?"                                    │
-  │ Creates: /docs/plans/overview/*, features/*                 │
-  │ Triggers: After L1 analysis, "plan", "how to build"         │
+  │ BACKEND (API Development)                                   │
+  │ Purpose: Backend patterns and best practices                │
+  │ Loads: When implementing APIs/services                      │
+  │ Includes: REST, databases, validation, auth, error handling │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ CHANGE-ANALYZER                                             │
-  │ "What's the impact of this change?"                         │
-  │ Creates: /docs/changes/change-*.md                          │
-  │ Triggers: "Add", "change", "also need", "what if"           │
+  │ TESTING (Test Strategies)                                   │
+  │ Purpose: Test pyramid and coverage strategies               │
+  │ Loads: When writing tests                                   │
+  │ Includes: Unit/integration/E2E patterns, mocking, factories │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ GAP-ANALYZER                                                │
-  │ "What's wrong with existing code?"                          │
-  │ Creates: /docs/gaps/gap-analysis.md, migration-plan.md      │
-  │ Triggers: Existing codebase, "improve", "technical debt"    │
+  │ VALIDATION (Promise Validation)                             │
+  │ Purpose: Validate promises are kept (beyond tests passing)  │
+  │ Loads: After tests pass, before feature complete            │
+  │ Example: Tests pass ≠ user can actually do what we promised │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ BROWNFIELD-ANALYZER                                         │
-  │ "What exists in this codebase?"                             │
-  │ Scans: Tech stack, features, tests, documentation           │
-  │ Triggers: First run on existing codebase (automatic)        │
-  └─────────────────────────────────────────────────────────────┘
-
-
-LEVEL 2 AGENTS (Feature-level)
-──────────────────────────────
-
-  ┌─────────────────────────────────────────────────────────────┐
-  │ BACKEND-ENGINEER                                            │
-  │ Implements: APIs, database, services, business logic        │
-  │ Triggers: Backend tasks, "API", "endpoint", "database"      │
+  │ DEBUGGING (Debug Protocols)                                 │
+  │ Purpose: Systematic debugging approach                      │
+  │ Loads: When issues reported                                 │
+  │ Process: Reproduce → Isolate → Fix → Test → Verify          │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ FRONTEND-ENGINEER                                           │
-  │ Implements: Pages, components (follows design system)       │
-  │ Triggers: Frontend tasks, "UI", "page", "component"         │
+  │ CODE-QUALITY (Review Criteria)                              │
+  │ Purpose: Code review standards                              │
+  │ Loads: After code changes (via hook) or manual /review      │
+  │ Checks: Security, performance, correctness, maintainability │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
-  │ TEST-ENGINEER                                               │
-  │ Implements: Unit, integration, E2E tests + verification     │
-  │ Triggers: "Test", "verify", after implementation            │
+  │ BROWNFIELD (Codebase Analysis)                              │
+  │ Purpose: Understand existing code                           │
+  │ Loads: First session in existing project                    │
+  │ Process: Detect stack → Scan → Infer intent → Document      │
   └─────────────────────────────────────────────────────────────┘
+
+
+SUBAGENTS (Isolated Context Execution)
+───────────────────────────────────────
 
   ┌─────────────────────────────────────────────────────────────┐
   │ CODE-REVIEWER                                               │
-  │ Reviews: Security, bugs, performance, maintainability       │
-  │ Triggers: "Review", "check code", before milestone          │
+  │ Type: Read-only isolated review                             │
+  │ Triggers: After implementation, via hook, /review           │
+  │ Checks: Security, bugs, performance, maintainability        │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
   │ DEBUGGER                                                    │
-  │ Does: Root cause analysis, minimal fix, regression test     │
+  │ Type: Isolated debugging session                            │
   │ Triggers: "Broken", "error", "bug", "doesn't work"          │
+  │ Does: Root cause analysis, minimal fix, regression test     │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
   │ UI-DEBUGGER                                                 │
-  │ Does: Browser automation, screenshots, console debugging    │
+  │ Type: Browser automation session                            │
   │ Triggers: UI issues, visual bugs (requires puppeteer MCP)   │
-  └─────────────────────────────────────────────────────────────┘
-
-  ┌─────────────────────────────────────────────────────────────┐
-  │ ACCEPTANCE-VALIDATOR                                        │
-  │ Does: Validates promises are kept (not just code tests)     │
-  │ Triggers: After feature complete, promise verification      │
+  │ Does: Screenshots, console logs, interaction debugging      │
   └─────────────────────────────────────────────────────────────┘
 
 
-OPERATIONS AGENT (Project Management)
-─────────────────────────────────────
+AGENT INVOCATION (Via Workflow Skill)
+──────────────────────────────────────
 
-  ┌─────────────────────────────────────────────────────────────┐
-  │ PROJECT-OPS                                                 │
-  │ Manages: Setup, sync, docs, verification, AI integration    │
-  │ Triggers: /project commands, "save state", after features   │
-  └─────────────────────────────────────────────────────────────┘
+The workflow skill invokes specialized agents via Task tool:
+
+  L1 Planning Agents (invoked by workflow):
+  - intent-guardian      → Captures promises
+  - ux-architect         → Designs UX
+  - agentic-architect    → Designs architecture
+  - implementation-planner → Creates plans
+
+  L2 Building Agents (invoked by workflow):
+  - backend-engineer     → Implements backend
+  - frontend-engineer    → Implements frontend
+  - test-engineer        → Writes tests
+  - acceptance-validator → Validates promises
+
+  Support Agents (invoked by workflow):
+  - change-analyzer      → Assesses change impact
+  - gap-analyzer         → Finds code quality gaps
+  - brownfield-analyzer  → Scans existing code
+  - project-ops          → Project operations
 
 
-ORCHESTRATION AGENT (Workflow Automation)
-──────────────────────────────────────────
+WHY SKILLS + SUBAGENTS?
+────────────────────────
 
-  ┌─────────────────────────────────────────────────────────────┐
-  │ WORKFLOW-ORCHESTRATOR                                       │
-  │ Does: Auto-chains agents, enforces quality gates            │
-  │ Triggers: Automatic (coordinates all agent interactions)    │
-  └─────────────────────────────────────────────────────────────┘
+  Context Efficiency:
+  - v2.0: 750+ lines loaded every session
+  - v2.1: ~80 lines + skills loaded only when needed
+  - 90% reduction in upfront context
+
+  Performance:
+  - Less context = better model performance
+  - Skills cache between sessions
+  - On-demand loading = faster responses
+
+  Modularity:
+  - Skills updated independently
+  - Easy to add new expertise
+  - Users can create custom skills
 ```
 
 ### If topic = "commands":

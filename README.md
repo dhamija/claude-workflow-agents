@@ -1,8 +1,11 @@
 # Claude Workflow Agents
 
-A multi-agent system for Claude Code that helps you build software systematically. Works for both new projects and existing codebases.
+A **skills-based workflow system** for Claude Code that helps you build software systematically. Works for both new projects and existing codebases.
 
-**Just talk naturally.** Claude automatically uses the right agents.
+**Just talk naturally.** Claude automatically loads the right skills and uses the right agents.
+
+> **Version:** 2.1.0
+> **Architecture:** Skills + Hooks + Subagents
 
 ---
 
@@ -10,10 +13,12 @@ A multi-agent system for Claude Code that helps you build software systematicall
 
 - [Quick Start](#quick-start)
 - [Installation](#installation)
-- [Usage Levels](#usage-levels)
+- [Architecture](#architecture)
+- [Usage](#usage)
 - [New Projects (Greenfield)](#new-projects-greenfield)
 - [Existing Projects (Brownfield)](#existing-projects-brownfield)
 - [Commands Reference](#commands-reference)
+- [Skills Reference](#skills-reference)
 - [Going Deeper](#going-deeper)
 - [FAQ](#faq)
 
@@ -29,13 +34,20 @@ source ~/.bashrc  # or restart terminal
 
 Workflow is immediately active for all Claude Code sessions.
 
-### 2. Use
+### 2. Initialize in Your Project
+```bash
+cd your-project
+workflow-init
+```
 
+Choose whether to enable automatic quality gate reminders (hooks).
+
+### 3. Use
 Just describe what you want:
 ```
 You: Build me a recipe app where I can save and search my favorite recipes
 
-Claude: [Creates intent, designs UX, plans architecture, starts building]
+Claude: [Loads workflow skill → Creates intent → Designs UX → Plans architecture → Starts building]
 ```
 
 That's it. Claude handles the rest.
@@ -53,43 +65,67 @@ Then restart your terminal (or `source ~/.bashrc`).
 
 **What this does:**
 - Installs to `~/.claude-workflow-agents/` (global location)
-- Creates individual file symlinks in `~/.claude/agents/` and `~/.claude/commands/`
-- Workflow immediately active for **all** Claude Code sessions
-- No per-project setup required
+- Copies **9 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
+- Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
+- Symlinks **24 commands** to `~/.claude/commands/`
+- Adds workflow commands to PATH
 
-### Commands
+### What Gets Installed
+
+#### Skills (Loaded On-Demand)
+Skills are domain expertise modules that Claude loads automatically when needed:
+
+| Skill | Purpose |
+|-------|---------|
+| `workflow` | Orchestration, L1/L2 phase management |
+| `ux-design` | UX principles (Fitts's, Hick's, Miller's Laws, etc.) |
+| `frontend` | Frontend development + design principle application |
+| `backend` | API, database, validation patterns |
+| `testing` | Test strategies (unit/integration/E2E) |
+| `validation` | Promise acceptance testing |
+| `debugging` | Systematic debugging protocols |
+| `code-quality` | Code review criteria |
+| `brownfield` | Existing codebase analysis |
+
+#### Subagents (Isolated Context)
+Subagents are isolated execution environments for specific tasks:
+
+| Subagent | Purpose |
+|----------|---------|
+| `code-reviewer` | Read-only code quality review |
+| `debugger` | Isolated debugging sessions |
+| `ui-debugger` | UI debugging with browser automation |
 
 #### Terminal Commands
 
 | Command | Description |
 |---------|-------------|
-| `workflow-toggle on/off/status` | Enable, disable, or check workflow status (global) |
-| `workflow-update` | Update to latest version from git |
-| `workflow-patch` | Update project CLAUDE.md with latest orchestration (v2.0+) |
-| `workflow-version` | Show current version |
-| `workflow-uninstall` | Remove global installation |
+| `workflow-init` | Initialize workflow in a project |
+| `workflow-toggle on/off/status` | Enable, disable, or check status |
+| `workflow-update` | Update to latest version |
+| `workflow-version` | Show version info |
+| `workflow-uninstall` | Remove installation |
 
-#### In-Project Commands (Claude)
+#### Claude Commands (In-Project)
 
 | Command | Description |
 |---------|-------------|
-| `/workflow on` | Enable workflow |
-| `/workflow off` | Disable workflow |
-| `/workflow status` | Check status |
+| `/help` | In-app help system |
+| `/workflow on/off/status` | Enable/disable/check workflow |
+| `/analyze` | Run all L1 planning agents |
+| `/audit` | Audit existing codebase |
+| `/gap` | Find code quality gaps |
+| `/implement <feature>` | Implement a feature |
+| `/review <files>` | Code review |
+| `/debug <issue>` | Debug problem |
 
-### Enable / Disable
+See [Commands Reference](#commands-reference) for all 24 commands.
 
-**Via Command:**
-```
-/workflow off    # Use standard Claude
-/workflow on     # Use workflow agents
-```
-
-**Via CLAUDE.md:**
-Edit the first line:
-```markdown
-<!-- workflow: enabled -->   ← Agents active
-<!-- workflow: disabled -->  ← Standard Claude
+### Verify Installation
+```bash
+ls ~/.claude/skills/              # Should show 9 directories
+ls ~/.claude/agents/*.md          # Should show 3 subagents
+workflow-version                  # Should show v2.1.0
 ```
 
 ### Uninstall
@@ -97,678 +133,818 @@ Edit the first line:
 ```bash
 workflow-uninstall
 ```
-Removes symlinks and installation directory. Preserves user's own agents/commands.
 
-### Verify Installation
-```bash
-ls ~/.claude-workflow-agents/agents/  # Should show 12 .md files
-ls -la ~/.claude/agents/               # Should show symlinks
-workflow-toggle status                 # Should show "enabled"
-```
+Removes skills, symlinks, and installation directory. Preserves user's own agents/commands.
 
 ---
 
-## Updating
+## Architecture
 
-### Check Version
+### v2.1: Skills + Hooks
 
-```bash
-workflow-version
+Claude Workflow Agents uses a **context-efficient architecture**:
+
+```
+~/.claude/skills/                   # Skills (loaded on-demand)
+├── workflow/SKILL.md               # Orchestration logic
+├── ux-design/SKILL.md              # Design principles
+├── frontend/SKILL.md               # Frontend expertise
+├── backend/SKILL.md                # Backend expertise
+├── testing/SKILL.md                # Test strategies
+├── validation/SKILL.md             # Promise validation
+├── debugging/SKILL.md              # Debug protocols
+├── code-quality/SKILL.md           # Review criteria
+└── brownfield/SKILL.md             # Codebase analysis
+
+~/.claude/agents/                   # Subagents (isolated tasks)
+├── code-reviewer.md                # Code review
+├── debugger.md                     # Debugging
+└── ui-debugger.md                  # UI debugging
+
+Project/.claude/settings.json       # Hooks (optional)
+                                    # Auto-quality reminders
+
+Project/CLAUDE.md                   # Minimal (~80 lines)
+                                    # State only, skills load on-demand
 ```
 
-Output:
-```
-Claude Workflow Agents
-──────────────────────
-Version:   v2.0.0
-Location:  ~/.claude-workflow-agents
-Agents:    16
-Commands:  24
+### Benefits
 
-Commands:
-  workflow-toggle on/off/status  Enable, disable, or check status
-  workflow-update                Update installation
-  workflow-patch                 Update project CLAUDE.md (v2.0+)
-  workflow-version               Show version
-  workflow-uninstall             Remove installation
-```
+**Context Efficiency:**
+- v2.0: 750+ lines loaded every session
+- v2.1: ~80 lines + skills loaded only when needed
+- **90% reduction in upfront context**
 
-### Update to Latest (v2.0+)
+**Performance:**
+- Less context = better model performance
+- On-demand loading = faster responses
+- Skills cache between sessions
 
-**Two-step update process:**
+**Modularity:**
+- Skills can be updated independently
+- Easy to add new domain expertise
+- User can create custom skills
 
-#### 1. Update Workflow System
-
-```bash
-workflow-update
-```
-
-This updates the global workflow installation:
-- Pulls latest changes from git repository
-- Updates agents, commands, and templates in `~/.claude-workflow-agents/`
-- Recreates symlinks if new agents/commands were added
-- Shows changelog and asks for confirmation
-
-#### 2. Update Project CLAUDE.md (New in v2.0)
-
-```bash
-cd /path/to/your/project
-workflow-patch
-```
-
-This safely merges template updates into your project's CLAUDE.md:
-- **Preserves your data:**
-  - Project name and description
-  - Workflow state (progress, features, promises)
-  - Project context (decisions, notes)
-- **Updates orchestration logic:**
-  - L1/L2 flows
-  - Quality gates
-  - Issue response protocols
-  - Design principles
-- **Safety features:**
-  - Creates timestamped backup
-  - Shows diff preview
-  - Requires confirmation
-  - Easy rollback
-
-**Example update workflow:**
-
-```bash
-# 1. Update the workflow system globally
-workflow-update
-
-# Output:
-#   Updated: 1.3.0 → 2.0.0
-#   Changes: Self-contained templates, new patch command
-#   Would you like to patch your CLAUDE.md? [Y/n/l]
-
-# 2. If not in project directory, navigate there
-cd ~/my-project
-
-# 3. Run patch command
-workflow-patch
-
-# Shows diff preview:
-#   - Old orchestration flows
-#   + New orchestration flows with embedded logic
-#
-#   Apply patch? [Y/n/d]
-
-# 4. Review changes
-git diff CLAUDE.md
-
-# 5. Test that orchestration works correctly
-
-# 6. Delete backup if satisfied
-rm CLAUDE.md.backup-*
-```
-
-### Migrating from v1.x to v2.0
-
-**Breaking change in v2.0:** CLAUDE.md templates are now self-contained.
-
-If you have existing projects with workflow-enabled CLAUDE.md files:
-
-```bash
-# 1. Update workflow system
-workflow-update
-
-# 2. For EACH project with CLAUDE.md
-cd /path/to/project
-workflow-patch
-
-# 3. Review and test
-git diff CLAUDE.md
-# Verify orchestration still works
-
-# 4. Commit updated CLAUDE.md
-git add CLAUDE.md
-git commit -m "chore: update to workflow v2.0 self-contained template"
-```
-
-**What changed:**
-- **Before (v1.x):** CLAUDE.md had HTML comment saying "READ orchestrator.md" (unreliable)
-- **After (v2.0):** All orchestration logic embedded directly in CLAUDE.md (guaranteed to work)
-
-### Changelog
-
-See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+**Automatic Quality:**
+- Hooks inject reminders after code changes
+- Completion checklist before marking done
+- No manual intervention needed
 
 ---
 
-## Usage Levels
+## Usage
 
-This system supports multiple levels of usage. Start simple, go deeper when needed.
+### Workflow Phases
 
-### Level 1: Just Talk (Simplest)
+Claude Workflow follows a structured approach:
 
-For most projects, just describe what you want:
+**L1: Planning (Greenfield Projects)**
 ```
-"Build me a todo app"
-"Add user authentication"
-"The search is broken"
-"Continue"
+Intent → UX → Architecture → Implementation Plans
 ```
 
-Claude figures out what to do. No commands needed.
-
-**Best for:** Small projects, prototypes, learning
-
-### Level 2: Use Commands
-
-For more control, use optional commands:
+**L2: Building (Per Feature)**
 ```
-/project status      # See progress
-/project sync        # Update docs
-/review auth         # Review specific code
-/help                # Get help
+Backend → Review → Frontend → Review → Tests → Validate → Complete
 ```
 
-**Best for:** Medium projects, when you want visibility
-
-### Level 3: Parallel Development
-
-For large projects, build features simultaneously:
+**Analysis (Brownfield Projects)**
 ```
-/parallel setup      # Create feature worktrees
-/parallel merge      # Merge when done
+Scan Codebase → Infer State → Ask User → Continue with L2
 ```
 
-**Best for:** Large projects, teams, time pressure
+### Natural Language Interface
 
-### Level 4: Direct Agent Control
+Just describe what you want. Claude loads the appropriate skills automatically:
 
-For maximum control, invoke agents directly:
 ```
-"Use intent-guardian to redefine our promises"
-"Use gap-analyzer to check technical debt"
+You: "I want to build a recipe app"
+→ Claude loads workflow skill → Starts L1 planning
+
+You: "Add authentication"
+→ Claude loads change-analysis skill → Assesses impact → Updates docs → Implements
+
+You: "The login button isn't working"
+→ Claude loads debugging skill → Diagnoses → Fixes → Adds regression test
+
+You: "Improve the codebase"
+→ Claude loads brownfield + gap-analysis skills → Finds issues → Creates migration plan
 ```
 
-**Best for:** Complex projects, specific needs
+### Automatic Agent Chaining
+
+You never manually invoke agents. Claude orchestrates automatically:
+
+**Example flow:**
+1. User: "Build a todo app"
+2. Claude loads `workflow` skill
+3. Workflow skill triggers intent-guardian (via Task tool)
+4. Intent-guardian completes → workflow skill triggers ux-architect
+5. UX-architect completes → workflow skill triggers agentic-architect
+6. And so on...
+
+### Hooks (Optional Quality Gates)
+
+When you run `workflow-init`, you can enable automatic reminders:
+
+**PostToolUse Hook:**
+```
+You: [Makes code changes with Edit tool]
+Claude: ⚠️  [QUALITY REMINDER] Code changed.
+        Consider running code-reviewer subagent after completing current task.
+```
+
+**Stop Hook:**
+```
+You: [Clicks stop]
+Claude: ✓ [COMPLETION CHECKLIST]
+          • Tests passing?
+          • Code reviewed?
+          • CLAUDE.md state updated?
+          • Documentation synced?
+```
+
+Enable hooks during `workflow-init` or manually create `.claude/settings.json` (see templates/hooks/).
 
 ---
 
 ## New Projects (Greenfield)
 
-### Simple: Just Describe It
-```
-You: Build me a habit tracker app
+### Step 1: Initialize
 
-Claude: I'll help you build a habit tracker. Let me start by understanding
-        what we're building...
-
-        [Creates intent document]
-        [Designs user experience]
-
-        What design style do you prefer?
-        1. modern-clean (professional SaaS)
-        2. minimal (ultra-clean)
-        3. playful (vibrant, fun)
-        4. corporate (enterprise)
-        5. glassmorphism (modern glass)
-        6. Reference another site
-
-You: modern-clean
-
-Claude: [Creates design system]
-        [Plans architecture]
-        [Creates feature plans]
-
-        Ready to build. Starting with user authentication...
-
-        [Frontend engineer reads design system first]
-        [Builds feature by feature with consistent UI]
+```bash
+mkdir my-app
+cd my-app
+workflow-init
 ```
 
-### With More Detail
+Output:
 ```
-You: Build me a habit tracker with these requirements:
-     - Users can create daily/weekly habits
-     - Track streaks and completion rates
-     - Send reminder notifications
-     - Show progress charts
-     - Use React frontend, FastAPI backend, PostgreSQL
+🌱 GREENFIELD PROJECT
 
-Claude: [More detailed planning based on your requirements]
-```
+   New project.
+   Claude will start L1 planning from scratch.
 
-### Iterating
-```
-You: Actually, add social features - users should see friends' habits
+✓ CLAUDE.md created (~80 lines, context-efficient)
+✓ Workflow state initialized
+✓ Type: greenfield
 
-Claude: [Analyzes impact]
-        This adds:
-        - 3 new user journeys
-        - 5 API endpoints
-        - 2 new pages
+Skills location: ~/.claude/skills/
+Subagents: code-reviewer, debugger, ui-debugger
 
-        Updating plans and continuing...
+NEXT STEPS:
+1. Open Claude in this project
+2. Describe what you want to build
+3. Claude will run L1 planning automatically
 ```
 
-### Check Progress Anytime
+### Step 2: Describe Your Project
+
 ```
-You: Where are we?
-
-Claude: Project: Habit Tracker
-
-        ✓ auth - complete
-        ✓ habits - complete
-        🔄 tracking - in progress (backend done)
-        ○ notifications - not started
-        ○ charts - not started
-
-        Continue with tracking frontend?
+You: I want to build a Spanish learning app that teaches vocabulary
+     through visual associations without any English translations
 ```
 
-### Saving State Between Sessions
+### Step 3: Claude Runs L1 Planning Automatically
 
-Before ending a session:
+**Claude's Process (Automatic):**
+
+1. **Loads workflow skill** (orchestration logic)
+2. **Intent Guardian** - Captures your promises:
+   - MUST teach Spanish vocabulary
+   - MUST use only visual associations
+   - MUST NOT show English translations
+   - Creates `docs/intent/product-intent.md`
+
+3. **UX Architect** - Designs user experience:
+   - Applies Fitts's Law (44px touch targets)
+   - Applies Hick's Law (≤7 options visible)
+   - Creates journey maps
+   - Creates `docs/ux/user-journeys.md`
+
+4. **Agentic Architect** - Designs system:
+   - Maps promises to components
+   - Designs agent interactions
+   - Creates `docs/architecture/agent-design.md`
+
+5. **Implementation Planner** - Creates build plans:
+   - Breaks into features
+   - Each feature has backend/frontend/test steps
+   - Creates `docs/plans/phase-1.md`
+
+### Step 4: Claude Starts L2 Building
+
+For each feature:
+
 ```
-You: Save state before I go
-
-Claude: [Runs /sync]
-        ✓ CLAUDE.md updated with current task
-        ✓ Documentation synced
-        ✓ Test coverage recorded
-
-        Session state saved ✓
-
-        Next session, just say "continue" and I'll know
-        exactly where we left off.
+Backend → code-reviewer → tests
+Frontend → code-reviewer → tests → ui-debugger (if available)
+Testing → full test suite
+Validation → promises validated? → COMPLETE
 ```
 
-Next session:
-```
-You: Continue
+### Step 5: You Review and Approve
 
-Claude: Continuing from where we left off...
-        Current task: tracking frontend (SearchResults component)
-        [Continues seamlessly]
-```
+Claude asks for confirmation at key points:
+- After L1 planning: "Does this match your vision?"
+- After each feature: "Tests pass, ready for next feature?"
+- After validation: "All promises validated, feature complete?"
 
 ---
 
 ## Existing Projects (Brownfield)
 
-### Quick Audit
-```
-You: What's wrong with this codebase?
+### Step 1: Initialize in Existing Project
 
-Claude: [Scans code]
-
-        Found issues:
-
-        🔴 Critical (2):
-           - SQL injection in search endpoint
-           - No rate limiting on auth
-
-        🟠 High (4):
-           - N+1 queries in dashboard
-           - Missing error handling in checkout
-           - No input validation on forms
-           - Broken password reset flow
-
-        🟡 Medium (6):
-           - Duplicated code in services
-           - No tests for payment flow
-           ...
-
-        Want me to fix the critical issues first?
+```bash
+cd existing-project
+workflow-init
 ```
 
-### Full Analysis
+Output:
 ```
-You: Analyze this codebase completely
+📦 BROWNFIELD PROJECT
 
-Claude: [Deep audit]
+   Existing code detected.
+   Claude will analyze the codebase first to understand what's built.
 
-        I've analyzed your codebase. Here's what I found:
+✓ CLAUDE.md created (~80 lines, context-efficient)
+✓ Workflow state initialized
+✓ Type: brownfield
 
-        INFERRED INTENT:
-        This appears to be an e-commerce platform for...
-
-        INFERRED JOURNEYS:
-        - Browse products → Add to cart → Checkout
-        - User signup → Login → Manage profile
-        - Admin: Manage products, View orders
-
-        Is this understanding correct?
-
-You: Yes, but it's specifically for handmade crafts
-
-Claude: [Updates understanding]
-        [Creates gap analysis]
-        [Creates migration plan]
-
-        Migration plan created with 4 phases:
-        - Phase 0: Critical security fixes
-        - Phase 1: Broken features
-        - Phase 2: Tech debt
-        - Phase 3: Enhancements
-
-        Start with Phase 0?
+NEXT STEPS:
+1. Open Claude in this project
+2. Claude will automatically analyze your codebase
+3. Confirm the analysis
+4. Continue development from inferred state
 ```
 
-### Focused Improvement
+### Step 2: Claude Analyzes Automatically
+
+**Claude's Process (Automatic):**
+
+1. **Loads brownfield skill** (codebase analysis)
+2. **Scans your code:**
+   - Detects tech stack
+   - Identifies features
+   - Infers promises (what the app is supposed to do)
+   - Estimates test coverage
+
+3. **Creates [INFERRED] documentation:**
+   - `docs/intent/product-intent.md` (marked INFERRED)
+   - `docs/architecture/system-design.md` (marked INFERRED)
+   - `docs/plans/current-state.md`
+
+4. **Asks what you want to do:**
+   - Add a feature?
+   - Fix a bug?
+   - Improve code quality?
+   - Refactor?
+
+### Step 3: Choose Your Path
+
+**Add Feature:**
 ```
-You: Just fix the security issues
+You: Add user authentication
 
-Claude: [Fixes only security-related gaps]
+Claude: [Loads change-analysis skill]
+        → Analyzes impact on architecture
+        → Updates intent doc with new promises
+        → Creates feature plan
+        → Starts L2 building
+```
 
-        ✓ Added rate limiting
-        ✓ Parameterized SQL queries
-        ✓ Added CSRF protection
+**Find Issues:**
+```
+You: Find problems with the codebase
 
-        Security issues resolved.
-        Run /status to see remaining improvements.
+Claude: [Loads gap-analysis skill]
+        → Compares current vs. ideal
+        → Creates migration plan with priorities
+        → Shows Critical/High/Medium/Low gaps
+```
+
+**Fix Bug:**
+```
+You: The login form isn't working
+
+Claude: [Loads debugging skill]
+        → Systematic diagnosis
+        → Root cause analysis
+        → Fix + regression test
+        → code-reviewer validates
+```
+
+**Improve Quality:**
+```
+You: Improve code quality
+
+Claude: [Loads gap-analysis skill]
+        → Finds gaps (missing tests, tech debt, etc.)
+        → Creates prioritized plan
+        → Fixes one by one with tests
 ```
 
 ---
 
 ## Commands Reference
 
-### Project Operations
+### Planning Commands
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `/project setup` | Initialize project infrastructure | `/project setup` |
-| `/project sync` | Update docs and state | `/project sync` |
-| `/project sync quick` | Quick state update | `/project sync quick` |
-| `/project verify` | Check compliance | `/project verify` |
-| `/project docs <action>` | Manage documentation | `/project docs generate` |
-| `/project ai <action>` | LLM integration | `/project ai setup` |
-| `/project mcp <action>` | MCP servers | `/project mcp setup` |
-| `/project status` | Show project health | `/project status` |
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/analyze` | Run all L1 agents (intent, UX, architecture, plans) | New project, want full planning |
+| `/intent` | Define product intent and promises | Capture what app must do |
+| `/ux` | Design user experience | Plan user journeys |
+| `/plan` | Create implementation plans | After architecture done |
+| `/replan` | Regenerate plans after changes | After major architecture change |
 
-### Analysis & Planning
+### Building Commands
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `/analyze` | Run all L1 analysis agents | `/analyze` |
-| `/plan show` | Display current plans | `/plan show` |
-| `/audit` | Audit existing codebase | `/audit` |
-| `/gap` | Find gaps in brownfield | `/gap` |
-| `/change <description>` | Analyze change impact | `/change add comments` |
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/implement <feature>` | Build a specific feature | Ready to code |
+| `/verify` | Run full verification (tests, promises, docs) | Before marking feature complete |
+| `/review <files>` | Code review | After implementing |
+| `/debug <issue>` | Launch debugger | Something broken |
 
-### Development
+### Brownfield Commands
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `/implement` | Implement from plans | `/implement` |
-| `/review [target]` | Review code quality | `/review auth` |
-| `/debug` | Launch debugger | `/debug` |
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/audit` | Analyze existing codebase | First time in brownfield project |
+| `/gap` | Find code quality gaps | Want to improve existing code |
+| `/improve <phase>` | Fix gaps from migration plan | Incrementally improve code |
+| `/change <feature>` | Analyze impact of adding feature | Before implementing in brownfield |
 
-### Parallel Development (Advanced)
+### UX/Design Commands
 
-| Command | Purpose | Example |
-|---------|---------|---------|
-| `/parallel <feature>` | Create worktree for feature | `/parallel auth` |
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/ux` | Design user experience | Planning UX |
+| `/ux-audit` | Audit current UX | Improve existing UX |
+| `/design preset <name>` | Apply design system preset | Want consistent styling |
+| `/design reference <url>` | Design based on reference site | Match existing design |
 
-### Help
+### Architecture Commands
 
-| Command | Purpose |
-|---------|---------|
-| `/help` | Quick overview |
-| `/help workflow` | How the system works |
-| `/help agents` | All 12 agents |
-| `/help commands` | All commands |
-| `/help patterns` | Usage patterns |
-| `/help parallel` | Parallel development |
-| `/help brownfield` | Existing codebases |
-| `/help examples` | Practical examples |
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/aa` | Agentic architecture analysis | New project architecture |
+| `/aa-audit` | Audit for agentic opportunities | Optimize existing architecture |
+
+### Workflow Commands
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/help` | Show help system | Learn about commands/patterns |
+| `/workflow on/off/status` | Enable/disable/check | Toggle workflow |
+| `/parallel <features>` | Implement multiple features in parallel | Speed up development |
+| `/update` | Update workflow state | Manual state sync |
+
+### Project Operations Commands
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/project setup` | Initialize infrastructure (scripts, CI, hooks) | Setup automation |
+| `/project sync` | Sync docs with code | After implementation |
+| `/project verify` | Verify everything (tests, docs, intent) | Quality check |
+| `/project docs` | Generate documentation | Create docs from code |
+| `/project ai setup` | Configure LLM provider | Setup AI features |
+| `/project mcp setup` | Configure MCP servers | Setup integrations |
+| `/project status` | Show project health | Check overall status |
+| `/project commit` | Guided conventional commit | Make clean commits |
+| `/project push` | Push current branch | Deploy changes |
+| `/project pr` | Create pull request | Open PR with summary |
+
+### Git Workflow
+
+The workflow supports conventional commits and PR creation:
+
+```
+/project commit
+→ Analyzes changed files
+→ Suggests commit type (feat/fix/refactor/docs/test/chore)
+→ Generates commit message
+→ Shows staged changes
+→ Asks for confirmation
+
+/project pr
+→ Analyzes full branch changes
+→ Generates PR title and summary
+→ Creates TODO checklist for testing
+→ Opens PR (with GitHub MCP if available)
+```
+
+---
+
+## Skills Reference
+
+### Workflow Orchestration
+
+**Skill:** `workflow`
+**Auto-loaded:** When managing project phases
+**Purpose:** Orchestration logic for L1/L2 flows
+
+**Capabilities:**
+- L1 planning flow (Intent → UX → Architecture → Plans)
+- L2 building flow (Backend → Frontend → Tests → Validate)
+- Brownfield flow (Analyze → Infer → Continue)
+- Quality gate enforcement
+- Issue detection and response
+
+### UX Design Principles
+
+**Skill:** `ux-design`
+**Auto-loaded:** When designing interfaces or reviewing UX
+**Purpose:** Apply proven UX design laws
+
+**Includes:**
+- **Fitts's Law** - Touch target sizing (≥44px)
+- **Hick's Law** - Choice reduction (≤7 options)
+- **Miller's Law** - Information chunking (7±2 items)
+- **Jakob's Law** - Familiar patterns
+- **Aesthetic-Usability Effect** - Visual polish
+- **Progressive Disclosure** - Complexity hiding
+- **Recognition over Recall** - Visible options
+- **Doherty Threshold** - Response time (<400ms)
+
+### Frontend Development
+
+**Skill:** `frontend`
+**Auto-loaded:** When implementing UI
+**Purpose:** Frontend expertise with auto-applied design principles
+
+**Includes:**
+- Component patterns (button, input, form, layout)
+- State management (Zustand/Redux patterns)
+- Design principle application (from ux-design skill)
+- TypeScript + React best practices
+- Accessibility (ARIA, keyboard nav, screen readers)
+- Performance (lazy loading, memoization)
+
+### Backend Development
+
+**Skill:** `backend`
+**Auto-loaded:** When implementing APIs/services
+**Purpose:** Backend patterns and best practices
+
+**Includes:**
+- REST API design (Express/FastAPI/etc.)
+- Database patterns (Prisma/TypeORM/SQLAlchemy)
+- Validation (Zod/Pydantic)
+- Authentication & authorization
+- Error handling patterns
+- Testing strategies (unit/integration)
+
+### Testing Strategies
+
+**Skill:** `testing`
+**Auto-loaded:** When writing tests
+**Purpose:** Test pyramid and coverage strategies
+
+**Includes:**
+- Test pyramid (70% unit, 20% integration, 10% E2E)
+- Unit test patterns
+- Integration test patterns
+- E2E test patterns (Playwright/Cypress)
+- Test data factories
+- Mocking strategies
+
+### Promise Validation
+
+**Skill:** `validation`
+**Auto-loaded:** After tests pass
+**Purpose:** Validate promises are actually kept
+
+**Difference from testing:**
+- Tests: Code works correctly
+- Validation: Promises are kept
+
+**Example:**
+```
+Promise: "User can search recipes by ingredient"
+Test passing: Search API returns 200 OK
+Validation: User can actually find recipes by typing "chicken" in search
+```
+
+### Debugging Protocols
+
+**Skill:** `debugging`
+**Auto-loaded:** When issues reported
+**Purpose:** Systematic debugging approach
+
+**Protocol:**
+1. Reproduce issue
+2. Isolate root cause
+3. Verify hypothesis
+4. Apply minimal fix
+5. Add regression test
+6. Verify fix
+
+### Code Quality Review
+
+**Skill:** `code-quality`
+**Auto-loaded:** After code changes (via hook) or manual `/review`
+**Purpose:** Code review criteria
+
+**Checks:**
+- Security (injection, auth, secrets)
+- Performance (N+1, large loops, memory leaks)
+- Correctness (logic errors, edge cases)
+- Maintainability (complexity, naming, structure)
+- Testing (coverage, quality)
+- Intent compliance (promises kept?)
+
+### Brownfield Analysis
+
+**Skill:** `brownfield`
+**Auto-loaded:** First session in existing project
+**Purpose:** Understand existing codebase
+
+**Process:**
+1. Detect tech stack
+2. Scan file structure
+3. Identify features
+4. Infer promises
+5. Estimate test coverage
+6. Create [INFERRED] documentation
 
 ---
 
 ## Going Deeper
 
-### Understanding the Workflow
+### Design Systems
 
-The system uses a two-level workflow:
+Apply consistent styling with presets or references:
 
-**Level 1 (App):** Runs once at project start
+**Presets:**
 ```
-Intent → UX → Architecture → Plans
+/design preset modern-clean
+/design preset minimal
+/design preset playful
+/design preset corporate
+/design preset glassmorphism
 ```
 
-**Level 2 (Feature):** Runs for each feature
+Creates `docs/ux/design-system.md` with:
+- Colors, typography, spacing
+- Component specifications
+- Visual guidelines
+
+**Reference-based:**
 ```
-Backend → Frontend → Tests → Verify
+/design reference https://example.com
 ```
 
-See `/help workflow` for details.
+Analyzes the site and extracts design system.
 
-### The 16 Agents
+### Multi-LLM Integration
 
-| Agent | Purpose | Used When |
-|-------|---------|-----------|
-| intent-guardian | Define promises with criticality | New project, changes |
-| ux-architect | Design user experience & design system | New project, UX changes |
-| agentic-architect | Design system with promise mapping | New project, system changes |
-| implementation-planner | Create plans with validation tasks | After analysis |
-| change-analyzer | Assess change impact | Adding/changing features |
-| gap-analyzer | Find issues in existing code | Brownfield projects |
-| brownfield-analyzer | Scan existing codebases | Brownfield initialization |
-| backend-engineer | Build server-side code | Implementation |
-| frontend-engineer | Build UI (follows design system) | Implementation |
-| test-engineer | Write tests, verify | Implementation |
-| code-reviewer | Review code quality | After code changes |
-| debugger | Fix bugs | When things break |
-| ui-debugger | Debug UI with browser automation | UI issues |
-| acceptance-validator | Validate promises are kept | After features |
-| workflow-orchestrator | Auto-chain agents & quality gates | Always (automatic) |
-| project-ops | Setup, sync, verify, docs, AI | Project operations |
+Setup AI-powered features in your app:
 
-See `/help agents` for details.
-
-### Documents Created
 ```
-/docs
-├── intent/
-│   └── product-intent.md      # What we promise users
-├── ux/
-│   └── user-journeys.md       # How users interact
-├── architecture/
-│   └── agent-design.md        # System design
-├── plans/
-│   ├── overview/              # Full system specs
-│   │   ├── backend-plan.md
-│   │   ├── frontend-plan.md
-│   │   └── test-plan.md
-│   ├── features/              # Per-feature plans
-│   │   ├── auth.md
-│   │   ├── habits.md
-│   │   └── ...
-│   └── implementation-order.md
-├── gaps/                      # Brownfield only
-│   ├── gap-analysis.md
-│   └── migration-plan.md
-└── verification/
-    └── phase-N-report.md
+/project ai setup
 ```
+
+Choose provider:
+- Anthropic (Claude)
+- OpenAI (GPT)
+- Google (Gemini)
+- Ollama (local)
+
+Generates:
+- LLM client abstraction
+- Provider adapters
+- Cost tracking
+- Error handling
+
+See `templates/integrations/llm/` for code.
+
+### MCP Server Integration
+
+Connect to Model Context Protocol servers:
+
+```
+/project mcp setup
+```
+
+Configures Claude Code to use MCP servers for:
+- GitHub operations (PRs, issues)
+- Filesystem access
+- Database queries
+- Custom integrations
 
 ### Parallel Development
 
-For large projects (5+ features):
-```bash
-# After Claude creates plans
-/parallel setup
+Speed up implementation by building multiple features at once:
 
-# Opens separate folders for each feature
-# ../myapp-auth/
-# ../myapp-habits/
-# ../myapp-tracking/
-
-# Open terminals in each
-cd ../myapp-auth && claude
-> Build this feature
-
-# When done
-cd ../myapp
-/parallel merge
+```
+/parallel "user auth, recipe search, favorites"
 ```
 
-See `/agent-wf-help parallel` for details.
+Claude:
+1. Plans all features
+2. Checks for dependencies
+3. Implements in parallel (using multiple Task calls)
+4. Runs full test suite after all complete
+5. Validates all promises together
+
+### Hooks Customization
+
+Customize `.claude/settings.json` for your workflow:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": { "tool_name": "Write|Edit" },
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Code changed. Run tests?'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Remember to commit changes!'"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ---
 
 ## FAQ
 
-### Do I need to use commands?
+### General
 
-No. Just talk naturally. Commands are optional shortcuts.
+**Q: How do I disable the workflow?**
+A: Run `workflow-toggle off` or remove the CLAUDE.md file.
 
-### How do I start a new project?
+**Q: Does this work with existing projects?**
+A: Yes! Run `workflow-init` in any directory. Claude analyzes existing code automatically (brownfield mode).
 
-Just describe what you want to build:
-```
-"Build me a [description]"
-```
+**Q: Can I use this with non-Node.js projects?**
+A: Yes! Works with Python, Go, Rust, or any language. Tech stack auto-detected.
 
-### How do I improve existing code?
-```
-"Analyze this codebase"
-```
-or
-```
-"What's wrong with this code?"
-```
+**Q: How much context does this use?**
+A: ~80 lines from CLAUDE.md + skills loaded on-demand. 90% less than v2.0.
 
-### How do I add features?
+**Q: What if I don't want hooks?**
+A: Say "n" during `workflow-init`. Hooks are optional.
 
-Just ask:
-```
-"Add [feature description]"
-```
+### Technical
 
-Claude analyzes impact and updates plans.
+**Q: Where are skills stored?**
+A: `~/.claude/skills/` - Claude loads them automatically when needed.
 
-### How do I continue after a break?
-```
-"Where were we?"
-```
-or
-```
-"Continue"
-```
+**Q: Where are subagents stored?**
+A: Symlinked from `~/.claude-workflow-agents/agents/` to `~/.claude/agents/`.
 
-### How do I speed up development?
+**Q: Can I create custom skills?**
+A: Yes! Create `~/.claude/skills/my-skill/SKILL.md` with frontmatter `name` and `description`.
 
-Use parallel mode:
-```
-/parallel setup
-```
+**Q: How do I update?**
+A: Run `workflow-update`. It updates the global installation (skills, subagents, commands).
 
-### What if Claude misunderstands?
+**Q: What's the difference between skills and subagents?**
+A:
+- **Skills** = Domain expertise, loaded in main Claude context
+- **Subagents** = Isolated execution environments, separate context
 
-Just correct it:
-```
-"No, I meant [clarification]"
-```
+**Q: Do I need to initialize in every project?**
+A: Only if you want project-specific CLAUDE.md tracking state. Skills work globally without it.
 
-### How do I review code before shipping?
-```
-"Review the code"
-```
-or
-```
-/review
-```
+### Workflow
 
-### How do I fix a bug?
+**Q: Can I skip L1 planning?**
+A: For small features in brownfield projects, yes. Just say "add [feature]" and Claude uses change-analysis.
 
-Describe the problem:
-```
-"The login isn't working - I get error X"
-```
+**Q: How do I know what phase I'm in?**
+A: Check CLAUDE.md workflow state or run `/workflow status`.
+
+**Q: Can Claude switch between projects?**
+A: Skills are global, so yes. Each project has its own CLAUDE.md with independent state.
+
+**Q: What if tests fail?**
+A: Claude automatically loads debugger skill, fixes, and retries. Quality gate won't pass until tests pass.
+
+### Customization
+
+**Q: Can I modify the L1/L2 flows?**
+A: Yes, edit `~/.claude/skills/workflow/SKILL.md`. Be careful - orchestration logic is complex.
+
+**Q: Can I add my own agents?**
+A: Yes, create them in `~/.claude/agents/`. Workflow won't auto-chain them, but you can invoke manually.
+
+**Q: Can I change the design principles?**
+A: Yes, edit `~/.claude/skills/ux-design/SKILL.md`.
+
+### Troubleshooting
+
+**Q: Claude isn't loading skills automatically**
+A: Check `ls ~/.claude/skills/`. If empty, run `workflow-update` to reinstall.
+
+**Q: Subagents not found**
+A: Check `ls ~/.claude/agents/*.md`. Should show 3 files. If not, run `workflow-update`.
+
+**Q: Commands not working**
+A: Check `ls ~/.claude/commands/*.md`. Should show 24 files. If not, run `workflow-update`.
+
+**Q: Hook reminders not showing**
+A: Check `.claude/settings.json` exists. If not, run `workflow-init` again and enable hooks.
 
 ---
 
 ## Testing
 
-### Run All Automated Tests
+### For Users
+
+Projects have test infrastructure set up automatically:
+
 ```bash
+# After Claude implements features
+npm test               # Run test suite
+npm run test:coverage  # Check coverage
+npm run test:e2e       # Run E2E tests
+```
+
+Claude writes tests as part of L2 building flow.
+
+### For Contributors
+
+```bash
+# Run all workflow system tests
+cd claude-workflow-agents
 ./tests/run_all_tests.sh
+
+# Run specific test category
+./tests/structural/test_agents_exist.sh
+./tests/install/test_workflow_init_greenfield.sh
 ```
 
-### Run Specific Test Category
-```bash
-./tests/run_all_tests.sh --structural
-./tests/run_all_tests.sh --content
-./tests/run_all_tests.sh --consistency
-./tests/run_all_tests.sh --documentation
-./tests/run_all_tests.sh --integration
-```
-
-### Manual Testing
-
-See [tests/MANUAL_TEST_CHECKLIST.md](tests/MANUAL_TEST_CHECKLIST.md) for manual testing procedures that verify functionality with Claude Code.
-
-### Test Report
-
-Use [tests/TEST_REPORT_TEMPLATE.md](tests/TEST_REPORT_TEMPLATE.md) to document test results.
-
-For details, see [tests/README.md](tests/README.md).
+See [tests/README.md](tests/README.md) for details.
 
 ---
 
 ## More Resources
 
-- [GUIDE.md](GUIDE.md) - Quick reference card
-- [WORKFLOW.md](WORKFLOW.md) - Detailed workflow explanation
-- [EXAMPLES.md](EXAMPLES.md) - Practical examples
-- [FRONTEND.md](FRONTEND.md) - Frontend development best practices
-- [COMMANDS.md](COMMANDS.md) - Complete command reference
-- [AGENTS.md](AGENTS.md) - All agents documentation
-- `/agent-wf-help` - In-app help system
+- [CHANGELOG.md](CHANGELOG.md) - Release history
+- [CLAUDE.md](CLAUDE.md) - Contributor maintenance guide
+- [commands/help.md](commands/help.md) - In-app help system
+- [agents/workflow-orchestrator.md](agents/workflow-orchestrator.md) - Architecture reference
+- [templates/](templates/) - All templates (projects, docs, infrastructure, integrations)
+
+### Documentation Files
+
+- `AGENTS.md` - Agent reference (legacy, now mostly skills)
+- `COMMANDS.md` - Command reference
+- `EXAMPLES.md` - Example conversations
+- `PATTERNS.md` - Common usage patterns
+- `GUIDE.md` - Detailed guide
+- `WORKFLOW.md` - Workflow deep-dive
 
 ---
 
 ## Releasing (Maintainers)
 
-### Quick Release
-
-Bump version and prepare release:
+### Create Release
 
 ```bash
-# Bug fix (1.0.0 → 1.0.1)
-./scripts/release.sh patch
+# 1. Update version
+echo "2.x.x" > version.txt
 
-# New feature (1.0.0 → 1.1.0)
-./scripts/release.sh minor
+# 2. Update CHANGELOG.md
+# Add release notes
 
-# Breaking change (1.0.0 → 2.0.0)
-./scripts/release.sh major
+# 3. Commit
+git add version.txt CHANGELOG.md
+git commit -m "chore: bump version to 2.x.x"
+
+# 4. Tag
+git tag -a v2.x.x -m "Release v2.x.x"
+
+# 5. Push
+git push origin master --tags
 ```
 
-This updates `version.txt` and creates a new section in `CHANGELOG.md`.
-
-### Finish Release
-
-Edit `CHANGELOG.md` with actual changes, then:
-
+Users update with:
 ```bash
-./scripts/release-finish.sh
+workflow-update
 ```
-
-This commits, tags, and pushes to GitHub. GitHub Actions automatically creates the release.
-
-### Release Process
-
-1. **Prepare**: `./scripts/release.sh [major|minor|patch]`
-2. **Edit**: Update `CHANGELOG.md` with actual changes
-3. **Finish**: `./scripts/release-finish.sh`
-4. **Automatic**: GitHub Actions creates the release from tag
-5. **Users**: Run `workflow-update` to get new version
-
-### Semantic Versioning
-
-- **MAJOR**: Breaking changes (incompatible API)
-- **MINOR**: New features (backward compatible)
-- **PATCH**: Bug fixes (backward compatible)
 
 ---
 
 ## License
 
-MIT
+MIT License - see LICENSE file
