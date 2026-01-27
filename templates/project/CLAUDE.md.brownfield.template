@@ -8,49 +8,13 @@ Initialized: {{DATE}}
 
 INSTRUCTIONS FOR CLAUDE:
 
-1. READ the orchestrator agent FIRST:
-   {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
+1. READ the orchestrator: {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
 
-2. THIS IS AN EXISTING PROJECT - Code already exists
+2. THIS IS EXISTING CODE - Run brownfield-analyzer FIRST
 
-3. BEFORE doing anything else, run brownfield analysis:
-   - Read {{WORKFLOW_HOME}}/agents/brownfield-analyzer.md
-   - Scan the codebase
-   - Detect existing features and their completeness
-   - Present findings to user for confirmation
-   - THEN update the state below with inferred information
+3. FOLLOW agent utilization rules below (quality gates, debugging)
 
-4. AFTER analysis is confirmed:
-   - Create [INFERRED] documentation
-   - Continue from the inferred state
-   - Usually this means L2 (building remaining features)
-
-5. AUTO-CHAIN agents - Do NOT ask user to manually invoke agents
-
-6. UPDATE the state section after each significant action
-
-Available agents at {{WORKFLOW_HOME}}/agents/:
-  Analysis:
-    - brownfield-analyzer.md (MUST RUN FIRST for this project)
-
-  L1 Planning (will create [INFERRED] docs):
-    - intent-guardian.md
-    - ux-architect.md
-    - agentic-architect.md
-    - implementation-planner.md
-
-  L2 Building:
-    - backend-engineer.md
-    - frontend-engineer.md
-    - test-engineer.md
-
-  Quality:
-    - code-reviewer.md
-    - ui-debugger.md
-    - debugger.md
-
-  Operations:
-    - project-ops.md
+4. UPDATE state after each significant action
 
 ═══════════════════════════════════════════════════════════════════════════════
 -->
@@ -59,9 +23,145 @@ Available agents at {{WORKFLOW_HOME}}/agents/:
 
 ## 🔄 WORKFLOW ACTIVE (Brownfield)
 
-This is an **existing project** with code. Workflow will analyze what's built.
+This is an **existing codebase**. Workflow will analyze first.
 
-**Claude: Run brownfield-analyzer FIRST before any other action.**
+**Claude: Run brownfield-analyzer FIRST, then follow Agent Utilization Guide.**
+
+---
+
+## Brownfield First-Run Protocol
+
+```
+SESSION START (if analysis.status == pending)
+       │
+       ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ brownfield-analyzer                                                         │
+│                                                                             │
+│  1. Scan project structure                                                  │
+│  2. Detect tech stack                                                       │
+│  3. Identify features and completeness                                      │
+│  4. Check existing tests                                                    │
+│  5. Check existing documentation                                            │
+│  6. Present findings to user                                                │
+│                                                                             │
+│  User confirms? ─────┬───────────────────────────────────────┐              │
+│                      │                                       │              │
+│                     YES                                     NO              │
+│                      │                                       │              │
+│                      ▼                                       ▼              │
+│            Update CLAUDE.md state                    User corrects          │
+│            Create [INFERRED] docs                    Re-analyze             │
+│            Continue to L2                                                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Agent Utilization Guide
+
+**Claude: These rules are MANDATORY. Follow them automatically.**
+
+### Quality Gates (Same as Greenfield)
+
+```
+AFTER ANY CODE CHANGE:
+│
+├─► code-reviewer
+│   • Review new/modified files
+│   • Check: quality, security, intent compliance
+│
+├─► Run tests (if exist)
+│   • Must pass before continuing
+│
+└─► Update CLAUDE.md state
+```
+
+### L2 Building Flow (Per Feature)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE: [name]                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  backend-engineer ──► code-reviewer ──► tests ──► PASS? ──► Continue       │
+│                                                     │                       │
+│                                               FAIL? ▼                       │
+│                                               debugger (fix)                │
+│                                                     │                       │
+│  frontend-engineer ──► code-reviewer ──► tests ──► ui-debugger ──► PASS?   │
+│                                                                     │       │
+│                                                               FAIL? ▼       │
+│                                                         debugger/ui-debugger│
+│                                                                     │       │
+│  test-engineer ──► Run ALL tests ──► PASS? ──► FEATURE COMPLETE            │
+│                                        │                                    │
+│                                  FAIL? ▼                                    │
+│                                  Fix and retry                              │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ FEATURE COMPLETE:                                                           │
+│   • project-ops sync                                                        │
+│   • Update [INFERRED] docs → mark as verified                               │
+│   • CI verification                                                         │
+│   • Continue to next feature                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Issue Response Protocol
+
+```
+USER REPORTS ISSUE
+       │
+       ├─── UI issue ──────► ui-debugger
+       │                        │
+       │                        ▼
+       │                     Screenshot, console, diagnose, fix
+       │
+       ├─── Runtime issue ──► debugger
+       │                        │
+       │                        ▼
+       │                     Trace, diagnose, fix, add test
+       │
+       ├─── Test failure ───► debugger + test-engineer
+       │                        │
+       │                        ▼
+       │                     Analyze, fix code or test, verify
+       │
+       └─── After ANY fix:
+                │
+                ▼
+            code-reviewer ──► tests ──► update state
+```
+
+### CI/CD Verification
+
+```
+BEFORE FEATURE COMPLETE:
+
+  Run local CI simulation:
+  • Lint check
+  • Type check
+  • All tests
+  • Build
+
+  ALL MUST PASS
+
+AFTER FEATURE COMPLETE:
+
+  Suggest: /project commit, /project push, /project pr
+```
+
+### Agent Quick Reference
+
+| Agent | Auto/Manual | Trigger |
+|-------|-------------|---------|
+| brownfield-analyzer | AUTO | First run on brownfield |
+| code-reviewer | AUTO | After ANY code changes |
+| ui-debugger | AUTO | After frontend (if puppeteer) |
+| debugger | MANUAL | User reports issue |
+| test-engineer | AUTO | L2 testing phase |
+| project-ops | AUTO | After milestones |
 
 ---
 
@@ -154,8 +254,14 @@ l2:
 
 quality:
   last_review: null
+  last_review_result: null     # pass, fail
   last_test_run: null
-  issues: []
+  last_test_result: null       # pass, fail
+  open_issues: []
+
+ci:
+  last_check: null
+  status: null                 # pass, fail, not_configured
 
 session:
   last_updated: {{DATE}}
@@ -170,8 +276,10 @@ session:
 
 | Command | Description |
 |---------|-------------|
-| `/workflow status` | Show current state |
-| `/workflow analyze` | Re-run brownfield analysis |
-| `/workflow auto` | Enable auto-orchestration |
-| `/workflow manual` | Manual control |
 | `/help` | Show all commands |
+| `/status` | Show project progress |
+| `/workflow analyze` | Re-run brownfield analysis |
+| `/review [path]` | Code review files |
+| `/debug [issue]` | Start debug session |
+| `/project commit` | Conventional commit |
+| `/workflow status` | Show workflow state |

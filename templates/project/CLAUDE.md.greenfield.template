@@ -8,41 +8,15 @@ Initialized: {{DATE}}
 
 INSTRUCTIONS FOR CLAUDE:
 
-1. READ the orchestrator agent FIRST:
-   {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
+1. READ the orchestrator: {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
 
-2. CHECK the "Workflow State" section at the bottom of this file
+2. CHECK "Workflow State" section below
 
-3. FOLLOW the orchestrator's protocol:
-   - If state is "not_started" → Begin L1 planning
-   - If state is "in_progress" → Resume from saved position
-   - If state is "complete" → Project is done
+3. FOLLOW orchestration protocol (auto-chain agents)
 
-4. AUTO-CHAIN agents - Do NOT ask user to manually invoke agents
+4. FOLLOW agent utilization rules below (quality gates, debugging)
 
-5. UPDATE the state section after each significant action
-
-6. RUN quality gates automatically after each phase
-
-Available agents at {{WORKFLOW_HOME}}/agents/:
-  L1 Planning:
-    - intent-guardian.md (capture promises)
-    - ux-architect.md (design user experience)
-    - agentic-architect.md (system architecture)
-    - implementation-planner.md (build plan)
-
-  L2 Building:
-    - backend-engineer.md (APIs, services)
-    - frontend-engineer.md (UI components)
-    - test-engineer.md (testing)
-
-  Quality:
-    - code-reviewer.md (code review)
-    - ui-debugger.md (UI issues)
-    - debugger.md (general debugging)
-
-  Operations:
-    - project-ops.md (docs, releases, git)
+5. UPDATE state after each significant action
 
 ═══════════════════════════════════════════════════════════════════════════════
 -->
@@ -51,9 +25,199 @@ Available agents at {{WORKFLOW_HOME}}/agents/:
 
 ## 🔄 WORKFLOW ACTIVE
 
-This project uses **Claude Workflow Agents** for structured development.
+This project uses **Claude Workflow Agents**.
 
-**Claude: Read the bootstrap comment above before responding.**
+**Claude: Read the bootstrap comment above, then follow the Agent Utilization Guide below.**
+
+---
+
+## Agent Utilization Guide
+
+**Claude: These rules are MANDATORY. Follow them automatically.**
+
+### Quality Gates (Automatic After Code Changes)
+
+```
+AFTER ANY CODE CHANGE:
+│
+├─► code-reviewer
+│   • Review new/modified files
+│   • Check: quality, security, intent compliance
+│   • If issues: show summary, suggest fixes
+│   • If clean: continue silently
+│
+├─► Run tests (if exist)
+│   • npm test / pytest / cargo test
+│   • If fail: STOP, show failures, ask to fix
+│   • If pass: continue
+│
+└─► Update CLAUDE.md state
+```
+
+### L2 Building Flow (Per Feature)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ FEATURE: [name]                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  backend-engineer                                                           │
+│       │                                                                     │
+│       ▼                                                                     │
+│  ┌─────────────────┐     ┌─────────────────┐                               │
+│  │  code-reviewer  │ ──► │   Run tests     │                               │
+│  │  (AUTO)         │     │   (if exist)    │                               │
+│  └─────────────────┘     └────────┬────────┘                               │
+│                                   │                                         │
+│                          PASS?────┼────FAIL?                                │
+│                            │      │      │                                  │
+│                            ▼      │      ▼                                  │
+│                       Continue    │   debugger                              │
+│                            │      │   (fix, retry)                          │
+│       ┌────────────────────┘      │                                         │
+│       ▼                           │                                         │
+│  frontend-engineer                │                                         │
+│       │                           │                                         │
+│       ▼                           │                                         │
+│  ┌─────────────────┐     ┌────────┴────────┐     ┌─────────────────┐       │
+│  │  code-reviewer  │ ──► │   Run tests     │ ──► │  ui-debugger    │       │
+│  │  (AUTO)         │     │   (if exist)    │     │  (if puppeteer) │       │
+│  └─────────────────┘     └────────┬────────┘     └────────┬────────┘       │
+│                                   │                       │                 │
+│                          PASS?────┼────FAIL?              │                 │
+│                            │      │      │                │                 │
+│                            ▼      │      ▼                │                 │
+│                       Continue    │   debugger/           │                 │
+│                            │      │   ui-debugger         │                 │
+│       ┌────────────────────┘      │                       │                 │
+│       ▼                           │                       │                 │
+│  test-engineer                    │                       │                 │
+│       │                           │                       │                 │
+│       ▼                           │                       │                 │
+│  ┌─────────────────┐              │                       │                 │
+│  │  Run ALL tests  │              │                       │                 │
+│  └────────┬────────┘              │                       │                 │
+│           │                       │                       │                 │
+│  PASS?────┼────FAIL?              │                       │                 │
+│    │      │      │                │                       │                 │
+│    ▼      │      ▼                │                       │                 │
+│ ┌──────┐  │   ┌──────────┐        │                       │                 │
+│ │DONE  │  │   │Fix tests │        │                       │                 │
+│ └──┬───┘  │   └──────────┘        │                       │                 │
+│    │      │                       │                       │                 │
+├────┼──────┴───────────────────────┴───────────────────────┘                 │
+│    ▼                                                                        │
+│  FEATURE COMPLETE                                                           │
+│    │                                                                        │
+│    ├──► project-ops sync (update docs)                                      │
+│    ├──► Update intent (mark promises KEPT)                                  │
+│    ├──► Update CLAUDE.md state                                              │
+│    ├──► CI verification (if configured)                                     │
+│    └──► Continue to next feature                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Issue Response Protocol
+
+```
+USER REPORTS ISSUE
+       │
+       ├─── "UI doesn't work" / "looks wrong" / "can't click"
+       │           │
+       │           ▼
+       │    ┌─────────────────────────────────────────────────────────────┐
+       │    │ ui-debugger                                                 │
+       │    │  1. Navigate to problem area                                │
+       │    │  2. Take screenshot                                         │
+       │    │  3. Capture console errors                                  │
+       │    │  4. Check network requests                                  │
+       │    │  5. Inspect DOM                                             │
+       │    │  6. Diagnose root cause                                     │
+       │    │  7. Suggest/apply fix                                       │
+       │    │  8. Verify fix                                              │
+       │    └─────────────────────────────────────────────────────────────┘
+       │
+       ├─── "Error" / "crash" / "exception" / "doesn't work"
+       │           │
+       │           ▼
+       │    ┌─────────────────────────────────────────────────────────────┐
+       │    │ debugger                                                    │
+       │    │  1. Understand the error                                    │
+       │    │  2. Reproduce the issue                                     │
+       │    │  3. Add logging if needed                                   │
+       │    │  4. Trace to root cause                                     │
+       │    │  5. Fix the issue                                           │
+       │    │  6. Add test to prevent regression                          │
+       │    │  7. Verify fix                                              │
+       │    └─────────────────────────────────────────────────────────────┘
+       │
+       ├─── "Test failing" / "tests broken"
+       │           │
+       │           ▼
+       │    ┌─────────────────────────────────────────────────────────────┐
+       │    │ debugger + test-engineer                                    │
+       │    │  1. Run failing tests                                       │
+       │    │  2. Analyze failure output                                  │
+       │    │  3. Determine: test wrong OR code wrong?                    │
+       │    │  4. Fix appropriate side                                    │
+       │    │  5. Run tests again                                         │
+       │    │  6. Verify all pass                                         │
+       │    └─────────────────────────────────────────────────────────────┘
+       │
+       └─── After ANY fix:
+                    │
+                    ▼
+             ┌─────────────────────────────────────────────────────────────┐
+             │ code-reviewer on changed files                              │
+             │ Run relevant tests                                          │
+             │ Update state if needed                                      │
+             └─────────────────────────────────────────────────────────────┘
+```
+
+### CI/CD Verification
+
+```
+BEFORE FEATURE COMPLETE:
+
+  ┌─────────────────────────────────────────────────────────────────────────┐
+  │ Local CI Simulation                                                     │
+  │                                                                         │
+  │  IF package.json exists:                                                │
+  │    npm run lint (if script exists)                                      │
+  │    npm run typecheck (if script exists)                                 │
+  │    npm run test                                                         │
+  │    npm run build                                                        │
+  │                                                                         │
+  │  IF pyproject.toml/requirements.txt:                                    │
+  │    ruff check . (if configured)                                         │
+  │    mypy . (if configured)                                               │
+  │    pytest                                                               │
+  │                                                                         │
+  │  IF scripts/verify.sh exists:                                           │
+  │    ./scripts/verify.sh                                                  │
+  │                                                                         │
+  │  ALL MUST PASS before marking complete                                  │
+  └─────────────────────────────────────────────────────────────────────────┘
+
+AFTER FEATURE COMPLETE (suggest to user):
+
+  "Feature complete and verified. Ready to commit?
+
+   /project commit - Create conventional commit
+   /project push   - Push to remote
+   /project pr     - Create PR (requires GitHub MCP)"
+```
+
+### Agent Quick Reference
+
+| Agent | Auto/Manual | Trigger |
+|-------|-------------|---------|
+| code-reviewer | AUTO | After ANY code changes |
+| ui-debugger | AUTO | After frontend (if puppeteer) |
+| debugger | MANUAL | User reports issue |
+| test-engineer | AUTO | L2 testing phase |
+| project-ops | AUTO | After milestones |
 
 ---
 
@@ -115,17 +279,17 @@ l2:
   current_step: null           # backend, frontend, testing, verification
   features: {}
   # Features will be populated after L1 planning completes
-  # Example:
-  # auth:
-  #   status: complete
-  #   backend: complete
-  #   frontend: complete
-  #   tests: complete
 
 quality:
   last_review: null
+  last_review_result: null     # pass, fail
   last_test_run: null
-  issues: []
+  last_test_result: null       # pass, fail
+  open_issues: []
+
+ci:
+  last_check: null
+  status: null                 # pass, fail, not_configured
 
 session:
   last_updated: {{DATE}}
@@ -140,11 +304,13 @@ session:
 
 | Command | Description |
 |---------|-------------|
-| `/workflow status` | Show current state |
-| `/workflow auto` | Enable auto-orchestration (default) |
-| `/workflow manual` | Disable auto-orchestration |
-| `/workflow pause` | Pause after current step |
-| `/workflow resume` | Resume paused workflow |
-| `/help` | Show all available commands |
+| `/help` | Show all commands |
 | `/status` | Show project progress |
 | `/next` | Continue to next step |
+| `/review [path]` | Code review specific files |
+| `/verify` | Run verification checks |
+| `/debug [issue]` | Start debug session |
+| `/project commit` | Conventional commit |
+| `/project release` | Release workflow |
+| `/workflow status` | Show workflow state |
+| `/workflow pause` | Pause auto-orchestration |

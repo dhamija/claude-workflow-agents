@@ -312,6 +312,193 @@ Continuing to next feature...
 
 ---
 
+## Quality Gate Enforcement (Detailed)
+
+**These run AUTOMATICALLY. Do not skip.**
+
+### After Code Changes
+
+```
+TRIGGER: Any file in src/, lib/, app/, etc. created or modified
+
+ACTION:
+  1. Identify changed files
+  2. Invoke code-reviewer:
+     "Review these files: [list]
+      Check: quality, security, intent compliance
+      Report: issues or 'clean'"
+  3. If issues found:
+     - Show summary to user
+     - Ask: "Fix these issues? [Yes / Skip / Show details]"
+     - If yes: fix and re-review
+  4. If clean:
+     - Note in state: quality.last_review = now, result = pass
+     - Continue silently
+```
+
+### After Backend Step
+
+```
+TRIGGER: backend-engineer completes
+
+ACTION:
+  1. code-reviewer on new backend files
+  2. Run backend tests:
+     - npm test (if jest/vitest)
+     - pytest (if python)
+     - go test (if go)
+  3. Quick API check (if applicable):
+     - curl health endpoint
+     - Verify response
+  4. If all pass: continue to frontend
+  5. If fail: invoke debugger, fix, retry
+```
+
+### After Frontend Step
+
+```
+TRIGGER: frontend-engineer completes
+
+ACTION:
+  1. code-reviewer on new frontend files
+  2. Run frontend tests
+  3. IF puppeteer MCP available:
+     - Invoke ui-debugger quick check:
+       "Quick UI verification:
+        - Screenshot main views
+        - Check console for errors
+        - Verify no layout breaks"
+  4. If issues: fix before continuing
+  5. If clean: continue to testing
+```
+
+### After Test Step
+
+```
+TRIGGER: test-engineer completes
+
+ACTION:
+  1. Run FULL test suite
+  2. Check results:
+     - All pass? → Continue
+     - Any fail? → STOP
+  3. If failures:
+     - Show failing tests
+     - Ask: "Fix failing tests? [Yes / Skip (not recommended)]"
+     - Invoke debugger to fix
+     - Re-run tests
+     - Repeat until pass
+```
+
+### After Feature Complete
+
+```
+TRIGGER: All steps (backend, frontend, tests) pass
+
+ACTION:
+  1. CI Verification:
+     - IF scripts/verify.sh exists: run it
+     - IF package.json has lint/typecheck: run them
+     - IF .github/workflows/ exists: simulate checks
+  2. Documentation:
+     - Invoke project-ops sync
+     - Update intent doc (mark promises)
+  3. State:
+     - Mark feature complete
+     - Update CLAUDE.md
+  4. Announce:
+     "✓ Feature [name] complete
+
+      Tests: X passing
+      Coverage: Y% (if available)
+
+      Ready for next feature: [name]
+
+      Or commit now? /project commit"
+```
+
+---
+
+## Issue Response
+
+### Detecting Issue Reports
+
+```
+KEYWORDS that trigger debug mode:
+  - "doesn't work"
+  - "broken"
+  - "bug"
+  - "error"
+  - "crash"
+  - "exception"
+  - "failed"
+  - "wrong"
+  - "issue"
+  - "problem"
+  - "not working"
+  - "can't"
+
+CONTEXT determines which debugger:
+  - "page", "screen", "button", "UI", "display", "layout", "click"
+    → ui-debugger
+  - "API", "request", "response", "server", "backend", "data"
+    → debugger (backend focus)
+  - "test", "failing", "spec"
+    → debugger + test-engineer
+  - General/unclear
+    → debugger (general)
+```
+
+### Debug Flow
+
+```
+USER: "[issue description]"
+
+Claude:
+  1. Acknowledge issue
+  2. Determine type (UI/backend/test/general)
+  3. Invoke appropriate debugger:
+
+     ui-debugger:
+       "Investigating UI issue: [description]
+
+        [Navigate to relevant page]
+        [Take screenshot]
+        [Check console]
+        [Inspect elements]
+
+        Found: [root cause]
+
+        Fixing..."
+
+     debugger:
+       "Investigating: [description]
+
+        [Read relevant code]
+        [Add logging if needed]
+        [Trace execution]
+
+        Found: [root cause]
+
+        Fixing..."
+
+  4. Apply fix
+  5. Verify fix:
+     - Run relevant tests
+     - If UI: screenshot after fix
+  6. code-reviewer on changes
+  7. Update state
+  8. Announce:
+     "✓ Fixed: [brief description]
+
+      Root cause: [explanation]
+      Changes: [files modified]
+
+      Verified: [tests pass / UI working]"
+```
+
+---
+
 ## State Tracking
 
 Maintain state in CLAUDE.md or memory:
@@ -335,6 +522,34 @@ Progress:
 ```
 
 Read this at start of each session to know where we are.
+
+### State Updates (Mandatory)
+
+After EVERY action, update CLAUDE.md:
+
+```yaml
+# After code review
+quality:
+  last_review: "2024-01-15T10:30:00Z"
+  last_review_result: pass  # or fail
+  open_issues: []  # or list of issues
+
+# After tests
+quality:
+  last_test_run: "2024-01-15T10:35:00Z"
+  last_test_result: pass  # or fail
+
+# After CI check
+ci:
+  last_check: "2024-01-15T10:40:00Z"
+  status: pass  # or fail
+
+# Always
+session:
+  last_updated: "2024-01-15T10:40:00Z"
+  last_action: "Completed auth backend, code review passed"
+  next_action: "Continue to auth frontend"
+```
 
 ---
 
