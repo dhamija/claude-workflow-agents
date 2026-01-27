@@ -23,10 +23,14 @@
 
 ```
 ~/.claude-workflow-agents/           # Installation directory
-├── agents/                          # 12 agent definitions
-├── commands/                        # 23 command definitions
+├── agents/                          # 15 agent definitions
+├── commands/                        # 24 command definitions
 ├── templates/                       # Templates for user projects
+│   └── project/                     # Project bootstrap templates
+│       ├── CLAUDE.md.greenfield.template
+│       └── CLAUDE.md.brownfield.template
 ├── bin/                            # CLI commands
+│   ├── workflow-init               # Initialize project (NEW)
 │   ├── workflow-toggle             # Enable/disable globally
 │   ├── workflow-update             # Update from git
 │   ├── workflow-uninstall          # Remove installation
@@ -37,11 +41,11 @@
 ├── agents/                          # Individual file symlinks
 │   ├── intent-guardian.md -> ~/.claude-workflow-agents/agents/intent-guardian.md
 │   ├── ux-architect.md -> ~/.claude-workflow-agents/agents/ux-architect.md
-│   └── ... (12 total)
+│   └── ... (15 total)
 └── commands/                        # Individual file symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
-    └── ... (23 total)
+    └── ... (24 total)
 ```
 
 ### How It Works
@@ -118,7 +122,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 | Metric | Count |
 |--------|-------|
-| Agents | 14 |
+| Agents | 15 |
 | Commands | 24 |
 
 ### Agents
@@ -131,6 +135,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | implementation-planner | L1 | Create build plan |
 | change-analyzer | L1 Support | Assess changes |
 | gap-analyzer | L1 Support | Find issues |
+| brownfield-analyzer | L1 Support | Scan existing codebases |
 | backend-engineer | L2 | Build backend |
 | frontend-engineer | L2 | Build frontend |
 | test-engineer | L2 | Write tests |
@@ -170,14 +175,15 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 │   └── .github/workflows/     # Repo CI
 │
 ├── INSTALLED FILES (copied to ~/.claude-workflow-agents/)
-│   ├── agents/                # Agent definitions (12)
-│   ├── commands/              # Command definitions (23)
+│   ├── agents/                # Agent definitions (15)
+│   ├── commands/              # Command definitions (24)
 │   ├── templates/             # User project templates
 │   └── version.txt            # Workflow version
 │
 └── USER TEMPLATES (in templates/, for user projects)
     ├── project/
-    │   ├── CLAUDE.md.template     # → user's CLAUDE.md
+    │   ├── CLAUDE.md.greenfield.template  # → user's CLAUDE.md (new projects)
+    │   ├── CLAUDE.md.brownfield.template  # → user's CLAUDE.md (existing code)
     │   └── README.md.template     # → user's README.md
     ├── docs/
     │   ├── intent/                # → user's /docs/intent/

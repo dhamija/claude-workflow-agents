@@ -1,0 +1,150 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+WORKFLOW BOOTSTRAP - CLAUDE MUST READ THIS FIRST
+═══════════════════════════════════════════════════════════════════════════════
+
+Project Type: GREENFIELD (new project)
+Initialized: {{DATE}}
+
+INSTRUCTIONS FOR CLAUDE:
+
+1. READ the orchestrator agent FIRST:
+   {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
+
+2. CHECK the "Workflow State" section at the bottom of this file
+
+3. FOLLOW the orchestrator's protocol:
+   - If state is "not_started" → Begin L1 planning
+   - If state is "in_progress" → Resume from saved position
+   - If state is "complete" → Project is done
+
+4. AUTO-CHAIN agents - Do NOT ask user to manually invoke agents
+
+5. UPDATE the state section after each significant action
+
+6. RUN quality gates automatically after each phase
+
+Available agents at {{WORKFLOW_HOME}}/agents/:
+  L1 Planning:
+    - intent-guardian.md (capture promises)
+    - ux-architect.md (design user experience)
+    - agentic-architect.md (system architecture)
+    - implementation-planner.md (build plan)
+
+  L2 Building:
+    - backend-engineer.md (APIs, services)
+    - frontend-engineer.md (UI components)
+    - test-engineer.md (testing)
+
+  Quality:
+    - code-reviewer.md (code review)
+    - ui-debugger.md (UI issues)
+    - debugger.md (general debugging)
+
+  Operations:
+    - project-ops.md (docs, releases, git)
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+# {{PROJECT_NAME}}
+
+## 🔄 WORKFLOW ACTIVE
+
+This project uses **Claude Workflow Agents** for structured development.
+
+**Claude: Read the bootstrap comment above before responding.**
+
+---
+
+## Project Context
+
+> {{PROJECT_DESCRIPTION}}
+
+### Key Decisions
+
+- [Document important decisions here]
+
+### Notes
+
+- [Add project notes, context, constraints]
+
+---
+
+## Session Resume
+
+**When starting a new session, Claude should:**
+
+1. Read the Workflow State below
+2. Announce: "Resuming [project] - [current state]. Continue?"
+3. On confirmation, continue from saved position
+4. If state is unclear, ask for clarification
+
+**Current Status:**
+- Phase: L1 Planning (not started)
+- Next: Begin with intent-guardian to capture promises
+
+---
+
+## Workflow State
+```yaml
+workflow:
+  version: 1.0
+  type: greenfield
+  phase: L1                    # L1 (planning) or L2 (building)
+  status: not_started          # not_started, in_progress, paused, complete
+  mode: auto                   # auto (recommended) or manual
+  initialized: {{DATE}}
+
+l1:
+  intent:
+    status: pending            # pending, in_progress, complete
+    output: null
+  ux:
+    status: pending
+    output: null
+  architecture:
+    status: pending
+    output: null
+  planning:
+    status: pending
+    output: null
+
+l2:
+  current_feature: null
+  current_step: null           # backend, frontend, testing, verification
+  features: {}
+  # Features will be populated after L1 planning completes
+  # Example:
+  # auth:
+  #   status: complete
+  #   backend: complete
+  #   frontend: complete
+  #   tests: complete
+
+quality:
+  last_review: null
+  last_test_run: null
+  issues: []
+
+session:
+  last_updated: {{DATE}}
+  last_action: "Project initialized"
+  next_action: "User describes project → Begin L1 with intent-guardian"
+  session_count: 0
+```
+
+---
+
+## Workflow Commands
+
+| Command | Description |
+|---------|-------------|
+| `/workflow status` | Show current state |
+| `/workflow auto` | Enable auto-orchestration (default) |
+| `/workflow manual` | Disable auto-orchestration |
+| `/workflow pause` | Pause after current step |
+| `/workflow resume` | Resume paused workflow |
+| `/help` | Show all available commands |
+| `/status` | Show project progress |
+| `/next` | Continue to next step |

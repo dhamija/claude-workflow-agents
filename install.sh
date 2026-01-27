@@ -160,6 +160,7 @@ echo "Agents:    $AGENTS"
 echo "Commands:  $COMMANDS"
 echo ""
 echo "Commands:"
+echo "  workflow-init                  Initialize workflow in a project"
 echo "  workflow-toggle on/off/status  Enable, disable, or check status"
 echo "  workflow-update                Update installation"
 echo "  workflow-version               Show version"
@@ -390,6 +391,277 @@ SCRIPT
 chmod +x "$INSTALL_DIR/bin/workflow-uninstall"
 
 # ─────────────────────────────────────────────────────────────────
+# Create: workflow-init
+# ─────────────────────────────────────────────────────────────────
+cat > "$INSTALL_DIR/bin/workflow-init" << 'SCRIPT'
+#!/bin/bash
+
+# Initialize workflow in a project
+# Detects greenfield vs brownfield and creates appropriate CLAUDE.md
+
+set -e
+
+WORKFLOW_HOME="$HOME/.claude-workflow-agents"
+TEMPLATES_DIR="$WORKFLOW_HOME/templates/project"
+DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+PROJECT_NAME=$(basename "$(pwd)")
+
+echo ""
+echo "╔═══════════════════════════════════════════════════════════════════════════╗"
+echo "║              CLAUDE WORKFLOW AGENTS - PROJECT INIT                        ║"
+echo "╚═══════════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+# Check global install
+if [ ! -d "$WORKFLOW_HOME/agents" ]; then
+    echo "ERROR: Workflow agents not installed."
+    echo ""
+    echo "Install first with:"
+    echo "  curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash"
+    exit 1
+fi
+
+# Check if already initialized
+if [ -f "CLAUDE.md" ] && grep -q "WORKFLOW BOOTSTRAP" "CLAUDE.md"; then
+    echo "✓ Workflow already initialized in this project."
+    echo ""
+
+    # Show current state
+    if grep -q "type: greenfield" "CLAUDE.md"; then
+        echo "  Type: Greenfield"
+    elif grep -q "type: brownfield" "CLAUDE.md"; then
+        echo "  Type: Brownfield"
+    fi
+
+    if grep -q "phase: L1" "CLAUDE.md"; then
+        echo "  Phase: L1 (Planning)"
+    elif grep -q "phase: L2" "CLAUDE.md"; then
+        echo "  Phase: L2 (Building)"
+    elif grep -q "phase: analysis" "CLAUDE.md"; then
+        echo "  Phase: Analysis"
+    fi
+
+    echo ""
+    echo "  To reset: Remove CLAUDE.md and run workflow-init again"
+    exit 0
+fi
+
+# Detect project type
+echo "Analyzing project..."
+echo ""
+
+HAS_CODE=false
+CODE_INDICATORS=0
+
+# Check for source code
+[ -d "src" ] && ((CODE_INDICATORS++))
+[ -d "app" ] && ((CODE_INDICATORS++))
+[ -d "lib" ] && ((CODE_INDICATORS++))
+[ -d "pkg" ] && ((CODE_INDICATORS++))
+ls *.py 2>/dev/null | head -1 > /dev/null && ((CODE_INDICATORS++))
+ls *.js 2>/dev/null | head -1 > /dev/null && ((CODE_INDICATORS++))
+ls *.ts 2>/dev/null | head -1 > /dev/null && ((CODE_INDICATORS++))
+ls *.go 2>/dev/null | head -1 > /dev/null && ((CODE_INDICATORS++))
+ls *.rs 2>/dev/null | head -1 > /dev/null && ((CODE_INDICATORS++))
+
+# Check for package files (indicates real project, not just scripts)
+[ -f "package.json" ] && ((CODE_INDICATORS++))
+[ -f "requirements.txt" ] && ((CODE_INDICATORS++))
+[ -f "pyproject.toml" ] && ((CODE_INDICATORS++))
+[ -f "Cargo.toml" ] && ((CODE_INDICATORS++))
+[ -f "go.mod" ] && ((CODE_INDICATORS++))
+
+if [ $CODE_INDICATORS -ge 2 ]; then
+    HAS_CODE=true
+fi
+
+# Check for existing CLAUDE.md (user content to preserve)
+HAS_EXISTING_CLAUDE_MD=false
+EXISTING_CONTENT=""
+if [ -f "CLAUDE.md" ]; then
+    HAS_EXISTING_CLAUDE_MD=true
+    EXISTING_CONTENT=$(cat "CLAUDE.md")
+fi
+
+echo "  Project name:     $PROJECT_NAME"
+echo "  Has code:         $HAS_CODE"
+echo "  Has CLAUDE.md:    $HAS_EXISTING_CLAUDE_MD"
+echo ""
+
+# Determine project type
+if [ "$HAS_CODE" = true ]; then
+    PROJECT_TYPE="brownfield"
+    echo "📦 BROWNFIELD PROJECT"
+    echo ""
+    echo "   Existing code detected."
+    echo "   Claude will analyze the codebase first to understand what's built."
+else
+    PROJECT_TYPE="greenfield"
+    echo "🌱 GREENFIELD PROJECT"
+    echo ""
+    echo "   New project."
+    echo "   Claude will start L1 planning from scratch."
+fi
+
+echo ""
+read -p "Continue with $PROJECT_TYPE setup? [Y/n] " confirm
+if [[ "$confirm" =~ ^[Nn]$ ]]; then
+    echo "Cancelled."
+    exit 0
+fi
+
+# Create CLAUDE.md from template
+echo ""
+echo "Creating CLAUDE.md..."
+
+if [ "$PROJECT_TYPE" = "greenfield" ]; then
+    TEMPLATE="$TEMPLATES_DIR/CLAUDE.md.greenfield.template"
+else
+    TEMPLATE="$TEMPLATES_DIR/CLAUDE.md.brownfield.template"
+fi
+
+if [ -f "$TEMPLATE" ]; then
+    # Use template
+    sed -e "s|{{PROJECT_NAME}}|$PROJECT_NAME|g" \
+        -e "s|{{DATE}}|$DATE|g" \
+        -e "s|{{WORKFLOW_HOME}}|$WORKFLOW_HOME|g" \
+        -e "s|{{PROJECT_DESCRIPTION}}|Describe your project here|g" \
+        "$TEMPLATE" > "CLAUDE.md"
+else
+    echo "Warning: Template not found at $TEMPLATE"
+    echo "Creating basic CLAUDE.md..."
+
+    # Fallback - create inline
+    cat > "CLAUDE.md" << EOF
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+WORKFLOW BOOTSTRAP - CLAUDE MUST READ THIS FIRST
+═══════════════════════════════════════════════════════════════════════════════
+
+Project Type: ${PROJECT_TYPE^^}
+Initialized: $DATE
+
+INSTRUCTIONS FOR CLAUDE:
+
+1. READ the orchestrator agent FIRST:
+   $WORKFLOW_HOME/agents/workflow-orchestrator.md
+
+2. CHECK the "Workflow State" section at the bottom of this file
+
+3. FOLLOW the orchestrator's protocol for ${PROJECT_TYPE} projects
+
+4. AUTO-CHAIN agents - Do NOT ask user to manually invoke agents
+
+5. UPDATE the state section after each significant action
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+# $PROJECT_NAME
+
+## 🔄 WORKFLOW ACTIVE
+
+This project uses Claude Workflow Agents.
+
+**Claude: Read the bootstrap comment above before responding.**
+
+---
+
+## Project Context
+
+> Describe your project here
+
+### Notes
+
+- [Add your notes]
+
+---
+
+## Workflow State
+
+\`\`\`yaml
+workflow:
+  version: 1.0
+  type: $PROJECT_TYPE
+  phase: $([ "$PROJECT_TYPE" = "brownfield" ] && echo "analysis" || echo "L1")
+  status: not_started
+  mode: auto
+  initialized: $DATE
+
+$([ "$PROJECT_TYPE" = "brownfield" ] && cat << BROWNFIELD
+analysis:
+  status: pending
+
+BROWNFIELD
+)
+l1:
+  intent:
+    status: pending
+  ux:
+    status: pending
+  architecture:
+    status: pending
+  planning:
+    status: pending
+
+l2:
+  current_feature: null
+  current_step: null
+  features: {}
+
+session:
+  last_updated: $DATE
+  last_action: "Project initialized"
+  next_action: "$([ "$PROJECT_TYPE" = "brownfield" ] && echo "Run brownfield-analyzer to scan existing code" || echo "User describes project → Begin L1 with intent-guardian")"
+  session_count: 0
+\`\`\`
+EOF
+fi
+
+# If there was existing content, append it
+if [ "$HAS_EXISTING_CLAUDE_MD" = true ]; then
+    echo ""
+    echo "Preserving your existing CLAUDE.md content..."
+
+    echo "" >> "CLAUDE.md"
+    echo "---" >> "CLAUDE.md"
+    echo "" >> "CLAUDE.md"
+    echo "## Previous Content (Preserved)" >> "CLAUDE.md"
+    echo "" >> "CLAUDE.md"
+    echo "$EXISTING_CONTENT" >> "CLAUDE.md"
+fi
+
+echo ""
+echo "╔═══════════════════════════════════════════════════════════════════════════╗"
+echo "║                         INITIALIZATION COMPLETE                           ║"
+echo "╚═══════════════════════════════════════════════════════════════════════════╝"
+echo ""
+echo "  ✓ CLAUDE.md created"
+echo "  ✓ Workflow state initialized"
+echo "  ✓ Type: $PROJECT_TYPE"
+echo ""
+echo "  Agents location: $WORKFLOW_HOME/agents/"
+echo ""
+
+if [ "$PROJECT_TYPE" = "brownfield" ]; then
+    echo "  NEXT STEPS:"
+    echo "  1. Open Claude in this project"
+    echo "  2. Claude will automatically analyze your codebase"
+    echo "  3. Confirm the analysis"
+    echo "  4. Continue development from inferred state"
+else
+    echo "  NEXT STEPS:"
+    echo "  1. Open Claude in this project"
+    echo "  2. Describe what you want to build"
+    echo "  3. Claude will run L1 planning automatically"
+fi
+
+echo ""
+SCRIPT
+
+chmod +x "$INSTALL_DIR/bin/workflow-init"
+
+# ─────────────────────────────────────────────────────────────────
 # Add to PATH
 # ─────────────────────────────────────────────────────────────────
 PATH_LINE='export PATH="$HOME/.claude-workflow-agents/bin:$PATH"'
@@ -429,6 +701,7 @@ echo ""
 echo "  Workflow is now globally enabled for all Claude Code sessions."
 echo ""
 echo "  Commands (after restarting terminal):"
+echo "    workflow-init                  Initialize workflow in a project"
 echo "    workflow-toggle on/off/status  Enable, disable, or check status"
 echo "    workflow-update                Update to latest version"
 echo "    workflow-version               Show version info"

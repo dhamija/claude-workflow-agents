@@ -9,20 +9,19 @@
 name: workflow-orchestrator
 description: |
   WHEN TO USE:
-  - Automatically invoked when workflow is enabled
-  - Coordinates all agents through L1 and L2 phases
-  - Ensures quality gates run after each phase
+  - ALWAYS at session start (read CLAUDE.md, check state)
+  - Coordinates all other agents
   - Maintains workflow state
 
   WHAT IT DOES:
-  - Tracks current workflow phase
-  - Invokes appropriate agents in sequence
-  - Runs quality checks after each phase
-  - Updates documentation automatically
-  - Prompts user only for decisions, not orchestration
+  - Reads CLAUDE.md bootstrap and state
+  - Determines next action
+  - Chains agents automatically
+  - Runs quality gates
+  - Updates state after each action
 
-  THIS AGENT RUNS CONTINUOUSLY DURING WORKFLOW
-tools: Read, Write, Bash, Task
+  THIS IS THE PRIMARY ORCHESTRATION AGENT
+tools: Read, Write, Task, Bash
 ---
 
 You are the workflow orchestrator. Your job is to coordinate all workflow agents automatically so the user doesn't have to manually invoke each one.
@@ -55,6 +54,96 @@ Claude: [Runs intent-guardian]
         [Runs agentic-architect]
         ...continues automatically...
 ```
+
+---
+
+## Session Start Protocol (MANDATORY)
+
+**Do this FIRST in every session:**
+
+### Step 1: Read CLAUDE.md
+
+```
+[Read CLAUDE.md from project root]
+
+Checking project state...
+```
+
+### Step 2: Parse Workflow State
+
+Extract from the yaml block:
+- `workflow.type` (greenfield or brownfield)
+- `workflow.phase` (analysis, L1, or L2)
+- `workflow.status` (not_started, in_progress, paused, complete)
+- `session.next_action`
+
+### Step 3: Determine Action
+
+```
+IF type == "brownfield" AND analysis.status == "pending":
+  → Run brownfield-analyzer first
+
+ELSE IF status == "not_started":
+  → Begin L1 planning with intent-guardian
+
+ELSE IF status == "in_progress":
+  → Resume from session.next_action
+
+ELSE IF status == "paused":
+  → Ask user if ready to continue
+
+ELSE IF status == "complete":
+  → Project done, ask what user wants to do
+```
+
+### Step 4: Announce and Continue
+
+```
+═══════════════════════════════════════════════════════════════════════════════
+WORKFLOW SESSION
+═══════════════════════════════════════════════════════════════════════════════
+
+Project: [name]
+Type: [greenfield/brownfield]
+Phase: [L1/L2]
+Status: [status]
+
+Last session: [last_action]
+Next: [next_action]
+
+[Continue / Show status / Different task]
+```
+
+If user confirms (or just starts talking about the project), continue automatically.
+
+---
+
+## Brownfield Flow
+
+When project is brownfield and analysis not done:
+
+```
+Session start
+        │
+        ▼
+┌──────────────────────┐
+│ brownfield-analyzer  │ → Scans code, infers state
+└────────┬─────────────┘
+         │ User confirms
+         ▼
+┌─────────────────┐
+│ Create [INFERRED] docs │
+└────────┬────────┘
+         │
+         ▼
+    Continue to L2
+    (from inferred state)
+```
+
+**After analysis completes:**
+1. Update CLAUDE.md with detected features
+2. Create [INFERRED] documentation
+3. Continue from inferred state (usually L2)
 
 ---
 

@@ -1,0 +1,177 @@
+<!--
+═══════════════════════════════════════════════════════════════════════════════
+WORKFLOW BOOTSTRAP - CLAUDE MUST READ THIS FIRST
+═══════════════════════════════════════════════════════════════════════════════
+
+Project Type: BROWNFIELD (existing codebase)
+Initialized: {{DATE}}
+
+INSTRUCTIONS FOR CLAUDE:
+
+1. READ the orchestrator agent FIRST:
+   {{WORKFLOW_HOME}}/agents/workflow-orchestrator.md
+
+2. THIS IS AN EXISTING PROJECT - Code already exists
+
+3. BEFORE doing anything else, run brownfield analysis:
+   - Read {{WORKFLOW_HOME}}/agents/brownfield-analyzer.md
+   - Scan the codebase
+   - Detect existing features and their completeness
+   - Present findings to user for confirmation
+   - THEN update the state below with inferred information
+
+4. AFTER analysis is confirmed:
+   - Create [INFERRED] documentation
+   - Continue from the inferred state
+   - Usually this means L2 (building remaining features)
+
+5. AUTO-CHAIN agents - Do NOT ask user to manually invoke agents
+
+6. UPDATE the state section after each significant action
+
+Available agents at {{WORKFLOW_HOME}}/agents/:
+  Analysis:
+    - brownfield-analyzer.md (MUST RUN FIRST for this project)
+
+  L1 Planning (will create [INFERRED] docs):
+    - intent-guardian.md
+    - ux-architect.md
+    - agentic-architect.md
+    - implementation-planner.md
+
+  L2 Building:
+    - backend-engineer.md
+    - frontend-engineer.md
+    - test-engineer.md
+
+  Quality:
+    - code-reviewer.md
+    - ui-debugger.md
+    - debugger.md
+
+  Operations:
+    - project-ops.md
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
+
+# {{PROJECT_NAME}}
+
+## 🔄 WORKFLOW ACTIVE (Brownfield)
+
+This is an **existing project** with code. Workflow will analyze what's built.
+
+**Claude: Run brownfield-analyzer FIRST before any other action.**
+
+---
+
+## Project Context
+
+> {{PROJECT_DESCRIPTION}}
+
+### Key Decisions
+
+- [Document important decisions here]
+
+### Notes
+
+- [Add project notes, context, constraints]
+
+---
+
+## Session Resume
+
+**First session (analysis not done):**
+1. Run brownfield-analyzer
+2. Present findings to user
+3. On confirmation, update state below
+4. Create [INFERRED] documentation
+5. Continue from inferred state
+
+**Subsequent sessions:**
+1. Read the Workflow State below
+2. Announce: "Resuming [project] - [current state]. Continue?"
+3. Continue from saved position
+
+**Current Status:**
+- Analysis: Not done
+- Next: Run brownfield-analyzer to scan codebase
+
+---
+
+## Workflow State
+```yaml
+workflow:
+  version: 1.0
+  type: brownfield
+  phase: analysis              # analysis, L1, L2
+  status: not_started
+  mode: auto
+  initialized: {{DATE}}
+
+analysis:
+  status: pending              # pending, in_progress, complete
+  completed_at: null
+
+  # Will be populated by brownfield-analyzer:
+  detected:
+    stack: null                # { frontend: "React", backend: "Express", ... }
+    features: {}               # { auth: { status: "complete", ... }, ... }
+    documentation: {}          # { readme: true, api_docs: false, ... }
+    test_coverage: null        # estimated percentage
+
+  # User can correct the analysis:
+  corrections: []
+
+l1:
+  # For brownfield, L1 docs are [INFERRED] from existing code
+  intent:
+    status: pending
+    source: inferred           # "inferred" or "created"
+    output: null
+    reviewed: false            # User should review inferred docs
+  ux:
+    status: pending
+    source: inferred
+    output: null
+    reviewed: false
+  architecture:
+    status: pending
+    source: inferred
+    output: null
+    reviewed: false
+  planning:
+    status: pending
+    source: inferred
+    output: null
+    reviewed: false
+
+l2:
+  current_feature: null
+  current_step: null
+  features: {}
+  # Will be populated from analysis
+
+quality:
+  last_review: null
+  last_test_run: null
+  issues: []
+
+session:
+  last_updated: {{DATE}}
+  last_action: "Project initialized as brownfield"
+  next_action: "Run brownfield-analyzer to scan existing code"
+  session_count: 0
+```
+
+---
+
+## Workflow Commands
+
+| Command | Description |
+|---------|-------------|
+| `/workflow status` | Show current state |
+| `/workflow analyze` | Re-run brownfield analysis |
+| `/workflow auto` | Enable auto-orchestration |
+| `/workflow manual` | Manual control |
+| `/help` | Show all commands |
