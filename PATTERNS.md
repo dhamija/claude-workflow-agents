@@ -1,5 +1,7 @@
 # Common Usage Patterns
 
+> **v2.1 Note:** Patterns work the same way. Skills load automatically, subagents invoked when needed. Just use these patterns naturally.
+
 Quick reference for common development scenarios.
 
 ---

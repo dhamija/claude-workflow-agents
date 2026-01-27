@@ -1,5 +1,7 @@
 # Usage Guide
 
+> **v2.1 Architecture:** Skills + Hooks. 9 skills loaded on-demand, 3 subagents for isolated tasks. See README.md for detailed architecture.
+
 ## Installation
 
 ### Global Install (One-Time)

@@ -1,13 +1,15 @@
 # Project State
 
 > **Auto-updated by**: `./scripts/update-claude-md.sh`
->  **Last updated**: 2026-01-26 00:00:00
+>  **Last updated**: 2026-01-27
 
-## Component Counts
+## Component Counts (v2.1)
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Agents | 16 | 2026-01-26 |
+| Skills | 9 | 2026-01-27 |
+| Subagents | 3 | 2026-01-27 |
+| Agent Files (for Task tool invocation) | 16 | 2026-01-26 |
 | Commands | 24 | 2026-01-26 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |

@@ -1,5 +1,7 @@
 # Workflow Deep Dive
 
+> **v2.1 Architecture:** Workflow orchestration now happens via the **workflow skill** loaded on-demand by Claude. Skills + Hooks + Subagents architecture for 90% context reduction.
+
 > **Note:** You don't need to know this to use the system. Just talk naturally to Claude. This document explains the internal mechanics for those who want to understand how it works.
 
 ---

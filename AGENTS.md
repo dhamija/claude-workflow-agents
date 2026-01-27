@@ -1,5 +1,11 @@
 # Agent Reference
 
+> **v2.1 Architecture Note:** In v2.1, most orchestration happens through **skills** loaded on-demand by Claude. The agents documented here are invoked automatically by the **workflow skill** via the Task tool. You don't call them directly - just describe what you want.
+>
+> **Subagents (Isolated Context):** code-reviewer, debugger, ui-debugger run in separate contexts.
+>
+> **Skills:** See `templates/skills/` for domain expertise (workflow, ux-design, frontend, backend, testing, validation, debugging, code-quality, brownfield).
+
 This document provides detailed information about each specialized agent in the workflow system.
 
 ## Table of Contents

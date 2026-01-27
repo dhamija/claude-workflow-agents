@@ -1,5 +1,7 @@
 # Claude Workflow Agents - Repository
 
+> **v2.1 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
 
@@ -27,60 +29,80 @@
 
 ---
 
-## Installation Architecture
+## Installation Architecture (v2.1)
 
-**Global-only model. No per-project enable/disable.**
+**Skills + Hooks + Subagents Architecture**
 
 ### Directory Structure
 
 ```
 ~/.claude-workflow-agents/           # Installation directory
-├── agents/                          # 16 agent definitions
+├── agents/                          # 16 agent files (invoked by workflow via Task tool)
 ├── commands/                        # 24 command definitions
 ├── templates/                       # Templates for user projects
-│   └── project/                     # Project bootstrap templates
-│       ├── CLAUDE.md.greenfield.template
-│       └── CLAUDE.md.brownfield.template
+│   ├── project/                     # Project bootstrap templates
+│   │   ├── CLAUDE.md.minimal.template (greenfield, ~80 lines)
+│   │   └── CLAUDE.md.minimal-brownfield.template (~80 lines)
+│   ├── skills/                      # 9 skill templates
+│   │   ├── workflow/, ux-design/, frontend/, backend/
+│   │   ├── testing/, validation/, debugging/
+│   │   └── code-quality/, brownfield/
+│   └── hooks/                       # Hooks configuration template
+│       └── settings.json.template
 ├── bin/                            # CLI commands
-│   ├── workflow-init               # Initialize project (NEW)
+│   ├── workflow-init               # Initialize project
 │   ├── workflow-toggle             # Enable/disable globally
 │   ├── workflow-update             # Update from git
 │   ├── workflow-uninstall          # Remove installation
 │   └── workflow-version            # Show version
-└── version.txt                     # Current version
+└── version.txt                     # Current version (2.1.0)
 
 ~/.claude/                           # Claude Code's directory
-├── agents/                          # Individual file symlinks
-│   ├── intent-guardian.md -> ~/.claude-workflow-agents/agents/intent-guardian.md
-│   ├── ux-architect.md -> ~/.claude-workflow-agents/agents/ux-architect.md
-│   └── ... (16 total)
-└── commands/                        # Individual file symlinks
+├── skills/                          # 9 skills (loaded on-demand by Claude)
+│   ├── workflow/, ux-design/, frontend/, backend/
+│   ├── testing/, validation/, debugging/
+│   └── code-quality/, brownfield/
+├── agents/                          # 3 subagents (isolated context)
+│   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
+│   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
+│   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
+└── commands/                        # 24 command symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
     └── ... (24 total)
 ```
 
-### How It Works
+### How It Works (v2.1)
 
 1. **Install** (`install.sh`):
    - Downloads to `~/.claude-workflow-agents/`
-   - Creates individual file symlinks in `~/.claude/agents/` and `~/.claude/commands/`
-   - Claude Code automatically loads from `~/.claude/`
+   - **Copies 9 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
+   - **Symlinks 3 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger)
+   - Symlinks 24 commands to `~/.claude/commands/`
+   - Adds bin/ commands to PATH
    - Workflow immediately active for all projects
 
-2. **Enable/Disable** (`workflow-toggle on|off|status`):
-   - **Global operation** - affects all Claude Code sessions
-   - `on`: Creates individual file symlinks
-   - `off`: Removes only workflow symlinks, preserves user's own files
-   - `status`: Shows count of workflow symlinks
+2. **Init Project** (`workflow-init`):
+   - Detects greenfield vs brownfield (code indicators)
+   - Creates minimal CLAUDE.md (~80 lines, state only)
+   - Optionally sets up hooks (.claude/settings.json)
+   - Preserves existing CLAUDE.md content if present
 
-3. **Update** (`workflow-update`):
+3. **Enable/Disable** (`workflow-toggle on|off|status`):
+   - **Global operation** - affects all Claude Code sessions
+   - `on`: Creates skills + subagent symlinks
+   - `off`: Removes only workflow files, preserves user's own
+   - `status`: Shows count of skills/subagents/commands
+
+4. **Update** (`workflow-update`):
    - Pulls latest from git
-   - Re-creates symlinks
+   - Updates skills in `~/.claude/skills/`
+   - Re-creates subagent symlinks
    - Preserves user's own agents/commands
 
-4. **Uninstall** (`workflow-uninstall`):
-   - Removes workflow symlinks from `~/.claude/`
+5. **Uninstall** (`workflow-uninstall`):
+   - Removes skills from `~/.claude/skills/`
+   - Removes workflow symlinks from `~/.claude/agents/` and `~/.claude/commands/`
    - Removes `~/.claude-workflow-agents/` directory
    - Preserves user's own agents/commands
 

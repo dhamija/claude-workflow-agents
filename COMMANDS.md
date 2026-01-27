@@ -1,5 +1,7 @@
 # Command Reference
 
+> **v2.1 Note:** Commands work the same way, but now they leverage **skills** and invoke **subagents** automatically. You don't need to know about the architecture - just use the commands naturally or describe what you want.
+
 This document provides detailed information about each workflow command.
 
 ## Table of Contents

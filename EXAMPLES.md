@@ -1,5 +1,7 @@
 # Practical Examples
 
+> **v2.1 Note:** Examples remain the same - just talk naturally. The v2.1 Skills + Hooks architecture makes this even more efficient with 90% less context.
+
 Real-world examples showing how to use the system for different scenarios.
 
 ---
