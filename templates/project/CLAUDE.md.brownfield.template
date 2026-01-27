@@ -259,6 +259,28 @@ quality:
   last_test_result: null       # pass, fail
   open_issues: []
 
+promises:
+  # Populated from intent doc (inferred or created), tracked through completion
+  # Format:
+  # PRM-001:
+  #   statement: "Auto-save every 30 seconds"
+  #   criticality: CORE|IMPORTANT|NICE_TO_HAVE
+  #   implementing_module: "auto_save_service"
+  #   status: pending|in_progress|validated|partial|failed
+  #   validated_at: null
+  #   acceptance_results: {}
+  #   evidence: []
+  #   issues: []
+
+validation:
+  last_run: null
+  last_result: null            # pass, partial, fail
+  coverage:
+    core_validated: 0
+    core_total: 0
+    important_validated: 0
+    important_total: 0
+
 ci:
   last_check: null
   status: null                 # pass, fail, not_configured

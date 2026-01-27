@@ -404,25 +404,88 @@ ACTION:
 TRIGGER: All steps (backend, frontend, tests) pass
 
 ACTION:
-  1. CI Verification:
+  1. Promise Validation (CRITICAL - NEW):
+     ┌─────────────────────────────────────────────────────────────┐
+     │ ACCEPTANCE VALIDATION                                       │
+     │                                                             │
+     │ 1. Identify promises this feature implements                │
+     │    Check: /docs/architecture/README.md promise mapping      │
+     │                                                             │
+     │ 2. Run acceptance tests for those promises                  │
+     │    From: /docs/plans/features/[feature].md (AUTH-ACC, etc.) │
+     │                                                             │
+     │ 3. Evaluate results:                                        │
+     │                                                             │
+     │    ALL CRITERIA MET?                                        │
+     │         │                                                   │
+     │        YES                          NO                      │
+     │         │                           │                       │
+     │         ▼                           ▼                       │
+     │    Mark promise                 STOP - Do not continue      │
+     │    VALIDATED                         │                      │
+     │         │                            ▼                      │
+     │         │                     Identify failing criteria     │
+     │         │                            │                      │
+     │         │                            ▼                      │
+     │         │                     Create fix tasks              │
+     │         │                            │                      │
+     │         │                            ▼                      │
+     │         │                     Implement fixes               │
+     │         │                            │                      │
+     │         │                            ▼                      │
+     │         │                     Re-run acceptance             │
+     │         │                            │                      │
+     │         └────────────────────────────┘                      │
+     │                                                             │
+     │ 4. Update state:                                            │
+     │    promises.PRM-XXX.status = VALIDATED                      │
+     │    promises.PRM-XXX.validated_at = timestamp                │
+     │    promises.PRM-XXX.evidence = [test results, etc.]         │
+     │                                                             │
+     └─────────────────────────────────────────────────────────────┘
+
+  2. CI Verification:
      - IF scripts/verify.sh exists: run it
      - IF package.json has lint/typecheck: run them
      - IF .github/workflows/ exists: simulate checks
-  2. Documentation:
+
+  3. Documentation:
      - Invoke project-ops sync
-     - Update intent doc (mark promises)
-  3. State:
+     - Update intent doc (mark validated promises)
+
+  4. State:
      - Mark feature complete
-     - Update CLAUDE.md
-  4. Announce:
+     - Update CLAUDE.md with promise validation status
+
+  5. Announce:
      "✓ Feature [name] complete
 
       Tests: X passing
-      Coverage: Y% (if available)
+      Promises validated:
+        - PRM-001: Auto-save ✓ VALIDATED
+        - PRM-004: Privacy ✓ VALIDATED
 
       Ready for next feature: [name]
 
       Or commit now? /project commit"
+```
+
+**FEATURE COMPLETE CHECKLIST:**
+
+```
+□ Implementation tasks done
+□ Unit tests pass
+□ Integration tests pass
+□ Code reviewed
+□ ACCEPTANCE TESTS PASS ← CRITICAL
+□ PROMISES VALIDATED ← CRITICAL
+
+IF acceptance tests fail:
+  → DO NOT mark feature complete
+  → Identify gaps
+  → Create remediation tasks
+  → Fix and re-validate
+  → Loop until PASS
 ```
 
 ---
@@ -516,6 +579,72 @@ Claude:
 
 ---
 
+## Final Promise Validation (Before "App Complete")
+
+**ALL CORE PROMISES MUST BE VALIDATED**
+
+Before declaring the app complete:
+
+```
+FINAL VALIDATION GATE:
+═══════════════════════
+
+□ P1 (CORE): Scene presentation = VALIDATED
+□ P2 (CORE): Spanish conversation = VALIDATED
+□ P3 (CORE): Skill tracking = VALIDATED
+□ P4 (IMPORTANT): Lesson generation = VALIDATED or ACCEPTED_PARTIAL
+□ P5 (NICE_TO_HAVE): Voice input = VALIDATED or DEFERRED
+
+IF any CORE promise is NOT VALIDATED:
+  → App is NOT complete
+  → Must fix or explicitly descope (with user approval)
+  → Document reason if descoped
+```
+
+### Validation Evidence Required
+
+For each CORE promise, must have:
+
+```yaml
+promises:
+  PRM-001:
+    status: VALIDATED
+    validated_at: "2024-01-15T14:30:00Z"
+    evidence:
+      - acceptance_test: PERSIST-ACC (PASSED)
+      - manual_qa: Crash recovery verified
+      - monitoring: Save success rate = 99.97%
+    issues: []
+```
+
+### If Validation Fails
+
+```
+Promise PRM-001 validation: PARTIAL (4/5 criteria)
+
+FAILING:
+  - Crash recovery not working (data lost on browser crash)
+
+OPTIONS:
+  1. Fix the issue (recommended)
+     - Estimated: 4 hours
+     - Then re-validate
+
+  2. Descope promise (requires user approval)
+     - Remove "crash recovery" from promise
+     - Update intent doc
+     - Document limitation
+
+  3. Ship as PARTIAL (NOT recommended for CORE)
+     - Document known issue
+     - Create remediation plan
+     - Get user approval
+
+RECOMMENDATION: Option 1 (Fix)
+```
+
+---
+
 ## State Tracking
 
 Maintain state in CLAUDE.md or memory:
@@ -561,10 +690,31 @@ ci:
   last_check: "2024-01-15T10:40:00Z"
   status: pass  # or fail
 
+# After promise validation (NEW)
+promises:
+  PRM-001:
+    status: validated  # pending, in_progress, validated, partial, failed
+    validated_at: "2024-01-15T10:45:00Z"
+    acceptance_results:
+      auto_save_triggers: pass
+      data_persists: pass
+      shows_confirmation: pass
+      crash_recovery: pass
+    evidence:
+      - "acceptance_test: PERSIST-ACC passed"
+      - "manual_qa: crash recovery verified"
+    issues: []
+
+  PRM-002:
+    status: in_progress
+    validated_at: null
+    acceptance_results: {}
+    issues: []
+
 # Always
 session:
   last_updated: "2024-01-15T10:40:00Z"
-  last_action: "Completed auth backend, code review passed"
+  last_action: "Completed auth backend, code review passed, PRM-001 validated"
   next_action: "Continue to auth frontend"
 ```
 

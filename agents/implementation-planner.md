@@ -64,14 +64,40 @@ If any input is missing, STOP and report what's needed.
 
 ## Your Planning Process
 
-### Phase 1: Synthesize Inputs
+### Phase 1: Receive Architecture with Acceptance Criteria
+
+**Input from agentic-architect:**
+
+```yaml
+promise_module_mapping:
+  PRM-001:  # Auto-save every 30 seconds
+    implementing_modules: [auto_save_service, data_persistence_layer, ui_feedback]
+    criticality: CORE
+    acceptance_criteria:
+      - Auto-save triggers every 30s
+      - Save completes successfully (data persisted)
+      - User sees visual confirmation
+      - No data loss on crash
+    validation_strategy:
+      automated: [unit, integration, E2E]
+      manual: [QA crash testing]
+      monitoring: [save success rate >99.9%]
+```
+
+**Your responsibility:**
+- Every implementation task must have a corresponding validation task
+- Every validation task explicitly tests an acceptance criterion
+- No feature is "complete" without acceptance validation passing
+
+### Phase 2: Synthesize Inputs
 1. Map user journeys to system capabilities needed
 2. Map promises/invariants to technical requirements
 3. Map agent design to implementation components
-4. Identify conflicts or gaps between the three inputs
-5. Flag anything that needs clarification before planning
+4. Map acceptance criteria to test tasks
+5. Identify conflicts or gaps between the three inputs
+6. Flag anything that needs clarification before planning
 
-### Phase 2: Create Overview Plans
+### Phase 3: Create Overview Plans
 
 Create full-system reference documents in `/docs/plans/overview/`:
 
@@ -92,7 +118,7 @@ Create full-system reference documents in `/docs/plans/overview/`:
 - Invariant protection tests
 - Unit/integration/E2E strategy
 
-### Phase 3: Decompose into Features
+### Phase 4: Decompose into Features
 
 Break the system into **vertical slices** (features):
 
@@ -112,14 +138,14 @@ Break the system into **vertical slices** (features):
 - "database setup" (infrastructure, not feature)
 - "UserService" (implementation detail, not user-facing)
 
-### Phase 4: Map Dependencies
+### Phase 5: Map Dependencies
 
 For each feature, identify:
 - **Depends on:** Features that must complete first
 - **Blocks:** Features waiting on this one
 - **Parallel with:** Features that can be built simultaneously
 
-### Phase 5: Create Feature Plans
+### Phase 6: Create Feature Plans with Validation Tasks
 
 For each feature, create `/docs/plans/features/[feature-name].md`:
 - Scope (what's included)
@@ -129,13 +155,46 @@ For each feature, create `/docs/plans/features/[feature-name].md`:
 - Exact file paths to create/modify
 - Acceptance criteria
 
-### Phase 6: Determine Implementation Order
+### Phase 7: Determine Implementation Order with Validation Gates
 
 Create `/docs/plans/implementation-order.md`:
 - Batch 0: Foundation (auth, DB, shared infra)
 - Batch 1: Independent features (can be parallel)
 - Batch 2: Features depending on Batch 1
 - Batch 3+: Continue based on dependencies
+
+### Phase 8: Add Promise Validation Checkpoints
+
+Map which features implement which promises, and schedule acceptance validation:
+
+```yaml
+promise_validation_schedule:
+  PRM-001:  # Auto-save every 30 seconds
+    implementing_features: [data-persistence]
+    validation_after: data-persistence
+    acceptance_task: PERSIST-ACC
+    must_pass_before: L2 complete
+
+  PRM-004:  # Privacy controls
+    implementing_features: [user-settings, data-export]
+    validation_after: data-export
+    acceptance_task: PRIVACY-ACC
+    must_pass_before: L2 complete
+
+  PRM-005:  # Lesson generation
+    implementing_features: [lesson-system]
+    validation_after: lesson-system
+    acceptance_task: LESSON-ACC
+    must_pass_before: L2 complete
+```
+
+**Exit Criteria for Each Batch:**
+
+- All implementation tasks complete
+- All validation tasks pass
+- All acceptance tests pass (for CORE promises)
+- Code reviewed
+- Cannot proceed to next batch until current batch validated
 
 ---
 
@@ -363,6 +422,129 @@ frontend/
 **E2E Tests:**
 - User signup flow (form → submit → redirect to dashboard)
 - User login flow (form → submit → redirect to dashboard)
+
+## Implementation & Validation Tasks
+
+**CRITICAL: Every implementation task must have a validation task.**
+
+```yaml
+tasks:
+  - id: AUTH-1
+    name: "Implement signup endpoint"
+    type: implementation
+    files: [backend/src/auth/routes.ts, backend/src/auth/service.ts]
+    acceptance: "POST /auth/signup creates user and returns token"
+    validation_task: AUTH-1-V
+
+  - id: AUTH-1-V
+    name: "Validate signup endpoint"
+    type: validation
+    validates: AUTH-1
+    checks:
+      - POST with valid data returns 201 + token
+      - POST with duplicate email returns 409
+      - POST with invalid email returns 400
+      - User record created in database
+      - Password is hashed (not plain text)
+
+  - id: AUTH-2
+    name: "Implement login endpoint"
+    type: implementation
+    files: [backend/src/auth/routes.ts, backend/src/auth/service.ts]
+    acceptance: "POST /auth/login validates credentials and returns token"
+    validation_task: AUTH-2-V
+
+  - id: AUTH-2-V
+    name: "Validate login endpoint"
+    type: validation
+    validates: AUTH-2
+    checks:
+      - POST with valid credentials returns 200 + token
+      - POST with wrong password returns 401
+      - POST with nonexistent email returns 401
+      - Token is valid JWT with correct payload
+
+  - id: AUTH-3
+    name: "Implement auth middleware"
+    type: implementation
+    files: [backend/src/auth/middleware.ts]
+    acceptance: "Middleware validates JWT and attaches user to request"
+    validation_task: AUTH-3-V
+
+  - id: AUTH-3-V
+    name: "Validate auth middleware"
+    type: validation
+    validates: AUTH-3
+    checks:
+      - Request with valid token passes
+      - Request with invalid token returns 401
+      - Request with expired token returns 401
+      - Request with no token returns 401
+      - User object attached to request
+
+  - id: AUTH-4
+    name: "Implement signup UI"
+    type: implementation
+    files: [frontend/src/features/auth/pages/SignupPage.tsx, SignupForm.tsx]
+    acceptance: "User can fill form and create account"
+    validation_task: AUTH-4-V
+
+  - id: AUTH-4-V
+    name: "Validate signup UI"
+    type: validation
+    validates: AUTH-4
+    checks:
+      - Form validates email format
+      - Form validates password strength
+      - Submit calls API with correct data
+      - Success redirects to dashboard
+      - Error shows user-friendly message
+
+  - id: AUTH-5
+    name: "Implement login UI"
+    type: implementation
+    files: [frontend/src/features/auth/pages/LoginPage.tsx, LoginForm.tsx]
+    acceptance: "User can log in and access dashboard"
+    validation_task: AUTH-5-V
+
+  - id: AUTH-5-V
+    name: "Validate login UI"
+    type: validation
+    validates: AUTH-5
+    checks:
+      - Form submits credentials
+      - Success stores token and redirects
+      - Error shows user-friendly message
+      - "Remember me" works if implemented
+
+  - id: AUTH-INT
+    name: "Integration validation"
+    type: integration_test
+    validates: [AUTH-1, AUTH-2, AUTH-3, AUTH-4, AUTH-5]
+    checks:
+      - Full signup flow works end-to-end
+      - Full login flow works end-to-end
+      - Auth middleware protects routes
+      - Token persists across page refresh
+
+  - id: AUTH-ACC
+    name: "Acceptance validation"
+    type: acceptance_test
+    validates_promise: PRM-001  # If this feature implements a promise
+    checks:
+      - All acceptance criteria below pass
+      - All integration tests pass
+      - No regressions in existing features
+```
+
+### Validation Gates
+
+```
+AUTH-1 → AUTH-1-V ✓ → AUTH-2 → AUTH-2-V ✓ → ... → AUTH-ACC ✓ → Feature Complete
+         ↑              ↑                           ↑
+       GATE           GATE                        GATE
+     (must pass)    (must pass)                (must pass)
+```
 
 ## Acceptance Criteria
 

@@ -57,6 +57,37 @@ Use traditional code/scripts when:
 
 ## Your Design Process
 
+### Phase 0: Receive Intent with Promise Criticality
+
+**Input from intent-guardian:**
+
+```yaml
+CORE PROMISES (must have dedicated modules):
+  PRM-001: Auto-save every 30 seconds
+    - Acceptance: triggers every 30s, persists, shows confirmation
+    - Validation: Unit + integration + E2E + monitoring
+
+  PRM-004: Privacy controls
+    - Acceptance: explicit consent, no sharing without permission
+    - Validation: Unit + audit + compliance check
+
+IMPORTANT PROMISES (needs design attention):
+  PRM-005: Lesson generation
+    - Acceptance: relevant to gaps, appropriate level
+    - Validation: Content review + user feedback
+
+NICE_TO_HAVE PROMISES (basic design):
+  PRM-008: Voice input
+    - Acceptance: accurate transcription
+    - Validation: ASR metrics
+```
+
+**Your responsibility:**
+1. Every CORE promise must map to a dedicated module or component
+2. Module design must include acceptance criteria validation
+3. If a CORE promise cannot be architected, flag for descoping discussion
+4. Document promise-to-module mapping explicitly
+
 ### Phase 1: Problem Decomposition
 1. What is the core problem being solved?
 2. Who are the users and what are their actual workflows?
@@ -93,6 +124,87 @@ For EACH agent, document:
 - How do you add new agents to the swarm?
 - Where are the plugin/extension points?
 
+### Phase 6: Promise-to-Module Mapping (CRITICAL)
+
+**Map every promise to implementing modules:**
+
+```yaml
+promise_module_mapping:
+  PRM-001:  # Auto-save every 30 seconds
+    implementing_modules:
+      - auto_save_service (primary)
+      - data_persistence_layer (dependency)
+      - ui_feedback_component (dependency)
+    criticality: CORE
+    acceptance_criteria:
+      - Auto-save triggers every 30s ← Handled by auto_save_service.timer
+      - Save completes successfully ← Handled by data_persistence_layer.save()
+      - User sees confirmation ← Handled by ui_feedback_component.updateTimestamp()
+      - No data loss on crash ← Handled by data_persistence_layer.recover()
+    validation_approach:
+      - Unit: Test timer triggers
+      - Integration: Test save persistence
+      - E2E: Test UI feedback
+      - Monitoring: Track save success rate
+
+  PRM-004:  # Privacy controls
+    implementing_modules:
+      - privacy_service (primary)
+      - consent_ui (dependency)
+      - audit_logger (dependency)
+    criticality: CORE
+    acceptance_criteria:
+      - Explicit consent required ← Handled by privacy_service.requireConsent()
+      - No sharing without permission ← Enforced by privacy_service.checkPermission()
+    validation_approach:
+      - Unit: Test consent flow
+      - Audit: Verify no unauthorized sharing
+      - Compliance: GDPR/privacy audit
+
+  PRM-005:  # Lesson generation
+    implementing_modules:
+      - lesson_generator_agent (primary)
+    criticality: IMPORTANT
+    acceptance_criteria:
+      - Relevant to gaps ← Agent analyzes skill graph
+      - Appropriate level ← Agent considers user performance
+    validation_approach:
+      - Manual: Content review
+      - User: Feedback mechanism
+```
+
+**Coverage Verification (MANDATORY):**
+
+```
+COVERAGE CHECK:
+───────────────
+
+□ PRM-001 (CORE): Auto-save
+  → Implemented by: auto_save_service, data_persistence_layer, ui_feedback_component ✓
+
+□ PRM-004 (CORE): Privacy controls
+  → Implemented by: privacy_service, consent_ui, audit_logger ✓
+
+□ PRM-005 (IMPORTANT): Lesson generation
+  → Implemented by: lesson_generator_agent ✓
+
+ALL CORE PROMISES MAPPED ✓
+
+IF any CORE promise is NOT mapped → STOP, cannot proceed to planning.
+```
+
+**For each CORE module, comprehensive design required:**
+
+Include in module design:
+- Purpose (which promise does it fulfill?)
+- Components (what pieces make up this module?)
+- Each component's responsibility
+- Data flow
+- Acceptance criteria validation (how does each criterion get verified?)
+- Testing strategy (unit, integration, acceptance)
+- Failure modes and fallbacks
+- Monitoring and observability
+
 ---
 
 ## Output: Comprehensive Architecture Documentation
@@ -114,16 +226,40 @@ After completing your design, create `/docs/architecture/README.md` as the main 
 
 ## Table of Contents
 
-1. [Executive Summary](#executive-summary)
-2. [System Overview](#system-overview)
-3. [Component Architecture](#component-architecture)
-4. [Data Architecture](#data-architecture)
-5. [API Design](#api-design)
-6. [AI/Agent Architecture](#aiagent-architecture)
-7. [Security Architecture](#security-architecture)
-8. [Infrastructure & Deployment](#infrastructure--deployment)
-9. [Design Decisions (ADRs)](#design-decisions-adrs)
-10. [Migration & Scalability](#migration--scalability)
+1. [Promise-to-Module Mapping](#promise-to-module-mapping) ← NEW
+2. [Executive Summary](#executive-summary)
+3. [System Overview](#system-overview)
+4. [Component Architecture](#component-architecture)
+5. [Data Architecture](#data-architecture)
+6. [API Design](#api-design)
+7. [AI/Agent Architecture](#aiagent-architecture)
+8. [Security Architecture](#security-architecture)
+9. [Infrastructure & Deployment](#infrastructure--deployment)
+10. [Design Decisions (ADRs)](#design-decisions-adrs)
+11. [Migration & Scalability](#migration--scalability)
+
+---
+
+## Promise-to-Module Mapping
+
+This section ensures every intent promise is implemented by specific modules.
+
+### Coverage Table
+
+| Promise | Criticality | Module(s) | Acceptance Criteria | Validation |
+|---------|-------------|-----------|---------------------|------------|
+| PRM-001: Auto-save every 30s | CORE | auto_save_service, data_persistence_layer, ui_feedback | Triggers 30s, persists, shows confirmation, crash recovery | Unit + Integration + E2E + Monitoring |
+| PRM-004: Privacy controls | CORE | privacy_service, consent_ui, audit_logger | Explicit consent, no unauthorized sharing | Unit + Audit + Compliance |
+| PRM-005: Lesson generation | IMPORTANT | lesson_generator_agent | Relevant to gaps, appropriate level | Manual + User feedback |
+
+### Module Designs (CORE only)
+
+For each CORE promise, comprehensive module design below includes:
+- Components and responsibilities
+- Data flow
+- How each acceptance criterion is met
+- Testing strategy
+- Failure modes
 
 ---
 

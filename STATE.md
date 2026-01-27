@@ -7,7 +7,7 @@
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Agents | 15 | 2026-01-26 |
+| Agents | 16 | 2026-01-26 |
 | Commands | 24 | 2026-01-26 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
@@ -31,6 +31,7 @@
 | ui-debugger | L2 Support | ✓ Complete |
 | workflow-orchestrator | Orchestration | ✓ Complete |
 | brownfield-analyzer | L1 Support | ✓ Complete |
+| acceptance-validator | L2 Validation | ✓ Complete |
 | project-ops | Operations | ✓ Complete |
 
 ## Commands List
@@ -68,6 +69,7 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-26 | Added intent-to-validation traceability system (promises, acceptance, validation) | Claude |
 | 2026-01-26 | Added MCP auto-enable protocol for ui-debugger (automatic puppeteer setup) | Claude |
 | 2026-01-26 | Added comprehensive agent utilization instructions to CLAUDE.md templates | Claude |
 | 2026-01-26 | Added automatic quality gates (code-reviewer after code, tests after steps) | Claude |

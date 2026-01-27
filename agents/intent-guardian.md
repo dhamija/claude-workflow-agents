@@ -135,26 +135,101 @@ invariants:
     verification: <how to check this holds>
 ```
 
-### 3. User Promises
-Commitments users can rely on:
+### 3. User Promises (Enhanced with Traceability)
+Commitments users can rely on, with criticality and acceptance criteria:
 ```yaml
 promises:
   - id: PRM-001
     promise: "Your work is auto-saved every 30 seconds"
+    criticality: CORE  # CORE, IMPORTANT, NICE_TO_HAVE
+
+    # WHY is this critical?
+    rationale: |
+      Data loss is catastrophic for users. Auto-save is the primary
+      protection against accidental data loss. Without it, users risk
+      losing significant work, which breaks trust and usability.
+
     user_expectation: "I never lose more than 30 seconds of work"
-    verification: 
-      observable: "Last saved timestamp visible and updating"
-      measurable: "Time since last save never exceeds 30s during active use"
+
+    # WHAT makes this promise fulfilled?
+    acceptance_criteria:
+      - Auto-save triggers every 30 seconds during active editing
+      - Save completes successfully (data persisted to storage)
+      - User sees visual confirmation (timestamp updates)
+      - No data loss on browser crash or unexpected close
+      - Recovered data matches last auto-save state
+
+    # HOW will we validate?
+    validation_strategy:
+      automated:
+        - Unit test: Auto-save timer triggers correctly
+        - Integration test: Data persists to database
+        - E2E test: UI shows updated timestamp
+      manual:
+        - QA: Simulate browser crash, verify recovery
+        - QA: Test offline scenarios
+      monitoring:
+        - Track save success rate (target: >99.9%)
+        - Alert on save failures
+        - Track recovery usage
+
     broken_when: "User loses work due to app failure"
-    
-  - id: PRM-002  
+
+    # WHAT modules implement this? (filled by architect)
+    implementing_modules: []
+
+  - id: PRM-002
     promise: "You'll get a response within 24 hours"
+    criticality: IMPORTANT
+
+    rationale: |
+      Users need acknowledgment that their inquiry was received.
+      24-hour response time sets clear expectations and builds trust.
+      Not CORE because app functions without support response.
+
     user_expectation: "I'm not ignored"
-    verification:
-      observable: "Response received"
-      measurable: "Response time < 24 hours for 99% of requests"
+
+    acceptance_criteria:
+      - Response sent within 24 hours of inquiry
+      - Response acknowledges the specific issue
+      - Response provides next steps or timeline
+      - 99% of inquiries meet this SLA
+
+    validation_strategy:
+      automated:
+        - Monitor response time metrics
+        - Alert on SLA breach
+      manual:
+        - Weekly review of response quality
+        - Monthly analysis of missed SLAs
+      monitoring:
+        - Track: response time p50, p95, p99
+        - Track: SLA compliance rate
+
     broken_when: "User waits more than 24 hours with no response"
+
+    implementing_modules: []
 ```
+
+**Criticality Levels:**
+
+- **CORE** (App fails without this):
+  - Must have dedicated architecture section
+  - Must have comprehensive test strategy
+  - Must have explicit acceptance criteria
+  - Must be validated before feature "complete"
+  - Cannot ship without validation passing
+
+- **IMPORTANT** (App degraded without this):
+  - Needs design attention
+  - Needs test coverage
+  - Should have acceptance criteria
+  - Can ship with partial implementation if documented
+
+- **NICE_TO_HAVE** (Enhancement):
+  - Basic design sufficient
+  - Basic tests sufficient
+  - Can defer or descope
 
 ### 4. Behavioral Contracts
 Cause-and-effect rules users can depend on:
@@ -483,6 +558,78 @@ Potential intent issues to address:
 - MEDIUM: Some evidence, but not comprehensive
 - LOW: Guessing based on limited signals
 - UNCERTAIN: Contradictory or no evidence
+
+---
+
+## Handoff to Architecture
+
+When passing to agentic-architect, provide a structured summary of CORE promises:
+
+```markdown
+CORE PROMISES REQUIRING DEDICATED DESIGN:
+═════════════════════════════════════════
+
+PRM-001: Auto-save every 30 seconds
+  Criticality: CORE
+  Rationale: Data loss is catastrophic
+  Acceptance Criteria:
+    - Auto-save triggers every 30s during active editing
+    - Save completes successfully (data persisted)
+    - User sees visual confirmation
+    - No data loss on browser crash
+    - Recovered data matches last auto-save
+
+  Validation Strategy:
+    - Automated: Unit, integration, E2E tests
+    - Manual: QA crash testing
+    - Monitoring: Save success rate (>99.9%)
+
+  ARCHITECT MUST: Design auto-save module with:
+    - Timer mechanism
+    - Data persistence layer
+    - UI feedback component
+    - Recovery system
+    - All with explicit validation
+
+PRM-002: [Next CORE promise]
+  ...
+
+IMPORTANT PROMISES:
+══════════════════
+
+PRM-003: [IMPORTANT promise]
+  ...
+
+ARCHITECT INSTRUCTIONS:
+══════════════════════
+
+1. Each CORE promise needs a dedicated module design
+2. Module design must include all acceptance criteria
+3. Module design must specify validation approach
+4. Cannot skip or gloss over any CORE promise
+5. If CORE promise cannot be architected, flag for descoping discussion
+```
+
+### Criticality Summary
+
+Pass this summary to help architect prioritize:
+
+```yaml
+promise_summary:
+  core_count: 3
+  important_count: 5
+  nice_to_have_count: 2
+
+  core_promises:
+    - PRM-001: Auto-save (data integrity)
+    - PRM-004: Privacy controls (user trust)
+    - PRM-007: Performance (<200ms response)
+
+  coverage_requirement: |
+    All 3 CORE promises must map to dedicated modules.
+    Each module must have acceptance validation defined.
+    Architect cannot proceed to planning without full CORE coverage.
+```
 
 ---
 
