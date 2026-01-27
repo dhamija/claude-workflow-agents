@@ -506,6 +506,126 @@ TIPS
   • Setup GitHub MCP for best experience
 ```
 
+### If topic = "debug" or "ui" or "browser" or "screenshot":
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                      UI DEBUGGING                                ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Debug frontend issues with browser automation.
+
+
+COMMANDS
+────────
+  /debug ui [url]         Full debug session
+  /debug console [url]    Console errors only
+  /debug network [url]    Network monitoring
+  /debug visual [url]     Visual regression
+  /debug responsive [url] Responsive testing
+  /debug <error msg>      Backend/test debugging (existing)
+
+
+CAPABILITIES
+────────────
+  ✓ Take screenshots
+  ✓ Inspect DOM elements
+  ✓ Capture console errors
+  ✓ Monitor network requests
+  ✓ Test different viewports
+  ✓ Compare visual changes
+  ✓ Accessibility audit
+
+
+REQUIRES
+────────
+  puppeteer MCP server
+
+  Enable with:
+    /project ai mcp
+
+  Or add to Claude config:
+    {
+      "mcpServers": {
+        "puppeteer": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+        }
+      }
+    }
+
+
+EXAMPLE
+───────
+  User: The login button doesn't work
+
+  Claude: [Navigates to login page]
+          [Takes screenshot]
+          [Clicks button]
+          [Captures console]
+
+          Found: onClick handler throws error
+          "Cannot read property 'email' of undefined"
+
+          Fix: Add null check in handleSubmit
+
+
+WORKFLOW
+────────
+
+  1. INVESTIGATE
+     - Navigate to URL
+     - Take screenshots
+     - Inspect DOM
+     - Check console
+
+  2. DIAGNOSE
+     - Identify root cause
+     - Gather evidence
+     - Explain why it fails
+
+  3. FIX
+     - Suggest solution
+     - Apply fix (if approved)
+     - Verify fix works
+
+  4. PREVENT
+     - Add regression test
+     - Document the issue
+
+
+RESPONSIVE TESTING
+──────────────────
+
+  Tests multiple viewports automatically:
+    - Desktop: 1920x1080
+    - Tablet:  768x1024
+    - Mobile:  375x667
+
+  Reports which viewports have issues.
+
+
+VISUAL REGRESSION
+─────────────────
+
+  Compares current UI to baseline:
+    - Captures screenshots
+    - Detects visual differences
+    - Highlights changed areas
+
+  Useful after CSS/layout changes.
+
+
+TIPS
+────
+
+  • Run your app locally first (localhost:3000)
+  • Use /debug ui for comprehensive investigation
+  • Use /debug console for just error logs
+  • Use /debug responsive for layout issues
+  • puppeteer MCP required for full functionality
+```
+
 ### If topic = "patterns":
 
 ```

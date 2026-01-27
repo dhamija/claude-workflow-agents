@@ -1,17 +1,17 @@
 # Project State
 
 > **Auto-updated by**: `./scripts/update-claude-md.sh`
->  **Last updated**: 2026-01-25 18:30:00
+>  **Last updated**: 2026-01-26 00:00:00
 
 ## Component Counts
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Agents | 12 | 2026-01-25 |
-| Commands | 23 | 2026-01-25 |
+| Agents | 13 | 2026-01-26 |
+| Commands | 23 | 2026-01-26 |
 | Templates | 27 | 2026-01-25 |
-| Help Topics | 12 | 2026-01-25 |
-| Tests | 26 | 2026-01-25 |
+| Help Topics | 13 | 2026-01-26 |
+| Tests | 27 | 2026-01-26 |
 
 ## Agents List
 
@@ -28,6 +28,7 @@
 | test-engineer | L2 Building | ✓ Complete |
 | code-reviewer | L2 Support | ✓ Complete |
 | debugger | L2 Support | ✓ Complete |
+| ui-debugger | L2 Support | ✓ Complete |
 | project-ops | Operations | ✓ Complete |
 
 ## Commands List

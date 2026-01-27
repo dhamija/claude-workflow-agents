@@ -1223,6 +1223,14 @@ Setup Model Context Protocol servers:
 def recommend_mcp_servers(project_info):
     recommendations = []
 
+    # Check for frontend (HIGH PRIORITY for debugging)
+    if has_dependency("react") or has_dependency("vue") or has_dependency("svelte"):
+        recommendations.append({
+            "server": "puppeteer",
+            "priority": "HIGH",
+            "reason": "Frontend project detected - enables UI debugging with /debug ui"
+        })
+
     # Check for database
     if has_file("prisma/schema.prisma") or has_file("drizzle.config.ts"):
         recommendations.append({
@@ -1245,6 +1253,70 @@ def recommend_mcp_servers(project_info):
         })
 
     return recommendations
+```
+
+**MCP Server Recommendations by Project Type:**
+
+For **Frontend Projects** (React, Vue, Svelte, etc.):
+```
+HIGH PRIORITY: puppeteer
+  - Screenshot capture
+  - DOM inspection
+  - Console error monitoring
+  - Network request tracking
+  - Responsive layout testing
+  - Visual regression testing
+
+  Enables: /debug ui, /debug console, /debug network, /debug visual, /debug responsive
+
+  Config:
+  {
+    "mcpServers": {
+      "puppeteer": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+      }
+    }
+  }
+```
+
+For **Backend Projects** with databases:
+```
+RECOMMENDED: postgres or sqlite
+  - Query debugging
+  - Schema inspection
+  - Data exploration
+
+  Config (Postgres):
+  {
+    "mcpServers": {
+      "postgres": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/dbname"]
+      }
+    }
+  }
+```
+
+For **Git-based Projects**:
+```
+RECOMMENDED: github
+  - Create issues/PRs
+  - Manage repository
+  - Read/update code
+
+  Config:
+  {
+    "mcpServers": {
+      "github": {
+        "command": "npx",
+        "args": ["-y", "@modelcontextprotocol/server-github"],
+        "env": {
+          "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+        }
+      }
+    }
+  }
 ```
 
 ---
