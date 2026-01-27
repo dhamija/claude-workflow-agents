@@ -454,6 +454,146 @@ If you forgot to run verify.sh and CI fails:
 
 ---
 
+## 🔢 VERSION BUMP PROTOCOL
+
+**CRITICAL: Follow this protocol when releasing a new version to ensure ALL files are updated.**
+
+### Files That MUST Be Updated
+
+When bumping version (e.g., 3.0.0 → 3.1.0), these files MUST be updated:
+
+1. **`version.txt`** (single line file)
+   ```
+   3.1.0
+   ```
+
+2. **`install.sh`** (line ~8)
+   ```bash
+   VERSION="3.1.0"
+   ```
+   **⚠️ MOST COMMONLY FORGOTTEN - Double-check this!**
+
+3. **`CHANGELOG.md`**
+   - Rename `[Unreleased]` or create new section to `[3.1.0] - YYYY-MM-DD`
+   - Document all changes in appropriate categories (Added/Changed/Fixed/Removed)
+
+4. **All Documentation Files** (automated with sed)
+   - README.md
+   - CLAUDE.md
+   - commands/help.md
+   - AGENTS.md, COMMANDS.md, GUIDE.md, WORKFLOW.md, STATE.md, USAGE.md, EXAMPLES.md, PATTERNS.md
+   - agents/workflow-orchestrator.md
+
+5. **Template Files**
+   - `templates/project/CLAUDE.md.minimal.template` - Update `workflow.version` field
+   - `templates/project/CLAUDE.md.minimal-brownfield.template` - Update `workflow.version` field
+
+### Automated Update Commands
+
+**Step 1: Update Core Version Files**
+```bash
+# Update version.txt
+echo "3.1.0" > version.txt
+
+# Update install.sh VERSION variable (line 8)
+sed -i '' 's/VERSION="[0-9.]*"/VERSION="3.1.0"/' install.sh
+
+# Update CHANGELOG.md (rename section header)
+sed -i '' 's/## \[Unreleased\]/## [3.1.0] - 2026-01-27/' CHANGELOG.md
+```
+
+**Step 2: Bulk Update All Documentation References**
+```bash
+# Replace version references across all docs (adjust OLD_VERSION as needed)
+OLD_VERSION="3.0.0"
+NEW_VERSION="3.1.0"
+
+for file in README.md CLAUDE.md commands/help.md AGENTS.md COMMANDS.md GUIDE.md WORKFLOW.md STATE.md USAGE.md EXAMPLES.md PATTERNS.md agents/workflow-orchestrator.md; do
+  sed -i '' "s/${OLD_VERSION}/${NEW_VERSION}/g" "$file"
+  sed -i '' "s/v${OLD_VERSION%.*}/v${NEW_VERSION%.*}/g" "$file"  # Handle vX.Y format
+done
+```
+
+**Step 3: Update Template Workflow Versions**
+```bash
+# Update workflow.version in templates (handles both X.Y and X.Y.Z formats)
+sed -i '' 's/version: [0-9.]*$/version: 3.1/' templates/project/CLAUDE.md.minimal.template
+sed -i '' 's/version: [0-9.]*$/version: 3.1/' templates/project/CLAUDE.md.minimal-brownfield.template
+```
+
+**Step 4: Verify All Updates**
+```bash
+# Run verification to ensure nothing broke
+./scripts/verify.sh
+
+# Manually verify critical files
+echo "=== version.txt ==="
+cat version.txt
+
+echo "=== install.sh VERSION (line 8) ==="
+head -n 10 install.sh | grep VERSION
+
+echo "=== CHANGELOG.md (latest version) ==="
+head -n 20 CHANGELOG.md | grep -A 5 "\[3.1.0\]"
+
+echo "=== Template workflow versions ==="
+grep "version:" templates/project/CLAUDE.md.*.template
+```
+
+**Step 5: Git Tag and Release**
+```bash
+# Commit version bump
+git add -A
+git commit -m "chore: bump version to 3.1.0"
+
+# Create annotated tag
+git tag -a v3.1.0 -m "Release v3.1.0
+
+- Feature 1
+- Feature 2
+- Bug fix 1"
+
+# Push commit and tag
+git push origin main
+git push origin v3.1.0
+```
+
+### Common Mistakes and How to Avoid Them
+
+| Mistake | Impact | Prevention |
+|---------|--------|------------|
+| ❌ Forget `install.sh` VERSION | Users get wrong version, updates fail | Run grep check before committing |
+| ❌ Inconsistent version refs in docs | Confusion, looks unprofessional | Use automated sed commands |
+| ❌ Forget to update templates | New projects initialized with wrong version | Check grep output for all workflow.version fields |
+| ❌ Skip CHANGELOG.md update | No release notes, breaks semver tracking | Make it first step before any commits |
+| ❌ Typo in version number | Breaking inconsistency | Verify with grep across all files |
+
+### Pre-Release Checklist
+
+Before creating the git tag, confirm:
+
+- [ ] `version.txt` contains new version
+- [ ] `install.sh` line 8 has `VERSION="X.Y.Z"` with new version
+- [ ] `CHANGELOG.md` has `[X.Y.Z] - YYYY-MM-DD` section with all changes documented
+- [ ] All docs have consistent version references (run grep to verify)
+- [ ] Templates have `workflow.version: X.Y` updated
+- [ ] `./scripts/verify.sh` passes
+- [ ] All tests pass (`./tests/run_all_tests.sh`)
+- [ ] Git working directory is clean
+
+### Why This Protocol Exists
+
+The user's question **"why is self maintenance not kicking in for these things?"** highlighted a gap in our process. This protocol ensures:
+
+1. **No files are forgotten** - Comprehensive checklist catches everything
+2. **Automation reduces errors** - Sed commands eliminate manual find-replace mistakes
+3. **Verification is mandatory** - Multiple checkpoints prevent bad releases
+4. **Process is documented** - Future maintainers know exactly what to do
+
+**If you're bumping a version and this protocol doesn't cover something, UPDATE THIS PROTOCOL FIRST, then proceed with the version bump.**
+
+---
+
 ## 📄 Documentation Dependency Map
 
 **CRITICAL: These files must stay in sync when agents/commands change.**
