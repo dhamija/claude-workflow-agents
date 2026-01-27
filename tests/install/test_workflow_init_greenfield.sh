@@ -25,9 +25,9 @@ cp "$REPO_ROOT/version.txt" "$INSTALL_DIR/"
 mkdir -p "$INSTALL_DIR/bin"
 
 # Extract workflow-init from install.sh
-sed -n '/^cat > "$INSTALL_DIR\/bin\/workflow-init"/,/^chmod +x "$INSTALL_DIR\/bin\/workflow-init"/p' "$REPO_ROOT/install.sh" | \
-    sed '1d;$d' | \
-    sed "s/\$INSTALL_DIR/\$HOME\/.claude-workflow-agents/g" > "$INSTALL_DIR/bin/workflow-init"
+# Find the heredoc content between 'SCRIPT' markers
+sed -n '/^cat > "\$INSTALL_DIR\/bin\/workflow-init" << .SCRIPT./,/^SCRIPT$/p' "$REPO_ROOT/install.sh" | \
+    sed '1d;$d' > "$INSTALL_DIR/bin/workflow-init"
 chmod +x "$INSTALL_DIR/bin/workflow-init"
 
 # Create empty project
