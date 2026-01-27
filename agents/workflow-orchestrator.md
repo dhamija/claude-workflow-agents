@@ -1,4 +1,4 @@
-><!--
+<!--
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║ 🔧 MAINTENANCE REQUIRED                                                      ║
 ║ After editing: CLAUDE.md, help, README, tests                                ║
