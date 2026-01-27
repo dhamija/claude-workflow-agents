@@ -52,9 +52,9 @@ jobs:
           cd /tmp
           mkdir test-greenfield
           cd test-greenfield
-          $HOME/.claude-workflow-agents/bin/workflow-init
+          echo "y" | $HOME/.claude-workflow-agents/bin/workflow-init
           [ -f "CLAUDE.md" ] || exit 1
-          grep -q "WORKFLOW BOOTSTRAP" CLAUDE.md || exit 1
+          grep -q "🔄 Workflow Active" CLAUDE.md || exit 1
           grep -q "type: greenfield" CLAUDE.md || exit 1
           echo "Greenfield init: OK"
 
@@ -66,9 +66,9 @@ jobs:
           mkdir src
           echo '{"name": "test"}' > package.json
           touch main.js
-          $HOME/.claude-workflow-agents/bin/workflow-init
+          echo "y" | $HOME/.claude-workflow-agents/bin/workflow-init
           [ -f "CLAUDE.md" ] || exit 1
-          grep -q "WORKFLOW BOOTSTRAP" CLAUDE.md || exit 1
+          grep -q "🔄 Workflow Active" CLAUDE.md || exit 1
           grep -q "type: brownfield" CLAUDE.md || exit 1
           echo "Brownfield init: OK"
 
@@ -82,6 +82,7 @@ jobs:
           echo "My custom content here." >> CLAUDE.md
           mkdir src
           touch package.json
-          $HOME/.claude-workflow-agents/bin/workflow-init
+          echo "y" | $HOME/.claude-workflow-agents/bin/workflow-init
+          grep -q "🔄 Workflow Active" CLAUDE.md || exit 1
           grep -q "My custom content here" CLAUDE.md || exit 1
           echo "Content preservation: OK"
