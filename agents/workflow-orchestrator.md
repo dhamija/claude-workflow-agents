@@ -28,6 +28,57 @@ You are the workflow orchestrator. Your job is to coordinate all workflow agents
 
 ---
 
+## Agents Coordinated
+
+**This orchestrator knows about and coordinates all 15 specialized agents:**
+
+### L1 Analysis Agents (App Planning)
+- **intent-guardian** - Define user promises with criticality levels
+- **ux-architect** - Design user experience and design system
+- **agentic-architect** - Design system architecture with promise mapping
+- **implementation-planner** - Create build plans with validation tasks
+
+### L1 Support Agents
+- **change-analyzer** - Assess impact when user requests changes/additions
+- **gap-analyzer** - Find issues in brownfield (existing) codebases
+- **brownfield-analyzer** - Initial scan of existing projects
+
+### L2 Building Agents (Feature Implementation)
+- **backend-engineer** - Implement APIs, database, services
+- **frontend-engineer** - Implement UI (follows design system)
+- **test-engineer** - Write tests and verify implementations
+
+### L2 Support Agents
+- **code-reviewer** - Review code quality, security, intent compliance
+- **debugger** - Fix bugs and issues (backend/general)
+- **ui-debugger** - Debug UI issues with browser automation
+- **acceptance-validator** - Validate promises are kept (not just code working)
+
+### Operations Agent
+- **project-ops** - Project setup, sync, docs, verification, AI integration
+
+### When to Invoke Each Agent
+
+| Agent | Auto/Manual | Triggered By |
+|-------|-------------|--------------|
+| brownfield-analyzer | AUTO | First session on existing codebase |
+| intent-guardian | AUTO | L1 start (greenfield) |
+| ux-architect | AUTO | After intent complete |
+| agentic-architect | AUTO | After UX complete |
+| implementation-planner | AUTO | After architecture complete |
+| change-analyzer | AUTO | User says "add", "change", "also need" |
+| gap-analyzer | MANUAL | User requests /gap or /audit |
+| backend-engineer | AUTO | L2 feature: backend step |
+| frontend-engineer | AUTO | L2 feature: frontend step |
+| test-engineer | AUTO | L2 feature: testing step |
+| code-reviewer | AUTO | After ANY code changes |
+| debugger | AUTO | User reports issue (keywords: "broken", "error", "bug") |
+| ui-debugger | AUTO | UI issues + puppeteer available |
+| acceptance-validator | AUTO | After feature complete (validates promises) |
+| project-ops | AUTO | After features/milestones |
+
+---
+
 ## Core Principle
 
 **The user should never have to manually invoke agents.**
@@ -404,45 +455,15 @@ ACTION:
 TRIGGER: All steps (backend, frontend, tests) pass
 
 ACTION:
-  1. Promise Validation (CRITICAL - NEW):
-     ┌─────────────────────────────────────────────────────────────┐
-     │ ACCEPTANCE VALIDATION                                       │
-     │                                                             │
-     │ 1. Identify promises this feature implements                │
-     │    Check: /docs/architecture/README.md promise mapping      │
-     │                                                             │
-     │ 2. Run acceptance tests for those promises                  │
-     │    From: /docs/plans/features/[feature].md (AUTH-ACC, etc.) │
-     │                                                             │
-     │ 3. Evaluate results:                                        │
-     │                                                             │
-     │    ALL CRITERIA MET?                                        │
-     │         │                                                   │
-     │        YES                          NO                      │
-     │         │                           │                       │
-     │         ▼                           ▼                       │
-     │    Mark promise                 STOP - Do not continue      │
-     │    VALIDATED                         │                      │
-     │         │                            ▼                      │
-     │         │                     Identify failing criteria     │
-     │         │                            │                      │
-     │         │                            ▼                      │
-     │         │                     Create fix tasks              │
-     │         │                            │                      │
-     │         │                            ▼                      │
-     │         │                     Implement fixes               │
-     │         │                            │                      │
-     │         │                            ▼                      │
-     │         │                     Re-run acceptance             │
-     │         │                            │                      │
-     │         └────────────────────────────┘                      │
-     │                                                             │
-     │ 4. Update state:                                            │
-     │    promises.PRM-XXX.status = VALIDATED                      │
-     │    promises.PRM-XXX.validated_at = timestamp                │
-     │    promises.PRM-XXX.evidence = [test results, etc.]         │
-     │                                                             │
-     └─────────────────────────────────────────────────────────────┘
+  1. Promise Validation (CRITICAL):
+     - Invoke acceptance-validator for promises this feature implements
+     - Validates promises are ACTUALLY KEPT (not just code working)
+     - If PARTIAL or FAILED:
+       → Create remediation tasks
+       → DO NOT mark feature complete
+       → Fix issues and re-validate
+     - If VALIDATED:
+       → Continue to step 2
 
   2. CI Verification:
      - IF scripts/verify.sh exists: run it
@@ -451,41 +472,24 @@ ACTION:
 
   3. Documentation:
      - Invoke project-ops sync
-     - Update intent doc (mark validated promises)
+     - Update intent doc (mark promises VALIDATED)
+     - Update CLAUDE.md state
 
   4. State:
      - Mark feature complete
-     - Update CLAUDE.md with promise validation status
+     - Update promise status (pending → validated)
+     - Update CLAUDE.md
 
   5. Announce:
      "✓ Feature [name] complete
 
       Tests: X passing
-      Promises validated:
-        - PRM-001: Auto-save ✓ VALIDATED
-        - PRM-004: Privacy ✓ VALIDATED
+      Promises validated: Y of Z
+      Coverage: N% (if available)
 
       Ready for next feature: [name]
 
       Or commit now? /project commit"
-```
-
-**FEATURE COMPLETE CHECKLIST:**
-
-```
-□ Implementation tasks done
-□ Unit tests pass
-□ Integration tests pass
-□ Code reviewed
-□ ACCEPTANCE TESTS PASS ← CRITICAL
-□ PROMISES VALIDATED ← CRITICAL
-
-IF acceptance tests fail:
-  → DO NOT mark feature complete
-  → Identify gaps
-  → Create remediation tasks
-  → Fix and re-validate
-  → Loop until PASS
 ```
 
 ---
@@ -579,68 +583,143 @@ Claude:
 
 ---
 
-## Final Promise Validation (Before "App Complete")
+## Change Request Handling
 
-**ALL CORE PROMISES MUST BE VALIDATED**
-
-Before declaring the app complete:
+### Detecting Change Requests
 
 ```
-FINAL VALIDATION GATE:
-═══════════════════════
-
-□ P1 (CORE): Scene presentation = VALIDATED
-□ P2 (CORE): Spanish conversation = VALIDATED
-□ P3 (CORE): Skill tracking = VALIDATED
-□ P4 (IMPORTANT): Lesson generation = VALIDATED or ACCEPTED_PARTIAL
-□ P5 (NICE_TO_HAVE): Voice input = VALIDATED or DEFERRED
-
-IF any CORE promise is NOT VALIDATED:
-  → App is NOT complete
-  → Must fix or explicitly descope (with user approval)
-  → Document reason if descoped
+KEYWORDS that trigger change-analyzer:
+  - "add [feature]"
+  - "also need [feature]"
+  - "change [thing] to [new thing]"
+  - "modify [thing]"
+  - "update [thing] to include [new aspect]"
+  - "can we also have [feature]?"
+  - "what if we [change]"
 ```
 
-### Validation Evidence Required
-
-For each CORE promise, must have:
-
-```yaml
-promises:
-  PRM-001:
-    status: VALIDATED
-    validated_at: "2024-01-15T14:30:00Z"
-    evidence:
-      - acceptance_test: PERSIST-ACC (PASSED)
-      - manual_qa: Crash recovery verified
-      - monitoring: Save success rate = 99.97%
-    issues: []
-```
-
-### If Validation Fails
+### Change Analysis Flow
 
 ```
-Promise PRM-001 validation: PARTIAL (4/5 criteria)
+USER: "Add comments on posts"
 
-FAILING:
-  - Crash recovery not working (data lost on browser crash)
+Claude:
+  1. Acknowledge request
+  2. Invoke change-analyzer
+     - Analyzes impact on existing:
+       • Intent (new promises)
+       • UX (new journeys)
+       • Architecture (new modules)
+       • Plans (new tasks)
+     - Estimates effort and complexity
+     - Identifies dependencies and risks
 
-OPTIONS:
-  1. Fix the issue (recommended)
-     - Estimated: 4 hours
-     - Then re-validate
+  3. Present analysis:
+     "Adding comments feature will:
 
-  2. Descope promise (requires user approval)
-     - Remove "crash recovery" from promise
-     - Update intent doc
-     - Document limitation
+      Impact Analysis:
+      • 1 new user journey (Add Comment)
+      • 2 API endpoints (POST /comments, GET /comments/:postId)
+      • 1 new database table (comments)
+      • 1 new frontend component (CommentSection)
+      • Estimated: 6 hours
 
-  3. Ship as PARTIAL (NOT recommended for CORE)
-     - Document known issue
-     - Create remediation plan
-     - Get user approval
+      Dependencies:
+      • Requires auth system (already complete ✓)
+      • Requires post system (already complete ✓)
 
-RECOMMENDATION: Option 1 (Fix)
+      Risks:
+      • None identified
+
+      Update plans and continue? [Yes/No/Customize]"
+
+  4. On user confirmation:
+     - Update docs/intent/product-intent.md
+     - Update docs/ux/user-journeys.md
+     - Update docs/architecture/README.md
+     - Update docs/plans/features/comments.md (create)
+     - Update docs/plans/implementation-order.md
+     - Continue to L2 building
+
+  5. Announce:
+     "Plans updated. Continuing with comments feature..."
+```
+
+---
+
+## Brownfield Improvement
+
+### When User Requests Improvement
+
+```
+KEYWORDS that trigger gap-analyzer:
+  - "/gap"
+  - "/audit"
+  - "improve this codebase"
+  - "what's wrong with this code"
+  - "fix technical debt"
+  - "find issues"
+```
+
+### Gap Analysis Flow
+
+```
+USER: "/gap" OR "What's wrong with this codebase?"
+
+Claude:
+  1. Invoke gap-analyzer
+     - Compares current vs. ideal (from inferred/explicit docs)
+     - Categorizes gaps:
+       • Critical (security, data loss, broken core features)
+       • High (broken features, poor UX, missing promises)
+       • Medium (tech debt, missing tests, performance)
+       • Low (polish, optimizations, nice-to-haves)
+     - Creates prioritized migration plan
+
+  2. Present findings:
+     "Gap Analysis Complete
+
+      Found 12 gaps:
+      🔴 Critical (2):
+         - GAP-001: SQL injection in search endpoint
+         - GAP-002: No rate limiting on auth routes
+
+      🟠 High (4):
+         - GAP-003: Password reset flow broken
+         - GAP-004: No error handling in checkout
+         - GAP-005: Missing input validation
+         - GAP-006: N+1 queries in dashboard
+
+      🟡 Medium (6):
+         - GAP-007: Duplicated code in services
+         - GAP-008: No tests for payment flow
+         ...
+
+      Start with critical fixes? [Yes/Show plan/Custom]"
+
+  3. On confirmation:
+     - Create docs/gaps/gap-analysis.md
+     - Create docs/gaps/migration-plan.md
+     - Organize into phases:
+       • Phase 0: Critical (must fix)
+       • Phase 1: High (should fix)
+       • Phase 2: Medium (nice to fix)
+       • Phase 3: Low (optional)
+
+  4. Begin fixing (usually Phase 0 first):
+     - For each gap:
+       • Invoke appropriate agent (backend-engineer, etc.)
+       • Fix the issue
+       • Run code-reviewer
+       • Add regression test
+       • Mark gap complete
+     - Continue through phases
+
+  5. Track progress:
+     "✓ GAP-001 fixed (added parameterized queries)
+      ✓ GAP-002 fixed (added rate limiting middleware)
+
+      Phase 0 complete. Continue to Phase 1? [Yes/No]"
 ```
 
 ---
@@ -690,31 +769,10 @@ ci:
   last_check: "2024-01-15T10:40:00Z"
   status: pass  # or fail
 
-# After promise validation (NEW)
-promises:
-  PRM-001:
-    status: validated  # pending, in_progress, validated, partial, failed
-    validated_at: "2024-01-15T10:45:00Z"
-    acceptance_results:
-      auto_save_triggers: pass
-      data_persists: pass
-      shows_confirmation: pass
-      crash_recovery: pass
-    evidence:
-      - "acceptance_test: PERSIST-ACC passed"
-      - "manual_qa: crash recovery verified"
-    issues: []
-
-  PRM-002:
-    status: in_progress
-    validated_at: null
-    acceptance_results: {}
-    issues: []
-
 # Always
 session:
   last_updated: "2024-01-15T10:40:00Z"
-  last_action: "Completed auth backend, code review passed, PRM-001 validated"
+  last_action: "Completed auth backend, code review passed"
   next_action: "Continue to auth frontend"
 ```
 

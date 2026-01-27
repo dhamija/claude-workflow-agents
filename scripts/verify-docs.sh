@@ -168,7 +168,7 @@ echo ""
 # CHECK 6: STATE.md agents list matches actual agents
 # ==============================================================================
 
-echo -e "${BLUE}[6/6]${NC} Checking STATE.md agents list..."
+echo -e "${BLUE}[6/7]${NC} Checking STATE.md agents list..."
 for agent in "$REPO_ROOT/agents"/*.md; do
     [ -f "$agent" ] || continue
     name=$(basename "$agent" .md)
@@ -178,6 +178,49 @@ for agent in "$REPO_ROOT/agents"/*.md; do
     fi
 done
 echo -e "  ${GREEN}✓${NC} All agents in STATE.md"
+echo ""
+
+# ==============================================================================
+# CHECK 7: workflow-orchestrator.md knows about all agents
+# ==============================================================================
+
+echo -e "${BLUE}[7/7]${NC} Checking workflow-orchestrator knows all agents..."
+
+ORCHESTRATOR="$REPO_ROOT/agents/workflow-orchestrator.md"
+MISSING_IN_ORCHESTRATOR=()
+
+# Agents that orchestrator should explicitly mention
+COORDINATED_AGENTS=(
+    "intent-guardian"
+    "ux-architect"
+    "agentic-architect"
+    "implementation-planner"
+    "change-analyzer"
+    "gap-analyzer"
+    "brownfield-analyzer"
+    "backend-engineer"
+    "frontend-engineer"
+    "test-engineer"
+    "code-reviewer"
+    "debugger"
+    "ui-debugger"
+    "acceptance-validator"
+    "project-ops"
+)
+
+for agent in "${COORDINATED_AGENTS[@]}"; do
+    if ! grep -q "$agent" "$ORCHESTRATOR" 2>/dev/null; then
+        echo -e "  ${RED}✗ Agent '$agent' not mentioned in workflow-orchestrator.md${NC}"
+        MISSING_IN_ORCHESTRATOR+=("$agent")
+        ((ERRORS++))
+    fi
+done
+
+if [ ${#MISSING_IN_ORCHESTRATOR[@]} -eq 0 ]; then
+    echo -e "  ${GREEN}✓${NC} workflow-orchestrator knows all coordinated agents"
+else
+    echo -e "  ${YELLOW}⚠${NC} Missing agents in orchestrator: ${MISSING_IN_ORCHESTRATOR[*]}"
+fi
 echo ""
 
 # ==============================================================================

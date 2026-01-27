@@ -132,13 +132,18 @@ When you add, modify, or remove ANY agent or command file:
    - Update command count (line ~125)
    - Add new entries to agent/command tables
 
-4. ✅ **Update tests**
+4. ✅ **Update agents/workflow-orchestrator.md** (CRITICAL!)
+   - Add agent to "Agents Coordinated" section (appropriate category)
+   - Add row to "When to Invoke Each Agent" table
+   - Add orchestration flow if it's a primary workflow agent (e.g., gap-analyzer, change-analyzer)
+
+5. ✅ **Update tests**
    - `tests/structural/test_agents_exist.sh` - add to REQUIRED_AGENTS array
    - `tests/structural/test_commands_exist.sh` - add to REQUIRED_COMMANDS array
    - `tests/test_agents.sh` - add to REQUIRED_AGENTS array
    - `tests/test_commands.sh` - add to REQUIRED_COMMANDS array
 
-5. ✅ **RUN VERIFICATION (MANDATORY)**
+6. ✅ **RUN VERIFICATION (MANDATORY)**
    ```bash
    ./scripts/verify.sh
    ```
@@ -148,8 +153,9 @@ When you add, modify, or remove ANY agent or command file:
    - If it fails, fix ALL reported issues immediately
    - Do NOT commit until verify.sh passes
    - Do NOT skip this step - CI will fail and block merges
+   - **Check 7/7 specifically ensures workflow-orchestrator is in sync!**
 
-6. ✅ **Update STATE.md**
+7. ✅ **Update STATE.md**
    - Add entry to Recent Changes section
    - Update component counts if changed
    - Update last updated timestamps
@@ -201,8 +207,11 @@ If you forgot to run verify.sh and CI fails:
 | **STATE.md** | Current state, agent/command lists, recent changes | Any agent/command added/removed, after major changes |
 | **README.md** | User-facing docs, agent/command counts, tables | Any agent/command added/removed |
 | **commands/help.md** | In-app help system, agent descriptions ("THE X AGENTS") | Any agent/command added/removed |
+| **agents/workflow-orchestrator.md** | Orchestration logic, agent coordination, invocation table | **ANY agent/command added/removed/modified** |
 | **AGENTS.md** | Detailed agent documentation | Agent capabilities change |
 | **COMMANDS.md** | Detailed command documentation | Command behavior changes |
+
+**⚠️ CRITICAL:** workflow-orchestrator.md is the MOST IMPORTANT file to keep in sync! It coordinates all agents and must know about every single one.
 
 ### Cross-Reference Matrix
 
@@ -212,8 +221,14 @@ When you add/remove an agent, it must be updated in:
 2. ✅ **STATE.md** - Agents List table + Component Counts
 3. ✅ **README.md** - "The X Agents" section + table
 4. ✅ **commands/help.md** - "THE X AGENTS" header + agent sections (L1/L2/Operations/Orchestration)
-5. ✅ **tests/structural/test_agents_exist.sh** - REQUIRED_AGENTS array
-6. ✅ **tests/test_agents.sh** - REQUIRED_AGENTS array
+5. ✅ **agents/workflow-orchestrator.md** - "Agents Coordinated" section + invocation table
+6. ✅ **tests/structural/test_agents_exist.sh** - REQUIRED_AGENTS array
+7. ✅ **tests/test_agents.sh** - REQUIRED_AGENTS array
+
+**CRITICAL: workflow-orchestrator.md must list ALL agents it coordinates!**
+- When adding an agent, add it to the appropriate category (L1/L2/Support/Operations)
+- Update the "When to Invoke Each Agent" table
+- Add orchestration flow if it's a primary workflow agent
 
 When you add/remove a command, it must be updated in:
 
@@ -226,15 +241,18 @@ When you add/remove a command, it must be updated in:
 
 ### Verification System
 
-The `./scripts/verify.sh` script automatically checks:
+The `./scripts/verify.sh` script automatically checks (7 checks):
 
-✓ Agent counts consistent (CLAUDE.md, STATE.md, README.md, help.md)
-✓ Command counts consistent (CLAUDE.md, STATE.md, README.md)
-✓ All agents in CLAUDE.md
-✓ All agents in help.md
-✓ All agents in STATE.md agents list
-✓ All agents in test files
-✓ All commands in test files
+✓ **[1/7]** Agent counts consistent (CLAUDE.md, STATE.md, README.md, help.md)
+✓ **[2/7]** Command counts consistent (CLAUDE.md, STATE.md, README.md)
+✓ **[3/7]** All agents referenced in CLAUDE.md
+✓ **[4/7]** All agents referenced in help.md
+✓ **[5/7]** All agents in test files
+✓ **[6/7]** All commands in test files
+✓ **[7/7]** All agents in STATE.md agents list
+✓ **[7/7]** **workflow-orchestrator knows all agents it coordinates**
+
+**NEW:** Check 7 ensures the orchestrator stays in sync when agents change!
 
 **If verify.sh passes, your docs are in sync. If it fails, follow the error messages.**
 
