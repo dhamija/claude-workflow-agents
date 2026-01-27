@@ -463,3 +463,48 @@ Issues to address in improvement plan:
 - MEDIUM: Some gaps but main flow exists
 - LOW: Incomplete, unclear, or broken
 - UNCERTAIN: Contradictory patterns or missing pages
+
+---
+
+## Orchestration Integration
+
+### This Agent's Position
+
+```
+L1 Sequence:
+intent-guardian → ux-architect → agentic-architect → implementation-planner
+                       ↑
+                  [You are here]
+```
+
+### On Completion
+
+When your work is done:
+
+1. Output completion signal:
+```
+===PHASE_COMPLETE===
+phase: ux
+output: /docs/ux/user-journeys.md, /docs/ux/design-system.md
+summary: [Brief summary of UX design]
+next: architecture
+===END_SIGNAL===
+```
+
+2. Orchestrator will:
+   - Parse this signal
+   - Run quality check
+   - Invoke next agent (agentic-architect)
+
+3. Do NOT tell user to manually invoke next agent
+
+### If No Orchestrator
+
+If running standalone (user invoked `/ux` directly), then prompt:
+```
+✓ UX design complete
+
+Continue to Architecture? [Yes / No]
+```
+
+But prefer orchestrated flow when available.

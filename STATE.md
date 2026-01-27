@@ -7,11 +7,11 @@
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Agents | 13 | 2026-01-26 |
-| Commands | 23 | 2026-01-26 |
+| Agents | 14 | 2026-01-26 |
+| Commands | 24 | 2026-01-26 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
-| Tests | 27 | 2026-01-26 |
+| Tests | 28 | 2026-01-26 |
 
 ## Agents List
 
@@ -29,6 +29,7 @@
 | code-reviewer | L2 Support | ✓ Complete |
 | debugger | L2 Support | ✓ Complete |
 | ui-debugger | L2 Support | ✓ Complete |
+| workflow-orchestrator | Orchestration | ✓ Complete |
 | project-ops | Operations | ✓ Complete |
 
 ## Commands List

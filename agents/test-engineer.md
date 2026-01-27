@@ -365,3 +365,63 @@ YES / NO (with reasons)
 - After a phase completes
 - Before marking phase as done
 - When `/verify` command is invoked
+
+---
+
+## Orchestration Integration
+
+### This Agent's Position
+
+```
+L2 Feature Sequence (per feature):
+backend-engineer → frontend-engineer → test-engineer → [verification]
+                                              ↑
+                                         [You are here]
+```
+
+### On Completion
+
+When your work is done:
+
+1. Output completion signal:
+```
+===STEP_COMPLETE===
+feature: [current feature name]
+step: testing
+files_created: [list of new test files]
+files_modified: [list of modified files]
+tests_added: [number]
+tests_passing: [X/Y]
+summary: [Brief summary of test coverage]
+next: verification
+===END_SIGNAL===
+```
+
+2. Orchestrator will:
+   - Parse this signal
+   - Run all tests
+   - If tests pass: mark feature complete, update docs, continue to next feature
+   - If tests fail: pause, show failures, ask for fix
+
+3. Do NOT tell user to manually invoke /verify or next feature
+
+### Quality Gate Hook
+
+After completion, expect:
+- All tests to run automatically
+- Coverage report generated
+- Intent promises checked (which are now fulfilled)
+- Documentation sync
+
+Feature is marked complete only if all tests pass.
+
+### If No Orchestrator
+
+If running standalone, then prompt:
+```
+✓ Tests written
+
+Run verification? [Yes / Skip]
+```
+
+But prefer orchestrated flow when available.

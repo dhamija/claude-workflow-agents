@@ -289,3 +289,60 @@ After implementing, report:
 - Provider used in development (should be Ollama)
 - Cost estimate for production (if using commercial APIs)
 ```
+
+---
+
+## Orchestration Integration
+
+### This Agent's Position
+
+```
+L2 Feature Sequence (per feature):
+backend-engineer → frontend-engineer → test-engineer → [verification]
+       ↑
+  [You are here]
+```
+
+### On Completion
+
+When your work is done:
+
+1. Output completion signal:
+```
+===STEP_COMPLETE===
+feature: [current feature name]
+step: backend
+files_created: [list of new files]
+files_modified: [list of modified files]
+summary: [Brief summary of backend work]
+next: frontend
+===END_SIGNAL===
+```
+
+2. Orchestrator will:
+   - Parse this signal
+   - Run code-reviewer on your changes
+   - If review passes, invoke frontend-engineer
+   - If review fails, fix and retry
+
+3. Do NOT tell user to manually invoke /implement frontend
+
+### Quality Gate Hook
+
+After completion, expect:
+- code-reviewer to run automatically
+- Security check
+- Intent compliance check
+
+Do not proceed until quality gates pass.
+
+### If No Orchestrator
+
+If running standalone, then prompt:
+```
+✓ Backend complete
+
+Continue to frontend? [Yes / Review code first]
+```
+
+But prefer orchestrated flow when available.

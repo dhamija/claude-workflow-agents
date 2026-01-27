@@ -106,3 +106,62 @@ After implementing, report:
 ## Notes
 - Any concerns or decisions made
 ```
+
+---
+
+## Orchestration Integration
+
+### This Agent's Position
+
+```
+L2 Feature Sequence (per feature):
+backend-engineer → frontend-engineer → test-engineer → [verification]
+                          ↑
+                     [You are here]
+```
+
+### On Completion
+
+When your work is done:
+
+1. Output completion signal:
+```
+===STEP_COMPLETE===
+feature: [current feature name]
+step: frontend
+files_created: [list of new files]
+files_modified: [list of modified files]
+summary: [Brief summary of frontend work]
+next: testing
+===END_SIGNAL===
+```
+
+2. Orchestrator will:
+   - Parse this signal
+   - Run code-reviewer on your changes
+   - Run ui-debugger for quick visual check
+   - If review passes, invoke test-engineer
+   - If review fails, fix and retry
+
+3. Do NOT tell user to manually invoke /implement tests
+
+### Quality Gate Hook
+
+After completion, expect:
+- code-reviewer to run automatically
+- ui-debugger to check UI (if app has frontend)
+- Responsive layout check
+- Console error check
+
+Do not proceed until quality gates pass.
+
+### If No Orchestrator
+
+If running standalone, then prompt:
+```
+✓ Frontend complete
+
+Continue to tests? [Yes / Review UI first]
+```
+
+But prefer orchestrated flow when available.

@@ -118,8 +118,8 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 | Metric | Count |
 |--------|-------|
-| Agents | 13 |
-| Commands | 23 |
+| Agents | 14 |
+| Commands | 24 |
 
 ### Agents
 
@@ -137,6 +137,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | code-reviewer | L2 Support | Review code |
 | debugger | L2 Support | Fix bugs |
 | ui-debugger | L2 Support | Debug UI with browser automation |
+| workflow-orchestrator | Orchestration | Auto-chain agents and quality gates |
 | project-ops | Ops | Setup, sync, docs |
 
 ### Commands

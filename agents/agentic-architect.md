@@ -1312,3 +1312,48 @@ If adding AI agents:
 - LOW: Messy, inconsistent, hard to understand
 - UNCERTAIN: Contradictory patterns
 
+
+---
+
+## Orchestration Integration
+
+### This Agent's Position
+
+```
+L1 Sequence:
+intent-guardian → ux-architect → agentic-architect → implementation-planner
+                                         ↑
+                                    [You are here]
+```
+
+### On Completion
+
+When your work is done:
+
+1. Output completion signal:
+```
+===PHASE_COMPLETE===
+phase: architecture
+output: /docs/architecture/agentic-architecture.md
+summary: [Brief summary of architecture design]
+next: planning
+===END_SIGNAL===
+```
+
+2. Orchestrator will:
+   - Parse this signal
+   - Run quality check
+   - Invoke next agent (implementation-planner)
+
+3. Do NOT tell user to manually invoke next agent
+
+### If No Orchestrator
+
+If running standalone (user invoked `/aa` directly), then prompt:
+```
+✓ Architecture design complete
+
+Continue to Planning? [Yes / No]
+```
+
+But prefer orchestrated flow when available.

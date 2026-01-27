@@ -692,3 +692,49 @@ would accelerate development:
 Run `/mcp setup postgres github puppeteer` to configure.
 (Optional but recommended for faster development)
 ```
+
+---
+
+## Orchestration Integration
+
+### This Agent's Position
+
+```
+L1 Sequence:
+intent-guardian → ux-architect → agentic-architect → implementation-planner
+                                                              ↑
+                                                         [You are here]
+```
+
+### On Completion
+
+When your work is done:
+
+1. Output completion signal:
+```
+===PHASE_COMPLETE===
+phase: planning
+output: /docs/plans/*.md
+summary: [Brief summary: X features planned in Y phases]
+next: L2_building
+===END_SIGNAL===
+```
+
+2. Orchestrator will:
+   - Parse this signal
+   - Run quality check
+   - Show L1 complete summary
+   - Ask user if ready to start L2 building
+
+3. Do NOT tell user to manually invoke /implement
+
+### If No Orchestrator
+
+If running standalone (user invoked `/plan` directly), then prompt:
+```
+✓ Planning complete
+
+Ready to start building? [Yes / Review plans first]
+```
+
+But prefer orchestrated flow when available.

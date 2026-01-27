@@ -483,3 +483,48 @@ Potential intent issues to address:
 - MEDIUM: Some evidence, but not comprehensive
 - LOW: Guessing based on limited signals
 - UNCERTAIN: Contradictory or no evidence
+
+---
+
+## Orchestration Integration
+
+### This Agent's Position
+
+```
+L1 Sequence:
+intent-guardian → ux-architect → agentic-architect → implementation-planner
+      ↑
+  [You are here]
+```
+
+### On Completion
+
+When your work is done:
+
+1. Output completion signal:
+```
+===PHASE_COMPLETE===
+phase: intent
+output: /docs/intent/product-intent.md
+summary: [Brief summary of what was captured]
+next: ux
+===END_SIGNAL===
+```
+
+2. Orchestrator will:
+   - Parse this signal
+   - Run quality check
+   - Invoke next agent (ux-architect)
+
+3. Do NOT tell user to manually invoke next agent
+
+### If No Orchestrator
+
+If running standalone (user invoked `/intent` directly), then prompt:
+```
+✓ Intent captured
+
+Continue to UX design? [Yes / No]
+```
+
+But prefer orchestrated flow when available.
