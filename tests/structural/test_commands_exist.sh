@@ -12,6 +12,7 @@ REQUIRED_COMMANDS=(
     "project"
     "analyze"
     "audit"
+    "auto"
     "change"
     "debug"
     "design"

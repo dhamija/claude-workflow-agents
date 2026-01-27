@@ -152,7 +152,7 @@ DOCUMENTS CREATED
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║                       THE 12 AGENTS                              ║
+║                       THE 16 AGENTS                              ║
 ╚══════════════════════════════════════════════════════════════════╝
 
 Claude automatically selects agents. You don't call them directly.
@@ -203,6 +203,13 @@ LEVEL 1 AGENTS (App-level)
   │ Triggers: Existing codebase, "improve", "technical debt"    │
   └─────────────────────────────────────────────────────────────┘
 
+  ┌─────────────────────────────────────────────────────────────┐
+  │ BROWNFIELD-ANALYZER                                         │
+  │ "What exists in this codebase?"                             │
+  │ Scans: Tech stack, features, tests, documentation           │
+  │ Triggers: First run on existing codebase (automatic)        │
+  └─────────────────────────────────────────────────────────────┘
+
 
 LEVEL 2 AGENTS (Feature-level)
 ──────────────────────────────
@@ -237,6 +244,18 @@ LEVEL 2 AGENTS (Feature-level)
   │ Triggers: "Broken", "error", "bug", "doesn't work"          │
   └─────────────────────────────────────────────────────────────┘
 
+  ┌─────────────────────────────────────────────────────────────┐
+  │ UI-DEBUGGER                                                 │
+  │ Does: Browser automation, screenshots, console debugging    │
+  │ Triggers: UI issues, visual bugs (requires puppeteer MCP)   │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ ACCEPTANCE-VALIDATOR                                        │
+  │ Does: Validates promises are kept (not just code tests)     │
+  │ Triggers: After feature complete, promise verification      │
+  └─────────────────────────────────────────────────────────────┘
+
 
 OPERATIONS AGENT (Project Management)
 ─────────────────────────────────────
@@ -245,6 +264,16 @@ OPERATIONS AGENT (Project Management)
   │ PROJECT-OPS                                                 │
   │ Manages: Setup, sync, docs, verification, AI integration    │
   │ Triggers: /project commands, "save state", after features   │
+  └─────────────────────────────────────────────────────────────┘
+
+
+ORCHESTRATION AGENT (Workflow Automation)
+──────────────────────────────────────────
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ WORKFLOW-ORCHESTRATOR                                       │
+  │ Does: Auto-chains agents, enforces quality gates            │
+  │ Triggers: Automatic (coordinates all agent interactions)    │
   └─────────────────────────────────────────────────────────────┘
 ```
 

@@ -19,12 +19,18 @@ REQUIRED_AGENTS=(
     "ux-architect"
     "agentic-architect"
     "implementation-planner"
+    "change-analyzer"
     "gap-analyzer"
+    "brownfield-analyzer"
     "backend-engineer"
     "frontend-engineer"
     "test-engineer"
     "code-reviewer"
     "debugger"
+    "ui-debugger"
+    "acceptance-validator"
+    "workflow-orchestrator"
+    "project-ops"
 )
 
 # Check each required agent exists

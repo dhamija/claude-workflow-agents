@@ -3,6 +3,18 @@
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
 
+---
+
+## 🚨 CLAUDE: READ THIS FIRST
+
+**Before making ANY changes to this repository:**
+
+1. Read the [MANDATORY MAINTENANCE PROTOCOL](#️-mandatory-maintenance-protocol) section below
+2. After changes to `agents/` or `commands/`, you MUST run `./scripts/verify.sh`
+3. Do NOT commit until verify.sh passes - CI will fail otherwise
+
+---
+
 ## ⚠️ Important Distinction
 
 | This Repo | User Projects |
@@ -95,16 +107,83 @@
 
 Multi-agent workflow system for Claude Code
 
-## Maintenance Rules
+## ⚠️ MANDATORY MAINTENANCE PROTOCOL
 
-After changing `agents/` or `commands/`:
-1. Update this file (Current State section)
-2. Update `commands/help.md`
-3. Update `README.md`
-4. Update tests
+**CRITICAL: Claude MUST follow this protocol after ANY change to `agents/` or `commands/`.**
 
-**Verify:** `./scripts/verify.sh`
-**CI will fail if docs are out of sync.**
+### Step-by-Step Checklist
+
+When you add, modify, or remove ANY agent or command file:
+
+1. ✅ **Update CLAUDE.md** (Current State section)
+   - Update agent/command counts
+   - Add new entries to the tables
+   - Remove deleted entries
+
+2. ✅ **Update commands/help.md**
+   - Add new agents to appropriate section (L1/L2/Operations/Orchestration)
+   - Update agent count in header ("THE X AGENTS")
+   - Add new commands to the commands list
+
+3. ✅ **Update README.md**
+   - Update agent count (line ~124)
+   - Update command count (line ~125)
+   - Add new entries to agent/command tables
+
+4. ✅ **Update tests**
+   - `tests/structural/test_agents_exist.sh` - add to REQUIRED_AGENTS array
+   - `tests/structural/test_commands_exist.sh` - add to REQUIRED_COMMANDS array
+   - `tests/test_agents.sh` - add to REQUIRED_AGENTS array
+   - `tests/test_commands.sh` - add to REQUIRED_COMMANDS array
+
+5. ✅ **RUN VERIFICATION (MANDATORY)**
+   ```bash
+   ./scripts/verify.sh
+   ```
+
+   **YOU MUST RUN THIS COMMAND BEFORE COMMITTING.**
+
+   - If it fails, fix ALL reported issues immediately
+   - Do NOT commit until verify.sh passes
+   - Do NOT skip this step - CI will fail and block merges
+
+6. ✅ **Update STATE.md**
+   - Add entry to Recent Changes section
+   - Update component counts if changed
+   - Update last updated timestamps
+
+### Why This Matters
+
+- **CI Enforcement**: `./scripts/verify.sh` runs in CI. PRs will be blocked if docs are out of sync.
+- **User Experience**: Out-of-sync docs confuse users and break trust.
+- **Automatic Detection**: The verify script catches 100% of sync issues before they reach users.
+
+### Automation Helpers
+
+To make this easier:
+
+```bash
+# After making changes, run:
+./scripts/verify.sh
+
+# If it passes, you're good to commit
+git add -A
+git commit -m "feat: add new agent"
+
+# If it fails, fix the reported issues and run again
+```
+
+### Failure Recovery
+
+If you forgot to run verify.sh and CI fails:
+
+1. Read the CI error output - it shows exactly what's missing
+2. Fix the reported issues locally
+3. Run `./scripts/verify.sh` to confirm
+4. Commit the fixes
+5. Push again
+
+**Remember: verify.sh is your friend. It prevents mistakes, not creates them.**
 
 ---
 

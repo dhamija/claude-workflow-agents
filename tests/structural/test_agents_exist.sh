@@ -13,11 +13,15 @@ REQUIRED_AGENTS=(
     "implementation-planner"
     "change-analyzer"
     "gap-analyzer"
+    "brownfield-analyzer"
     "backend-engineer"
     "frontend-engineer"
     "test-engineer"
     "code-reviewer"
     "debugger"
+    "ui-debugger"
+    "acceptance-validator"
+    "workflow-orchestrator"
     "project-ops"
 )
 

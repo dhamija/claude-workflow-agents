@@ -30,6 +30,7 @@ REQUIRED_COMMANDS=(
     "intent-audit"
     "review"
     "debug"
+    "auto"
 )
 
 # Check each required command exists
