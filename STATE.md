@@ -69,6 +69,14 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-26 | **v2.0.0 RELEASE:** Self-contained CLAUDE.md templates architecture | Claude |
+| 2026-01-26 | BREAKING: Embedded all orchestration logic in CLAUDE.md templates (750+ lines each) | Claude |
+| 2026-01-26 | workflow-orchestrator.md converted to contributor documentation only | Claude |
+| 2026-01-26 | Created workflow-patch command for safe CLAUDE.md updates with diff preview | Claude |
+| 2026-01-26 | Created workflow-update command with automatic patch offering | Claude |
+| 2026-01-26 | Templates now self-contained: no external file dependencies required | Claude |
+| 2026-01-26 | Added smart section extraction preserving user customizations | Claude |
+| 2026-01-26 | Added automatic backup system for CLAUDE.md patching | Claude |
 | 2026-01-26 | Added intent-to-validation traceability system (promises, acceptance, validation) | Claude |
 | 2026-01-26 | Added MCP auto-enable protocol for ui-debugger (automatic puppeteer setup) | Claude |
 | 2026-01-26 | Added comprehensive agent utilization instructions to CLAUDE.md templates | Claude |

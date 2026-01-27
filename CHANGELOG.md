@@ -6,6 +6,116 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [2.0.0] - 2026-01-26
+
+### BREAKING CHANGES
+
+**Self-Contained CLAUDE.md Templates Architecture**
+
+The orchestration system has been completely redesigned for reliability. CLAUDE.md templates now contain ALL orchestration logic embedded directly, eliminating dependency on external files.
+
+### What Changed
+
+**Before (v1.x):**
+- CLAUDE.md had HTML comment: `<!-- READ orchestrator.md -->`
+- Relied on Claude reading external files (unreliable)
+- HTML comments could be ignored
+- Orchestration was "wishful thinking"
+
+**After (v2.0):**
+- ALL orchestration logic embedded in CLAUDE.md templates (750+ lines each)
+- Self-contained, no external dependencies
+- Guaranteed to work
+- workflow-orchestrator.md is now contributor documentation only
+
+### Added
+
+- **workflow-update** command - Update workflow system from git repository
+  - Pulls latest changes
+  - Updates agents, commands, and templates in `~/.claude-workflow-agents/`
+  - Recreates symlinks if new agents/commands added
+  - Offers to run workflow-patch if in project directory
+
+- **workflow-patch** command - Smart merge of template updates into user CLAUDE.md
+  - Detects CLAUDE.md version and type (greenfield/brownfield)
+  - **Preserves user data:**
+    - Project name and description
+    - Workflow state (progress, features, promises)
+    - Project context (decisions, notes)
+  - **Updates orchestration logic:**
+    - Quick Reference tables
+    - L1/L2 orchestration flows
+    - Issue response protocols
+    - Quality gates
+    - Design principles
+  - **Safety features:**
+    - Creates timestamped backup
+    - Shows diff preview
+    - Requires confirmation
+    - Easy rollback
+
+### Changed
+
+- **templates/project/CLAUDE.md.greenfield.template** (793 lines)
+  - Embedded complete L1 orchestration flow (Intent → UX → Architecture → Planning)
+  - Embedded complete L2 orchestration flow (Backend → Frontend → Testing → Verification)
+  - Embedded change request handling (change-analyzer integration)
+  - Embedded issue response protocols (debugger, ui-debugger flows)
+  - Embedded quality gates (automatic enforcement)
+  - Embedded design principles (auto-applied)
+  - All operational logic self-contained
+
+- **templates/project/CLAUDE.md.brownfield.template** (795 lines)
+  - Embedded brownfield analysis flow (brownfield-analyzer)
+  - Embedded gap analysis flow (gap-analyzer)
+  - Same L2/quality/issue handling as greenfield
+  - All operational logic self-contained
+
+- **agents/workflow-orchestrator.md**
+  - Converted to **contributor documentation only**
+  - Documents orchestration system architecture for maintainers
+  - NOT read by Claude during normal operation
+  - Explains template system, agent coordination, maintenance
+
+### Migration Guide
+
+**For users updating from v1.x:**
+
+```bash
+# 1. Update workflow system globally
+workflow-update
+
+# 2. For EACH project with workflow-enabled CLAUDE.md:
+cd /path/to/project
+workflow-patch
+
+# 3. Review changes
+git diff CLAUDE.md
+
+# 4. Test orchestration works correctly
+
+# 5. Commit updated CLAUDE.md
+git add CLAUDE.md
+git commit -m "chore: update to workflow v2.0 self-contained template"
+```
+
+### Benefits
+
+- **Reliability**: Orchestration guaranteed to work (no external dependencies)
+- **Simplicity**: All logic in one place, easier to understand
+- **Maintainability**: Templates are source of truth
+- **Safety**: Smart patching preserves user customizations
+- **Transparency**: Diff preview shows exactly what changes
+
+### Documentation
+
+- Added "Template Architecture (v2.0)" section to CLAUDE.md
+- Added "User Update Workflow" section to CLAUDE.md
+- Updated README.md with v2.0 update process
+- Updated STATE.md with v2.0 release notes
+
+---
+
 ## [1.3.0] - 2026-01-25
 
 ### Changed

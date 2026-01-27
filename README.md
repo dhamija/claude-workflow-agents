@@ -64,7 +64,8 @@ Then restart your terminal (or `source ~/.bashrc`).
 | Command | Description |
 |---------|-------------|
 | `workflow-toggle on/off/status` | Enable, disable, or check workflow status (global) |
-| `workflow-update` | Update global installation from git |
+| `workflow-update` | Update to latest version from git |
+| `workflow-patch` | Update project CLAUDE.md with latest orchestration (v2.0+) |
 | `workflow-version` | Show current version |
 | `workflow-uninstall` | Remove global installation |
 
@@ -119,7 +120,7 @@ Output:
 ```
 Claude Workflow Agents
 ──────────────────────
-Version:   v1.3.0
+Version:   v2.0.0
 Location:  ~/.claude-workflow-agents
 Agents:    16
 Commands:  24
@@ -127,22 +128,108 @@ Commands:  24
 Commands:
   workflow-toggle on/off/status  Enable, disable, or check status
   workflow-update                Update installation
+  workflow-patch                 Update project CLAUDE.md (v2.0+)
   workflow-version               Show version
   workflow-uninstall             Remove installation
 ```
 
-### Update to Latest
+### Update to Latest (v2.0+)
+
+**Two-step update process:**
+
+#### 1. Update Workflow System
 
 ```bash
 workflow-update
 ```
 
-The update command:
-- Checks for new version
-- Shows changelog
-- Prompts for confirmation
-- Updates global installation
-- All projects automatically use new version
+This updates the global workflow installation:
+- Pulls latest changes from git repository
+- Updates agents, commands, and templates in `~/.claude-workflow-agents/`
+- Recreates symlinks if new agents/commands were added
+- Shows changelog and asks for confirmation
+
+#### 2. Update Project CLAUDE.md (New in v2.0)
+
+```bash
+cd /path/to/your/project
+workflow-patch
+```
+
+This safely merges template updates into your project's CLAUDE.md:
+- **Preserves your data:**
+  - Project name and description
+  - Workflow state (progress, features, promises)
+  - Project context (decisions, notes)
+- **Updates orchestration logic:**
+  - L1/L2 flows
+  - Quality gates
+  - Issue response protocols
+  - Design principles
+- **Safety features:**
+  - Creates timestamped backup
+  - Shows diff preview
+  - Requires confirmation
+  - Easy rollback
+
+**Example update workflow:**
+
+```bash
+# 1. Update the workflow system globally
+workflow-update
+
+# Output:
+#   Updated: 1.3.0 → 2.0.0
+#   Changes: Self-contained templates, new patch command
+#   Would you like to patch your CLAUDE.md? [Y/n/l]
+
+# 2. If not in project directory, navigate there
+cd ~/my-project
+
+# 3. Run patch command
+workflow-patch
+
+# Shows diff preview:
+#   - Old orchestration flows
+#   + New orchestration flows with embedded logic
+#
+#   Apply patch? [Y/n/d]
+
+# 4. Review changes
+git diff CLAUDE.md
+
+# 5. Test that orchestration works correctly
+
+# 6. Delete backup if satisfied
+rm CLAUDE.md.backup-*
+```
+
+### Migrating from v1.x to v2.0
+
+**Breaking change in v2.0:** CLAUDE.md templates are now self-contained.
+
+If you have existing projects with workflow-enabled CLAUDE.md files:
+
+```bash
+# 1. Update workflow system
+workflow-update
+
+# 2. For EACH project with CLAUDE.md
+cd /path/to/project
+workflow-patch
+
+# 3. Review and test
+git diff CLAUDE.md
+# Verify orchestration still works
+
+# 4. Commit updated CLAUDE.md
+git add CLAUDE.md
+git commit -m "chore: update to workflow v2.0 self-contained template"
+```
+
+**What changed:**
+- **Before (v1.x):** CLAUDE.md had HTML comment saying "READ orchestrator.md" (unreliable)
+- **After (v2.0):** All orchestration logic embedded directly in CLAUDE.md (guaranteed to work)
 
 ### Changelog
 
