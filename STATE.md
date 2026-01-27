@@ -68,6 +68,16 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-26 | Added comprehensive agent utilization instructions to CLAUDE.md templates | Claude |
+| 2026-01-26 | Added automatic quality gates (code-reviewer after code, tests after steps) | Claude |
+| 2026-01-26 | Added issue response protocols (debugger keyword detection, auto-invocation) | Claude |
+| 2026-01-26 | Created workflow initialization system (workflow-init detects greenfield/brownfield) | Claude |
+| 2026-01-26 | Created brownfield-analyzer agent (scans existing code, infers state) | Claude |
+| 2026-01-26 | Added session resume protocol to workflow-orchestrator | Claude |
+| 2026-01-26 | Created CLAUDE.md.greenfield.template and CLAUDE.md.brownfield.template | Claude |
+| 2026-01-26 | Added state tracking (quality gates, CI status, open issues) | Claude |
+| 2026-01-26 | Added workflow orchestrator for automatic agent chaining | Claude |
+| 2026-01-26 | Added UI debugger agent with browser automation (puppeteer MCP) | Claude |
 | 2026-01-25 | Changed installation path to ~/.claude-workflow-agents/ (where Claude Code looks) | Claude |
 | 2026-01-25 | Separated repo files from user templates (templates/ directory) | Claude |
 | 2026-01-25 | Added git workflow conventions to project-ops agent | Claude |
