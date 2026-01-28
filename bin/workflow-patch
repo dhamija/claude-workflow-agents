@@ -139,16 +139,13 @@ if [ -n "$PROJECT_CONTEXT" ]; then
     PATCH_CONTEXT_END=$(grep -n "^## Agent Implementation Details\|^---$" "$PATCHED_FILE" | tail -2 | head -1 | cut -d: -f1)
 
     if [ -n "$PATCH_CONTEXT_START" ] && [ -n "$PATCH_CONTEXT_END" ]; then
-        # Delete template's Project Context section
-        sed -i.tmp "${PATCH_CONTEXT_START},$((PATCH_CONTEXT_END-1))d" "$PATCHED_FILE"
-        # Insert user's Project Context at the same location
+        # Build new file: header + user context + footer (skip template's context)
         {
             head -n $((PATCH_CONTEXT_START-1)) "$PATCHED_FILE"
             echo "$PROJECT_CONTEXT"
-            tail -n +$PATCH_CONTEXT_START "$PATCHED_FILE"
+            tail -n +$PATCH_CONTEXT_END "$PATCHED_FILE"
         } > "$PATCHED_FILE.tmp2"
         mv "$PATCHED_FILE.tmp2" "$PATCHED_FILE"
-        rm -f "$PATCHED_FILE.tmp"
     fi
 fi
 
@@ -157,16 +154,13 @@ PATCH_STATE_START=$(grep -n '^```yaml' "$PATCHED_FILE" | tail -1 | cut -d: -f1)
 PATCH_STATE_END=$(grep -n '^```$' "$PATCHED_FILE" | awk -v start="$PATCH_STATE_START" '$1 > start {print; exit}' | cut -d: -f1)
 
 if [ -n "$PATCH_STATE_START" ] && [ -n "$PATCH_STATE_END" ]; then
-    # Delete template's workflow state
-    sed -i.tmp "${PATCH_STATE_START},${PATCH_STATE_END}d" "$PATCHED_FILE"
-    # Insert user's workflow state at the same location
+    # Build new file: header + user state + footer (skip template's state)
     {
         head -n $((PATCH_STATE_START-1)) "$PATCHED_FILE"
         echo "$WORKFLOW_STATE"
-        tail -n +$PATCH_STATE_START "$PATCHED_FILE"
+        tail -n +$((PATCH_STATE_END+1)) "$PATCHED_FILE"
     } > "$PATCHED_FILE.tmp2"
     mv "$PATCHED_FILE.tmp2" "$PATCHED_FILE"
-    rm -f "$PATCHED_FILE.tmp"
 fi
 
 # Update version in workflow state
