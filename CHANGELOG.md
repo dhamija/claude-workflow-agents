@@ -6,6 +6,16 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [Unreleased]
+
+### Fixed
+- Hooks template had incorrect matcher format (object instead of string), causing Claude Code error: "objects when string expected in settings.json"
+  - **Migration**: Users who already ran `workflow-init` with hooks need to either:
+    1. Delete `.claude/settings.json` and re-run `workflow-init` (recommended)
+    2. Manually edit `.claude/settings.json` line 5 to: `"matcher": "Write|Edit",` (remove the object wrapper)
+
+---
+
 ## [3.0.0] - 2026-01-27
 
 ### MAJOR ARCHITECTURE REFACTOR
