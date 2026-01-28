@@ -98,8 +98,8 @@ echo ""
 PROJECT_NAME=$(head -1 CLAUDE.md | sed 's/^# //')
 PROJECT_DESC=$(grep "^>" CLAUDE.md | head -1 | sed 's/^> //')
 
-# 2. Extract Project Context section
-CONTEXT_START=$(grep -n "^## Project Context" CLAUDE.md | cut -d: -f1)
+# 2. Extract Project Context section (take LAST match if multiple exist)
+CONTEXT_START=$(grep -n "^## Project Context" CLAUDE.md | tail -1 | cut -d: -f1)
 CONTEXT_END=$(grep -n "^## Agent Implementation Details\|^---$" CLAUDE.md | tail -2 | head -1 | cut -d: -f1)
 if [ -n "$CONTEXT_START" ] && [ -n "$CONTEXT_END" ]; then
     PROJECT_CONTEXT=$(sed -n "${CONTEXT_START},${CONTEXT_END}p" CLAUDE.md | head -n -1)
@@ -134,8 +134,8 @@ rm "$PATCHED_FILE.tmp"
 
 # Replace Project Context section with user's version
 if [ -n "$PROJECT_CONTEXT" ]; then
-    # Find Project Context section in patched file
-    PATCH_CONTEXT_START=$(grep -n "^## Project Context" "$PATCHED_FILE" | cut -d: -f1)
+    # Find Project Context section in patched file (take FIRST match - template location)
+    PATCH_CONTEXT_START=$(grep -n "^## Project Context" "$PATCHED_FILE" | head -1 | cut -d: -f1)
     PATCH_CONTEXT_END=$(grep -n "^## Agent Implementation Details\|^---$" "$PATCHED_FILE" | tail -2 | head -1 | cut -d: -f1)
 
     if [ -n "$PATCH_CONTEXT_START" ] && [ -n "$PATCH_CONTEXT_END" ]; then
