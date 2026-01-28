@@ -27,15 +27,17 @@ Format: [Semantic Versioning](https://semver.org/)
   - Critical gaps block feature completion until resolved
 
 ### Fixed
+- **CRITICAL: install.sh deleted TEMP_DIR before copying bin scripts**
+  - **Root cause**: `rm -rf "$TEMP_DIR"` on line 106 happened immediately after copying agents/commands/templates, but 700 lines before attempting to copy bin scripts
+  - **Impact**: workflow-patch and workflow-fix-hooks NEVER got installed, even with copy logic present
+  - **Fix**: Delayed TEMP_DIR cleanup to line 809, after bin scripts are copied
+  - Fresh installs now correctly include all bin scripts
 - **install.sh and workflow-update did not install workflow-patch and workflow-fix-hooks**
   - Initial install: Added section to copy additional bin scripts from repository after generating core scripts
   - workflow-update: Added logic to set executable permissions on all scripts from repo before moving to install dir
   - Fixed `workflow-update` INSTALL_DIR path bug (`$HOME/.claude` → `$HOME/.claude-workflow-agents`)
   - Fixed `workflow-update` to preserve ONLY generated scripts, allowing new scripts from repo to be installed
-  - **Migration for existing users**:
-    - Option 1 (Recommended): Reinstall with `curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash` to get updated workflow-update
-    - Option 2 (Quick fix): Manually copy scripts: `cp /path/to/repo/bin/workflow-* ~/.claude-workflow-agents/bin/ && chmod +x ~/.claude-workflow-agents/bin/workflow-*`
-    - After migration, all future `workflow-update` runs will include additional scripts
+  - **Migration for existing users**: Reinstall with `curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash` (now actually works!)
 
 ---
 

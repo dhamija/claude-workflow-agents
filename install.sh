@@ -101,9 +101,7 @@ cp -r "$TEMP_DIR/agents" "$INSTALL_DIR/"
 cp -r "$TEMP_DIR/commands" "$INSTALL_DIR/"
 cp -r "$TEMP_DIR/templates" "$INSTALL_DIR/"
 cp "$TEMP_DIR/version.txt" "$INSTALL_DIR/"
-
-# Cleanup temp
-rm -rf "$TEMP_DIR"
+# Note: Keep TEMP_DIR for now - we need it later to copy bin scripts
 
 # Create directories
 mkdir -p "$CLAUDE_DIR/agents"
@@ -806,6 +804,9 @@ if [ -d "$TEMP_DIR/bin" ]; then
         fi
     done
 fi
+
+# Cleanup temp directory (delayed until after copying bin scripts)
+rm -rf "$TEMP_DIR"
 
 # ─────────────────────────────────────────────────────────────────
 # Add to PATH
