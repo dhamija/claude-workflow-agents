@@ -24,7 +24,7 @@ tools: N/A (reference documentation only)
 
 **Purpose:** This document explains how the workflow orchestration system works for contributors and maintainers.
 
-**Important (v3.0):** This is NOT operational documentation. Orchestration logic is in the **workflow skill** (`templates/skills/workflow/SKILL.md`), NOT in project CLAUDE.md files.
+**Important (v3.1):** This is NOT operational documentation. Orchestration logic is in the **workflow skill** (`templates/skills/workflow/SKILL.md`), NOT in project CLAUDE.md files.
 
 Project CLAUDE.md files are now minimal (~80 lines) and contain only state tracking.
 
@@ -32,7 +32,7 @@ Project CLAUDE.md files are now minimal (~80 lines) and contain only state track
 
 ## Architecture Overview
 
-### Current Architecture (v3.0 - Skills + Hooks)
+### Current Architecture (v3.1 - Skills + Hooks)
 
 ```
 Skills (Domain Expertise)
@@ -72,7 +72,7 @@ Hooks (.claude/settings.json - optional)
 **v2.0 (Self-Contained Templates):**
 - 750+ line CLAUDE.md with embedded orchestration
 - Problem: Context bloat, poor performance
-- Deprecated in v3.0
+- Deprecated in v3.1
 
 **v0.9-v1.0 (External Orchestrator):**
 - HTML comment pointing to orchestrator.md
@@ -534,7 +534,7 @@ grep -A 10 "## L1 Orchestration Flow" CLAUDE.md
 
 ## Version History
 
-### v3.0 (2026-01-27)
+### v3.1 (2026-01-27)
 - **Breaking Change:** Skills + Hooks architecture
 - Orchestration logic moved FROM CLAUDE.md TO workflow skill
 - 9 skills loaded on-demand by Claude
@@ -547,7 +547,7 @@ grep -A 10 "## L1 Orchestration Flow" CLAUDE.md
 ### v2.0 (2026-01-26)
 - **Breaking Change:** Self-contained CLAUDE.md templates (750+ lines)
 - All orchestration embedded in project CLAUDE.md
-- Deprecated in v3.0 due to context bloat
+- Deprecated in v3.1 due to context bloat
 
 ### v1.0 / v0.9 (Historical)
 - External orchestrator file with HTML comment

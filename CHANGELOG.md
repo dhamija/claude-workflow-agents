@@ -6,7 +6,7 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
-## [Unreleased]
+## [3.1.0] - 2026-01-27
 
 ### Added
 - **LLM User Testing System** - Doc-driven automated UI testing with LLM-simulated users

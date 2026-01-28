@@ -3,7 +3,7 @@
 > **Auto-updated by**: `./scripts/update-claude-md.sh`
 >  **Last updated**: 2026-01-27
 
-## Component Counts (v3.0)
+## Component Counts (v3.1)
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|

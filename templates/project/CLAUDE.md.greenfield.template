@@ -666,7 +666,7 @@ When frontend-engineer builds UI:
 
 ```yaml
 workflow:
-  version: 1.0
+  version: 3.1
   type: greenfield
   phase: L1                    # L1 (planning) or L2 (building)
   status: not_started          # not_started, in_progress, paused, complete

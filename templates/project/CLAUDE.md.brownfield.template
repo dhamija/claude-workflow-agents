@@ -629,7 +629,7 @@ When modifying UI, automatically apply:
 
 ```yaml
 workflow:
-  version: 1.0
+  version: 3.1
   type: brownfield
   phase: analysis              # analysis, L1, L2
   status: not_started          # not_started, in_progress, paused, complete

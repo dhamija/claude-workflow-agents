@@ -1,6 +1,6 @@
 # Practical Examples
 
-> **v3.0 Note:** Examples remain the same - just talk naturally. The v3.0 Skills + Hooks architecture makes this even more efficient with 90% less context.
+> **v3.1 Note:** Examples remain the same - just talk naturally. The v3.1 Skills + Hooks architecture makes this even more efficient with 90% less context.
 
 Real-world examples showing how to use the system for different scenarios.
 

@@ -1,6 +1,6 @@
 # Claude Workflow Agents - Repository
 
-> **v3.0 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+> **v3.1 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
 
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
@@ -29,7 +29,7 @@
 
 ---
 
-## Installation Architecture (v3.0)
+## Installation Architecture (v3.1)
 
 **Skills + Hooks + Subagents Architecture**
 
@@ -55,7 +55,7 @@
 │   ├── workflow-update             # Update from git
 │   ├── workflow-uninstall          # Remove installation
 │   └── workflow-version            # Show version
-└── version.txt                     # Current version (3.0.0)
+└── version.txt                     # Current version (3.1.0)
 
 ~/.claude/                           # Claude Code's directory
 ├── skills/                          # 10 skills (loaded on-demand by Claude)
@@ -73,7 +73,7 @@
     └── ... (26 total)
 ```
 
-### How It Works (v3.0)
+### How It Works (v3.1)
 
 1. **Install** (`install.sh`):
    - Downloads to `~/.claude-workflow-agents/`
@@ -461,7 +461,7 @@ If you forgot to run verify.sh and CI fails:
 
 ### Files That MUST Be Updated
 
-When bumping version (e.g., 3.0.0 → 3.1.0), these files MUST be updated:
+When bumping version (e.g., 3.1.0 → 3.1.0), these files MUST be updated:
 
 1. **`version.txt`** (single line file)
    ```
@@ -506,7 +506,7 @@ sed -i '' 's/## \[Unreleased\]/## [3.1.0] - 2026-01-27/' CHANGELOG.md
 **Step 2: Bulk Update All Documentation References**
 ```bash
 # Replace version references across all docs (adjust OLD_VERSION as needed)
-OLD_VERSION="3.0.0"
+OLD_VERSION="3.1.0"
 NEW_VERSION="3.1.0"
 
 for file in README.md CLAUDE.md commands/help.md AGENTS.md COMMANDS.md GUIDE.md WORKFLOW.md STATE.md USAGE.md EXAMPLES.md PATTERNS.md agents/workflow-orchestrator.md; do

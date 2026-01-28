@@ -1,6 +1,6 @@
 # Common Usage Patterns
 
-> **v3.0 Note:** Patterns work the same way. Skills load automatically, subagents invoked when needed. Just use these patterns naturally.
+> **v3.1 Note:** Patterns work the same way. Skills load automatically, subagents invoked when needed. Just use these patterns naturally.
 
 Quick reference for common development scenarios.
 
