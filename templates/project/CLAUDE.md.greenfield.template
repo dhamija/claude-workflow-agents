@@ -27,6 +27,7 @@ This project uses **Claude Workflow Agents** - an automated orchestration system
 | **code-reviewer** | AUTO | After ANY code changes |
 | **debugger** | AUTO | User reports issue (keywords: "broken", "error", "bug") |
 | **ui-debugger** | AUTO | UI issues + puppeteer available |
+| **llm-user-architect** | AUTO | UI ready + L1 docs exist (after frontend complete) |
 | **acceptance-validator** | AUTO | After feature complete (validates promises) |
 | **project-ops** | AUTO | After features/milestones |
 
@@ -38,6 +39,8 @@ This project uses **Claude Workflow Agents** - an automated orchestration system
 | "page", "screen", "button", "UI", "display", "layout", "click" + issue | **ui-debugger** |
 | "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
 | "add [feature]", "also need", "change [thing]" | **change-analyzer** |
+| "UI is ready", "frontend done", "deployed to staging", "test user journeys" | **llm-user-architect** → `/llm-user init` |
+| "validate user experience", "check if promises work in UI" | `/test-ui` |
 
 ---
 
@@ -314,7 +317,47 @@ Starting with backend...
 ### Step 4: Feature Verification
 
 **Action:**
-1. **CRITICAL:** Promise Validation
+1. **LLM User Testing** (if UI exists)
+   - Check conditions:
+     * UI is accessible (localhost/staging/production)
+     * L1 docs exist (intent, UX, architecture)
+     * Feature has frontend component
+   - If conditions met and NOT initialized:
+     ```
+     💡 UI Ready for LLM User Testing
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+     Your UI is ready to test with simulated users!
+
+     Run /llm-user init to:
+     • Generate test scenarios from your docs
+     • Create domain-specific test infrastructure
+     • Set up evaluation criteria
+
+     [Initialize now / Later / Skip]
+     ```
+     → If user agrees: Invoke **llm-user-architect**
+   - If initialized but not run recently:
+     ```
+     Suggest: Run /test-ui --url=[URL] to validate user journeys
+     ```
+   - If critical gaps found:
+     ```
+     ⚠ LLM User Testing Found Critical Gaps
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+     Score: [X/10]
+     Critical gaps: [count] (RELEASE BLOCKERS)
+
+     Run /llm-user gaps for details
+
+     [Fix now / Show details / Continue anyway (not recommended)]
+     ```
+     → DO NOT mark feature complete until critical gaps fixed
+     → Re-run /test-ui after fixes
+   - Update state: `ui_testing.last_run`, `ui_testing.last_score`, `ui_testing.critical_gaps`
+
+2. **CRITICAL:** Promise Validation
    - Invoke **acceptance-validator** for promises this feature implements
    - Validates promises are ACTUALLY KEPT (not just code working)
    - If PARTIAL or FAILED:
@@ -329,15 +372,15 @@ Starting with backend...
      → DO NOT mark feature complete
      → Fix issues and re-validate
    - If VALIDATED:
-     → Continue to step 2
+     → Continue to step 3
 
-2. CI Verification (if configured)
+3. CI Verification (if configured)
    - IF `scripts/verify.sh` exists: Run it
    - IF `package.json` has lint/typecheck scripts: Run them
    - IF `.github/workflows/` exists: Simulate checks
    - All must pass
 
-3. Documentation Update
+4. Documentation Update
    - Invoke **project-ops** sync
    - Update intent doc: Mark promises VALIDATED
    - Update CLAUDE.md state
@@ -730,6 +773,14 @@ validation:
     core_total: 0
     important_validated: 0
     important_total: 0
+
+ui_testing:
+  initialized: false           # true after /llm-user init
+  last_run: null               # timestamp of last /test-ui run
+  last_score: null             # overall score (0-10)
+  critical_gaps: 0             # number of critical gaps found
+  high_priority_gaps: 0        # number of high priority gaps
+  test_spec_hash: null         # hash to detect doc changes
 
 ci:
   last_check: null

@@ -218,6 +218,86 @@ Update documentation
 Continue to L2 building for feature
 ```
 
+### UI Testing Flow (LLM User Testing)
+
+```
+Trigger: Frontend implementation complete + UI deployed
+   ↓
+Detect UI readiness
+   ├─► Check: L1 docs exist (intent, UX, architecture)
+   ├─► Check: UI is accessible (localhost/staging/prod)
+   └─► Check: No blocking test failures
+   ↓
+Suggest: "UI is ready for LLM user testing. Run /llm-user init?"
+   ↓
+User confirms
+   ↓
+llm-user-architect
+   ├─► Phase 1: Analyze docs
+   │   ├─► Extract promises from product-intent.md
+   │   ├─► Extract personas from user-journeys.md
+   │   ├─► Extract acceptance criteria from plans
+   │   └─► Extract domain knowledge from architecture
+   ├─► Phase 2: Synthesize test-spec.yaml
+   │   ├─► Create evaluation rubric
+   │   ├─► Define success thresholds
+   │   └─► Map promises to test scenarios
+   ├─► Phase 3: Generate infrastructure
+   │   ├─► Create project-specific {{project}}-llm-user.md
+   │   ├─► Create project-specific {{project}}-evaluator.md
+   │   ├─► Generate persona YAML files
+   │   └─► Generate scenario YAML files
+   ├─► Phase 4: Present for review
+   │   ├─► Show: 3 personas generated
+   │   ├─► Show: 5 scenarios created
+   │   ├─► Show: Evaluation criteria
+   │   └─► Ask: "Review test-spec.yaml and iterate if needed?"
+   └─► Phase 5: Ready to test
+       └─► Suggest: "Run /test-ui --url=<URL> to execute tests"
+   ↓
+User reviews evaluation criteria
+   ├─► If needs changes: Edit test-spec.yaml → /llm-user refresh
+   └─► If approved: Continue
+   ↓
+Execute UI tests
+   ├─► Invoke /test-ui command
+   ├─► For each scenario:
+   │   ├─► Spawn LLM user with persona
+   │   ├─► Execute user journey steps
+   │   ├─► Record interactions + screenshots
+   │   └─► Track frustration/motivation dynamics
+   ├─► Invoke evaluator
+   │   ├─► Score promise fulfillment
+   │   ├─► Identify gaps with severity
+   │   └─► Generate recommendations
+   └─► Present results
+       ├─► Overall score (e.g., 7.2/10)
+       ├─► Promise status (validated/partial/failed)
+       ├─► Critical gaps (release blockers)
+       └─► Suggest: "/llm-user gaps for details"
+   ↓
+Handle results
+   ├─► If critical gaps: FIX IMMEDIATELY (release blocker)
+   ├─► If high priority gaps: Recommend fixing before release
+   ├─► If medium/low gaps: Log for future improvement
+   └─► Update promise status in CLAUDE.md state
+   ↓
+Re-test after fixes
+   └─► /test-ui --scenario=<failed-scenario> to verify
+```
+
+**Integration Points:**
+
+1. **After frontend-engineer completes** → Check if UI accessible → Suggest `/llm-user init`
+2. **Before acceptance-validator** → Run LLM user tests first (automated validation)
+3. **After gaps fixed** → Re-run specific scenarios to verify fixes
+4. **When docs change** → Remind user to run `/llm-user refresh`
+
+**Keywords that trigger LLM user testing:**
+- "UI is ready", "frontend done", "deployed to staging"
+- "test the user experience", "validate user journeys"
+- "check if promises work in UI"
+
 ---
 
 ## Quality Gates (Automatic Enforcement)
@@ -255,14 +335,21 @@ Continue to L2 building for feature
 **Trigger:** All steps pass
 
 **Action:**
-1. Promise Validation (CRITICAL)
-   - acceptance-validator
+1. LLM User Testing (if UI exists)
+   - Check: UI accessible + L1 docs exist
+   - Suggest: /llm-user init (if not done)
+   - Execute: /test-ui to validate user journeys
+   - If critical gaps: STOP, fix, re-test
+   - If high priority gaps: Recommend fixing
+   - Update promise status based on test results
+2. Promise Validation (CRITICAL)
+   - acceptance-validator (manual validation)
    - If PARTIAL/FAILED: fix and re-validate
    - If VALIDATED: continue
-2. CI Verification
+3. CI Verification
    - scripts/verify.sh if exists
    - lint/typecheck if configured
-3. Documentation
+4. Documentation
    - project-ops sync
    - Update intent doc
    - Update CLAUDE.md state
@@ -324,6 +411,8 @@ session:
 | "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
 | "add [feature]", "also need", "change [thing]" | **change-analyzer** |
 | "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
+| "UI is ready", "frontend done", "deployed to staging", "test user journeys" | **llm-user-architect** → `/llm-user init` |
+| "validate user experience", "check if promises work in UI" | `/test-ui` |
 
 ### Response Protocols
 
