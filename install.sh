@@ -223,6 +223,18 @@ for script in workflow-update workflow-version workflow-toggle workflow-uninstal
     fi
 done
 
+# Copy additional bin scripts from the repo (workflow-patch, workflow-fix-hooks, etc.)
+# This ensures new scripts added to the repo get installed during updates
+if [ -d "$TEMP_DIR/bin" ]; then
+    for script in "$TEMP_DIR/bin"/*; do
+        if [ -f "$script" ]; then
+            script_name=$(basename "$script")
+            # Set executable permission
+            chmod +x "$script"
+        fi
+    done
+fi
+
 # Replace
 rm -rf "$INSTALL_DIR"
 mv "$TEMP_DIR" "$INSTALL_DIR"
