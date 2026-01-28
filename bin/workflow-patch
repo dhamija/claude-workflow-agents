@@ -143,7 +143,7 @@ if [ -n "$PROJECT_CONTEXT" ]; then
         {
             head -n $((PATCH_CONTEXT_START-1)) "$PATCHED_FILE"
             echo "$PROJECT_CONTEXT"
-            tail -n +$PATCH_CONTEXT_END "$PATCHED_FILE"
+            tail -n +$((PATCH_CONTEXT_END+1)) "$PATCHED_FILE"
         } > "$PATCHED_FILE.tmp2"
         mv "$PATCHED_FILE.tmp2" "$PATCHED_FILE"
     fi
