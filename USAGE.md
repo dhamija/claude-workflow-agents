@@ -6,8 +6,21 @@
 
 ### Global Install (One-Time)
 ```bash
+# Latest stable release (recommended)
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 source ~/.bashrc  # or restart terminal
+```
+
+### Version Selection
+```bash
+# Latest stable (default)
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s latest
+
+# Specific version
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s v3.1.0
+
+# Bleeding edge
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s master
 ```
 
 **What this does:**
@@ -18,7 +31,7 @@ source ~/.bashrc  # or restart terminal
 
 ### Commands Available
 - `workflow-toggle on/off/status` - Enable, disable, or check workflow status (global)
-- `workflow-update` - Update global installation from git
+- `workflow-update [version]` - Update global installation (latest/v3.1.0/master)
 - `workflow-version` - Show current version
 - `workflow-uninstall` - Remove global installation
 

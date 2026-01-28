@@ -9,6 +9,14 @@ Format: [Semantic Versioning](https://semver.org/)
 ## [Unreleased]
 
 ### Added
+- **Version Selection for Install and Update**
+  - `install.sh` now supports version arguments: `latest` (default), `master`, or specific tags (e.g., `v3.1.0`)
+  - `workflow-update` now supports version arguments for targeted updates
+  - Install latest stable: `curl ... | bash` or `curl ... | bash -s latest`
+  - Install specific version: `curl ... | bash -s v3.1.0`
+  - Install bleeding edge: `curl ... | bash -s master`
+  - Same syntax for `workflow-update`: `workflow-update latest`, `workflow-update v3.1.0`, `workflow-update master`
+  - Automatic latest tag detection from GitHub using `git ls-remote`
 - **Workflow Orchestration Integration for LLM User Testing**
   - Integrated `llm-user-architect` into workflow orchestration (triggered after frontend complete)
   - Added UI Testing Flow to `workflow-orchestrator.md` with 5-phase protocol

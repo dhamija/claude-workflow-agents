@@ -56,12 +56,26 @@ That's it. Claude handles the rest.
 
 ## Installation
 
-### Quick Install
+### Quick Install (Latest Stable)
 ```bash
+# Install latest stable release (recommended)
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
 ```
 
 Then restart your terminal (or `source ~/.bashrc`).
+
+### Version Selection
+
+```bash
+# Latest stable release (default)
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s latest
+
+# Specific version
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s v3.1.0
+
+# Bleeding edge (master branch)
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s master
+```
 
 **What this does:**
 - Installs to `~/.claude-workflow-agents/` (global location)
@@ -104,9 +118,17 @@ Subagents are isolated execution environments for specific tasks:
 |---------|-------------|
 | `workflow-init` | Initialize workflow in a project |
 | `workflow-toggle on/off/status` | Enable, disable, or check status |
-| `workflow-update` | Update to latest version |
+| `workflow-update [version]` | Update to latest/specific version |
 | `workflow-version` | Show version info |
 | `workflow-uninstall` | Remove installation |
+
+**workflow-update examples:**
+```bash
+workflow-update           # Update to latest stable release
+workflow-update latest    # Update to latest stable release
+workflow-update v3.1.0    # Update to specific version
+workflow-update master    # Update to bleeding edge
+```
 
 #### Claude Commands (In-Project)
 

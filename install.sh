@@ -1,14 +1,59 @@
 #!/bin/bash
 
 # Install claude-workflow-agents globally
-# Usage: curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
+# Usage:
+#   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s latest
+#   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s v3.1.0
+#   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s master
 
 set -e
 
-VERSION="3.1.0"
 INSTALL_DIR="$HOME/.claude-workflow-agents"
 CLAUDE_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
+
+# Parse version argument (default: latest stable tag)
+VERSION_ARG="${1:-latest}"
+
+# Function to clone repository at specified version
+clone_repo() {
+    local target_dir="$1"
+    local version="$2"
+
+    case "$version" in
+        master|main|dev)
+            echo "Installing from: master branch (bleeding edge)"
+            git clone --depth 1 --quiet "$REPO_URL" "$target_dir"
+            ;;
+        latest)
+            echo "Installing from: latest stable release"
+            # Get latest tag
+            LATEST_TAG=$(git ls-remote --tags --refs --sort="v:refname" "$REPO_URL" | tail -n1 | sed 's/.*\///')
+            if [ -z "$LATEST_TAG" ]; then
+                echo "Warning: No tags found, using master branch"
+                git clone --depth 1 --quiet "$REPO_URL" "$target_dir"
+            else
+                echo "  Version: $LATEST_TAG"
+                git clone --depth 1 --branch "$LATEST_TAG" --quiet "$REPO_URL" "$target_dir"
+            fi
+            ;;
+        v*.*.*)
+            echo "Installing from: $version"
+            git clone --depth 1 --branch "$version" --quiet "$REPO_URL" "$target_dir"
+            ;;
+        *)
+            echo "Error: Invalid version '$version'"
+            echo ""
+            echo "Valid options:"
+            echo "  latest       - Latest stable release (default)"
+            echo "  master       - Latest development version"
+            echo "  v3.1.0       - Specific tagged version"
+            echo ""
+            exit 1
+            ;;
+    esac
+}
 
 echo ""
 echo "Claude Workflow Agents - Install"
@@ -19,8 +64,9 @@ echo ""
 if [ -d "$INSTALL_DIR" ]; then
     CURRENT_VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "unknown")
     echo "Already installed (version: $CURRENT_VERSION)"
+    echo "Target version: $VERSION_ARG"
     echo ""
-    read -p "Update to version $VERSION? [y/N] " update
+    read -p "Reinstall/update? [y/N] " update
     if [[ "$update" =~ ^[Yy]$ ]]; then
         echo "Updating..."
         # Remove symlinks
@@ -37,15 +83,14 @@ if [ -d "$INSTALL_DIR" ]; then
 fi
 
 # Download
-echo "Downloading..."
 TEMP_DIR=$(mktemp -d)
-if command -v git &> /dev/null; then
-    git clone --depth 1 --quiet "$REPO_URL" "$TEMP_DIR"
-else
+if ! command -v git &> /dev/null; then
     echo "Error: git required. Install git and retry."
     rm -rf "$TEMP_DIR"
     exit 1
 fi
+
+clone_repo "$TEMP_DIR" "$VERSION_ARG"
 
 # Create install directory
 mkdir -p "$INSTALL_DIR"
@@ -100,9 +145,55 @@ cat > "$INSTALL_DIR/bin/workflow-update" << 'SCRIPT'
 #!/bin/bash
 
 # Update global installation
+# Usage:
+#   workflow-update          - Update to latest stable release
+#   workflow-update latest   - Update to latest stable release
+#   workflow-update master   - Update to bleeding edge
+#   workflow-update v3.1.0   - Update to specific version
 
 INSTALL_DIR="$HOME/.claude-workflow-agents"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
+
+# Parse version argument (default: latest stable tag)
+VERSION_ARG="${1:-latest}"
+
+# Function to clone repository at specified version
+clone_repo() {
+    local target_dir="$1"
+    local version="$2"
+
+    case "$version" in
+        master|main|dev)
+            echo "Updating to: master branch (bleeding edge)"
+            git clone --depth 1 --quiet "$REPO_URL" "$target_dir"
+            ;;
+        latest)
+            echo "Updating to: latest stable release"
+            # Get latest tag
+            LATEST_TAG=$(git ls-remote --tags --refs --sort="v:refname" "$REPO_URL" | tail -n1 | sed 's/.*\///')
+            if [ -z "$LATEST_TAG" ]; then
+                echo "Warning: No tags found, using master branch"
+                git clone --depth 1 --quiet "$REPO_URL" "$target_dir"
+            else
+                git clone --depth 1 --branch "$LATEST_TAG" --quiet "$REPO_URL" "$target_dir"
+            fi
+            ;;
+        v*.*.*)
+            echo "Updating to: $version"
+            git clone --depth 1 --branch "$version" --quiet "$REPO_URL" "$target_dir"
+            ;;
+        *)
+            echo "Error: Invalid version '$version'"
+            echo ""
+            echo "Valid options:"
+            echo "  latest       - Latest stable release (default)"
+            echo "  master       - Latest development version"
+            echo "  v3.1.0       - Specific tagged version"
+            echo ""
+            exit 1
+            ;;
+    esac
+}
 
 echo "Updating Claude Workflow Agents..."
 
@@ -111,13 +202,13 @@ echo "Current version: $CURRENT"
 
 # Download to temp
 TEMP_DIR=$(mktemp -d)
-git clone --depth 1 --quiet "$REPO_URL" "$TEMP_DIR"
+clone_repo "$TEMP_DIR" "$VERSION_ARG"
 rm -rf "$TEMP_DIR/.git"
 
 NEW_VERSION=$(cat "$TEMP_DIR/version.txt" 2>/dev/null || echo "unknown")
-echo "Latest version:  $NEW_VERSION"
+echo "Target version:  $NEW_VERSION"
 
-if [ "$CURRENT" = "$NEW_VERSION" ]; then
+if [ "$CURRENT" = "$NEW_VERSION" ] && [ "$VERSION_ARG" = "latest" ]; then
     echo "Already up to date."
     rm -rf "$TEMP_DIR"
     exit 0
