@@ -47,6 +47,7 @@ Generate test infrastructure from your L1 workflow docs.
 ```bash
 /llm-user init           # Generate from docs
 /llm-user init --force   # Regenerate even if exists
+/llm-user init --upgrade # Regenerate with latest skill version
 ```
 
 **Prerequisites:**
@@ -64,6 +65,25 @@ tests/llm-user/
 .claude/agents/
 ├── {{project}}-llm-user.md      # Domain-specific user agent
 └── {{project}}-evaluator.md     # Domain-specific evaluator
+```
+
+**Version Tracking:**
+When artifacts are generated, the skill version is recorded in CLAUDE.md:
+```yaml
+ui_testing:
+  skill_version: "1.1.0"  # Version that generated artifacts
+```
+
+If the skill is upgraded, `/llm-user init` will detect the version mismatch:
+```
+⚠ Artifacts were generated with skill v1.0.0
+  Current skill version: v1.1.0
+
+New features in v1.1.0:
+  - Scene-grounded responses (critical for scene-based apps)
+  - Improved validation rules
+
+Run /llm-user init --upgrade to regenerate with new features
 ```
 
 ---
@@ -248,7 +268,7 @@ NEXT: /llm-user fix GAP-002
 
 ### `/llm-user refresh`
 
-Regenerate test artifacts after workflow docs change.
+Regenerate test artifacts after workflow docs or skill version changes.
 
 ```bash
 # Detect changes and regenerate
@@ -262,6 +282,32 @@ Regenerate test artifacts after workflow docs change.
 - After updating `product-intent.md` (new promises)
 - After updating `user-journeys.md` (new personas)
 - After architecture changes
+- After `workflow-update` installs new skill version
+
+**What it checks:**
+1. Doc hash changes (product-intent.md, user-journeys.md, etc.)
+2. Skill version changes (e.g., 1.0.0 → 1.1.0)
+
+```
+LLM USER TESTING REFRESH
+════════════════════════
+
+Checking for changes...
+
+📄 Doc changes:    None
+🔧 Skill version:  1.0.0 → 1.1.0 (upgraded!)
+
+New in v1.1.0:
+  • Scene-grounded responses
+  • Improved validation
+
+Regenerating artifacts with v1.1.0 patterns...
+✓ Personas updated (3)
+✓ Scenarios updated (5)
+✓ Evaluators updated
+
+Done! Run /llm-user test to validate changes.
+```
 
 ---
 

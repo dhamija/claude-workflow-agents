@@ -73,6 +73,7 @@ l2:
 
 ui_testing:
   initialized: false           # true after /llm-user init
+  skill_version: null          # version of skill that generated artifacts
   last_run: null               # timestamp of last /llm-user test
   last_score: null             # overall score (0-10)
   critical_gaps: 0             # number of critical gaps

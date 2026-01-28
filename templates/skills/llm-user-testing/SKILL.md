@@ -1248,17 +1248,50 @@ Response <400ms for maintained flow state
 
 ## Version History
 
+### Upgrade Notes
+
+**When skill version changes**, existing projects should regenerate their test artifacts:
+
+```bash
+# Check if upgrade needed (automatic on init)
+/llm-user init
+
+# Explicitly upgrade artifacts
+/llm-user init --upgrade
+
+# Or use refresh (also checks version)
+/llm-user refresh
+```
+
+**Version tracking in CLAUDE.md:**
+```yaml
+ui_testing:
+  skill_version: "1.1.0"  # Recorded when artifacts generated
+```
+
+---
+
 ### 1.1.0 (2026-01-28)
-- Added **Principle 5: Scene-Grounded Responses** - Critical for scene-based apps
-- Added **Step 0: GROUND IN SCENE** to Action Loop
-- Added **Scene-Response Validation** section with validation logic
-- Added **scene_grounding** to Recording Format
-- Added **Scene-Based Scenario Template** for language learning apps
+
+**BREAKING:** Scene-based apps (language learning with image descriptions) should regenerate artifacts.
+
+**New Features:**
+- **Principle 5: Scene-Grounded Responses** - Critical for scene-based apps
+- **Step 0: GROUND IN SCENE** in Action Loop
+- **Scene-Response Validation** with regeneration logic
+- **scene_grounding** field in Recording Format
+- **Scene-Based Scenario Template** for language learning apps
+
+**Improvements:**
 - Updated **Pattern 1: Learning Apps** with scene-specific rules
 - Added scene grounding to **Best Practices** (DO and DON'T sections)
 - Added scene accuracy to **Success Indicators**
-- Updated **Example: Complete Test Flow** with scene grounding demonstration
-- Added **What Would Have Been WRONG** section showing mismatch detection
+- Added **What Would Have Been WRONG** section in examples
+
+**Why Upgrade:**
+Without scene-grounding, test users may describe objects not in the scene (e.g., "dog" when there's no dog), causing app feedback to be nonsensical and invalidating test results.
+
+---
 
 ### 1.0.0 (2026-01-27)
 - Initial release
