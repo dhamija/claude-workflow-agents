@@ -1,6 +1,6 @@
 # Quick Reference
 
-> **v3.1 Architecture:** Skills + Hooks for context efficiency. 9 skills loaded on-demand, 3 subagents for isolated tasks, ~80 line CLAUDE.md. 90% less context than v2.0.
+> **v3.1 Architecture:** Skills + Hooks for context efficiency. 9 skills loaded on-demand, 4 subagents for isolated tasks, ~80 line CLAUDE.md. 90% less context than v2.0.
 
 > **Getting Started:** Install once globally → `workflow-init` in your project → Just talk!
 

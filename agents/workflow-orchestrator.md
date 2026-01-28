@@ -627,7 +627,7 @@ grep -A 10 "## L1 Orchestration Flow" CLAUDE.md
 - **Breaking Change:** Skills + Hooks architecture
 - Orchestration logic moved FROM CLAUDE.md TO workflow skill
 - 9 skills loaded on-demand by Claude
-- Only 3 subagents (isolated tasks)
+- Only 4 subagents (isolated tasks)
 - Minimal CLAUDE.md (~80 lines, state only)
 - Optional hooks for automatic quality gates
 - 90% reduction in upfront context

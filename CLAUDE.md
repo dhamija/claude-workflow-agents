@@ -1,6 +1,6 @@
 # Claude Workflow Agents - Repository
 
-> **v3.1 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+> **v3.1 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 4 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
 
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
