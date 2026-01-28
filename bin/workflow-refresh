@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Refresh command/skill/agent symlinks after update
+# This ensures new commands and skills appear in Claude Code
+
+INSTALL_DIR="$HOME/.claude-workflow-agents"
+CLAUDE_DIR="$HOME/.claude"
+
+echo ""
+echo "Refreshing Claude Workflow Agents symlinks..."
+echo ""
+
+# Check installation
+if [ ! -d "$INSTALL_DIR" ]; then
+    echo "Error: Workflow not installed"
+    exit 1
+fi
+
+mkdir -p "$CLAUDE_DIR/agents"
+mkdir -p "$CLAUDE_DIR/commands"
+mkdir -p "$CLAUDE_DIR/skills"
+
+# Clean up old workflow command symlinks
+echo "Cleaning old command symlinks..."
+for file in "$CLAUDE_DIR/commands"/*; do
+    if [ -L "$file" ]; then
+        target=$(readlink "$file")
+        if [[ "$target" == *"workflow-agents"* ]]; then
+            rm -f "$file"
+        fi
+    fi
+done
+
+# Recreate all command symlinks
+echo "Creating command symlinks..."
+command_count=0
+for command_file in "$INSTALL_DIR/commands"/*.md; do
+    if [ -f "$command_file" ]; then
+        filename=$(basename "$command_file")
+        ln -sf "$command_file" "$CLAUDE_DIR/commands/$filename"
+        ((command_count++))
+    fi
+done
+
+# Refresh skills
+echo "Refreshing skills..."
+for skill_dir in "$CLAUDE_DIR/skills"/*; do
+    if [ -d "$skill_dir" ]; then
+        skill_name=$(basename "$skill_dir")
+        if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver)$ ]]; then
+            rm -rf "$skill_dir"
+        fi
+    fi
+done
+cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
+
+skill_count=$(find "$CLAUDE_DIR/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
+
+# Refresh subagent symlinks
+echo "Refreshing subagent symlinks..."
+for file in "$CLAUDE_DIR/agents"/*; do
+    if [ -L "$file" ]; then
+        target=$(readlink "$file")
+        if [[ "$target" == *"workflow-agents"* ]]; then
+            rm -f "$file"
+        fi
+    fi
+done
+
+CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
+for agent_name in "${CORE_AGENTS[@]}"; do
+    agent_file="$INSTALL_DIR/agents/${agent_name}.md"
+    if [ -f "$agent_file" ]; then
+        ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
+    fi
+done
+
+echo ""
+echo "✓ Refresh complete"
+echo ""
+echo "  Commands: $command_count linked"
+echo "  Skills:   $skill_count installed"
+echo "  Subagents: 3 linked (code-reviewer, debugger, ui-debugger)"
+echo ""
