@@ -6,6 +6,27 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Workflow Orchestration Integration for LLM User Testing**
+  - Integrated `llm-user-architect` into workflow orchestration (triggered after frontend complete)
+  - Added UI Testing Flow to `workflow-orchestrator.md` with 5-phase protocol
+  - Updated all 4 CLAUDE.md templates with LLM user testing integration
+  - Added `ui_testing` state tracking (initialized, last_run, last_score, critical_gaps)
+  - Added keyword triggers: "UI is ready", "frontend done", "test user journeys"
+  - Automatic prompts for `/llm-user init` when UI accessible + L1 docs exist
+  - Critical gaps block feature completion until resolved
+
+### Fixed
+- **install.sh did not install workflow-patch and workflow-fix-hooks**
+  - Added section to copy additional bin scripts from repository (workflow-patch, workflow-fix-hooks)
+  - Fixed `workflow-update` INSTALL_DIR path bug (`$HOME/.claude` → `$HOME/.claude-workflow-agents`)
+  - Fixed `workflow-update` to preserve ONLY generated scripts, allowing new scripts from repo to be installed
+  - **Migration**: Run `workflow-update` to get missing scripts, or manually copy from repo bin/ directory
+
+---
+
 ## [3.1.0] - 2026-01-27
 
 ### Added
