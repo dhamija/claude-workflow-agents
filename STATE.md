@@ -7,10 +7,10 @@
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Skills | 9 | 2026-01-27 |
-| Subagents | 3 | 2026-01-27 |
-| Agent Files (for Task tool invocation) | 16 | 2026-01-26 |
-| Commands | 24 | 2026-01-26 |
+| Skills | 10 | 2026-01-27 |
+| Subagents | 4 | 2026-01-27 |
+| Agent Files (for Task tool invocation) | 17 | 2026-01-27 |
+| Commands | 26 | 2026-01-27 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
 | Tests | 32 | 2026-01-26 |
@@ -35,6 +35,7 @@
 | brownfield-analyzer | L1 Support | ✓ Complete |
 | acceptance-validator | L2 Validation | ✓ Complete |
 | project-ops | Operations | ✓ Complete |
+| llm-user-architect | Operations | ✓ Complete |
 
 ## Commands List
 
@@ -53,11 +54,13 @@
 | intent | ✓ Complete |
 | intent-audit | ✓ Complete |
 | llm | ✓ Complete |
+| llm-user | ✓ Complete |
 | parallel | ✓ Complete |
 | plan | ✓ Complete |
 | replan | ✓ Complete |
 | review | ✓ Complete |
 | sync | ✓ Complete |
+| test-ui | ✓ Complete |
 | update | ✓ Complete |
 | ux | ✓ Complete |
 | ux-audit | ✓ Complete |

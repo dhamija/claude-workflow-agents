@@ -23,6 +23,7 @@ REQUIRED_AGENTS=(
     "acceptance-validator"
     "workflow-orchestrator"
     "project-ops"
+    "llm-user-architect"
 )
 
 # Check each agent

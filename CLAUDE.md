@@ -37,13 +37,13 @@
 
 ```
 ~/.claude-workflow-agents/           # Installation directory
-├── agents/                          # 16 agent files (invoked by workflow via Task tool)
-├── commands/                        # 24 command definitions
+├── agents/                          # 17 agent files (invoked by workflow via Task tool)
+├── commands/                        # 26 command definitions
 ├── templates/                       # Templates for user projects
 │   ├── project/                     # Project bootstrap templates
 │   │   ├── CLAUDE.md.minimal.template (greenfield, ~80 lines)
 │   │   └── CLAUDE.md.minimal-brownfield.template (~80 lines)
-│   ├── skills/                      # 9 skill templates
+│   ├── skills/                      # 10 skill templates
 │   │   ├── workflow/, ux-design/, frontend/, backend/
 │   │   ├── testing/, validation/, debugging/
 │   │   └── code-quality/, brownfield/
@@ -58,27 +58,28 @@
 └── version.txt                     # Current version (3.0.0)
 
 ~/.claude/                           # Claude Code's directory
-├── skills/                          # 9 skills (loaded on-demand by Claude)
+├── skills/                          # 10 skills (loaded on-demand by Claude)
 │   ├── workflow/, ux-design/, frontend/, backend/
 │   ├── testing/, validation/, debugging/
-│   └── code-quality/, brownfield/
-├── agents/                          # 3 subagents (isolated context)
+│   └── code-quality/, brownfield/, llm-user-testing/
+├── agents/                          # 4 subagents (isolated context)
 │   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
 │   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
-│   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
-└── commands/                        # 24 command symlinks
+│   ├── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
+│   └── llm-user-architect.md -> ~/.claude-workflow-agents/agents/llm-user-architect.md
+└── commands/                        # 26 command symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
-    └── ... (24 total)
+    └── ... (26 total)
 ```
 
 ### How It Works (v3.0)
 
 1. **Install** (`install.sh`):
    - Downloads to `~/.claude-workflow-agents/`
-   - **Copies 9 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
-   - **Symlinks 3 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger)
-   - Symlinks 24 commands to `~/.claude/commands/`
+   - **Copies 10 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
+   - **Symlinks 4 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger, llm-user-architect)
+   - Symlinks 26 commands to `~/.claude/commands/`
    - Adds bin/ commands to PATH
    - Workflow immediately active for all projects
 
@@ -742,6 +743,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | acceptance-validator | L2 Validation | Validate promises are kept |
 | workflow-orchestrator | Orchestration | Auto-chain agents and quality gates |
 | project-ops | Ops | Setup, sync, docs |
+| llm-user-architect | Ops | Generate LLM user testing from docs |
 
 ### Commands
 
@@ -757,6 +759,8 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | /parallel | Parallel development |
 | /design | Design system |
 | /project | Project operations |
+| /llm-user | LLM user testing (init/gaps/refresh) |
+| /test-ui | Run LLM user tests |
 
 ---
 
@@ -773,8 +777,8 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 │   └── .github/workflows/     # Repo CI
 │
 ├── INSTALLED FILES (copied to ~/.claude-workflow-agents/)
-│   ├── agents/                # Agent definitions (15)
-│   ├── commands/              # Command definitions (24)
+│   ├── agents/                # Agent definitions (17)
+│   ├── commands/              # Command definitions (26)
 │   ├── templates/             # User project templates
 │   └── version.txt            # Workflow version
 │

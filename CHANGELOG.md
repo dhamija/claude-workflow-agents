@@ -8,6 +8,18 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ## [Unreleased]
 
+### Added
+- **LLM User Testing System** - Doc-driven automated UI testing with LLM-simulated users
+  - New skill: `llm-user-testing` - Protocols for LLM-as-user testing, persona simulation, gap analysis
+  - New subagent: `llm-user-architect` - Generates project-specific test infrastructure from workflow docs
+  - New commands: `/llm-user init`, `/test-ui`, `/llm-user gaps`, `/llm-user refresh`
+  - Automatically synthesizes test specs from existing L1 docs (intent, UX, architecture)
+  - Domain-specific personas and scenarios extracted from user journeys
+  - Promise-based validation with traceability back to original requirements
+  - Generates project-specific `{{project}}-llm-user` and `{{project}}-evaluator` subagents
+  - Gap analysis with prioritized recommendations and root cause analysis
+  - Zero manual test case writing - all generated from existing documentation
+
 ### Fixed
 - Hooks template had incorrect matcher format (object instead of string), causing Claude Code error: "objects when string expected in settings.json"
   - **Migration**: Users who already ran `workflow-init` with hooks need to either:

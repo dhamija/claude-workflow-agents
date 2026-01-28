@@ -65,9 +65,9 @@ Then restart your terminal (or `source ~/.bashrc`).
 
 **What this does:**
 - Installs to `~/.claude-workflow-agents/` (global location)
-- Copies **9 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
-- Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
-- Symlinks **24 commands** to `~/.claude/commands/`
+- Copies **10 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
+- Symlinks **4 subagents** to `~/.claude/agents/` (for isolated tasks)
+- Symlinks **26 commands** to `~/.claude/commands/`
 - Adds workflow commands to PATH
 
 ### What Gets Installed
@@ -86,6 +86,7 @@ Skills are domain expertise modules that Claude loads automatically when needed:
 | `debugging` | Systematic debugging protocols |
 | `code-quality` | Code review criteria |
 | `brownfield` | Existing codebase analysis |
+| `llm-user-testing` | LLM-as-user testing protocols |
 
 #### Subagents (Isolated Context)
 Subagents are isolated execution environments for specific tasks:
@@ -95,6 +96,7 @@ Subagents are isolated execution environments for specific tasks:
 | `code-reviewer` | Read-only code quality review |
 | `debugger` | Isolated debugging sessions |
 | `ui-debugger` | UI debugging with browser automation |
+| `llm-user-architect` | Generate LLM user testing infrastructure from docs |
 
 #### Terminal Commands
 
@@ -118,13 +120,15 @@ Subagents are isolated execution environments for specific tasks:
 | `/implement <feature>` | Implement a feature |
 | `/review <files>` | Code review |
 | `/debug <issue>` | Debug problem |
+| `/test-ui` | Run LLM user tests against UI |
+| `/llm-user` | LLM user testing commands (init/gaps/refresh) |
 
-See [Commands Reference](#commands-reference) for all 24 commands.
+See [Commands Reference](#commands-reference) for all 26 commands.
 
 ### Verify Installation
 ```bash
-ls ~/.claude/skills/              # Should show 9 directories
-ls ~/.claude/agents/*.md          # Should show 3 subagents
+ls ~/.claude/skills/              # Should show 10 directories
+ls ~/.claude/agents/*.md          # Should show 4 subagents
 workflow-version                  # Should show v3.0.0
 ```
 
@@ -517,6 +521,15 @@ Claude: [Loads gap-analysis skill]
 | `/project push` | Push current branch | Deploy changes |
 | `/project pr` | Create pull request | Open PR with summary |
 
+### Testing Commands
+
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `/llm-user init` | Generate LLM user testing infrastructure | After L1 planning complete |
+| `/test-ui` | Run LLM user tests against UI | Test deployed UI |
+| `/llm-user gaps` | View detailed gap analysis from tests | After test run |
+| `/llm-user refresh` | Regenerate tests after doc changes | Docs updated |
+
 ### Git Workflow
 
 The workflow supports conventional commits and PR creation:
@@ -669,6 +682,22 @@ Validation: User can actually find recipes by typing "chicken" in search
 4. Infer promises
 5. Estimate test coverage
 6. Create [INFERRED] documentation
+
+### LLM User Testing
+
+**Skill:** `llm-user-testing`
+**Auto-loaded:** When working with `/llm-user` or `/test-ui` commands
+**Purpose:** Domain-specific LLM-as-user testing protocols
+
+**Provides:**
+- LLM user simulation principles (authenticity, persona-driven behavior)
+- Action loop protocol (observe → think → decide → act → react)
+- Frustration dynamics and abandonment thresholds
+- Gap analysis methodology (identification, root cause, traceability)
+- Domain-specific testing patterns (learning apps, creative tools, etc.)
+- Evaluation rubrics and weighted scoring
+
+**Key insight:** Your L1 docs already contain everything needed to test your app - this skill shows how to synthesize them into executable LLM user tests.
 
 ---
 
@@ -856,10 +885,10 @@ A: Yes, edit `~/.claude/skills/ux-design/SKILL.md`.
 A: Check `ls ~/.claude/skills/`. If empty, run `workflow-update` to reinstall.
 
 **Q: Subagents not found**
-A: Check `ls ~/.claude/agents/*.md`. Should show 3 files. If not, run `workflow-update`.
+A: Check `ls ~/.claude/agents/*.md`. Should show 4 files. If not, run `workflow-update`.
 
 **Q: Commands not working**
-A: Check `ls ~/.claude/commands/*.md`. Should show 24 files. If not, run `workflow-update`.
+A: Check `ls ~/.claude/commands/*.md`. Should show 26 files. If not, run `workflow-update`.
 
 **Q: Hook reminders not showing**
 A: Check `.claude/settings.json` exists. If not, run `workflow-init` again and enable hooks.

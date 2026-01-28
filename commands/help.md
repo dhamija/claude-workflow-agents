@@ -164,11 +164,11 @@ ARCHITECTURE OVERVIEW
 
   Skills: Domain expertise (loaded on-demand by Claude)
           Location: ~/.claude/skills/
-          Count: 9 skills
+          Count: 10 skills
 
   Subagents: Isolated execution environments (separate context)
              Location: ~/.claude/agents/
-             Count: 3 subagents
+             Count: 4 subagents
 
 
 SKILLS (On-Demand Domain Expertise)
@@ -237,6 +237,13 @@ SKILLS (On-Demand Domain Expertise)
   │ Process: Detect stack → Scan → Infer intent → Document      │
   └─────────────────────────────────────────────────────────────┘
 
+  ┌─────────────────────────────────────────────────────────────┐
+  │ LLM-USER-TESTING (Automated UI Testing)                     │
+  │ Purpose: LLM-as-user testing protocols                       │
+  │ Loads: When working with /llm-user or /test-ui commands     │
+  │ Includes: Persona simulation, gap analysis, evaluation      │
+  └─────────────────────────────────────────────────────────────┘
+
 
 SUBAGENTS (Isolated Context Execution)
 ───────────────────────────────────────
@@ -260,6 +267,13 @@ SUBAGENTS (Isolated Context Execution)
   │ Type: Browser automation session                            │
   │ Triggers: UI issues, visual bugs (requires puppeteer MCP)   │
   │ Does: Screenshots, console logs, interaction debugging      │
+  └─────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │ LLM-USER-ARCHITECT                                          │
+  │ Type: Test infrastructure generator                         │
+  │ Triggers: /llm-user init command                            │
+  │ Does: Generates domain-specific LLM user tests from docs    │
   └─────────────────────────────────────────────────────────────┘
 
 
