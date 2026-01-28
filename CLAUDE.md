@@ -1012,6 +1012,115 @@ The `./scripts/verify.sh` script automatically checks (7 checks):
 
 ---
 
+## 🧪 LLM USER TESTING ARCHITECTURE (v1.1)
+
+**Purpose:** Automated UI testing using LLM-simulated users to validate that promises to users are kept.
+
+### Design Decisions
+
+#### 1. Consolidated Command Structure (v3.2)
+
+**Previous (27 commands):** Separate commands for each action
+- `/llm-user init`, `/test-ui`, `/fix-gaps`
+
+**Current (25 commands):** Single entry point with subcommands
+- `/llm-user init|test|fix|status|refresh`
+
+**Rationale:** Clearer mental model, related functionality grouped together, easier discovery.
+
+#### 2. Skill Version Tracking
+
+**Problem:** When the llm-user-testing skill is updated (e.g., v1.0.0 → v1.1.0), existing projects need to regenerate test artifacts to benefit from new features.
+
+**Solution:** Track skill version in CLAUDE.md workflow state:
+```yaml
+ui_testing:
+  initialized: true
+  skill_version: "1.1.0"    # Version that generated artifacts
+  last_run: null
+  last_score: null
+  critical_gaps: 0
+  test_spec_hash: null       # Hash to detect doc changes
+```
+
+**Detection flow:**
+1. `/llm-user init` checks `ui_testing.skill_version` vs current skill version
+2. If mismatch → warn user and suggest `--upgrade`
+3. `/llm-user refresh` also checks version, not just doc hashes
+
+**User commands:**
+```bash
+/llm-user init --upgrade    # Regenerate with new skill version
+/llm-user refresh           # Also checks skill version changes
+```
+
+#### 3. Scene-Grounded Responses (v1.1.0)
+
+**Problem:** For scene-based language learning apps, test users were describing objects not in the scene (e.g., "dog" when there's no dog), causing app feedback to be nonsensical.
+
+**Principle:** LLM user responses must ONLY reference elements that exist in the current scene. Make LANGUAGE mistakes (grammar, vocabulary), not PERCEPTION mistakes (wrong objects).
+
+**Implementation:**
+1. **Step 0: GROUND IN SCENE** - Before any response, extract all visible elements
+2. **Validation** - Check that all nouns in response map to scene elements
+3. **Regeneration** - If validation fails, regenerate response using only valid elements
+
+**Recording format includes:**
+```json
+{
+  "scene_grounding": {
+    "scene_elements": ["person", "vegetables", "knife", "kitchen"],
+    "scene_actions": ["cutting", "preparing food"],
+    "NOT_in_scene": ["dog", "park", "walking"]
+  },
+  "user_response": {
+    "validation": {
+      "status": "PASS",
+      "all_elements_in_scene": true
+    }
+  }
+}
+```
+
+#### 4. Gap-Driven Development Flow
+
+**Workflow:**
+```
+L1 Planning
+  /intent → /ux → /architect → /plan
+  ↓
+L2 Building
+  /implement phases
+  ↓
+L3 Validation (Gap-Driven)
+  /llm-user init → /llm-user test → /llm-user fix → Promises validated
+```
+
+**Gap resolution:**
+1. Test finds gaps → Creates GAP-XXX entries
+2. `/llm-user fix` prioritizes by severity (CRITICAL first)
+3. Each fix: spec → implement → code review → auto-verify
+4. Re-runs failed scenarios to confirm fix
+5. Updates gap status (OPEN → CLOSED)
+
+### Files Structure
+
+| File | Purpose |
+|------|---------|
+| `commands/llm-user.md` | Unified command documentation |
+| `templates/skills/llm-user-testing/SKILL.md` | Domain expertise (v1.1.0) |
+| `templates/skills/gap-resolver/SKILL.md` | Gap fixing protocols |
+| Templates: `ui_testing.skill_version` | Version tracking in workflow state |
+
+### Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 1.1.0 | 2026-01-28 | Scene-grounded responses, skill version tracking |
+| 1.0.0 | 2026-01-27 | Initial release with /llm-user consolidation |
+
+---
+
 ## What This Is
 
 A multi-agent workflow system. Users describe what they want, Claude orchestrates specialized agents to build it.
