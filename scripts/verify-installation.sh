@@ -40,7 +40,7 @@ echo ""
 
 # Expected state for v3.1+
 EXPECTED_SUBAGENTS=("code-reviewer" "debugger" "ui-debugger")
-EXPECTED_SKILLS=("backend" "brownfield" "code-quality" "debugging" "frontend" "llm-user-testing" "testing" "ux-design" "validation" "workflow")
+EXPECTED_SKILLS=("backend" "brownfield" "code-quality" "debugging" "frontend" "gap-resolver" "llm-user-testing" "testing" "ux-design" "validation" "workflow")
 OLD_AGENTS=("acceptance-validator" "agentic-architect" "backend-engineer" "brownfield-analyzer" "change-analyzer" "frontend-engineer" "gap-analyzer" "implementation-planner" "intent-guardian" "project-ops" "test-engineer" "ux-architect" "workflow-orchestrator")
 
 echo -e "${BLUE}Checking subagents (should be 3 symlinks)...${NC}"
@@ -114,10 +114,10 @@ for skill in "${EXPECTED_SKILLS[@]}"; do
 done
 
 echo ""
-if [ $SKILL_COUNT -eq 10 ]; then
-    echo -e "${GREEN}✓ All 10 skills present${NC}"
+if [ $SKILL_COUNT -eq 11 ]; then
+    echo -e "${GREEN}✓ All 11 skills present${NC}"
 else
-    echo -e "${RED}✗ Expected 10 skills, found $SKILL_COUNT${NC}"
+    echo -e "${RED}✗ Expected 11 skills, found $SKILL_COUNT${NC}"
 fi
 echo ""
 

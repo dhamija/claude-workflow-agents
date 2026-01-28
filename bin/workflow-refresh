@@ -3,8 +3,10 @@
 # Refresh command/skill/agent symlinks after update
 # This ensures new commands and skills appear in Claude Code
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
-CLAUDE_DIR="$HOME/.claude"
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
 
 echo ""
 echo "Refreshing Claude Workflow Agents symlinks..."
@@ -16,69 +18,33 @@ if [ ! -d "$INSTALL_DIR" ]; then
     exit 1
 fi
 
+# Ensure directories exist
 mkdir -p "$CLAUDE_DIR/agents"
 mkdir -p "$CLAUDE_DIR/commands"
 mkdir -p "$CLAUDE_DIR/skills"
 
-# Clean up old workflow command symlinks
+# Clean and reinstall using shared functions
 echo "Cleaning old command symlinks..."
-for file in "$CLAUDE_DIR/commands"/*; do
-    if [ -L "$file" ]; then
-        target=$(readlink "$file")
-        if [[ "$target" == *"workflow-agents"* ]]; then
-            rm -f "$file"
-        fi
-    fi
-done
+cleanup_commands "$CLAUDE_DIR"
 
-# Recreate all command symlinks
 echo "Creating command symlinks..."
-command_count=0
-for command_file in "$INSTALL_DIR/commands"/*.md; do
-    if [ -f "$command_file" ]; then
-        filename=$(basename "$command_file")
-        ln -sf "$command_file" "$CLAUDE_DIR/commands/$filename"
-        ((command_count++))
-    fi
-done
+install_commands "$INSTALL_DIR" "$CLAUDE_DIR"
+command_count=$(count_commands)
 
-# Refresh skills
 echo "Refreshing skills..."
-for skill_dir in "$CLAUDE_DIR/skills"/*; do
-    if [ -d "$skill_dir" ]; then
-        skill_name=$(basename "$skill_dir")
-        if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver)$ ]]; then
-            rm -rf "$skill_dir"
-        fi
-    fi
-done
-cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
+cleanup_skills "$CLAUDE_DIR"
+install_skills "$INSTALL_DIR" "$CLAUDE_DIR"
+skill_count=$(count_skills)
 
-skill_count=$(find "$CLAUDE_DIR/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
-
-# Refresh subagent symlinks
 echo "Refreshing subagent symlinks..."
-for file in "$CLAUDE_DIR/agents"/*; do
-    if [ -L "$file" ]; then
-        target=$(readlink "$file")
-        if [[ "$target" == *"workflow-agents"* ]]; then
-            rm -f "$file"
-        fi
-    fi
-done
-
-CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
-for agent_name in "${CORE_AGENTS[@]}"; do
-    agent_file="$INSTALL_DIR/agents/${agent_name}.md"
-    if [ -f "$agent_file" ]; then
-        ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
-    fi
-done
+cleanup_agents "$CLAUDE_DIR"
+install_subagents "$INSTALL_DIR" "$CLAUDE_DIR"
+subagent_count=$(count_subagents)
 
 echo ""
 echo "✓ Refresh complete"
 echo ""
-echo "  Commands: $command_count linked"
-echo "  Skills:   $skill_count installed"
-echo "  Subagents: 3 linked (code-reviewer, debugger, ui-debugger)"
+echo "  Commands:  $command_count linked"
+echo "  Skills:    $skill_count installed (expected: $WORKFLOW_SKILL_COUNT)"
+echo "  Subagents: $subagent_count linked (${CORE_SUBAGENTS[*]})"
 echo ""

@@ -1,6 +1,6 @@
 # Claude Workflow Agents - Repository
 
-> **v3.1 Architecture:** Skills + Hooks + Subagents. 10 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+> **v3.1 Architecture:** Skills + Hooks + Subagents. 11 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
 
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
@@ -37,48 +37,50 @@
 
 ```
 ~/.claude-workflow-agents/           # Installation directory
-├── agents/                          # 17 agent files (invoked by workflow via Task tool)
-├── commands/                        # 26 command definitions
+├── agents/                          # 16 agent files (invoked by workflow via Task tool)
+├── commands/                        # 27 command definitions
+├── lib/                             # Shared configuration and functions
+│   └── config.sh                    # SINGLE SOURCE OF TRUTH for all scripts
 ├── templates/                       # Templates for user projects
 │   ├── project/                     # Project bootstrap templates
 │   │   ├── CLAUDE.md.minimal.template (greenfield, ~80 lines)
 │   │   └── CLAUDE.md.minimal-brownfield.template (~80 lines)
-│   ├── skills/                      # 10 skill templates
+│   ├── skills/                      # 11 skill templates
 │   │   ├── workflow/, ux-design/, frontend/, backend/
-│   │   ├── testing/, validation/, debugging/
-│   │   └── code-quality/, brownfield/
+│   │   ├── testing/, validation/, debugging/, gap-resolver/
+│   │   └── code-quality/, brownfield/, llm-user-testing/
 │   └── hooks/                       # Hooks configuration template
 │       └── settings.json.template
-├── bin/                            # CLI commands
+├── bin/                            # CLI commands (all source lib/config.sh)
 │   ├── workflow-init               # Initialize project
 │   ├── workflow-toggle             # Enable/disable globally
 │   ├── workflow-update             # Update from git
 │   ├── workflow-uninstall          # Remove installation
 │   └── workflow-version            # Show version
-└── version.txt                     # Current version (3.1.0)
+└── version.txt                     # Current version (3.2.0)
 
 ~/.claude/                           # Claude Code's directory
-├── skills/                          # 10 skills (loaded on-demand by Claude)
+├── skills/                          # 11 skills (loaded on-demand by Claude)
 │   ├── workflow/, ux-design/, frontend/, backend/
-│   ├── testing/, validation/, debugging/
+│   ├── testing/, validation/, debugging/, gap-resolver/
 │   └── code-quality/, brownfield/, llm-user-testing/
 ├── agents/                          # 3 subagents (isolated context)
 │   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
 │   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
 │   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
-└── commands/                        # 26 command symlinks
+└── commands/                        # 27 command symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
-    └── ... (26 total)
+    └── ... (27 total)
 ```
 
-### How It Works (v3.1)
+### How It Works (v3.2)
 
 1. **Install** (`install.sh`):
    - Downloads to `~/.claude-workflow-agents/`
-   - **Copies 10 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
+   - **Copies 11 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
    - **Symlinks 3 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger)
-   - Symlinks 26 commands to `~/.claude/commands/`
+   - Symlinks 27 commands to `~/.claude/commands/`
    - Adds bin/ commands to PATH
    - Workflow immediately active for all projects
 
@@ -390,29 +392,37 @@ When you add, modify, or remove ANY agent or command file:
    - Do NOT skip this step - CI will fail and block merges
    - **Check 7/7 specifically ensures workflow-orchestrator is in sync!**
 
-7. ✅ **Update workflow commands in install.sh (if applicable)**
+7. ✅ **Update lib/config.sh (SINGLE SOURCE OF TRUTH)**
 
-   If your changes affect the workflow commands, update the embedded scripts in `install.sh`:
+   **All script configuration is centralized in `lib/config.sh`.** When adding/removing skills, subagents, or old agents for cleanup, ONLY update this file.
 
-   - **workflow-version** (line ~137-169)
-     - Update commands list if new commands added
-     - Update agent/command counts if changed
+   ```bash
+   # Example: Adding a new skill
+   # Edit lib/config.sh:
+   WORKFLOW_SKILLS=(
+       ...existing...
+       "new-skill"   # Add here
+   )
 
-   - **workflow-update** (created in bin/workflow-update, installed by install.sh)
-     - If update process changes
-     - If new features need announcing
+   # Example: Adding a new subagent
+   CORE_SUBAGENTS=(
+       ...existing...
+       "new-agent"   # Add here
+   )
+   ```
 
-   - **workflow-patch** (created in bin/workflow-patch, installed by install.sh)
-     - If patch logic changes
-     - If section extraction needs updating
+   **Run verification after changes:**
+   ```bash
+   ./scripts/verify-config.sh
+   ```
 
-   - **Install success message** (line ~700-710)
-     - Keep command list in sync with workflow-version output
+   **What lib/config.sh controls:**
+   - `CORE_SUBAGENTS` array - Subagents symlinked to `~/.claude/agents/`
+   - `WORKFLOW_SKILLS` array - Skills copied to `~/.claude/skills/`
+   - `OLD_WORKFLOW_AGENTS` array - Old agent files to clean up from v2.0
+   - Shared functions: `cleanup_*`, `install_*`, `count_*`
 
-   **Examples of when to update:**
-   - Adding new agent → Update workflow-version commands list
-   - New workflow command → Add to both workflow-version and install success
-   - Changing template structure → Update workflow-patch logic
+   **install.sh note:** The embedded scripts in install.sh source lib/config.sh at runtime after installation. The constants at the top of install.sh must match lib/config.sh - verify-config.sh checks this.
 
 8. ✅ **Update STATE.md**
    - Add entry to Recent Changes section
@@ -454,6 +464,143 @@ If you forgot to run verify.sh and CI fails:
 
 ---
 
+## 🔧 SCRIPT ARCHITECTURE (v3.2)
+
+**CRITICAL: All scripts share configuration from `lib/config.sh`. This is the SINGLE SOURCE OF TRUTH.**
+
+### Single Source of Truth
+
+```
+lib/config.sh                    # THE SOURCE - All constants and functions
+    │
+    ├─→ install.sh               # Sources config AFTER downloading
+    │   └─→ Generates bin/ scripts that source config at runtime
+    │
+    ├─→ bin/workflow-update      # Sources: $SCRIPT_DIR/../lib/config.sh
+    ├─→ bin/workflow-refresh     # Sources: $SCRIPT_DIR/../lib/config.sh
+    ├─→ bin/workflow-patch       # Sources: $SCRIPT_DIR/../lib/config.sh
+    └─→ bin/workflow-toggle      # Sources: $SCRIPT_DIR/../lib/config.sh
+```
+
+### What lib/config.sh Contains
+
+| Constant | Purpose | Example |
+|----------|---------|---------|
+| `CORE_SUBAGENTS` | Array of subagents to symlink | `("code-reviewer" "debugger" "ui-debugger")` |
+| `WORKFLOW_SKILLS` | Array of skills to install | `("backend" "frontend" ... 10 total)` |
+| `OLD_WORKFLOW_AGENTS` | Array of old agents for cleanup | 14 agents from v2.0 |
+| `WORKFLOW_SKILL_REGEX` | Generated regex for cleanup | `^(backend|brownfield|...)$` |
+| `OLD_AGENT_REGEX` | Generated regex for cleanup | `^(acceptance-validator|...)\.md$` |
+
+| Function | Purpose |
+|----------|---------|
+| `cleanup_agents()` | Remove old workflow agent files/symlinks |
+| `cleanup_commands()` | Remove old workflow command symlinks |
+| `cleanup_skills()` | Remove old workflow skill directories |
+| `install_skills()` | Copy skills to ~/.claude/skills/ |
+| `install_subagents()` | Symlink core subagents |
+| `install_commands()` | Symlink commands |
+| `count_subagents()` | Count installed subagents |
+| `count_skills()` | Count installed skills |
+| `count_commands()` | Count installed command symlinks |
+| `count_zombies()` | Count zombie agents (should be 0) |
+
+### Making Changes
+
+**Adding a new skill:**
+```bash
+# 1. Create the skill directory
+mkdir -p templates/skills/new-skill/
+cat > templates/skills/new-skill/skill.md << 'EOF'
+# New Skill
+...skill content...
+EOF
+
+# 2. Update lib/config.sh (ONLY place to add it)
+# Add "new-skill" to WORKFLOW_SKILLS array
+
+# 3. Verify
+./scripts/verify-config.sh
+./scripts/verify.sh
+```
+
+**Adding a new subagent:**
+```bash
+# 1. Create the agent file
+cat > agents/new-agent.md << 'EOF'
+# New Agent
+...agent content...
+EOF
+
+# 2. Update lib/config.sh
+# Add "new-agent" to CORE_SUBAGENTS array
+
+# 3. Update documentation (per maintenance protocol)
+# CLAUDE.md, help.md, README.md, tests
+
+# 4. Verify
+./scripts/verify-config.sh
+./scripts/verify.sh
+```
+
+**Adding an old agent for cleanup (from previous versions):**
+```bash
+# Update lib/config.sh
+# Add agent name to OLD_WORKFLOW_AGENTS array
+
+# Verify
+./scripts/verify-config.sh
+```
+
+### Why This Architecture
+
+**Before (v3.1):** Constants scattered across 4+ locations
+- CORE_AGENTS in install.sh:164, install.sh:331 (embedded), install.sh:506 (embedded), bin/workflow-refresh:70
+- Skill regex in 4 places with inconsistencies
+- Changes required updating multiple files manually
+- Easy to miss one location → silent bugs
+
+**After (v3.2):** Single source of truth
+- All constants in `lib/config.sh`
+- All scripts source this file
+- `verify-config.sh` ensures consistency
+- Changes require ONE edit
+
+### Verification Commands
+
+```bash
+# Check config consistency (are all scripts using lib/config.sh?)
+./scripts/verify-config.sh
+
+# Check documentation consistency (are all docs in sync?)
+./scripts/verify.sh
+
+# Run all tests
+./tests/run_all_tests.sh
+
+# Full pre-commit verification
+./scripts/verify-config.sh && ./scripts/verify.sh
+```
+
+### Troubleshooting
+
+**"Found hardcoded CORE_AGENTS in bin/":**
+- A script is defining its own array instead of sourcing config
+- Edit the script to add: `source "$SCRIPT_DIR/../lib/config.sh"`
+- Remove the hardcoded array
+
+**"Config arrays don't match install.sh":**
+- The constants at the top of install.sh must match lib/config.sh
+- This is because install.sh can't source config until AFTER downloading
+- Update install.sh to match, or run `./scripts/verify-config.sh` to see differences
+
+**"Zombie agents found":**
+- Old agent files exist in ~/.claude/agents/ that should have been cleaned up
+- Add the agent names to `OLD_WORKFLOW_AGENTS` in lib/config.sh
+- Run `workflow-toggle off && workflow-toggle on` to clean up
+
+---
+
 ## 🧪 PRE-RELEASE VERIFICATION CHECKLIST
 
 **CRITICAL: Run this checklist BEFORE releasing ANY version to catch installation issues.**
@@ -487,7 +634,7 @@ These issues were only discovered after users reported them. This checklist prev
    Must show:
    - ✓ All 3 subagents present and correctly symlinked
    - ✓ No zombie agents found
-   - ✓ All 10 skills present
+   - ✓ All 11 skills present
    - ✓ All bin scripts present and executable
    - ✓ VERIFICATION PASSED
 
@@ -605,7 +752,7 @@ echo "✓ Ready to release"
 
 - verify-installation.sh shows "✓ VERIFICATION PASSED"
 - No zombie files in ~/.claude/agents/
-- Exactly 3 subagents (symlinks), 10 skills (directories)
+- Exactly 3 subagents (symlinks), 11 skills (directories)
 - All 7 bin scripts present and executable
 - workflow-init works in both greenfield and brownfield
 - Documentation counts match actual installation

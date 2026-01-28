@@ -6,14 +6,9 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WORKFLOW_HOME="$(cd "$SCRIPT_DIR/.." && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+WORKFLOW_HOME="$INSTALL_DIR"
 
 # Check if CLAUDE.md exists in current directory
 if [ ! -f "CLAUDE.md" ]; then
@@ -245,4 +240,3 @@ echo "  1. Review the changes: git diff CLAUDE.md"
 echo "  2. Test that orchestration still works"
 echo "  3. Delete backup if satisfied: rm $BACKUP_FILE"
 echo ""
-

@@ -67,10 +67,10 @@ else
     echo -e "  ${GREEN}✓${NC} STATE.md command count"
 fi
 
-# Check README.md (v3.0: skills + subagents architecture, no unified "agent" count)
-# Count subagents (4 in v3.0) and commands
-SUBAGENT_COUNT=4
-SKILL_COUNT=10
+# Check README.md (v3.2: skills + subagents architecture, no unified "agent" count)
+# Count subagents (3 in v3.2) and commands
+SUBAGENT_COUNT=3
+SKILL_COUNT=11
 if ! grep -q "\*\*$SUBAGENT_COUNT subagents\*\*" "$REPO_ROOT/README.md"; then
     echo -e "  ${RED}✗ README.md has wrong subagent count (expected $SUBAGENT_COUNT)${NC}"
     ((ERRORS++))

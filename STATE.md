@@ -3,13 +3,13 @@
 > **Auto-updated by**: `./scripts/update-claude-md.sh`
 >  **Last updated**: 2026-01-27
 
-## Component Counts (v3.1)
+## Component Counts (v3.2)
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
 | Skills | 11 | 2026-01-28 |
-| Subagents | 3 | 2026-01-27 |
-| Agent Files (for Task tool invocation) | 17 | 2026-01-27 |
+| Subagents | 3 | 2026-01-28 |
+| Agent Files (for Task tool invocation) | 16 | 2026-01-28 |
 | Commands | 27 | 2026-01-28 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |

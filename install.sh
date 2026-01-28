@@ -9,6 +9,13 @@
 
 set -e
 
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+# Note: install.sh cannot source lib/config.sh until AFTER downloading.
+# These values must match lib/config.sh exactly.
+# Run ./scripts/verify-config.sh to check they're in sync.
+
 INSTALL_DIR="$HOME/.claude-workflow-agents"
 CLAUDE_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
@@ -16,7 +23,10 @@ REPO_URL="https://github.com/dhamija/claude-workflow-agents"
 # Parse version argument (default: latest stable tag)
 VERSION_ARG="${1:-latest}"
 
-# Function to clone repository at specified version
+# ============================================================================
+# CLONE FUNCTION (duplicated because config not available yet)
+# ============================================================================
+
 clone_repo() {
     local target_dir="$1"
     local version="$2"
@@ -54,6 +64,10 @@ clone_repo() {
             ;;
     esac
 }
+
+# ============================================================================
+# MAIN INSTALLATION
+# ============================================================================
 
 echo ""
 echo "Claude Workflow Agents - Install"
@@ -100,8 +114,11 @@ echo "Installing..."
 cp -r "$TEMP_DIR/agents" "$INSTALL_DIR/"
 cp -r "$TEMP_DIR/commands" "$INSTALL_DIR/"
 cp -r "$TEMP_DIR/templates" "$INSTALL_DIR/"
+cp -r "$TEMP_DIR/lib" "$INSTALL_DIR/"
 cp "$TEMP_DIR/version.txt" "$INSTALL_DIR/"
-# Note: Keep TEMP_DIR for now - we need it later to copy bin scripts
+
+# Now we can source the config from the installed copy
+source "$INSTALL_DIR/lib/config.sh"
 
 # Create directories
 mkdir -p "$CLAUDE_DIR/agents"
@@ -110,76 +127,26 @@ mkdir -p "$CLAUDE_DIR/skills"
 
 echo "Cleaning up old workflow files..."
 
-# Clean up agents: Remove old workflow symlinks AND old agent files
-if [ -d "$CLAUDE_DIR/agents" ]; then
-    for file in "$CLAUDE_DIR/agents"/*; do
-        if [ -L "$file" ]; then
-            # Remove symlinks pointing to workflow-agents
-            target=$(readlink "$file")
-            if [[ "$target" == *"workflow-agents"* ]]; then
-                rm -f "$file"
-            fi
-        elif [ -f "$file" ]; then
-            # Remove known old workflow agent files (from v2.0 and earlier)
-            filename=$(basename "$file")
-            if [[ "$filename" =~ ^(acceptance-validator|agentic-architect|backend-engineer|brownfield-analyzer|change-analyzer|frontend-engineer|gap-analyzer|implementation-planner|intent-guardian|project-ops|test-engineer|ux-architect|workflow-orchestrator|llm-user-architect)\.md$ ]]; then
-                rm -f "$file"
-            fi
-        fi
-    done
-fi
-
-# Clean up commands: Remove old workflow symlinks
-if [ -d "$CLAUDE_DIR/commands" ]; then
-    for file in "$CLAUDE_DIR/commands"/*; do
-        if [ -L "$file" ]; then
-            target=$(readlink "$file")
-            if [[ "$target" == *"workflow-agents"* ]]; then
-                rm -f "$file"
-            fi
-        fi
-    done
-fi
-
-# Clean up skills: Remove all old skill directories (will be replaced)
-if [ -d "$CLAUDE_DIR/skills" ]; then
-    for skill_dir in "$CLAUDE_DIR/skills"/*; do
-        if [ -d "$skill_dir" ]; then
-            # Only remove workflow skill directories, preserve user's own skills
-            skill_name=$(basename "$skill_dir")
-            if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow)$ ]]; then
-                rm -rf "$skill_dir"
-            fi
-        fi
-    done
-fi
+# Use shared cleanup functions
+cleanup_agents "$CLAUDE_DIR"
+cleanup_commands "$CLAUDE_DIR"
+cleanup_skills "$CLAUDE_DIR"
 
 echo "Installing skills and subagents..."
 
-# Copy skills directly (loaded on-demand by Claude)
-cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
-
-# Symlink ONLY core subagents (isolated-context agents)
-# Other expertise is now in skills (on-demand loading)
-CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
-for agent_name in "${CORE_AGENTS[@]}"; do
-    agent_file="$INSTALL_DIR/agents/${agent_name}.md"
-    if [ -f "$agent_file" ]; then
-        ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
-    fi
-done
-
-# Symlink each command file
-for command_file in "$INSTALL_DIR/commands"/*.md; do
-    if [ -f "$command_file" ]; then
-        filename=$(basename "$command_file")
-        ln -sf "$command_file" "$CLAUDE_DIR/commands/$filename"
-    fi
-done
+# Use shared install functions
+install_skills "$INSTALL_DIR" "$CLAUDE_DIR"
+install_subagents "$INSTALL_DIR" "$CLAUDE_DIR"
+install_commands "$INSTALL_DIR" "$CLAUDE_DIR"
 
 echo "✓ Installed skills and subagents"
 
-# Create bin directory
+# ============================================================================
+# CREATE BIN SCRIPTS
+# ============================================================================
+# These scripts are generated here because they need to be standalone
+# (users run them from anywhere). They source lib/config.sh at runtime.
+
 mkdir -p "$INSTALL_DIR/bin"
 
 # ─────────────────────────────────────────────────────────────────
@@ -195,53 +162,17 @@ cat > "$INSTALL_DIR/bin/workflow-update" << 'SCRIPT'
 #   workflow-update master   - Update to bleeding edge
 #   workflow-update v3.1.0   - Update to specific version
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
-REPO_URL="https://github.com/dhamija/claude-workflow-agents"
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
 
 # Parse version argument (default: latest stable tag)
 VERSION_ARG="${1:-latest}"
 
-# Function to clone repository at specified version
-clone_repo() {
-    local target_dir="$1"
-    local version="$2"
-
-    case "$version" in
-        master|main|dev)
-            echo "Updating to: master branch (bleeding edge)"
-            git clone --depth 1 --quiet "$REPO_URL" "$target_dir"
-            ;;
-        latest)
-            echo "Updating to: latest stable release"
-            # Get latest tag
-            LATEST_TAG=$(git ls-remote --tags --refs --sort="v:refname" "$REPO_URL" | tail -n1 | sed 's/.*\///')
-            if [ -z "$LATEST_TAG" ]; then
-                echo "Warning: No tags found, using master branch"
-                git clone --depth 1 --quiet "$REPO_URL" "$target_dir"
-            else
-                git clone --depth 1 --branch "$LATEST_TAG" --quiet "$REPO_URL" "$target_dir"
-            fi
-            ;;
-        v*.*.*)
-            echo "Updating to: $version"
-            git clone --depth 1 --branch "$version" --quiet "$REPO_URL" "$target_dir"
-            ;;
-        *)
-            echo "Error: Invalid version '$version'"
-            echo ""
-            echo "Valid options:"
-            echo "  latest       - Latest stable release (default)"
-            echo "  master       - Latest development version"
-            echo "  v3.1.0       - Specific tagged version"
-            echo ""
-            exit 1
-            ;;
-    esac
-}
-
 echo "Updating Claude Workflow Agents..."
 
-CURRENT=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "unknown")
+CURRENT=$(get_installed_version)
 echo "Current version: $CURRENT"
 
 # Download to temp
@@ -258,8 +189,8 @@ if [ "$CURRENT" = "$NEW_VERSION" ] && [ "$VERSION_ARG" = "latest" ]; then
     exit 0
 fi
 
-# Preserve generated bin scripts (workflow-update, workflow-version, etc.)
-# Copy only the generated scripts, keep new scripts from repo (workflow-patch, workflow-fix-hooks)
+# Preserve generated bin scripts that were created by install.sh
+# Copy only the generated scripts, keep new scripts from repo
 mkdir -p "$TEMP_DIR/bin"
 for script in workflow-update workflow-version workflow-toggle workflow-uninstall workflow-init; do
     if [ -f "$INSTALL_DIR/bin/$script" ]; then
@@ -268,12 +199,9 @@ for script in workflow-update workflow-version workflow-toggle workflow-uninstal
 done
 
 # Copy additional bin scripts from the repo (workflow-patch, workflow-fix-hooks, etc.)
-# This ensures new scripts added to the repo get installed during updates
 if [ -d "$TEMP_DIR/bin" ]; then
     for script in "$TEMP_DIR/bin"/*; do
         if [ -f "$script" ]; then
-            script_name=$(basename "$script")
-            # Set executable permission
             chmod +x "$script"
         fi
     done
@@ -283,58 +211,22 @@ fi
 rm -rf "$INSTALL_DIR"
 mv "$TEMP_DIR" "$INSTALL_DIR"
 
-# Refresh symlinks in ~/.claude/ for new commands
-CLAUDE_DIR="$HOME/.claude"
+# Re-source config from new installation
+source "$INSTALL_DIR/lib/config.sh"
+
+# Refresh symlinks using shared functions
 mkdir -p "$CLAUDE_DIR/agents"
 mkdir -p "$CLAUDE_DIR/commands"
 mkdir -p "$CLAUDE_DIR/skills"
 
-# Clean up old workflow symlinks
-for file in "$CLAUDE_DIR/commands"/*; do
-    if [ -L "$file" ]; then
-        target=$(readlink "$file")
-        if [[ "$target" == *"workflow-agents"* ]]; then
-            rm -f "$file"
-        fi
-    fi
-done
+cleanup_commands "$CLAUDE_DIR"
+install_commands "$INSTALL_DIR" "$CLAUDE_DIR"
 
-# Recreate command symlinks (includes new commands)
-for command_file in "$INSTALL_DIR/commands"/*.md; do
-    if [ -f "$command_file" ]; then
-        filename=$(basename "$command_file")
-        ln -sf "$command_file" "$CLAUDE_DIR/commands/$filename"
-    fi
-done
+cleanup_skills "$CLAUDE_DIR"
+install_skills "$INSTALL_DIR" "$CLAUDE_DIR"
 
-# Refresh skills (may have new ones)
-for skill_dir in "$CLAUDE_DIR/skills"/*; do
-    if [ -d "$skill_dir" ]; then
-        skill_name=$(basename "$skill_dir")
-        if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver)$ ]]; then
-            rm -rf "$skill_dir"
-        fi
-    fi
-done
-cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
-
-# Refresh subagent symlinks
-for file in "$CLAUDE_DIR/agents"/*; do
-    if [ -L "$file" ]; then
-        target=$(readlink "$file")
-        if [[ "$target" == *"workflow-agents"* ]]; then
-            rm -f "$file"
-        fi
-    fi
-done
-
-CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
-for agent_name in "${CORE_AGENTS[@]}"; do
-    agent_file="$INSTALL_DIR/agents/${agent_name}.md"
-    if [ -f "$agent_file" ]; then
-        ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
-    fi
-done
+cleanup_agents "$CLAUDE_DIR"
+install_subagents "$INSTALL_DIR" "$CLAUDE_DIR"
 
 echo ""
 echo "✓ Updated to $NEW_VERSION"
@@ -351,7 +243,8 @@ cat > "$INSTALL_DIR/bin/workflow-version" << 'SCRIPT'
 
 # Show version information
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
 
 echo ""
 echo "Claude Workflow Agents"
@@ -362,7 +255,7 @@ if [ ! -d "$INSTALL_DIR" ]; then
     exit 1
 fi
 
-VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "unknown")
+VERSION=$(get_installed_version)
 AGENTS=$(find "$INSTALL_DIR/agents" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
 COMMANDS=$(find "$INSTALL_DIR/commands" -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
 
@@ -390,8 +283,8 @@ cat > "$INSTALL_DIR/bin/workflow-toggle" << 'SCRIPT'
 
 # Toggle workflow agents/commands on or off
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
-CLAUDE_DIR="$HOME/.claude"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
 
 # Check installation
 if [ ! -d "$INSTALL_DIR" ]; then
@@ -399,24 +292,8 @@ if [ ! -d "$INSTALL_DIR" ]; then
     exit 1
 fi
 
-# Count workflow symlinks to determine status
-count_workflow_symlinks() {
-    local count=0
-    if [ -d "$CLAUDE_DIR/agents" ]; then
-        for file in "$CLAUDE_DIR/agents"/*; do
-            if [ -L "$file" ]; then
-                local target=$(readlink "$file")
-                if [[ "$target" == *"workflow-agents"* ]]; then
-                    ((count++))
-                fi
-            fi
-        done
-    fi
-    echo $count
-}
-
-WORKFLOW_COUNT=$(count_workflow_symlinks)
-if [ "$WORKFLOW_COUNT" -gt 0 ]; then
+# Determine status using shared function
+if is_workflow_enabled; then
     STATUS="enabled"
 else
     STATUS="disabled"
@@ -430,10 +307,12 @@ case "$CMD" in
         echo ""
         echo "Workflow Status: $STATUS"
         if [ "$STATUS" = "enabled" ]; then
-            agent_count=$(find "$CLAUDE_DIR/agents" -type l 2>/dev/null | wc -l | tr -d ' ')
-            command_count=$(find "$CLAUDE_DIR/commands" -type l 2>/dev/null | wc -l | tr -d ' ')
-            echo "  Workflow agents:   $agent_count symlinked"
-            echo "  Workflow commands: $command_count symlinked"
+            subagent_count=$(count_subagents)
+            skill_count=$(count_skills)
+            command_count=$(count_commands)
+            echo "  Subagents: $subagent_count/$CORE_SUBAGENT_COUNT"
+            echo "  Skills:    $skill_count/$WORKFLOW_SKILL_COUNT"
+            echo "  Commands:  $command_count symlinked"
             echo ""
             echo "Your own files coexist in the same directories."
             echo "To disable: workflow-toggle off"
@@ -458,70 +337,19 @@ case "$CMD" in
 
         echo "Cleaning up old workflow files..."
 
-        # Clean up agents: Remove old workflow symlinks AND old agent files
-        if [ -d "$CLAUDE_DIR/agents" ]; then
-            for file in "$CLAUDE_DIR/agents"/*; do
-                if [ -L "$file" ]; then
-                    target=$(readlink "$file")
-                    if [[ "$target" == *"workflow-agents"* ]]; then
-                        rm -f "$file"
-                    fi
-                elif [ -f "$file" ]; then
-                    filename=$(basename "$file")
-                    if [[ "$filename" =~ ^(acceptance-validator|agentic-architect|backend-engineer|brownfield-analyzer|change-analyzer|frontend-engineer|gap-analyzer|implementation-planner|intent-guardian|project-ops|test-engineer|ux-architect|workflow-orchestrator|llm-user-architect)\.md$ ]]; then
-                        rm -f "$file"
-                    fi
-                fi
-            done
-        fi
+        # Use shared cleanup functions
+        cleanup_agents "$CLAUDE_DIR"
+        cleanup_commands "$CLAUDE_DIR"
+        cleanup_skills "$CLAUDE_DIR"
 
-        # Clean up commands: Remove old workflow symlinks
-        if [ -d "$CLAUDE_DIR/commands" ]; then
-            for file in "$CLAUDE_DIR/commands"/*; do
-                if [ -L "$file" ]; then
-                    target=$(readlink "$file")
-                    if [[ "$target" == *"workflow-agents"* ]]; then
-                        rm -f "$file"
-                    fi
-                fi
-            done
-        fi
-
-        # Clean up skills: Remove old workflow skill directories
-        if [ -d "$CLAUDE_DIR/skills" ]; then
-            for skill_dir in "$CLAUDE_DIR/skills"/*; do
-                if [ -d "$skill_dir" ]; then
-                    skill_name=$(basename "$skill_dir")
-                    if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow)$ ]]; then
-                        rm -rf "$skill_dir"
-                    fi
-                fi
-            done
-        fi
-
-        # Copy skills
-        cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
-
-        # Symlink ONLY core subagents
-        CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
-        for agent_name in "${CORE_AGENTS[@]}"; do
-            agent_file="$INSTALL_DIR/agents/${agent_name}.md"
-            if [ -f "$agent_file" ]; then
-                ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
-            fi
-        done
-
-        # Symlink each command file
-        for command_file in "$INSTALL_DIR/commands"/*.md; do
-            if [ -f "$command_file" ]; then
-                filename=$(basename "$command_file")
-                ln -sf "$command_file" "$CLAUDE_DIR/commands/$filename"
-            fi
-        done
+        # Use shared install functions
+        install_skills "$INSTALL_DIR" "$CLAUDE_DIR"
+        install_subagents "$INSTALL_DIR" "$CLAUDE_DIR"
+        install_commands "$INSTALL_DIR" "$CLAUDE_DIR"
 
         echo "✓ Workflow enabled"
-        echo "  Created symlinks for 3 subagents and all commands"
-        echo "  Installed 10 skills"
+        echo "  Created symlinks for $CORE_SUBAGENT_COUNT subagents and all commands"
+        echo "  Installed $WORKFLOW_SKILL_COUNT skills"
         echo "  Your own files in ~/.claude/ remain untouched"
         ;;
 
@@ -580,8 +408,8 @@ cat > "$INSTALL_DIR/bin/workflow-uninstall" << 'SCRIPT'
 
 # Uninstall globally
 
-INSTALL_DIR="$HOME/.claude-workflow-agents"
-CLAUDE_DIR="$HOME/.claude"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
 
 echo ""
 echo "Uninstall Claude Workflow Agents"
@@ -663,7 +491,10 @@ cat > "$INSTALL_DIR/bin/workflow-init" << 'SCRIPT'
 
 set -e
 
-WORKFLOW_HOME="$HOME/.claude-workflow-agents"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
+
+WORKFLOW_HOME="$INSTALL_DIR"
 TEMPLATES_DIR="$WORKFLOW_HOME/templates/project"
 DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 PROJECT_NAME=$(basename "$(pwd)")
@@ -757,13 +588,13 @@ echo ""
 # Determine project type
 if [ "$HAS_CODE" = true ]; then
     PROJECT_TYPE="brownfield"
-    echo "📦 BROWNFIELD PROJECT"
+    echo "BROWNFIELD PROJECT"
     echo ""
     echo "   Existing code detected."
     echo "   Claude will analyze the codebase first to understand what's built."
 else
     PROJECT_TYPE="greenfield"
-    echo "🌱 GREENFIELD PROJECT"
+    echo "GREENFIELD PROJECT"
     echo ""
     echo "   New project."
     echo "   Claude will start L1 planning from scratch."
@@ -800,9 +631,7 @@ else
     # Fallback - create inline
     cat > "CLAUDE.md" << EOF
 <!--
-═══════════════════════════════════════════════════════════════════════════════
 WORKFLOW BOOTSTRAP - CLAUDE MUST READ THIS FIRST
-═══════════════════════════════════════════════════════════════════════════════
 
 Project Type: ${PROJECT_TYPE^^}
 Initialized: $DATE
@@ -819,13 +648,11 @@ INSTRUCTIONS FOR CLAUDE:
 4. AUTO-CHAIN agents - Do NOT ask user to manually invoke agents
 
 5. UPDATE the state section after each significant action
-
-═══════════════════════════════════════════════════════════════════════════════
 -->
 
 # $PROJECT_NAME
 
-## 🔄 WORKFLOW ACTIVE
+## Workflow Active
 
 This project uses Claude Workflow Agents.
 
@@ -878,7 +705,7 @@ l2:
 session:
   last_updated: $DATE
   last_action: "Project initialized"
-  next_action: "$([ "$PROJECT_TYPE" = "brownfield" ] && echo "Run brownfield-analyzer to scan existing code" || echo "User describes project → Begin L1 with intent-guardian")"
+  next_action: "$([ "$PROJECT_TYPE" = "brownfield" ] && echo "Run brownfield-analyzer to scan existing code" || echo "User describes project - Begin L1 with intent-guardian")"
   session_count: 0
 \`\`\`
 EOF
@@ -923,7 +750,7 @@ echo "  ✓ Workflow state initialized"
 echo "  ✓ Type: $PROJECT_TYPE"
 echo ""
 echo "  Skills location: ~/.claude/skills/"
-echo "  Subagents: code-reviewer, debugger, ui-debugger"
+echo "  Subagents: ${CORE_SUBAGENTS[*]}"
 echo ""
 
 if [ "$PROJECT_TYPE" = "brownfield" ]; then
@@ -961,9 +788,10 @@ fi
 # Cleanup temp directory (delayed until after copying bin scripts)
 rm -rf "$TEMP_DIR"
 
-# ─────────────────────────────────────────────────────────────────
-# Add to PATH
-# ─────────────────────────────────────────────────────────────────
+# ============================================================================
+# ADD TO PATH
+# ============================================================================
+
 PATH_LINE='export PATH="$HOME/.claude-workflow-agents/bin:$PATH"'
 
 add_to_path() {
@@ -988,66 +816,39 @@ elif add_to_path "$HOME/.profile"; then
     ADDED_TO="$HOME/.profile"
 fi
 
-# ─────────────────────────────────────────────────────────────────
-# Post-Install Verification
-# ─────────────────────────────────────────────────────────────────
+# ============================================================================
+# POST-INSTALL VERIFICATION
+# ============================================================================
+
 echo ""
 echo "Verifying installation..."
 echo ""
 
-# Count what was installed
-SUBAGENT_COUNT=0
-for agent in code-reviewer debugger ui-debugger; do
-    if [ -L "$CLAUDE_DIR/agents/${agent}.md" ]; then
-        ((SUBAGENT_COUNT++))
-    fi
-done
+# Use shared verification functions
+SUBAGENT_COUNT=$(count_subagents)
+SKILL_COUNT=$(count_skills)
+COMMAND_COUNT=$(count_commands)
+ZOMBIE_COUNT=$(count_zombies)
 
-SKILL_COUNT=0
-for skill in backend brownfield code-quality debugging frontend llm-user-testing testing ux-design validation workflow; do
-    if [ -d "$CLAUDE_DIR/skills/$skill" ]; then
-        ((SKILL_COUNT++))
-    fi
-done
-
-COMMAND_COUNT=0
-for cmd_file in "$CLAUDE_DIR/commands"/*.md; do
-    if [ -L "$cmd_file" ]; then
-        target=$(readlink "$cmd_file")
-        if [[ "$target" == *"workflow-agents"* ]]; then
-            ((COMMAND_COUNT++))
-        fi
-    fi
-done
-
-# Check for zombie agents (should not exist)
-ZOMBIE_COUNT=0
-OLD_AGENTS=("acceptance-validator" "agentic-architect" "backend-engineer" "brownfield-analyzer" "change-analyzer" "frontend-engineer" "gap-analyzer" "implementation-planner" "intent-guardian" "project-ops" "test-engineer" "ux-architect" "workflow-orchestrator")
-for agent in "${OLD_AGENTS[@]}"; do
-    if [ -f "$CLAUDE_DIR/agents/${agent}.md" ] || [ -L "$CLAUDE_DIR/agents/${agent}.md" ]; then
-        ((ZOMBIE_COUNT++))
-    fi
-done
-
-echo "  Subagents: $SUBAGENT_COUNT/3"
-echo "  Skills:    $SKILL_COUNT/10"
+echo "  Subagents: $SUBAGENT_COUNT/$CORE_SUBAGENT_COUNT"
+echo "  Skills:    $SKILL_COUNT/$WORKFLOW_SKILL_COUNT"
 echo "  Commands:  $COMMAND_COUNT"
-if [ $ZOMBIE_COUNT -gt 0 ]; then
+if [ "$ZOMBIE_COUNT" -gt 0 ]; then
     echo "  ⚠ Zombie agents: $ZOMBIE_COUNT (should be 0)"
 fi
 echo ""
 
 # Warn if anything is wrong
-if [ $SUBAGENT_COUNT -ne 3 ] || [ $SKILL_COUNT -ne 10 ] || [ $ZOMBIE_COUNT -gt 0 ]; then
+if [ "$SUBAGENT_COUNT" -ne "$CORE_SUBAGENT_COUNT" ] || [ "$SKILL_COUNT" -ne "$WORKFLOW_SKILL_COUNT" ] || [ "$ZOMBIE_COUNT" -gt 0 ]; then
     echo "⚠ WARNING: Installation verification found issues"
     echo ""
-    if [ $SUBAGENT_COUNT -ne 3 ]; then
-        echo "  • Expected 3 subagents, found $SUBAGENT_COUNT"
+    if [ "$SUBAGENT_COUNT" -ne "$CORE_SUBAGENT_COUNT" ]; then
+        echo "  • Expected $CORE_SUBAGENT_COUNT subagents, found $SUBAGENT_COUNT"
     fi
-    if [ $SKILL_COUNT -ne 10 ]; then
-        echo "  • Expected 10 skills, found $SKILL_COUNT"
+    if [ "$SKILL_COUNT" -ne "$WORKFLOW_SKILL_COUNT" ]; then
+        echo "  • Expected $WORKFLOW_SKILL_COUNT skills, found $SKILL_COUNT"
     fi
-    if [ $ZOMBIE_COUNT -gt 0 ]; then
+    if [ "$ZOMBIE_COUNT" -gt 0 ]; then
         echo "  • Found $ZOMBIE_COUNT zombie agent files from previous version"
         echo "    Run: workflow-toggle off && workflow-toggle on"
     fi
@@ -1057,9 +858,12 @@ if [ $SUBAGENT_COUNT -ne 3 ] || [ $SKILL_COUNT -ne 10 ] || [ $ZOMBIE_COUNT -gt 0
     echo ""
 fi
 
-# ─────────────────────────────────────────────────────────────────
-# Done
-# ─────────────────────────────────────────────────────────────────
+# ============================================================================
+# DONE
+# ============================================================================
+
+VERSION=$(cat "$INSTALL_DIR/version.txt" 2>/dev/null || echo "unknown")
+
 echo ""
 echo "✓ Installed successfully"
 echo ""
