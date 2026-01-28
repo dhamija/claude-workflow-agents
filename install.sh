@@ -115,7 +115,7 @@ cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
 
 # Symlink ONLY core subagents (isolated-context agents)
 # Other expertise is now in skills (on-demand loading)
-CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
+CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger" "llm-user-architect")
 for agent_name in "${CORE_AGENTS[@]}"; do
     agent_file="$INSTALL_DIR/agents/${agent_name}.md"
     if [ -f "$agent_file" ]; then
