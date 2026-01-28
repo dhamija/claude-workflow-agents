@@ -10,7 +10,7 @@
 | Skills | 11 | 2026-01-28 |
 | Subagents | 3 | 2026-01-28 |
 | Agent Files (for Task tool invocation) | 16 | 2026-01-28 |
-| Commands | 27 | 2026-01-28 |
+| Commands | 25 | 2026-01-28 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
 | Tests | 32 | 2026-01-26 |
@@ -49,7 +49,6 @@
 | debug | ✓ Complete |
 | design | ✓ Complete |
 | docs | ✓ Complete |
-| fix-gaps | ✓ Complete |
 | gap | ✓ Complete |
 | implement | ✓ Complete |
 | improve | ✓ Complete |
@@ -62,7 +61,6 @@
 | replan | ✓ Complete |
 | review | ✓ Complete |
 | sync | ✓ Complete |
-| test-ui | ✓ Complete |
 | update | ✓ Complete |
 | ux | ✓ Complete |
 | ux-audit | ✓ Complete |

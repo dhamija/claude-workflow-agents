@@ -63,7 +63,7 @@ Format: [Semantic Versioning](https://semver.org/)
   - **Impact**: `llm-user-architect` couldn't be invoked by Task tool, but skill already existed with full functionality
   - **Fix**: Removed llm-user-architect from CORE_AGENTS, deleted redundant agent file
     - LLM user testing now uses `llm-user-testing` skill exclusively
-    - Skill has complete protocol (/llm-user init, /test-ui, /llm-user gaps, etc.)
+    - Skill has complete protocol (/llm-user init, /llm-user test, /llm-user gaps, etc.)
     - Updated all templates and orchestration to reference skill instead of subagent
     - Subagent count: 4 → 3 (code-reviewer, debugger, ui-debugger)
     - Skills count: 9 → 10 (added llm-user-testing to documented list)
@@ -77,7 +77,7 @@ Format: [Semantic Versioning](https://semver.org/)
 - **LLM User Testing System** - Doc-driven automated UI testing with LLM-simulated users
   - New skill: `llm-user-testing` - Protocols for LLM-as-user testing, persona simulation, gap analysis
   - New subagent: `llm-user-architect` - Generates project-specific test infrastructure from workflow docs
-  - New commands: `/llm-user init`, `/test-ui`, `/llm-user gaps`, `/llm-user refresh`
+  - New commands: `/llm-user init`, `/llm-user test`, `/llm-user gaps`, `/llm-user refresh`
   - Automatically synthesizes test specs from existing L1 docs (intent, UX, architecture)
   - Domain-specific personas and scenarios extracted from user journeys
   - Promise-based validation with traceability back to original requirements

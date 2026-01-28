@@ -38,7 +38,7 @@
 ```
 ~/.claude-workflow-agents/           # Installation directory
 ├── agents/                          # 16 agent files (invoked by workflow via Task tool)
-├── commands/                        # 27 command definitions
+├── commands/                        # 25 command definitions
 ├── lib/                             # Shared configuration and functions
 │   └── config.sh                    # SINGLE SOURCE OF TRUTH for all scripts
 ├── templates/                       # Templates for user projects
@@ -68,7 +68,7 @@
 │   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
 │   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
 │   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
-└── commands/                        # 27 command symlinks
+└── commands/                        # 25 command symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
     └── ... (27 total)
@@ -80,7 +80,7 @@
    - Downloads to `~/.claude-workflow-agents/`
    - **Copies 11 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
    - **Symlinks 3 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger)
-   - Symlinks 27 commands to `~/.claude/commands/`
+   - Symlinks 25 commands to `~/.claude/commands/`
    - Adds bin/ commands to PATH
    - Workflow immediately active for all projects
 
@@ -1064,8 +1064,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | /parallel | Parallel development |
 | /design | Design system |
 | /project | Project operations |
-| /llm-user | LLM user testing (init/gaps/refresh) |
-| /test-ui | Run LLM user tests |
+| /llm-user | LLM user testing (init/test/fix/status/refresh) |
 
 ---
 

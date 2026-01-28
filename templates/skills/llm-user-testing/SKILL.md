@@ -3,7 +3,7 @@ name: llm-user-testing
 description: |
   Domain expertise for LLM-as-User testing. Provides principles, protocols,
   and best practices for simulating real users to test UIs. Loaded on-demand
-  when executing /llm-user commands (/llm-user init, /test-ui, /llm-user gaps).
+  when executing /llm-user commands (init, test, fix, status, refresh).
 version: 1.0.0
 ---
 

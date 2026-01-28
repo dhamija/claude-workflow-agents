@@ -39,7 +39,7 @@ This is an **existing codebase**. Workflow will analyze first, then help improve
 | "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
 | "add [feature]", "also need", "change [thing]" | **change-analyzer** |
 | "UI is ready", "frontend done", "deployed to staging", "test user journeys" | Load `llm-user-testing` skill → `/llm-user init` |
-| "validate user experience", "check if promises work in UI" | `/test-ui` |
+| "validate user experience", "check if promises work in UI" | `/llm-user test` |
 | "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
 
 ---
@@ -455,7 +455,7 @@ Starting with backend...
 1. **LLM User Testing** (if UI exists)
    - Check if UI accessible + L1 docs exist
    - If NOT initialized: Suggest `/llm-user init`
-   - If initialized: Suggest `/test-ui --url=[URL]`
+   - If initialized: Suggest `/llm-user test --url=[URL]`
    - If critical gaps found: DO NOT mark complete until fixed
    - Update state: `ui_testing.last_run`, `ui_testing.last_score`, `ui_testing.critical_gaps`
 
@@ -744,7 +744,7 @@ validation:
 
 ui_testing:
   initialized: false           # true after /llm-user init
-  last_run: null               # timestamp of last /test-ui run
+  last_run: null               # timestamp of last /llm-user test run
   last_score: null             # overall score (0-10)
   critical_gaps: 0             # number of critical gaps found
   high_priority_gaps: 0        # number of high priority gaps
@@ -770,13 +770,13 @@ session:
 | `/help` | Show all available commands |
 | `/status` | Show detailed project progress |
 | `/gap` or `/audit` | Run gap analysis on codebase |
-| `/fix-gaps` | Fix gaps systematically (after LLM user testing) |
-| `/fix-gaps status` | Show gap resolution progress |
-| `/fix-gaps verify` | Re-run tests to validate fixes |
-| `/fix-gaps report` | Generate improvement report |
 | `/llm-user init` | Generate LLM user testing infrastructure |
 | `/llm-user gaps` | Display gap analysis from test run |
-| `/test-ui [--url]` | Execute LLM user tests with personas |
+| `/llm-user fix` | Fix gaps systematically (after LLM user testing) |
+| `/llm-user verify` | Re-run tests to validate fixes |
+| `/llm-user status` | Show gap resolution progress |
+| `/llm-user report` | Generate improvement report |
+| `/llm-user test [--url]` | Execute LLM user tests with personas |
 | `/workflow analyze` | Re-run brownfield analysis |
 | `/next` | Continue to next workflow step |
 | `/review [path]` | Run code-reviewer on specific files |

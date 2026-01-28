@@ -160,41 +160,36 @@ Gap-driven development validates that your application keeps its promises to use
 # Generates: test-spec.yaml, personas, scenarios, test subagents
 
 # 3. Run LLM user tests
-/test-ui --url=http://localhost:3000
+/llm-user test http://localhost:3000
 # Output:
 #   ✓ 4 scenarios passed
 #   ✗ 1 scenario failed
 #   Overall: 7.2/10
 #   1 critical gap found
 
-# 4. Review gaps
-/llm-user gaps
+# 4. View gaps and progress
+/llm-user status
 # Shows:
-#   [CRITICAL] No progress tracking (blocks P2: Real-time feedback)
-#   [HIGH] Slow response time (impacts P1: Instant feedback)
+#   Test Results (last run):
+#     ✓ 4 scenarios passed
+#     ✗ 1 scenario failed
+#
+#   Critical Gaps:
+#     [CRITICAL] No progress tracking (blocks P2)
+#
+#   All Gaps:
+#     [CRITICAL] GAP-001: No progress tracking
+#     [HIGH] GAP-002: Slow response time
 
-# 5. Fix gaps systematically
-/fix-gaps
+# 5. Fix gaps systematically (auto-verifies after each)
+/llm-user fix
 # Automatically:
 #   - Prioritizes by severity (CRITICAL first)
 #   - Creates fix specification
 #   - Implements through workflow agents
 #   - Re-runs failed scenarios to verify
 #   - Updates promise status
-
-# 6. Check progress
-/fix-gaps status
-# Shows:
-#   ✓ GAP-001 (CRITICAL): Resolved
-#   ⏳ GAP-002 (HIGH): In progress
-#   Promise P2: FAILED → VALIDATED
-
-# 7. Verify all fixes
-/fix-gaps verify
-# Re-runs all fixed scenarios with same personas
-
-# 8. Generate report
-/fix-gaps report
+#   - Shows improvement: 7.2 → 8.5 (+1.3)
 # Shows:
 #   Score: 7.2 → 9.1 (+1.9)
 #   Promises validated: 3/5 → 5/5
@@ -204,12 +199,12 @@ Gap-driven development validates that your application keeps its promises to use
 ### Example 1: Critical Gap Fix
 
 ```bash
-# After /test-ui finds critical gap
-/llm-user gaps
+# After /llm-user test finds critical gap
+/llm-user status --filter=critical
 # Output: [CRITICAL] Missing auth prevents user from saving work
 
 # Fix only critical gaps
-/fix-gaps --priority=critical
+/llm-user fix critical
 
 # Claude:
 #   Creating fix spec for GAP-001: Missing auth
@@ -234,13 +229,13 @@ Gap-driven development validates that your application keeps its promises to use
 
 ```bash
 # Fix specific gap by ID
-/fix-gaps --gap=GAP-003
+/llm-user fix GAP-003
 
 # Fix only high-priority gaps
-/fix-gaps --priority=high --limit=3
+/llm-user fix high
 
-# List gaps by status
-/fix-gaps list --status=pending --priority=high
+# View gaps filtered by priority
+/llm-user status --filter=high
 ```
 
 ### Example 3: Iterative Testing
@@ -248,16 +243,16 @@ Gap-driven development validates that your application keeps its promises to use
 ```bash
 # Build → Test → Fix cycle
 /implement phase 1
-/test-ui
-/fix-gaps --priority=critical
+/llm-user test
+/llm-user fix critical
 
 /implement phase 2
-/test-ui
-/fix-gaps --priority=critical
+/llm-user test
+/llm-user fix critical
 
 # Final validation
-/test-ui
-/fix-gaps report
+/llm-user test
+/llm-user status
 # All promises validated → Ready to ship
 ```
 
@@ -280,13 +275,9 @@ Gap-driven development validates that your application keeps its promises to use
 | Command | Purpose |
 |---------|---------|
 | `/llm-user init` | Generate test infrastructure from docs |
-| `/test-ui [--url]` | Run LLM user tests with personas |
-| `/llm-user gaps` | Display human-readable gap analysis |
-| `/fix-gaps` | Fix gaps systematically |
-| `/fix-gaps --priority=X` | Fix only critical/high priority gaps |
-| `/fix-gaps status` | Show resolution progress |
-| `/fix-gaps verify` | Re-run tests to validate fixes |
-| `/fix-gaps report` | Generate improvement report |
+| `/llm-user test [url]` | Run LLM user tests with personas |
+| `/llm-user fix [target]` | Fix gaps (all, critical, high, or GAP-XXX) |
+| `/llm-user status [--filter]` | View results, gaps, progress |
 | `/llm-user refresh` | Regenerate after doc changes |
 
 ### Integration with Workflow
@@ -301,7 +292,7 @@ L2 Building
   /implement phases
   ↓
 L3 Validation (Gap-Driven)
-  /llm-user init → /test-ui → /fix-gaps → Promises validated
+  /llm-user init → /llm-user test → /llm-user fix → Promises validated
 ```
 
 ## Tips & Best Practices

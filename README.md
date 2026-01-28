@@ -81,7 +81,7 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 - Installs to `~/.claude-workflow-agents/` (global location)
 - Copies **11 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
 - Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
-- Symlinks **27 commands** to `~/.claude/commands/`
+- Symlinks **25 commands** to `~/.claude/commands/`
 - Adds workflow commands to PATH
 
 ### What Gets Installed
@@ -142,10 +142,9 @@ workflow-update master    # Update to bleeding edge
 | `/implement <feature>` | Implement a feature |
 | `/review <files>` | Code review |
 | `/debug <issue>` | Debug problem |
-| `/test-ui` | Run LLM user tests against UI |
-| `/llm-user` | LLM user testing commands (init/gaps/refresh) |
+| `/llm-user` | LLM user testing (init/test/fix/status/refresh) |
 
-See [Commands Reference](#commands-reference) for all 26 commands.
+See [Commands Reference](#commands-reference) for all 25 commands.
 
 ### Verify Installation
 ```bash
@@ -548,8 +547,9 @@ Claude: [Loads gap-analysis skill]
 | Command | Description | When to Use |
 |---------|-------------|-------------|
 | `/llm-user init` | Generate LLM user testing infrastructure | After L1 planning complete |
-| `/test-ui` | Run LLM user tests against UI | Test deployed UI |
-| `/llm-user gaps` | View detailed gap analysis from tests | After test run |
+| `/llm-user test` | Run LLM user tests against UI | Test deployed UI |
+| `/llm-user fix` | Fix gaps found by tests (auto-verifies) | After test run |
+| `/llm-user status` | View test results, gaps, progress | Check current state |
 | `/llm-user refresh` | Regenerate tests after doc changes | Docs updated |
 
 ### Git Workflow
@@ -708,7 +708,7 @@ Validation: User can actually find recipes by typing "chicken" in search
 ### LLM User Testing
 
 **Skill:** `llm-user-testing`
-**Auto-loaded:** When working with `/llm-user` or `/test-ui` commands
+**Auto-loaded:** When working with `/llm-user` commands
 **Purpose:** Domain-specific LLM-as-user testing protocols
 
 **Provides:**
@@ -724,34 +724,33 @@ Validation: User can actually find recipes by typing "chicken" in search
 ### Gap Resolution
 
 **Skill:** `gap-resolver`
-**Auto-loaded:** When working with `/fix-gaps` commands
+**Auto-loaded:** When working with `/llm-user fix` commands
 **Purpose:** Systematic gap resolution from LLM user testing results
 
 **Provides:**
 - Gap prioritization logic (CRITICAL > HIGH > MEDIUM > LOW)
 - Fix specification templates with structured problem analysis
 - Task orchestration through workflow agents
-- Verification protocols (re-run failed scenarios)
+- Auto-verification (re-runs failed scenarios after each fix)
 - Promise validation tracking
-- Comprehensive improvement reporting
 
 **Commands:**
 ```bash
-/fix-gaps                   # Start systematic gap resolution
-/fix-gaps --priority=critical  # Fix only critical gaps
-/fix-gaps status            # Show resolution progress
-/fix-gaps verify            # Re-run tests to validate fixes
-/fix-gaps report            # Generate improvement report
-/fix-gaps list              # List and filter gaps
+/llm-user init                    # Generate test infrastructure
+/llm-user test                    # Run LLM user tests
+/llm-user fix                     # Fix gaps (auto-verifies)
+/llm-user fix --critical          # Fix only critical gaps
+/llm-user status                  # View results, gaps, progress
+/llm-user refresh                 # Regenerate after doc changes
 ```
 
 **Gap-Driven Development Cycle:**
 ```
-/test-ui              → Run LLM user tests
-/llm-user gaps        → Review identified gaps
-/fix-gaps             → Systematically fix gaps
-/fix-gaps verify      → Validate fixes work
-/fix-gaps report      → Track improvement journey
+/llm-user init        → Generate personas, scenarios
+/llm-user test        → Run tests, find gaps
+/llm-user status      → Review gaps by priority
+/llm-user fix         → Fix gaps (auto-verifies)
+/llm-user test        → Confirm all resolved
 ```
 
 **Key insight:** LLM user testing finds what's broken from the user's perspective - gap-resolver systematically fixes it and proves promises are kept.

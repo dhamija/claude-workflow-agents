@@ -60,7 +60,7 @@ l2:
 
 ui_testing:
   initialized: false           # true after /llm-user init
-  last_run: null               # timestamp of last /test-ui run
+  last_run: null               # timestamp of last /llm-user test
   last_score: null             # overall score (0-10)
   critical_gaps: 0             # number of critical gaps
   test_spec_hash: null         # hash to detect doc changes
