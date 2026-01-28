@@ -108,6 +108,52 @@ mkdir -p "$CLAUDE_DIR/agents"
 mkdir -p "$CLAUDE_DIR/commands"
 mkdir -p "$CLAUDE_DIR/skills"
 
+echo "Cleaning up old workflow files..."
+
+# Clean up agents: Remove old workflow symlinks AND old agent files
+if [ -d "$CLAUDE_DIR/agents" ]; then
+    for file in "$CLAUDE_DIR/agents"/*; do
+        if [ -L "$file" ]; then
+            # Remove symlinks pointing to workflow-agents
+            target=$(readlink "$file")
+            if [[ "$target" == *"workflow-agents"* ]]; then
+                rm -f "$file"
+            fi
+        elif [ -f "$file" ]; then
+            # Remove known old workflow agent files (from v2.0 and earlier)
+            filename=$(basename "$file")
+            if [[ "$filename" =~ ^(acceptance-validator|agentic-architect|backend-engineer|brownfield-analyzer|change-analyzer|frontend-engineer|gap-analyzer|implementation-planner|intent-guardian|project-ops|test-engineer|ux-architect|workflow-orchestrator|llm-user-architect)\.md$ ]]; then
+                rm -f "$file"
+            fi
+        fi
+    done
+fi
+
+# Clean up commands: Remove old workflow symlinks
+if [ -d "$CLAUDE_DIR/commands" ]; then
+    for file in "$CLAUDE_DIR/commands"/*; do
+        if [ -L "$file" ]; then
+            target=$(readlink "$file")
+            if [[ "$target" == *"workflow-agents"* ]]; then
+                rm -f "$file"
+            fi
+        fi
+    done
+fi
+
+# Clean up skills: Remove all old skill directories (will be replaced)
+if [ -d "$CLAUDE_DIR/skills" ]; then
+    for skill_dir in "$CLAUDE_DIR/skills"/*; do
+        if [ -d "$skill_dir" ]; then
+            # Only remove workflow skill directories, preserve user's own skills
+            skill_name=$(basename "$skill_dir")
+            if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow)$ ]]; then
+                rm -rf "$skill_dir"
+            fi
+        fi
+    done
+fi
+
 echo "Installing skills and subagents..."
 
 # Copy skills directly (loaded on-demand by Claude)
@@ -354,16 +400,64 @@ case "$CMD" in
         # Create directories if they don't exist
         mkdir -p "$CLAUDE_DIR/agents"
         mkdir -p "$CLAUDE_DIR/commands"
+        mkdir -p "$CLAUDE_DIR/skills"
 
-        # Create symlinks for each workflow agent
-        for agent_file in "$INSTALL_DIR/agents"/*.md; do
+        echo "Cleaning up old workflow files..."
+
+        # Clean up agents: Remove old workflow symlinks AND old agent files
+        if [ -d "$CLAUDE_DIR/agents" ]; then
+            for file in "$CLAUDE_DIR/agents"/*; do
+                if [ -L "$file" ]; then
+                    target=$(readlink "$file")
+                    if [[ "$target" == *"workflow-agents"* ]]; then
+                        rm -f "$file"
+                    fi
+                elif [ -f "$file" ]; then
+                    filename=$(basename "$file")
+                    if [[ "$filename" =~ ^(acceptance-validator|agentic-architect|backend-engineer|brownfield-analyzer|change-analyzer|frontend-engineer|gap-analyzer|implementation-planner|intent-guardian|project-ops|test-engineer|ux-architect|workflow-orchestrator|llm-user-architect)\.md$ ]]; then
+                        rm -f "$file"
+                    fi
+                fi
+            done
+        fi
+
+        # Clean up commands: Remove old workflow symlinks
+        if [ -d "$CLAUDE_DIR/commands" ]; then
+            for file in "$CLAUDE_DIR/commands"/*; do
+                if [ -L "$file" ]; then
+                    target=$(readlink "$file")
+                    if [[ "$target" == *"workflow-agents"* ]]; then
+                        rm -f "$file"
+                    fi
+                fi
+            done
+        fi
+
+        # Clean up skills: Remove old workflow skill directories
+        if [ -d "$CLAUDE_DIR/skills" ]; then
+            for skill_dir in "$CLAUDE_DIR/skills"/*; do
+                if [ -d "$skill_dir" ]; then
+                    skill_name=$(basename "$skill_dir")
+                    if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow)$ ]]; then
+                        rm -rf "$skill_dir"
+                    fi
+                fi
+            done
+        fi
+
+        # Copy skills
+        cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
+
+        # Symlink ONLY core subagents
+        CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger" "llm-user-architect")
+        for agent_name in "${CORE_AGENTS[@]}"; do
+            agent_file="$INSTALL_DIR/agents/${agent_name}.md"
             if [ -f "$agent_file" ]; then
-                filename=$(basename "$agent_file")
-                ln -sf "$agent_file" "$CLAUDE_DIR/agents/$filename"
+                ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
             fi
         done
 
-        # Create symlinks for each workflow command
+        # Symlink each command file
         for command_file in "$INSTALL_DIR/commands"/*.md; do
             if [ -f "$command_file" ]; then
                 filename=$(basename "$command_file")
@@ -372,7 +466,8 @@ case "$CMD" in
         done
 
         echo "✓ Workflow enabled"
-        echo "  Created individual symlinks for each agent and command"
+        echo "  Created symlinks for 4 subagents and all commands"
+        echo "  Installed 10 skills"
         echo "  Your own files in ~/.claude/ remain untouched"
         ;;
 
@@ -774,7 +869,7 @@ echo "  ✓ Workflow state initialized"
 echo "  ✓ Type: $PROJECT_TYPE"
 echo ""
 echo "  Skills location: ~/.claude/skills/"
-echo "  Subagents: code-reviewer, debugger, ui-debugger"
+echo "  Subagents: code-reviewer, debugger, ui-debugger, llm-user-architect"
 echo ""
 
 if [ "$PROJECT_TYPE" = "brownfield" ]; then

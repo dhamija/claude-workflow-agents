@@ -49,6 +49,15 @@ Format: [Semantic Versioning](https://semver.org/)
 - **workflow-init detected projects with backend/frontend as greenfield**
   - Brownfield detection only checked src/, app/, lib/, pkg/ directories
   - Added detection for backend/, frontend/, server/, client/ directories
+- **install.sh and workflow-toggle did not clean up old agent/command/skill files**
+  - **Root cause**: Never removed old files before creating new symlinks, leaving zombie files from previous versions
+  - **Impact**: Users upgrading from v2.0 had 13+ old agent files in ~/.claude/agents/ that shouldn't be loaded (bloated context)
+  - **Fix**: Added cleanup logic before installation
+    - Removes old workflow symlinks from agents/, commands/
+    - Removes known old agent files (acceptance-validator, agentic-architect, etc.)
+    - Removes old skill directories (backend, frontend, etc.)
+    - Only CORE_AGENTS (4 subagents) get symlinked, skills copied fresh
+  - Applied to both install.sh and workflow-toggle on/enable
 
 ---
 
