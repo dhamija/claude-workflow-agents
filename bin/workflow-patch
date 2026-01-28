@@ -109,8 +109,10 @@ else
 fi
 
 # 3. Extract Workflow State YAML block (most critical)
-STATE_START=$(grep -n '^```yaml' CLAUDE.md | grep -A 1 "^## Workflow State" | tail -1 | cut -d: -f1)
-STATE_END=$(grep -n '^```$' CLAUDE.md | awk -v start="$STATE_START" '$1 > start {print; exit}' | cut -d: -f1)
+# Find "## Workflow State" section, then find first ```yaml after it
+WORKFLOW_STATE_LINE=$(grep -n "^## Workflow State" CLAUDE.md | cut -d: -f1)
+STATE_START=$(grep -n '^```yaml' CLAUDE.md | awk -F: -v start="$WORKFLOW_STATE_LINE" '$1 > start {print $1; exit}')
+STATE_END=$(grep -n '^```$' CLAUDE.md | awk -F: -v start="$STATE_START" '$1 > start {print $1; exit}')
 if [ -n "$STATE_START" ] && [ -n "$STATE_END" ]; then
     # Extract including the ``` delimiters
     WORKFLOW_STATE=$(sed -n "${STATE_START},${STATE_END}p" CLAUDE.md)
@@ -153,7 +155,7 @@ fi
 
 # Replace Workflow State YAML with user's actual state
 PATCH_STATE_START=$(grep -n '^```yaml' "$PATCHED_FILE" | tail -1 | cut -d: -f1)
-PATCH_STATE_END=$(grep -n '^```$' "$PATCHED_FILE" | awk -v start="$PATCH_STATE_START" '$1 > start {print; exit}' | cut -d: -f1)
+PATCH_STATE_END=$(grep -n '^```$' "$PATCHED_FILE" | awk -F: -v start="$PATCH_STATE_START" '$1 > start {print $1; exit}')
 
 if [ -n "$PATCH_STATE_START" ] && [ -n "$PATCH_STATE_END" ]; then
     # Build new file: header + user state + footer (skip template's state)
