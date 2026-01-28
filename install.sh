@@ -566,11 +566,15 @@ echo ""
 HAS_CODE=false
 CODE_INDICATORS=0
 
-# Check for source code
+# Check for source code directories
 [ -d "src" ] && ((CODE_INDICATORS++))
 [ -d "app" ] && ((CODE_INDICATORS++))
 [ -d "lib" ] && ((CODE_INDICATORS++))
 [ -d "pkg" ] && ((CODE_INDICATORS++))
+[ -d "backend" ] && ((CODE_INDICATORS++))
+[ -d "frontend" ] && ((CODE_INDICATORS++))
+[ -d "server" ] && ((CODE_INDICATORS++))
+[ -d "client" ] && ((CODE_INDICATORS++))
 [ -n "$(ls *.py 2>/dev/null | head -1)" ] && ((CODE_INDICATORS++))
 [ -n "$(ls *.js 2>/dev/null | head -1)" ] && ((CODE_INDICATORS++))
 [ -n "$(ls *.ts 2>/dev/null | head -1)" ] && ((CODE_INDICATORS++))
