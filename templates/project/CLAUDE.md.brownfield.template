@@ -770,6 +770,13 @@ session:
 | `/help` | Show all available commands |
 | `/status` | Show detailed project progress |
 | `/gap` or `/audit` | Run gap analysis on codebase |
+| `/fix-gaps` | Fix gaps systematically (after LLM user testing) |
+| `/fix-gaps status` | Show gap resolution progress |
+| `/fix-gaps verify` | Re-run tests to validate fixes |
+| `/fix-gaps report` | Generate improvement report |
+| `/llm-user init` | Generate LLM user testing infrastructure |
+| `/llm-user gaps` | Display gap analysis from test run |
+| `/test-ui [--url]` | Execute LLM user tests with personas |
 | `/workflow analyze` | Re-run brownfield analysis |
 | `/next` | Continue to next workflow step |
 | `/review [path]` | Run code-reviewer on specific files |
