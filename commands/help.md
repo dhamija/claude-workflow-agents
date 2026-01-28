@@ -164,7 +164,7 @@ ARCHITECTURE OVERVIEW
 
   Skills: Domain expertise (loaded on-demand by Claude)
           Location: ~/.claude/skills/
-          Count: 10 skills
+          Count: 11 skills
 
   Subagents: Isolated execution environments (separate context)
              Location: ~/.claude/agents/
@@ -244,6 +244,13 @@ SKILLS (On-Demand Domain Expertise)
   │ Includes: Persona simulation, gap analysis, evaluation      │
   └─────────────────────────────────────────────────────────────┘
 
+  ┌─────────────────────────────────────────────────────────────┐
+  │ GAP-RESOLVER (Gap-Driven Development)                       │
+  │ Purpose: Systematic gap resolution from LLM user testing    │
+  │ Loads: When working with /fix-gaps commands                 │
+  │ Includes: Fix specs, task orchestration, verification       │
+  └─────────────────────────────────────────────────────────────┘
+
 
 SUBAGENTS (Isolated Context Execution)
 ───────────────────────────────────────
@@ -267,13 +274,6 @@ SUBAGENTS (Isolated Context Execution)
   │ Type: Browser automation session                            │
   │ Triggers: UI issues, visual bugs (requires puppeteer MCP)   │
   │ Does: Screenshots, console logs, interaction debugging      │
-  └─────────────────────────────────────────────────────────────┘
-
-  ┌─────────────────────────────────────────────────────────────┐
-  │ LLM-USER-ARCHITECT                                          │
-  │ Type: Test infrastructure generator                         │
-  │ Triggers: /llm-user init command                            │
-  │ Does: Generates domain-specific LLM user tests from docs    │
   └─────────────────────────────────────────────────────────────┘
 
 
@@ -369,6 +369,19 @@ DEVELOPMENT
   /implement                 Implement features
   /debug                     Launch debugger
   /review [target]           Code review (file, dir, or "staged")
+
+
+LLM USER TESTING
+────────────────
+  /llm-user init             Generate LLM user testing infrastructure
+  /llm-user gaps [--run]     Display gap analysis from test run
+  /llm-user refresh          Regenerate test artifacts after doc changes
+  /test-ui [--url]           Execute LLM user tests with personas
+  /fix-gaps [options]        Fix gaps systematically
+  /fix-gaps status           Show gap resolution progress
+  /fix-gaps verify [--gap]   Re-run verification for fixes
+  /fix-gaps report           Generate comprehensive gap report
+  /fix-gaps list             List all gaps with filtering
 
 
 PARALLEL (Advanced, Opt-In)

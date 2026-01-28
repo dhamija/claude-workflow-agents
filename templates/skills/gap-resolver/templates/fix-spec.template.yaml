@@ -1,0 +1,143 @@
+# Fix Specification Template
+# Copy this template to tests/llm-user/fixes/GAP-XXX-description.yaml
+# and fill in the details for each gap.
+
+fix_specification:
+  gap_id: GAP-XXX
+  title: "Brief description of what needs to be fixed"
+  promise: P# # Which promise is affected
+  priority: CRITICAL | HIGH | MEDIUM | LOW
+  created_at: "YYYY-MM-DDTHH:MM:SSZ"
+
+  # ═══════════════════════════════════════════════════════════════
+  # PROBLEM ANALYSIS
+  # ═══════════════════════════════════════════════════════════════
+
+  problem:
+    observation: |
+      What did the LLM user experience?
+      What frustrated them?
+      What behavior was observed?
+
+    root_cause: |
+      Why did this happen?
+      What is missing or broken?
+      What architectural issue exists?
+
+    acceptance_criteria_failed:
+      - "Specific criterion from intent doc that failed"
+      - "Another criterion that failed"
+
+    affected_personas:
+      - persona-id: "How this persona was affected"
+      - another-persona: "Impact on this persona"
+
+  # ═══════════════════════════════════════════════════════════════
+  # FIX DESIGN
+  # ═══════════════════════════════════════════════════════════════
+
+  design:
+    # What changes are needed?
+    backend:
+      - component: "ComponentName"
+        location: "src/path/to/file.ts"
+        changes:
+          - "What needs to be added/changed"
+          - "Another change"
+
+    frontend:
+      - component: "ComponentName"
+        location: "src/path/to/file.tsx"
+        features:
+          - "Feature to implement"
+          - "Another feature"
+
+    database:
+      - changes:
+          - "Schema changes if needed"
+
+    integration:
+      - "How components integrate"
+      - "Workflow changes"
+
+    ux_considerations:
+      - "UX principle to follow"
+      - "User experience concern"
+
+  # ═══════════════════════════════════════════════════════════════
+  # IMPLEMENTATION TASKS
+  # ═══════════════════════════════════════════════════════════════
+
+  tasks:
+    - id: GAP-XXX-T1
+      name: "Task name"
+      type: backend | frontend | testing | database | infrastructure
+      agent: backend-engineer | frontend-engineer | test-engineer
+      depends_on: []  # List of task IDs this depends on
+      description: |
+        Detailed description of what needs to be done.
+      acceptance:
+        - "Criterion 1 for task completion"
+        - "Criterion 2 for task completion"
+      files:
+        - "path/to/file1.ts"
+        - "path/to/file2.tsx"
+      effort: Xh  # Estimated hours
+
+    - id: GAP-XXX-T2
+      name: "Another task"
+      type: backend
+      agent: backend-engineer
+      depends_on: [GAP-XXX-T1]  # This task depends on T1
+      description: |
+        Description of second task.
+      acceptance:
+        - "Acceptance criterion"
+      files:
+        - "path/to/file.ts"
+      effort: Xh
+
+  # ═══════════════════════════════════════════════════════════════
+  # VERIFICATION PLAN
+  # ═══════════════════════════════════════════════════════════════
+
+  verification:
+    # Re-run the scenarios that failed
+    scenarios_to_rerun:
+      - scenario-id
+
+    # With the personas that were affected
+    personas_to_test:
+      - persona-id
+
+    # Success criteria for verification
+    success_criteria:
+      - name: "Human-readable success criterion"
+        metric: "metric_name > threshold"
+
+      - name: "Another criterion"
+        metric: "another_metric == expected_value"
+
+    # Expected promise outcome
+    promise_validation:
+      P#:
+        before: FAILED | PARTIAL
+        expected_after: VALIDATED | PARTIAL
+        evidence_required:
+          - "What evidence proves this promise is now met"
+          - "Another piece of evidence"
+
+  # ═══════════════════════════════════════════════════════════════
+  # STATUS TRACKING
+  # ═══════════════════════════════════════════════════════════════
+
+  status: pending  # pending | in_progress | implemented | verifying | verified | closed | failed
+
+  timeline:
+    created_at: "YYYY-MM-DDTHH:MM:SSZ"
+    started_at: null
+    implemented_at: null
+    verified_at: null
+    closed_at: null
+
+  resolution: null  # Filled after verification
