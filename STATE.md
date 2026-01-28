@@ -7,10 +7,10 @@
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
-| Skills | 10 | 2026-01-27 |
-| Subagents | 4 | 2026-01-27 |
+| Skills | 11 | 2026-01-28 |
+| Subagents | 3 | 2026-01-27 |
 | Agent Files (for Task tool invocation) | 17 | 2026-01-27 |
-| Commands | 26 | 2026-01-27 |
+| Commands | 27 | 2026-01-28 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
 | Tests | 32 | 2026-01-26 |
@@ -49,6 +49,7 @@
 | debug | ✓ Complete |
 | design | ✓ Complete |
 | docs | ✓ Complete |
+| fix-gaps | ✓ Complete |
 | gap | ✓ Complete |
 | implement | ✓ Complete |
 | improve | ✓ Complete |

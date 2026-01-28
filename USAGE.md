@@ -1,6 +1,6 @@
 # Usage Guide
 
-> **v3.1 Architecture:** Skills + Hooks. 10 skills loaded on-demand, 3 subagents for isolated tasks. See README.md for detailed architecture.
+> **v3.1 Architecture:** Skills + Hooks. 11 skills loaded on-demand, 3 subagents for isolated tasks. See README.md for detailed architecture.
 
 ## Installation
 
@@ -141,6 +141,167 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 
 # Review suggestions, then implement specific agent
 /implement content-classifier agent
+```
+
+## Gap-Driven Development Workflow
+
+Gap-driven development validates that your application keeps its promises to users through LLM-as-user testing, then systematically fixes any gaps found.
+
+### Complete Cycle
+
+```bash
+# 1. Build your app (L1 → L2)
+/analyze recipe sharing app
+/plan node express react postgres
+/implement
+
+# 2. Initialize LLM user testing (after UI ready)
+/llm-user init
+# Generates: test-spec.yaml, personas, scenarios, test subagents
+
+# 3. Run LLM user tests
+/test-ui --url=http://localhost:3000
+# Output:
+#   ✓ 4 scenarios passed
+#   ✗ 1 scenario failed
+#   Overall: 7.2/10
+#   1 critical gap found
+
+# 4. Review gaps
+/llm-user gaps
+# Shows:
+#   [CRITICAL] No progress tracking (blocks P2: Real-time feedback)
+#   [HIGH] Slow response time (impacts P1: Instant feedback)
+
+# 5. Fix gaps systematically
+/fix-gaps
+# Automatically:
+#   - Prioritizes by severity (CRITICAL first)
+#   - Creates fix specification
+#   - Implements through workflow agents
+#   - Re-runs failed scenarios to verify
+#   - Updates promise status
+
+# 6. Check progress
+/fix-gaps status
+# Shows:
+#   ✓ GAP-001 (CRITICAL): Resolved
+#   ⏳ GAP-002 (HIGH): In progress
+#   Promise P2: FAILED → VALIDATED
+
+# 7. Verify all fixes
+/fix-gaps verify
+# Re-runs all fixed scenarios with same personas
+
+# 8. Generate report
+/fix-gaps report
+# Shows:
+#   Score: 7.2 → 9.1 (+1.9)
+#   Promises validated: 3/5 → 5/5
+#   Release readiness: 70% → 95%
+```
+
+### Example 1: Critical Gap Fix
+
+```bash
+# After /test-ui finds critical gap
+/llm-user gaps
+# Output: [CRITICAL] Missing auth prevents user from saving work
+
+# Fix only critical gaps
+/fix-gaps --priority=critical
+
+# Claude:
+#   Creating fix spec for GAP-001: Missing auth
+#   Tasks:
+#     1. Add JWT authentication (backend)
+#     2. Create login component (frontend)
+#     3. Add auth middleware (backend)
+#     4. Add tests
+#
+#   Implementing tasks...
+#   ✓ All tasks complete
+#
+#   Verifying fix...
+#   Re-running scenario: save-recipe (maria-beginner, jake-teen)
+#   ✓ Verification passed
+#
+#   Promise P3: FAILED → VALIDATED
+#   Gap GAP-001: CLOSED
+```
+
+### Example 2: Focused Gap Fixing
+
+```bash
+# Fix specific gap by ID
+/fix-gaps --gap=GAP-003
+
+# Fix only high-priority gaps
+/fix-gaps --priority=high --limit=3
+
+# List gaps by status
+/fix-gaps list --status=pending --priority=high
+```
+
+### Example 3: Iterative Testing
+
+```bash
+# Build → Test → Fix cycle
+/implement phase 1
+/test-ui
+/fix-gaps --priority=critical
+
+/implement phase 2
+/test-ui
+/fix-gaps --priority=critical
+
+# Final validation
+/test-ui
+/fix-gaps report
+# All promises validated → Ready to ship
+```
+
+### When to Use Gap-Driven Development
+
+✅ **Use when:**
+- UI is accessible (localhost or staging)
+- Want to validate promises are kept
+- Need systematic issue resolution
+- Building user-facing applications
+- Want automated regression testing
+
+❌ **Skip when:**
+- Building APIs without UI
+- App not yet functional
+- Still in early prototype phase
+
+### Key Commands
+
+| Command | Purpose |
+|---------|---------|
+| `/llm-user init` | Generate test infrastructure from docs |
+| `/test-ui [--url]` | Run LLM user tests with personas |
+| `/llm-user gaps` | Display human-readable gap analysis |
+| `/fix-gaps` | Fix gaps systematically |
+| `/fix-gaps --priority=X` | Fix only critical/high priority gaps |
+| `/fix-gaps status` | Show resolution progress |
+| `/fix-gaps verify` | Re-run tests to validate fixes |
+| `/fix-gaps report` | Generate improvement report |
+| `/llm-user refresh` | Regenerate after doc changes |
+
+### Integration with Workflow
+
+Gap-driven development complements the L1/L2 workflow:
+
+```
+L1 Planning
+  /intent → /ux → /architect → /plan
+  ↓
+L2 Building
+  /implement phases
+  ↓
+L3 Validation (Gap-Driven)
+  /llm-user init → /test-ui → /fix-gaps → Promises validated
 ```
 
 ## Tips & Best Practices

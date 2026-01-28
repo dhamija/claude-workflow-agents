@@ -16,6 +16,7 @@ REQUIRED_COMMANDS=(
     "change"
     "debug"
     "design"
+    "fix-gaps"
     "gap"
     "implement"
     "improve"

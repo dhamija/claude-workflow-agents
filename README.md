@@ -79,9 +79,9 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 
 **What this does:**
 - Installs to `~/.claude-workflow-agents/` (global location)
-- Copies **10 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
+- Copies **11 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
 - Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
-- Symlinks **26 commands** to `~/.claude/commands/`
+- Symlinks **27 commands** to `~/.claude/commands/`
 - Adds workflow commands to PATH
 
 ### What Gets Installed
@@ -101,6 +101,7 @@ Skills are domain expertise modules that Claude loads automatically when needed:
 | `code-quality` | Code review criteria |
 | `brownfield` | Existing codebase analysis |
 | `llm-user-testing` | LLM-as-user testing protocols |
+| `gap-resolver` | Systematic gap resolution from test results |
 
 #### Subagents (Isolated Context)
 Subagents are isolated execution environments for specific tasks:
@@ -719,6 +720,41 @@ Validation: User can actually find recipes by typing "chicken" in search
 - Evaluation rubrics and weighted scoring
 
 **Key insight:** Your L1 docs already contain everything needed to test your app - this skill shows how to synthesize them into executable LLM user tests.
+
+### Gap Resolution
+
+**Skill:** `gap-resolver`
+**Auto-loaded:** When working with `/fix-gaps` commands
+**Purpose:** Systematic gap resolution from LLM user testing results
+
+**Provides:**
+- Gap prioritization logic (CRITICAL > HIGH > MEDIUM > LOW)
+- Fix specification templates with structured problem analysis
+- Task orchestration through workflow agents
+- Verification protocols (re-run failed scenarios)
+- Promise validation tracking
+- Comprehensive improvement reporting
+
+**Commands:**
+```bash
+/fix-gaps                   # Start systematic gap resolution
+/fix-gaps --priority=critical  # Fix only critical gaps
+/fix-gaps status            # Show resolution progress
+/fix-gaps verify            # Re-run tests to validate fixes
+/fix-gaps report            # Generate improvement report
+/fix-gaps list              # List and filter gaps
+```
+
+**Gap-Driven Development Cycle:**
+```
+/test-ui              → Run LLM user tests
+/llm-user gaps        → Review identified gaps
+/fix-gaps             → Systematically fix gaps
+/fix-gaps verify      → Validate fixes work
+/fix-gaps report      → Track improvement journey
+```
+
+**Key insight:** LLM user testing finds what's broken from the user's perspective - gap-resolver systematically fixes it and proves promises are kept.
 
 ---
 

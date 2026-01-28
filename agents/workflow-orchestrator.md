@@ -277,26 +277,40 @@ Execute UI tests
        └─► Suggest: "/llm-user gaps for details"
    ↓
 Handle results
-   ├─► If critical gaps: FIX IMMEDIATELY (release blocker)
-   ├─► If high priority gaps: Recommend fixing before release
-   ├─► If medium/low gaps: Log for future improvement
+   ├─► If critical gaps: Load gap-resolver skill → Suggest "/fix-gaps --priority=critical"
+   ├─► If high priority gaps: Load gap-resolver skill → Suggest "/fix-gaps --priority=high"
+   ├─► If medium/low gaps: Log for future improvement → Suggest "/fix-gaps list"
    └─► Update promise status in CLAUDE.md state
    ↓
-Re-test after fixes
-   └─► /test-ui --scenario=<failed-scenario> to verify
+Gap-driven development cycle (with gap-resolver skill)
+   1. /fix-gaps → Systematic gap resolution
+      ├─► Prioritize gaps by severity
+      ├─► Create fix specification
+      ├─► Implement via workflow agents
+      └─► Verify with re-testing
+   2. /fix-gaps verify → Re-run failed scenarios
+      └─► Compare before/after results
+   3. /fix-gaps status → Track progress
+   4. /fix-gaps report → Generate improvement report
 ```
 
 **Integration Points:**
 
 1. **After frontend-engineer completes** → Check if UI accessible → Suggest `/llm-user init`
 2. **Before acceptance-validator** → Run LLM user tests first (automated validation)
-3. **After gaps fixed** → Re-run specific scenarios to verify fixes
-4. **When docs change** → Remind user to run `/llm-user refresh`
+3. **After test results** → If gaps found → Load gap-resolver skill → Suggest `/fix-gaps`
+4. **After gaps fixed** → Suggest `/fix-gaps verify` to re-run failed scenarios
+5. **When docs change** → Remind user to run `/llm-user refresh`
 
 **Keywords that trigger LLM user testing:**
 - "UI is ready", "frontend done", "deployed to staging"
 - "test the user experience", "validate user journeys"
 - "check if promises work in UI"
+
+**Keywords that trigger gap resolution:**
+- "fix the gaps", "resolve issues found", "improve test scores"
+- "critical gaps", "high priority issues"
+- "validate promises", "close gaps"
 
 ---
 
@@ -413,6 +427,8 @@ session:
 | "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
 | "UI is ready", "frontend done", "deployed to staging", "test user journeys" | Load `llm-user-testing` skill → `/llm-user init` |
 | "validate user experience", "check if promises work in UI" | `/test-ui` |
+| "fix the gaps", "resolve issues", "critical gaps", "validate promises" | Load `gap-resolver` skill → `/fix-gaps` |
+| "verify fixes", "re-test", "check improvements" | `/fix-gaps verify` |
 
 ### Response Protocols
 
