@@ -27,11 +27,15 @@ Format: [Semantic Versioning](https://semver.org/)
   - Critical gaps block feature completion until resolved
 
 ### Fixed
-- **install.sh did not install workflow-patch and workflow-fix-hooks**
-  - Added section to copy additional bin scripts from repository (workflow-patch, workflow-fix-hooks)
+- **install.sh and workflow-update did not install workflow-patch and workflow-fix-hooks**
+  - Initial install: Added section to copy additional bin scripts from repository after generating core scripts
+  - workflow-update: Added logic to set executable permissions on all scripts from repo before moving to install dir
   - Fixed `workflow-update` INSTALL_DIR path bug (`$HOME/.claude` → `$HOME/.claude-workflow-agents`)
   - Fixed `workflow-update` to preserve ONLY generated scripts, allowing new scripts from repo to be installed
-  - **Migration**: Run `workflow-update` to get missing scripts, or manually copy from repo bin/ directory
+  - **Migration for existing users**:
+    - Option 1 (Recommended): Reinstall with `curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash` to get updated workflow-update
+    - Option 2 (Quick fix): Manually copy scripts: `cp /path/to/repo/bin/workflow-* ~/.claude-workflow-agents/bin/ && chmod +x ~/.claude-workflow-agents/bin/workflow-*`
+    - After migration, all future `workflow-update` runs will include additional scripts
 
 ---
 
