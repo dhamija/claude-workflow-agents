@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# Fix hooks settings.json matcher format (v3.0 bugfix)
+# Converts {"matcher": {"tool_name": "Write|Edit"}} → {"matcher": "Write|Edit"}
+
+set -e
+
+SETTINGS_FILE=".claude/settings.json"
+
+echo ""
+echo "╔═══════════════════════════════════════════════════════════════════════════╗"
+echo "║              CLAUDE WORKFLOW AGENTS - FIX HOOKS                           ║"
+echo "╚═══════════════════════════════════════════════════════════════════════════╝"
+echo ""
+
+if [ ! -f "$SETTINGS_FILE" ]; then
+    echo "❌ No .claude/settings.json found in current directory"
+    echo ""
+    echo "This script fixes the hooks template bug from v3.0.0."
+    echo "Run this in a project directory that has .claude/settings.json"
+    exit 1
+fi
+
+echo "Checking $SETTINGS_FILE..."
+echo ""
+
+# Check if it has the old broken format
+if grep -q '"matcher": {' "$SETTINGS_FILE"; then
+    echo "Found old format. Fixing..."
+    echo ""
+
+    # Create backup
+    cp "$SETTINGS_FILE" "$SETTINGS_FILE.backup"
+    echo "✓ Backup created: $SETTINGS_FILE.backup"
+
+    # Fix the matcher format using sed
+    # This replaces the multi-line object structure with a simple string
+    sed -i '' '/"matcher": {/,/"tool_name":/c\
+        "matcher": "Write|Edit",
+' "$SETTINGS_FILE"
+
+    # Remove the orphaned closing brace
+    sed -i '' '/^        },$/d' "$SETTINGS_FILE"
+
+    echo "✓ Fixed matcher format"
+    echo ""
+    echo "✓ COMPLETE"
+    echo ""
+    echo "  Old: {\"matcher\": {\"tool_name\": \"Write|Edit\"}}"
+    echo "  New: {\"matcher\": \"Write|Edit\"}"
+    echo ""
+    echo "  Backup saved to: $SETTINGS_FILE.backup"
+    echo ""
+elif grep -q '"matcher": "Write|Edit"' "$SETTINGS_FILE"; then
+    echo "✓ Already using correct format. No fix needed."
+    echo ""
+else
+    echo "⚠️  Unexpected format in settings.json"
+    echo ""
+    echo "This script expects either:"
+    echo "  1. Old format: {\"matcher\": {\"tool_name\": \"Write|Edit\"}}"
+    echo "  2. New format: {\"matcher\": \"Write|Edit\"}"
+    echo ""
+    echo "Your settings.json doesn't match either pattern."
+    echo "You may need to manually fix it or delete it and re-run workflow-init."
+    exit 1
+fi
