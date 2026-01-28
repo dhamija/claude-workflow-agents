@@ -100,9 +100,10 @@ PROJECT_DESC=$(grep "^>" CLAUDE.md | head -1 | sed 's/^> //')
 
 # 2. Extract Project Context section (take LAST match if multiple exist)
 CONTEXT_START=$(grep -n "^## Project Context" CLAUDE.md | tail -1 | cut -d: -f1)
-CONTEXT_END=$(grep -n "^## Agent Implementation Details\|^---$" CLAUDE.md | tail -2 | head -1 | cut -d: -f1)
+# Find first "---" separator AFTER the Project Context start
+CONTEXT_END=$(grep -n "^---$" CLAUDE.md | awk -F: -v start="$CONTEXT_START" '$1 > start {print $1; exit}')
 if [ -n "$CONTEXT_START" ] && [ -n "$CONTEXT_END" ]; then
-    PROJECT_CONTEXT=$(sed -n "${CONTEXT_START},${CONTEXT_END}p" CLAUDE.md | head -n -1)
+    PROJECT_CONTEXT=$(sed -n "${CONTEXT_START},$((CONTEXT_END-1))p" CLAUDE.md)
 else
     PROJECT_CONTEXT=""
 fi
@@ -136,14 +137,15 @@ rm "$PATCHED_FILE.tmp"
 if [ -n "$PROJECT_CONTEXT" ]; then
     # Find Project Context section in patched file (take FIRST match - template location)
     PATCH_CONTEXT_START=$(grep -n "^## Project Context" "$PATCHED_FILE" | head -1 | cut -d: -f1)
-    PATCH_CONTEXT_END=$(grep -n "^## Agent Implementation Details\|^---$" "$PATCHED_FILE" | tail -2 | head -1 | cut -d: -f1)
+    # Find first "---" separator AFTER the Project Context start
+    PATCH_CONTEXT_END=$(grep -n "^---$" "$PATCHED_FILE" | awk -F: -v start="$PATCH_CONTEXT_START" '$1 > start {print $1; exit}')
 
     if [ -n "$PATCH_CONTEXT_START" ] && [ -n "$PATCH_CONTEXT_END" ]; then
         # Build new file: header + user context + footer (skip template's context)
         {
             head -n $((PATCH_CONTEXT_START-1)) "$PATCHED_FILE"
             echo "$PROJECT_CONTEXT"
-            tail -n +$((PATCH_CONTEXT_END+1)) "$PATCHED_FILE"
+            tail -n +$PATCH_CONTEXT_END "$PATCHED_FILE"
         } > "$PATCHED_FILE.tmp2"
         mv "$PATCHED_FILE.tmp2" "$PATCHED_FILE"
     fi
