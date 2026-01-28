@@ -37,23 +37,23 @@ echo ""
 
 echo -e "${BLUE}[1/6]${NC} Checking agent/command counts..."
 
-# Check CLAUDE.md
-if ! grep -q "| Agents | $AGENT_COUNT |" "$REPO_ROOT/CLAUDE.md"; then
+# Check CLAUDE.md (v3.0 structure)
+if ! grep -q "# $AGENT_COUNT agent files" "$REPO_ROOT/CLAUDE.md"; then
     echo -e "  ${RED}✗ CLAUDE.md has wrong agent count (expected $AGENT_COUNT)${NC}"
     ((ERRORS++))
 else
     echo -e "  ${GREEN}✓${NC} CLAUDE.md agent count"
 fi
 
-if ! grep -q "# $COMMAND_COUNT command definitions" "$REPO_ROOT/CLAUDE.md"; then
+if ! grep -q "# $COMMAND_COUNT command" "$REPO_ROOT/CLAUDE.md"; then
     echo -e "  ${RED}✗ CLAUDE.md has wrong command count (expected $COMMAND_COUNT)${NC}"
     ((ERRORS++))
 else
     echo -e "  ${GREEN}✓${NC} CLAUDE.md command count"
 fi
 
-# Check STATE.md
-if ! grep -q "| Agents | $AGENT_COUNT |" "$REPO_ROOT/STATE.md"; then
+# Check STATE.md (v3.0 structure)
+if ! grep -q "| Agent Files (for Task tool invocation) | $AGENT_COUNT |" "$REPO_ROOT/STATE.md"; then
     echo -e "  ${RED}✗ STATE.md has wrong agent count (expected $AGENT_COUNT)${NC}"
     ((ERRORS++))
 else
@@ -67,27 +67,44 @@ else
     echo -e "  ${GREEN}✓${NC} STATE.md command count"
 fi
 
-# Check README.md
-if ! grep -q "Agents:.*$AGENT_COUNT" "$REPO_ROOT/README.md"; then
-    echo -e "  ${RED}✗ README.md has wrong agent count (expected $AGENT_COUNT)${NC}"
+# Check README.md (v3.0: skills + subagents architecture, no unified "agent" count)
+# Count subagents (4 in v3.0) and commands
+SUBAGENT_COUNT=4
+SKILL_COUNT=10
+if ! grep -q "\*\*$SUBAGENT_COUNT subagents\*\*" "$REPO_ROOT/README.md"; then
+    echo -e "  ${RED}✗ README.md has wrong subagent count (expected $SUBAGENT_COUNT)${NC}"
     ((ERRORS++))
 else
-    echo -e "  ${GREEN}✓${NC} README.md agent count"
+    echo -e "  ${GREEN}✓${NC} README.md subagent count"
 fi
 
-if ! grep -q "Commands:.*$COMMAND_COUNT" "$REPO_ROOT/README.md"; then
+if ! grep -q "\*\*$SKILL_COUNT skills\*\*" "$REPO_ROOT/README.md"; then
+    echo -e "  ${RED}✗ README.md has wrong skill count (expected $SKILL_COUNT)${NC}"
+    ((ERRORS++))
+else
+    echo -e "  ${GREEN}✓${NC} README.md skill count"
+fi
+
+if ! grep -q "\*\*$COMMAND_COUNT commands\*\*" "$REPO_ROOT/README.md"; then
     echo -e "  ${RED}✗ README.md has wrong command count (expected $COMMAND_COUNT)${NC}"
     ((ERRORS++))
 else
     echo -e "  ${GREEN}✓${NC} README.md command count"
 fi
 
-# Check help.md
-if ! grep -q "THE $AGENT_COUNT AGENTS" "$REPO_ROOT/commands/help.md"; then
-    echo -e "  ${RED}✗ help.md has wrong agent count header (expected THE $AGENT_COUNT AGENTS)${NC}"
+# Check help.md (v3.0: no longer has "THE X AGENTS" header, check counts in architecture section)
+if ! grep -q "Count: $SKILL_COUNT skills" "$REPO_ROOT/commands/help.md"; then
+    echo -e "  ${RED}✗ help.md has wrong skill count (expected $SKILL_COUNT)${NC}"
     ((ERRORS++))
 else
-    echo -e "  ${GREEN}✓${NC} help.md agent count header"
+    echo -e "  ${GREEN}✓${NC} help.md skill count"
+fi
+
+if ! grep -q "Count: $SUBAGENT_COUNT subagents" "$REPO_ROOT/commands/help.md"; then
+    echo -e "  ${RED}✗ help.md has wrong subagent count (expected $SUBAGENT_COUNT)${NC}"
+    ((ERRORS++))
+else
+    echo -e "  ${GREEN}✓${NC} help.md subagent count"
 fi
 
 echo ""
@@ -109,13 +126,20 @@ echo -e "  ${GREEN}✓${NC} All agents in CLAUDE.md"
 echo ""
 
 # ==============================================================================
-# CHECK 3: All agents in help.md
+# CHECK 3: All user-facing agents in help.md
 # ==============================================================================
 
-echo -e "${BLUE}[3/6]${NC} Checking all agents in help.md..."
+echo -e "${BLUE}[3/6]${NC} Checking all user-facing agents in help.md..."
+# Exclude workflow-orchestrator (reference docs only in v3.0)
 for agent in "$REPO_ROOT/agents"/*.md; do
     [ -f "$agent" ] || continue
     name=$(basename "$agent" .md)
+
+    # Skip workflow-orchestrator (contributor reference docs only)
+    if [ "$name" = "workflow-orchestrator" ]; then
+        continue
+    fi
+
     # Convert to uppercase with hyphens for display name
     display_name=$(echo "$name" | tr '[:lower:]' '[:upper:]')
     if ! grep -qi "$display_name" "$REPO_ROOT/commands/help.md" 2>/dev/null; then
@@ -123,7 +147,7 @@ for agent in "$REPO_ROOT/agents"/*.md; do
         ((ERRORS++))
     fi
 done
-echo -e "  ${GREEN}✓${NC} All agents in help.md"
+echo -e "  ${GREEN}✓${NC} All user-facing agents in help.md"
 echo ""
 
 # ==============================================================================
