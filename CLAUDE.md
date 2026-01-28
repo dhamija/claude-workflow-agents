@@ -455,6 +455,166 @@ If you forgot to run verify.sh and CI fails:
 
 ---
 
+## 🧪 PRE-RELEASE VERIFICATION CHECKLIST
+
+**CRITICAL: Run this checklist BEFORE releasing ANY version to catch installation issues.**
+
+### Why This Exists
+
+Multiple iterations were needed to fix v3.1.0 post-release because installation state wasn't verified:
+- workflow-patch missing (TEMP_DIR deleted too early)
+- llm-user-architect not in CORE_AGENTS
+- Zombie agents from v2.0 not cleaned up
+- Documentation said "4 subagents" but only 3 installed
+
+These issues were only discovered after users reported them. This checklist prevents that.
+
+### Pre-Release Checklist
+
+**Before tagging a release:**
+
+1. ✅ **Fresh Install Test (Clean Environment)**
+   ```bash
+   # In a VM or clean user account
+   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
+   source ~/.bashrc
+   ```
+
+2. ✅ **Run Installation Verification**
+   ```bash
+   ~/.claude-workflow-agents/scripts/verify-installation.sh
+   ```
+
+   Must show:
+   - ✓ All 4 subagents present and correctly symlinked
+   - ✓ No zombie agents found
+   - ✓ All 10 skills present
+   - ✓ All bin scripts present and executable
+   - ✓ VERIFICATION PASSED
+
+3. ✅ **Check Actual Files (Not Just Counts)**
+   ```bash
+   # Verify only expected files exist
+   ls -la ~/.claude/agents/
+   # Should show ONLY 4 symlinks (code-reviewer, debugger, ui-debugger, llm-user-architect)
+   # NO regular files from old versions
+
+   ls ~/.claude/skills/
+   # Should show exactly 10 directories
+
+   ls ~/.claude-workflow-agents/bin/
+   # Should show all 7 scripts: workflow-init, workflow-update, workflow-version,
+   # workflow-toggle, workflow-uninstall, workflow-patch, workflow-fix-hooks
+   ```
+
+4. ✅ **Test Upgrade from Previous Version**
+   ```bash
+   # Install previous stable version first
+   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/v3.1.0/install.sh | bash
+
+   # Verify old files exist (simulate v2.0 upgrade)
+   touch ~/.claude/agents/acceptance-validator.md
+   touch ~/.claude/agents/agentic-architect.md
+
+   # Now upgrade to new version
+   workflow-update master
+
+   # Run verification - should clean up zombie files
+   ~/.claude-workflow-agents/scripts/verify-installation.sh
+   ```
+
+5. ✅ **Test workflow-init in Sample Project**
+   ```bash
+   mkdir /tmp/test-greenfield && cd /tmp/test-greenfield
+   workflow-init
+   # Should detect greenfield, create minimal CLAUDE.md, show all 4 subagents
+
+   mkdir /tmp/test-brownfield && cd /tmp/test-brownfield
+   mkdir backend frontend
+   echo '{"name":"test"}' > package.json
+   workflow-init
+   # Should detect brownfield, create minimal-brownfield CLAUDE.md
+   ```
+
+6. ✅ **Test workflow-patch (v2.0 → v3.1+ Migration)**
+   ```bash
+   cd /tmp/test-project
+   # Copy a v2.0 CLAUDE.md with "## 🔄 WORKFLOW ACTIVE"
+   workflow-patch
+   # Should accept both v2.0 and v3.x formats
+   ```
+
+7. ✅ **Verify Documentation Accuracy**
+   ```bash
+   # Check that docs match reality
+   grep "subagent" README.md USAGE.md GUIDE.md CLAUDE.md
+   # All references should say "4 subagents", not "3 subagents"
+
+   grep "CORE_AGENTS" install.sh
+   # Should include all 4: code-reviewer, debugger, ui-debugger, llm-user-architect
+   ```
+
+8. ✅ **Test Toggle On/Off**
+   ```bash
+   workflow-toggle status
+   workflow-toggle off
+   ls ~/.claude/agents/ ~/.claude/skills/
+   # Should remove workflow files, keep user's own files
+
+   workflow-toggle on
+   ~/.claude-workflow-agents/scripts/verify-installation.sh
+   # Should pass verification again
+   ```
+
+9. ✅ **Check Post-Install Verification Output**
+   ```bash
+   # The install.sh should show:
+   # Verifying installation...
+   #   Subagents: 4/4
+   #   Skills:    10/10
+   #   Commands:  26
+   # ✓ Installed successfully
+
+   # If it shows warnings, FIX BEFORE RELEASE
+   ```
+
+10. ✅ **Run All Tests**
+    ```bash
+    cd ~/dev/claude-workflow-agents
+    ./tests/run_all_tests.sh
+    # All tests must pass
+    ```
+
+### Quick Pre-Release Command
+
+```bash
+# Run this one-liner before every release
+bash <(curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh) && \
+~/.claude-workflow-agents/scripts/verify-installation.sh && \
+echo "✓ Ready to release"
+```
+
+### What to Do If Verification Fails
+
+1. **DO NOT RELEASE** - Fix issues first
+2. Identify root cause (check install.sh, CORE_AGENTS array, cleanup logic)
+3. Fix and commit
+4. Re-run full checklist
+5. Only release after all checks pass
+
+### Success Criteria
+
+- verify-installation.sh shows "✓ VERIFICATION PASSED"
+- No zombie files in ~/.claude/agents/
+- Exactly 4 subagents (symlinks), 10 skills (directories)
+- All 7 bin scripts present and executable
+- workflow-init works in both greenfield and brownfield
+- Documentation counts match actual installation
+
+**If ANY check fails, DO NOT tag the release.**
+
+---
+
 ## 🔢 VERSION BUMP PROTOCOL
 
 **CRITICAL: Follow this protocol when releasing a new version to ensure ALL files are updated.**

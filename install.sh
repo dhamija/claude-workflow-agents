@@ -935,6 +935,75 @@ elif add_to_path "$HOME/.profile"; then
 fi
 
 # ─────────────────────────────────────────────────────────────────
+# Post-Install Verification
+# ─────────────────────────────────────────────────────────────────
+echo ""
+echo "Verifying installation..."
+echo ""
+
+# Count what was installed
+SUBAGENT_COUNT=0
+for agent in code-reviewer debugger ui-debugger llm-user-architect; do
+    if [ -L "$CLAUDE_DIR/agents/${agent}.md" ]; then
+        ((SUBAGENT_COUNT++))
+    fi
+done
+
+SKILL_COUNT=0
+for skill in backend brownfield code-quality debugging frontend llm-user-testing testing ux-design validation workflow; do
+    if [ -d "$CLAUDE_DIR/skills/$skill" ]; then
+        ((SKILL_COUNT++))
+    fi
+done
+
+COMMAND_COUNT=0
+for cmd_file in "$CLAUDE_DIR/commands"/*.md; do
+    if [ -L "$cmd_file" ]; then
+        target=$(readlink "$cmd_file")
+        if [[ "$target" == *"workflow-agents"* ]]; then
+            ((COMMAND_COUNT++))
+        fi
+    fi
+done
+
+# Check for zombie agents (should not exist)
+ZOMBIE_COUNT=0
+OLD_AGENTS=("acceptance-validator" "agentic-architect" "backend-engineer" "brownfield-analyzer" "change-analyzer" "frontend-engineer" "gap-analyzer" "implementation-planner" "intent-guardian" "project-ops" "test-engineer" "ux-architect" "workflow-orchestrator")
+for agent in "${OLD_AGENTS[@]}"; do
+    if [ -f "$CLAUDE_DIR/agents/${agent}.md" ] || [ -L "$CLAUDE_DIR/agents/${agent}.md" ]; then
+        ((ZOMBIE_COUNT++))
+    fi
+done
+
+echo "  Subagents: $SUBAGENT_COUNT/4"
+echo "  Skills:    $SKILL_COUNT/10"
+echo "  Commands:  $COMMAND_COUNT"
+if [ $ZOMBIE_COUNT -gt 0 ]; then
+    echo "  ⚠ Zombie agents: $ZOMBIE_COUNT (should be 0)"
+fi
+echo ""
+
+# Warn if anything is wrong
+if [ $SUBAGENT_COUNT -ne 4 ] || [ $SKILL_COUNT -ne 10 ] || [ $ZOMBIE_COUNT -gt 0 ]; then
+    echo "⚠ WARNING: Installation verification found issues"
+    echo ""
+    if [ $SUBAGENT_COUNT -ne 4 ]; then
+        echo "  • Expected 4 subagents, found $SUBAGENT_COUNT"
+    fi
+    if [ $SKILL_COUNT -ne 10 ]; then
+        echo "  • Expected 10 skills, found $SKILL_COUNT"
+    fi
+    if [ $ZOMBIE_COUNT -gt 0 ]; then
+        echo "  • Found $ZOMBIE_COUNT zombie agent files from previous version"
+        echo "    Run: workflow-toggle off && workflow-toggle on"
+    fi
+    echo ""
+    echo "  For detailed verification, run:"
+    echo "    $INSTALL_DIR/scripts/verify-installation.sh"
+    echo ""
+fi
+
+# ─────────────────────────────────────────────────────────────────
 # Done
 # ─────────────────────────────────────────────────────────────────
 echo ""
