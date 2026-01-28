@@ -4,7 +4,7 @@ description: |
   Domain expertise for LLM-as-User testing. Provides principles, protocols,
   and best practices for simulating real users to test UIs. Loaded on-demand
   when executing /llm-user commands (init, test, fix, status, refresh).
-version: 1.0.0
+version: 1.1.0
 ---
 
 # LLM User Testing Skill
@@ -101,7 +101,39 @@ expert_user:
   abandonment_threshold: frustration > 0.5
 ```
 
-### 5. Evidence-Based Gap Analysis
+### 5. Scene-Grounded Responses
+
+**Principle:** LLM user responses must ONLY reference elements that exist in the current scene.
+
+**What this means:**
+- ❌ Don't reference objects not visible in the scene
+- ❌ Don't invent people, animals, or actions not shown
+- ❌ Don't assume a setting different from what's displayed
+- ✅ Only describe what is actually visible
+- ✅ Make mistakes in LANGUAGE (grammar, vocabulary), not in PERCEPTION
+- ✅ If unsure what's in scene, describe it vaguely but accurately
+
+**Critical distinction:**
+```
+WRONG TYPE OF MISTAKE (perception error):
+Scene: Kitchen with person cutting vegetables
+Response: "El hombre está caminando el perro" (man walking dog)
+Problem: No dog exists in scene - this is a scene mismatch, not a language learning mistake
+
+RIGHT TYPE OF MISTAKE (language error):
+Scene: Kitchen with person cutting vegetables
+Response: "El hombre está cortando las verduras" (correct observation)
+Response: "El hombre es cortando verduras" (grammar mistake - ser vs estar)
+Response: "El hombre corta los vegetablos" (vocabulary mistake)
+Problem: These are legitimate Spanish learning errors about the ACTUAL scene
+```
+
+**Why this matters:**
+The app is testing Spanish language skills, not scene comprehension.
+If the test user describes the wrong scene, the app's feedback becomes nonsensical
+and we can't validate whether the feedback system actually works.
+
+### 6. Evidence-Based Gap Analysis
 
 **Principle:** Every gap must trace back to observable behavior and original requirements.
 
@@ -147,6 +179,19 @@ persona_state:
 **For each step in scenario:**
 
 ```
+0. GROUND IN SCENE (before any responses)
+   ├─ Extract ALL visible elements from scene:
+   │   ├─ People (count, gender, approximate age, actions)
+   │   ├─ Objects (what items are visible)
+   │   ├─ Setting (indoor/outdoor, location type)
+   │   ├─ Actions (what is happening)
+   │   └─ Details (colors, positions, relationships)
+   ├─ Create SCENE_ELEMENTS list
+   ├─ Create SCENE_ACTIONS list
+   ├─ Create NOT_IN_SCENE list (common items NOT present)
+   ├─ All user responses MUST only reference SCENE_ELEMENTS
+   └─ Flag if scene unclear → describe uncertainty, don't invent
+
 1. OBSERVE
    ├─ Take screenshot
    ├─ Read visible text
@@ -163,6 +208,10 @@ persona_state:
 
 3. ACT
    ├─ Execute action (click, type, scroll, etc.)
+   ├─ If typing a scene description:
+   │   ├─ VALIDATE against SCENE_ELEMENTS before submitting
+   │   ├─ Ensure all nouns reference actual scene items
+   │   └─ Make LANGUAGE mistakes, not PERCEPTION mistakes
    ├─ Record confidence (0.0-1.0)
    └─ Note reasoning
 
@@ -181,10 +230,105 @@ persona_state:
    └─ If success → Express satisfaction
 
 6. RECORD
-   ├─ Save structured JSON
+   ├─ Save structured JSON (including scene_grounding)
    ├─ Take screenshot
    └─ Continue or quit
 ```
+
+### Scene-Response Validation
+
+**Before recording any user response about a scene, validate:**
+
+```python
+def validate_response_grounding(response_text, scene_elements, scene_actions):
+    """
+    Ensure user response only references scene-present elements.
+
+    Args:
+        response_text: The Spanish text the test user wants to submit
+        scene_elements: List of objects/people actually in the scene
+        scene_actions: List of actions actually happening in the scene
+
+    Returns: (is_valid, violations)
+    """
+    # Extract nouns/subjects from response
+    referenced_items = extract_nouns(response_text)
+    referenced_actions = extract_verbs(response_text)
+
+    violations = []
+
+    # Check all referenced items exist in scene
+    for item in referenced_items:
+        if not matches_any(item, scene_elements):
+            violations.append({
+                "type": "OBJECT_MISMATCH",
+                "referenced": item,
+                "exists_in_scene": False,
+                "scene_elements": scene_elements
+            })
+
+    # Check all referenced actions are happening
+    for action in referenced_actions:
+        if not matches_any(action, scene_actions):
+            violations.append({
+                "type": "ACTION_MISMATCH",
+                "referenced": action,
+                "exists_in_scene": False,
+                "scene_actions": scene_actions
+            })
+
+    if violations:
+        return False, violations
+    return True, []
+
+
+def regenerate_if_invalid(response_text, scene_elements, scene_actions, persona):
+    """
+    If response has scene mismatches, regenerate using only valid elements.
+    """
+    is_valid, violations = validate_response_grounding(
+        response_text, scene_elements, scene_actions
+    )
+
+    if is_valid:
+        return response_text, None
+
+    # Regenerate response constrained to scene
+    new_response = generate_scene_description(
+        scene_elements=scene_elements,
+        scene_actions=scene_actions,
+        persona=persona,
+        allowed_mistakes=["grammar", "vocabulary", "spelling", "incomplete"],
+        forbidden_mistakes=["wrong_objects", "wrong_actions", "wrong_setting"]
+    )
+
+    return new_response, {
+        "original": response_text,
+        "violations": violations,
+        "regenerated": new_response,
+        "reason": "Scene mismatch detected and corrected"
+    }
+```
+
+**Validation rules:**
+1. Every noun in response must map to a scene element
+2. Every action described must be happening in scene
+3. Setting references must match (kitchen ≠ park)
+4. If validation fails → regenerate response using only valid elements
+
+**Acceptable mistakes (keep these - they test the app's feedback system):**
+- Grammar errors (wrong conjugation, gender agreement, ser vs estar)
+- Vocabulary errors (wrong Spanish word for correct object)
+- Incomplete descriptions (missing details that ARE in scene)
+- Spelling errors
+- Word order mistakes
+- Missing accents
+
+**Unacceptable mistakes (fix these - they break the test validity):**
+- Referencing objects not in scene (dog when there's no dog)
+- Describing actions not happening (walking when person is sitting)
+- Wrong setting/location (park when it's a kitchen)
+- Inventing people/animals not present
 
 ### Frustration Dynamics
 
@@ -242,6 +386,33 @@ def should_abandon(persona, state):
     "name": "Maria (Beginner Adult)"
   },
 
+  "scene_grounding": {
+    "scene_description": "Kitchen scene with adult male preparing food",
+    "scene_elements": [
+      "person (adult male)",
+      "cutting board",
+      "knife",
+      "vegetables (tomatoes, onions, peppers)",
+      "kitchen counter",
+      "stove (background)",
+      "window"
+    ],
+    "scene_actions": [
+      "cutting/chopping vegetables",
+      "preparing food"
+    ],
+    "scene_setting": "indoor kitchen, daytime",
+    "NOT_in_scene": [
+      "dog",
+      "park",
+      "bench",
+      "outdoor",
+      "walking",
+      "child",
+      "woman"
+    ]
+  },
+
   "state_before": {
     "frustration": 0.15,
     "motivation": 0.75,
@@ -250,24 +421,43 @@ def should_abandon(persona, state):
 
   "observation": {
     "screen": "Scene description page",
-    "visible_elements": ["textarea", "submit button", "hint icon"],
+    "visible_elements": ["scene image", "textarea", "submit button", "hint icon"],
     "current_task": "Write scene description in Spanish"
   },
 
   "decision": {
-    "intent": "Submit my description to get feedback",
+    "intent": "Describe what I see in Spanish and submit",
     "options_considered": [
-      "Click submit button",
-      "Click hint icon first",
-      "Edit description more"
+      "Describe the man cutting vegetables",
+      "Describe the kitchen setting",
+      "Ask for a hint first"
     ],
-    "chosen_action": "Click submit button",
-    "reasoning": "I'm nervous but I want to see what happens. Submit button is clear.",
+    "chosen_action": "Type description and submit",
+    "reasoning": "I can see a man cutting vegetables. I'll try to describe that.",
     "confidence": 0.65
   },
 
+  "user_response": {
+    "spanish_text": "El hombre es cortando las verduras en la cocina",
+    "intended_meaning": "The man is cutting vegetables in the kitchen",
+    "elements_referenced": ["person/hombre", "vegetables/verduras", "kitchen/cocina", "cutting/cortando"],
+    "validation": {
+      "status": "PASS",
+      "all_elements_in_scene": true,
+      "violations": []
+    },
+    "intentional_mistakes": [
+      {
+        "type": "grammar",
+        "error": "es cortando (should be está cortando)",
+        "description": "Used ser instead of estar for ongoing action"
+      }
+    ]
+  },
+
   "action": {
-    "type": "click",
+    "type": "type_and_click",
+    "input_text": "El hombre es cortando las verduras en la cocina",
     "target": "button#submit-description",
     "timestamp": "2026-01-27T10:23:45.500Z"
   },
@@ -275,23 +465,24 @@ def should_abandon(persona, state):
   "outcome": {
     "success": true,
     "observation": "Button disabled, loading spinner appeared for 1.2s, then feedback displayed",
+    "feedback_received": "¡Casi! Recuerda usar 'estar' para acciones en progreso: 'está cortando'",
     "matched_expectation": true,
     "unexpected": "Spinner took longer than expected"
   },
 
   "reaction": {
-    "thought": "Okay, feedback is here. Let me read it...",
-    "emotion": "relieved but slightly anxious",
-    "frustration_delta": +0.05,
-    "motivation_delta": 0.00,
-    "confidence_delta": +0.10,
-    "reason_for_change": "Wait time was noticeable (+frustration), but outcome was good (+confidence)"
+    "thought": "Oh! I used 'es' instead of 'está'. The feedback helped me understand why.",
+    "emotion": "slightly embarrassed but grateful for clear feedback",
+    "frustration_delta": -0.05,
+    "motivation_delta": +0.10,
+    "confidence_delta": +0.05,
+    "reason_for_change": "Feedback was helpful and not judgmental (+motivation), learned something (+confidence)"
   },
 
   "state_after": {
-    "frustration": 0.20,
-    "motivation": 0.75,
-    "confidence": 0.70
+    "frustration": 0.10,
+    "motivation": 0.85,
+    "confidence": 0.65
   },
 
   "screenshot_before": "screenshots/step-2-action-3-before.png",
@@ -470,13 +661,46 @@ High Effort│ Low        │ Medium     │ Medium
 
 ## Domain-Specific Testing Patterns
 
-### Pattern 1: Learning Apps
+### Pattern 1: Learning Apps (Scene-Based Language Learning)
 
 **Special considerations:**
 - Track skill progression over time
 - Validate feedback helps user improve
 - Test spaced repetition effectiveness
 - Ensure errors don't demoralize
+- **CRITICAL: Validate test responses match actual scene content**
+
+**Scene-Based Learning Specific Rules:**
+```yaml
+scene_response_rules:
+  # The test user MUST ground responses in actual scene
+  before_responding:
+    - Extract all visible elements from scene image
+    - List all actions occurring in scene
+    - Identify setting (indoor/outdoor, location type)
+    - Note what is NOT in the scene
+
+  when_generating_response:
+    - ONLY reference elements actually in scene
+    - Make LANGUAGE mistakes (grammar, vocabulary, spelling)
+    - Do NOT make PERCEPTION mistakes (wrong objects, wrong actions)
+    - Validate response against scene elements before submitting
+
+  mistake_types_allowed:
+    - grammar: "el hombre es cortando" (ser vs estar)
+    - vocabulary: "el hombre corta los vegetablos" (wrong word)
+    - spelling: "el honbre está cortando" (typo)
+    - gender: "la hombre está cortando" (wrong article)
+    - conjugation: "el hombre cortamos" (wrong form)
+    - word_order: "cortando está el hombre verduras"
+    - missing_accents: "el esta cortando" (missing accent)
+
+  mistake_types_forbidden:
+    - wrong_object: "el perro está corriendo" (no dog in scene)
+    - wrong_action: "el hombre está caminando" (he's cutting, not walking)
+    - wrong_setting: "en el parque" (it's a kitchen, not park)
+    - invented_elements: "la mujer y el niño" (no woman or child present)
+```
 
 **Metrics:**
 ```yaml
@@ -486,6 +710,11 @@ learning_effectiveness:
   - improvement_rate: (last - first) / attempts
   - correction_application_rate: % of corrections applied
   - confidence_progression: confidence_last - confidence_first
+
+scene_grounding_metrics:
+  - scene_match_rate: % of responses that correctly reference scene
+  - violation_count: number of scene mismatches detected and corrected
+  - element_coverage: % of scene elements user attempted to describe
 ```
 
 ### Pattern 2: Creative Tools
@@ -584,6 +813,69 @@ scenario:
   ✅ pass_criteria: promise-linked success conditions
   ✅ expected_duration: timeout detection
   ✅ source: link back to UX journey doc
+  ✅ scene_grounding: (for scene-based apps) expected scene elements
+```
+
+### Scene-Based Scenario Template
+
+**For language learning apps with scene descriptions:**
+```yaml
+scenario:
+  id: "kitchen-cooking-scene"
+  name: "Describe cooking scene in Spanish"
+  persona: "maria-beginner"
+
+  scene_grounding:
+    # Pre-define what's in this scene so test responses can be validated
+    scene_id: "scene-kitchen-001"
+    expected_elements:
+      - "person (adult, male)"
+      - "vegetables"
+      - "knife"
+      - "cutting board"
+      - "kitchen"
+      - "counter"
+    expected_actions:
+      - "cutting"
+      - "preparing food"
+    setting: "indoor kitchen"
+    NOT_present:
+      - "dog"
+      - "park"
+      - "walking"
+      - "child"
+      - "outdoor"
+
+  steps:
+    - id: "view-scene"
+      intent: "View and understand the scene"
+      success_criteria:
+        - "Scene image loads"
+        - "User can identify main elements"
+
+    - id: "write-description"
+      intent: "Write Spanish description of what's in the scene"
+      response_constraints:
+        must_reference: ["person", "vegetables OR food", "action"]
+        must_not_reference: ["dog", "park", "outdoor elements"]
+        allowed_mistakes: ["grammar", "vocabulary", "spelling"]
+      success_criteria:
+        - "Response references actual scene elements"
+        - "Response is in Spanish"
+        - "Response contains at least one describable element"
+
+    - id: "receive-feedback"
+      intent: "Submit and receive helpful feedback"
+      success_criteria:
+        - "Feedback received within 2 seconds"
+        - "Feedback addresses language errors (not scene accuracy)"
+        - "Feedback is encouraging"
+
+  pass_criteria:
+    - promise: "P1 - Users can describe scenes in Spanish"
+      check: "User successfully submitted scene-accurate Spanish description"
+    - promise: "P2 - Users receive helpful feedback"
+      check: "Feedback helped user understand their language mistakes"
 ```
 
 ---
@@ -678,6 +970,9 @@ rubric:
 ✅ **Trace gaps to docs** - Every gap must link to source requirement
 ✅ **Prioritize by impact** - Fix what matters most
 ✅ **Provide specific recommendations** - "Add X here" not "improve UX"
+✅ **Extract scene elements FIRST** - Before generating any response, list what's actually visible
+✅ **Validate response grounding** - Every noun must map to a scene element
+✅ **Make language mistakes, not perception mistakes** - Wrong Spanish, not wrong scene
 
 ### DON'T
 
@@ -688,6 +983,9 @@ rubric:
 ❌ **Don't skip documentation reading** - Garbage in, garbage out
 ❌ **Don't test without clear promises** - What are you even validating?
 ❌ **Don't ignore persona traits** - They exist for a reason
+❌ **Don't invent scene elements** - No dogs if there's no dog
+❌ **Don't assume context** - Kitchen scene ≠ park scene
+❌ **Don't confuse mistake types** - Test user errors should be linguistic, not perceptual
 
 ---
 
@@ -702,6 +1000,8 @@ rubric:
 5. ✅ Different personas have different experiences
 6. ✅ Test setup takes minutes, not days
 7. ✅ Gap analysis traces back to source documentation
+8. ✅ Test user responses accurately describe actual scene content
+9. ✅ Language mistakes are realistic learning errors, not scene mismatches
 
 **LLM user testing needs improvement if:**
 
@@ -711,6 +1011,8 @@ rubric:
 4. ❌ Personas all behave identically
 5. ❌ Can't trace gaps to specific requirements
 6. ❌ Tests feel like "going through the motions"
+7. ❌ Test user describes wrong scene (dog when there's no dog)
+8. ❌ App feedback doesn't make sense because test input was scene-mismatched
 
 ---
 
@@ -757,41 +1059,110 @@ scenario:
   id: "first-scene-description"
   persona: "maria-beginner"
 
+  scene_grounding:
+    scene_id: "park-scene-001"
+    expected_elements: ["man", "dog", "bench", "park", "trees"]
+    expected_actions: ["sitting", "dog standing nearby"]
+    setting: "outdoor park"
+    NOT_present: ["kitchen", "vegetables", "cooking", "indoor"]
+
   steps:
     - intent: "View scene and understand task"
       success: ["Scene visible", "Instructions clear"]
 
     - intent: "Write Spanish description"
-      success: ["Text input works", "No errors"]
+      response_constraints:
+        must_reference_from: ["man", "dog", "bench", "park"]
+        allowed_mistakes: ["grammar", "vocabulary"]
+      success: ["Text input works", "No errors", "Response matches scene"]
 
     - intent: "Submit and receive feedback"
       success: ["Feedback immediate", "Feedback helpful"]
 
   pass_criteria:
     - promise: "P1"
-      check: "All steps completed, Maria satisfied"
+      check: "All steps completed, Maria satisfied, responses scene-accurate"
 ```
 
 ### Execution: LLM User Simulation
 
 ```
 [Maria loads page]
-Screenshot: Park scene with dog, man, bench
-Maria thinks: "Okay, I see a park. Instructions say 'Describe en español'"
+Screenshot: Park scene with man, dog, bench
 
-[Maria types]
-Action: Type "Hay un hombre con un perro"
-Confidence: 0.6 (not sure if correct)
-State: frustration=0.05 (slight anxiety)
+SCENE GROUNDING (Step 0):
+├─ Elements extracted: man (adult, sitting), dog (brown, standing), bench (wooden),
+│                      park, trees, grass, pathway
+├─ Actions: man sitting on bench, dog standing beside man
+├─ Setting: outdoor park, daytime, sunny
+└─ NOT in scene: kitchen, vegetables, cooking, car, child, woman
+
+Maria thinks: "Okay, I see a park with a man sitting on a bench and his dog."
+
+[Maria types - SCENE-GROUNDED response with LANGUAGE mistake]
+Action: Type "Hay un hombre con un perro en el parque"
+
+VALIDATION CHECK:
+├─ "hombre" (man) → ✅ present in scene
+├─ "perro" (dog) → ✅ present in scene
+├─ "parque" (park) → ✅ matches setting
+└─ All elements validated → PASS
+
+Confidence: 0.6 (not sure if grammar correct)
+State: frustration=0.05 (slight anxiety about Spanish)
 
 [Maria submits]
 Action: Click submit
 Wait: 1.2s (spinner visible)
-Outcome: "¡Bien! Puedes agregar más detalles sobre el perro."
-Reaction: "That felt good! Feedback was encouraging."
-State: frustration=0.0, motivation=0.85 (↑ from feedback)
+Outcome: "¡Bien! Puedes agregar más detalles. ¿Qué hace el hombre?"
+Translation: "Good! You can add more details. What is the man doing?"
 
-Result: SUCCESS - P1 fulfilled
+Reaction: "That felt good! Feedback was encouraging and gave me direction."
+State: frustration=0.0, motivation=0.85 (↑ from helpful feedback)
+
+[Maria tries again with more detail - includes intentional grammar mistake]
+Action: Type "El hombre es sentado en el banco con su perro"
+
+VALIDATION CHECK:
+├─ "hombre" → ✅ present
+├─ "sentado" (sitting) → ✅ action happening
+├─ "banco" (bench) → ✅ present
+├─ "perro" → ✅ present
+├─ Grammar error: "es sentado" should be "está sentado" → ✅ VALID learning mistake
+└─ All elements validated → PASS
+
+Outcome: "¡Casi! Usa 'estar' para posiciones: 'está sentado'. ¡Muy bien con los detalles!"
+Translation: "Almost! Use 'estar' for positions: 'is sitting'. Very good with the details!"
+
+Reaction: "Oh, I used 'ser' instead of 'estar' for position. That makes sense now!"
+State: frustration=0.0, motivation=0.90, confidence=0.75
+
+Result: SUCCESS - P1 fulfilled, feedback addressed LANGUAGE error appropriately
+```
+
+### What Would Have Been WRONG:
+
+```
+[INCORRECT - Scene mismatch that should NOT happen]
+
+[Maria loads page]
+Screenshot: Park scene with man, dog, bench
+
+[Maria types - WRONG, describes different scene]
+Action: Type "El hombre está cortando las verduras en la cocina"
+
+VALIDATION CHECK:
+├─ "cortando verduras" (cutting vegetables) → ❌ NOT happening in scene
+├─ "cocina" (kitchen) → ❌ Setting is PARK, not kitchen
+└─ VALIDATION FAILED - Scene mismatch detected
+
+REGENERATION TRIGGERED:
+├─ Original: "El hombre está cortando las verduras en la cocina"
+├─ Violations: [action_mismatch: "cutting vegetables", setting_mismatch: "kitchen"]
+├─ Regenerating with scene constraints...
+└─ New response: "El hombre está sentado con su perro" (scene-accurate)
+
+[Continue with corrected response]
 ```
 
 ### Evaluation: Rubric Application
@@ -799,10 +1170,11 @@ Result: SUCCESS - P1 fulfilled
 ```yaml
 scores:
   P1_fulfillment: 0.9  # Minor wait time issue
-  feedback_quality: 0.85  # Good but could be more specific
+  feedback_quality: 0.90  # Addressed grammar, was encouraging
   motivation: 0.9  # Maria satisfied and encouraged
+  scene_grounding: 1.0  # All responses matched actual scene content
 
-overall: 0.88 (B+)
+overall: 0.90 (A-)
 
 gaps:
   - criterion: "Doherty Threshold"
@@ -810,6 +1182,12 @@ gaps:
     issue: "1.2s feedback delay (should be <400ms)"
     severity: medium
     recommendation: "Add loading skeleton immediately"
+
+test_validity:
+  scene_match_rate: 100%  # All responses accurately described scene
+  language_mistakes_made: 1  # "es sentado" instead of "está sentado"
+  perception_mistakes_made: 0  # No wrong objects/actions described
+  verdict: "VALID TEST - mistakes were linguistic, not perceptual"
 ```
 
 ### Output: Gap Analysis
@@ -817,9 +1195,14 @@ gaps:
 ```markdown
 ## Gap Analysis
 
-**Overall Score:** 8.8/10 (Grade: B+)
+**Overall Score:** 9.0/10 (Grade: A-)
 
-**Verdict:** PASS with recommendations
+**Verdict:** PASS with minor recommendations
+
+**Test Validity:** ✅ CONFIRMED
+- All test user responses accurately referenced scene elements
+- Mistakes were language-learning errors (ser vs estar)
+- No scene mismatches detected
 
 ### Gaps Found
 
@@ -864,6 +1247,18 @@ Response <400ms for maintained flow state
 ---
 
 ## Version History
+
+### 1.1.0 (2026-01-28)
+- Added **Principle 5: Scene-Grounded Responses** - Critical for scene-based apps
+- Added **Step 0: GROUND IN SCENE** to Action Loop
+- Added **Scene-Response Validation** section with validation logic
+- Added **scene_grounding** to Recording Format
+- Added **Scene-Based Scenario Template** for language learning apps
+- Updated **Pattern 1: Learning Apps** with scene-specific rules
+- Added scene grounding to **Best Practices** (DO and DON'T sections)
+- Added scene accuracy to **Success Indicators**
+- Updated **Example: Complete Test Flow** with scene grounding demonstration
+- Added **What Would Have Been WRONG** section showing mismatch detection
 
 ### 1.0.0 (2026-01-27)
 - Initial release
