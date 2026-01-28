@@ -232,7 +232,7 @@ Suggest: "UI is ready for LLM user testing. Run /llm-user init?"
    ↓
 User confirms
    ↓
-llm-user-architect
+Load llm-user-testing skill
    ├─► Phase 1: Analyze docs
    │   ├─► Extract promises from product-intent.md
    │   ├─► Extract personas from user-journeys.md
@@ -411,7 +411,7 @@ session:
 | "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
 | "add [feature]", "also need", "change [thing]" | **change-analyzer** |
 | "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
-| "UI is ready", "frontend done", "deployed to staging", "test user journeys" | **llm-user-architect** → `/llm-user init` |
+| "UI is ready", "frontend done", "deployed to staging", "test user journeys" | Load `llm-user-testing` skill → `/llm-user init` |
 | "validate user experience", "check if promises work in UI" | `/test-ui` |
 
 ### Response Protocols
@@ -626,8 +626,8 @@ grep -A 10 "## L1 Orchestration Flow" CLAUDE.md
 ### v3.1 (2026-01-27)
 - **Breaking Change:** Skills + Hooks architecture
 - Orchestration logic moved FROM CLAUDE.md TO workflow skill
-- 9 skills loaded on-demand by Claude
-- Only 4 subagents (isolated tasks)
+- 10 skills loaded on-demand by Claude
+- Only 3 subagents (isolated tasks)
 - Minimal CLAUDE.md (~80 lines, state only)
 - Optional hooks for automatic quality gates
 - 90% reduction in upfront context

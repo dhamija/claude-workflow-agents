@@ -80,7 +80,7 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 **What this does:**
 - Installs to `~/.claude-workflow-agents/` (global location)
 - Copies **10 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
-- Symlinks **4 subagents** to `~/.claude/agents/` (for isolated tasks)
+- Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
 - Symlinks **26 commands** to `~/.claude/commands/`
 - Adds workflow commands to PATH
 
@@ -110,7 +110,6 @@ Subagents are isolated execution environments for specific tasks:
 | `code-reviewer` | Read-only code quality review |
 | `debugger` | Isolated debugging sessions |
 | `ui-debugger` | UI debugging with browser automation |
-| `llm-user-architect` | Generate LLM user testing infrastructure from docs |
 
 #### Terminal Commands
 
@@ -150,7 +149,7 @@ See [Commands Reference](#commands-reference) for all 26 commands.
 ### Verify Installation
 ```bash
 ls ~/.claude/skills/              # Should show 10 directories
-ls ~/.claude/agents/*.md          # Should show 4 subagents
+ls ~/.claude/agents/*.md          # Should show 3 subagents
 workflow-version                  # Should show v3.1.0
 ```
 

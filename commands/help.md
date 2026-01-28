@@ -168,7 +168,7 @@ ARCHITECTURE OVERVIEW
 
   Subagents: Isolated execution environments (separate context)
              Location: ~/.claude/agents/
-             Count: 4 subagents
+             Count: 3 subagents
 
 
 SKILLS (On-Demand Domain Expertise)

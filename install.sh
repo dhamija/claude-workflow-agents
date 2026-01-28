@@ -161,7 +161,7 @@ cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
 
 # Symlink ONLY core subagents (isolated-context agents)
 # Other expertise is now in skills (on-demand loading)
-CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger" "llm-user-architect")
+CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
 for agent_name in "${CORE_AGENTS[@]}"; do
     agent_file="$INSTALL_DIR/agents/${agent_name}.md"
     if [ -f "$agent_file" ]; then
@@ -449,7 +449,7 @@ case "$CMD" in
         cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
 
         # Symlink ONLY core subagents
-        CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger" "llm-user-architect")
+        CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
         for agent_name in "${CORE_AGENTS[@]}"; do
             agent_file="$INSTALL_DIR/agents/${agent_name}.md"
             if [ -f "$agent_file" ]; then
@@ -466,7 +466,7 @@ case "$CMD" in
         done
 
         echo "✓ Workflow enabled"
-        echo "  Created symlinks for 4 subagents and all commands"
+        echo "  Created symlinks for 3 subagents and all commands"
         echo "  Installed 10 skills"
         echo "  Your own files in ~/.claude/ remain untouched"
         ;;
@@ -869,7 +869,7 @@ echo "  ✓ Workflow state initialized"
 echo "  ✓ Type: $PROJECT_TYPE"
 echo ""
 echo "  Skills location: ~/.claude/skills/"
-echo "  Subagents: code-reviewer, debugger, ui-debugger, llm-user-architect"
+echo "  Subagents: code-reviewer, debugger, ui-debugger"
 echo ""
 
 if [ "$PROJECT_TYPE" = "brownfield" ]; then
@@ -943,7 +943,7 @@ echo ""
 
 # Count what was installed
 SUBAGENT_COUNT=0
-for agent in code-reviewer debugger ui-debugger llm-user-architect; do
+for agent in code-reviewer debugger ui-debugger; do
     if [ -L "$CLAUDE_DIR/agents/${agent}.md" ]; then
         ((SUBAGENT_COUNT++))
     fi
@@ -975,7 +975,7 @@ for agent in "${OLD_AGENTS[@]}"; do
     fi
 done
 
-echo "  Subagents: $SUBAGENT_COUNT/4"
+echo "  Subagents: $SUBAGENT_COUNT/3"
 echo "  Skills:    $SKILL_COUNT/10"
 echo "  Commands:  $COMMAND_COUNT"
 if [ $ZOMBIE_COUNT -gt 0 ]; then
@@ -984,11 +984,11 @@ fi
 echo ""
 
 # Warn if anything is wrong
-if [ $SUBAGENT_COUNT -ne 4 ] || [ $SKILL_COUNT -ne 10 ] || [ $ZOMBIE_COUNT -gt 0 ]; then
+if [ $SUBAGENT_COUNT -ne 3 ] || [ $SKILL_COUNT -ne 10 ] || [ $ZOMBIE_COUNT -gt 0 ]; then
     echo "⚠ WARNING: Installation verification found issues"
     echo ""
-    if [ $SUBAGENT_COUNT -ne 4 ]; then
-        echo "  • Expected 4 subagents, found $SUBAGENT_COUNT"
+    if [ $SUBAGENT_COUNT -ne 3 ]; then
+        echo "  • Expected 3 subagents, found $SUBAGENT_COUNT"
     fi
     if [ $SKILL_COUNT -ne 10 ]; then
         echo "  • Expected 10 skills, found $SKILL_COUNT"

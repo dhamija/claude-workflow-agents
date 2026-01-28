@@ -56,8 +56,18 @@ Format: [Semantic Versioning](https://semver.org/)
     - Removes old workflow symlinks from agents/, commands/
     - Removes known old agent files (acceptance-validator, agentic-architect, etc.)
     - Removes old skill directories (backend, frontend, etc.)
-    - Only CORE_AGENTS (4 subagents) get symlinked, skills copied fresh
+    - Only CORE_AGENTS (3 subagents) get symlinked, skills copied fresh
   - Applied to both install.sh and workflow-toggle on/enable
+- **llm-user-architect was subagent but should have been skill**
+  - **Root cause**: Architecture mismatch - Claude Code's Task tool doesn't recognize custom subagent types
+  - **Impact**: `llm-user-architect` couldn't be invoked by Task tool, but skill already existed with full functionality
+  - **Fix**: Removed llm-user-architect from CORE_AGENTS, deleted redundant agent file
+    - LLM user testing now uses `llm-user-testing` skill exclusively
+    - Skill has complete protocol (/llm-user init, /test-ui, /llm-user gaps, etc.)
+    - Updated all templates and orchestration to reference skill instead of subagent
+    - Subagent count: 4 → 3 (code-reviewer, debugger, ui-debugger)
+    - Skills count: 9 → 10 (added llm-user-testing to documented list)
+  - Aligns with v3.0 architecture: Expertise = Skills, Isolated tasks = Subagents
 
 ---
 

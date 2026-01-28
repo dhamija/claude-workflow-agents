@@ -39,11 +39,11 @@ echo "  Location: $INSTALL_DIR"
 echo ""
 
 # Expected state for v3.1+
-EXPECTED_SUBAGENTS=("code-reviewer" "debugger" "ui-debugger" "llm-user-architect")
+EXPECTED_SUBAGENTS=("code-reviewer" "debugger" "ui-debugger")
 EXPECTED_SKILLS=("backend" "brownfield" "code-quality" "debugging" "frontend" "llm-user-testing" "testing" "ux-design" "validation" "workflow")
 OLD_AGENTS=("acceptance-validator" "agentic-architect" "backend-engineer" "brownfield-analyzer" "change-analyzer" "frontend-engineer" "gap-analyzer" "implementation-planner" "intent-guardian" "project-ops" "test-engineer" "ux-architect" "workflow-orchestrator")
 
-echo -e "${BLUE}Checking subagents (should be 4 symlinks)...${NC}"
+echo -e "${BLUE}Checking subagents (should be 3 symlinks)...${NC}"
 echo ""
 
 SUBAGENT_COUNT=0
@@ -68,10 +68,10 @@ for agent in "${EXPECTED_SUBAGENTS[@]}"; do
 done
 
 echo ""
-if [ $SUBAGENT_COUNT -eq 4 ]; then
-    echo -e "${GREEN}✓ All 4 subagents present and correctly symlinked${NC}"
+if [ $SUBAGENT_COUNT -eq 3 ]; then
+    echo -e "${GREEN}✓ All 3 subagents present and correctly symlinked${NC}"
 else
-    echo -e "${RED}✗ Expected 4 subagents, found $SUBAGENT_COUNT${NC}"
+    echo -e "${RED}✗ Expected 3 subagents, found $SUBAGENT_COUNT${NC}"
 fi
 echo ""
 

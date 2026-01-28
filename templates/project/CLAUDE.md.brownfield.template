@@ -25,9 +25,10 @@ This is an **existing codebase**. Workflow will analyze first, then help improve
 | **code-reviewer** | AUTO | After ANY code changes |
 | **debugger** | AUTO | User reports issue (keywords: "broken", "error", "bug") |
 | **ui-debugger** | AUTO | UI issues + puppeteer available |
-| **llm-user-architect** | AUTO | UI ready + L1 docs exist (after frontend complete) |
 | **acceptance-validator** | AUTO | After feature complete (validates promises) |
 | **project-ops** | AUTO | After features/milestones |
+
+> **Note:** LLM user testing is handled via the `llm-user-testing` skill, loaded when UI testing is requested.
 
 ### Issue Detection Keywords
 
@@ -37,7 +38,7 @@ This is an **existing codebase**. Workflow will analyze first, then help improve
 | "page", "screen", "button", "UI", "display", "layout", "click" + issue | **ui-debugger** |
 | "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
 | "add [feature]", "also need", "change [thing]" | **change-analyzer** |
-| "UI is ready", "frontend done", "deployed to staging", "test user journeys" | **llm-user-architect** → `/llm-user init` |
+| "UI is ready", "frontend done", "deployed to staging", "test user journeys" | Load `llm-user-testing` skill → `/llm-user init` |
 | "validate user experience", "check if promises work in UI" | `/test-ui` |
 | "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
 

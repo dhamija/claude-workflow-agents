@@ -1,6 +1,6 @@
 # Claude Workflow Agents - Repository
 
-> **v3.1 Architecture:** Skills + Hooks + Subagents. 9 skills loaded on-demand, 4 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+> **v3.1 Architecture:** Skills + Hooks + Subagents. 10 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
 
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
@@ -62,11 +62,10 @@
 │   ├── workflow/, ux-design/, frontend/, backend/
 │   ├── testing/, validation/, debugging/
 │   └── code-quality/, brownfield/, llm-user-testing/
-├── agents/                          # 4 subagents (isolated context)
+├── agents/                          # 3 subagents (isolated context)
 │   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
 │   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
-│   ├── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
-│   └── llm-user-architect.md -> ~/.claude-workflow-agents/agents/llm-user-architect.md
+│   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
 └── commands/                        # 26 command symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
@@ -78,7 +77,7 @@
 1. **Install** (`install.sh`):
    - Downloads to `~/.claude-workflow-agents/`
    - **Copies 10 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
-   - **Symlinks 4 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger, llm-user-architect)
+   - **Symlinks 3 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger)
    - Symlinks 26 commands to `~/.claude/commands/`
    - Adds bin/ commands to PATH
    - Workflow immediately active for all projects
@@ -463,9 +462,9 @@ If you forgot to run verify.sh and CI fails:
 
 Multiple iterations were needed to fix v3.1.0 post-release because installation state wasn't verified:
 - workflow-patch missing (TEMP_DIR deleted too early)
-- llm-user-architect not in CORE_AGENTS
+- llm-user-architect was subagent but should have been skill
 - Zombie agents from v2.0 not cleaned up
-- Documentation said "4 subagents" but only 3 installed
+- Architecture mismatch: Task tool doesn't recognize custom subagents
 
 These issues were only discovered after users reported them. This checklist prevents that.
 
@@ -486,7 +485,7 @@ These issues were only discovered after users reported them. This checklist prev
    ```
 
    Must show:
-   - ✓ All 4 subagents present and correctly symlinked
+   - ✓ All 3 subagents present and correctly symlinked
    - ✓ No zombie agents found
    - ✓ All 10 skills present
    - ✓ All bin scripts present and executable
@@ -496,7 +495,7 @@ These issues were only discovered after users reported them. This checklist prev
    ```bash
    # Verify only expected files exist
    ls -la ~/.claude/agents/
-   # Should show ONLY 4 symlinks (code-reviewer, debugger, ui-debugger, llm-user-architect)
+   # Should show ONLY 3 symlinks (code-reviewer, debugger, ui-debugger)
    # NO regular files from old versions
 
    ls ~/.claude/skills/
@@ -527,7 +526,7 @@ These issues were only discovered after users reported them. This checklist prev
    ```bash
    mkdir /tmp/test-greenfield && cd /tmp/test-greenfield
    workflow-init
-   # Should detect greenfield, create minimal CLAUDE.md, show all 4 subagents
+   # Should detect greenfield, create minimal CLAUDE.md, show all 3 subagents
 
    mkdir /tmp/test-brownfield && cd /tmp/test-brownfield
    mkdir backend frontend
@@ -548,10 +547,10 @@ These issues were only discovered after users reported them. This checklist prev
    ```bash
    # Check that docs match reality
    grep "subagent" README.md USAGE.md GUIDE.md CLAUDE.md
-   # All references should say "4 subagents", not "3 subagents"
+   # All references should say "3 subagents"
 
    grep "CORE_AGENTS" install.sh
-   # Should include all 4: code-reviewer, debugger, ui-debugger, llm-user-architect
+   # Should include all 3: code-reviewer, debugger, ui-debugger
    ```
 
 8. ✅ **Test Toggle On/Off**
@@ -606,7 +605,7 @@ echo "✓ Ready to release"
 
 - verify-installation.sh shows "✓ VERIFICATION PASSED"
 - No zombie files in ~/.claude/agents/
-- Exactly 4 subagents (symlinks), 10 skills (directories)
+- Exactly 3 subagents (symlinks), 10 skills (directories)
 - All 7 bin scripts present and executable
 - workflow-init works in both greenfield and brownfield
 - Documentation counts match actual installation
@@ -903,7 +902,6 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | acceptance-validator | L2 Validation | Validate promises are kept |
 | workflow-orchestrator | Orchestration | Auto-chain agents and quality gates |
 | project-ops | Ops | Setup, sync, docs |
-| llm-user-architect | Ops | Generate LLM user testing from docs |
 
 ### Commands
 

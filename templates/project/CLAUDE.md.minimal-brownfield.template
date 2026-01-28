@@ -30,7 +30,6 @@ This project uses **Claude Workflow Skills** - on-demand domain expertise for ex
 - `code-reviewer` - Code quality review
 - `debugger` - Debug specialist
 - `ui-debugger` - UI debug + browser automation
-- `llm-user-architect` - LLM user test infrastructure generator
 
 ### Quality Gates
 Automatic reminders via hooks:
