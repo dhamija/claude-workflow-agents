@@ -23,8 +23,8 @@ if [ ! -f "CLAUDE.md" ]; then
     exit 1
 fi
 
-# Check if CLAUDE.md has workflow marker
-if ! grep -q "## 🔄 Workflow Active" CLAUDE.md; then
+# Check if CLAUDE.md has workflow marker (support both v2.0 and v3.1 formats)
+if ! grep -q -E "## 🔄 (Workflow Active|WORKFLOW ACTIVE)" CLAUDE.md; then
     echo -e "${RED}✗ CLAUDE.md does not appear to be a workflow-enabled file${NC}"
     echo ""
     echo "Looking for '## 🔄 Workflow Active' marker."
