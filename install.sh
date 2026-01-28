@@ -101,7 +101,7 @@ cat > "$INSTALL_DIR/bin/workflow-update" << 'SCRIPT'
 
 # Update global installation
 
-INSTALL_DIR="$HOME/.claude"
+INSTALL_DIR="$HOME/.claude-workflow-agents"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
 
 echo "Updating Claude Workflow Agents..."
@@ -123,9 +123,14 @@ if [ "$CURRENT" = "$NEW_VERSION" ]; then
     exit 0
 fi
 
-# Preserve bin (has our scripts)
+# Preserve generated bin scripts (workflow-update, workflow-version, etc.)
+# Copy only the generated scripts, keep new scripts from repo (workflow-patch, workflow-fix-hooks)
 mkdir -p "$TEMP_DIR/bin"
-cp -r "$INSTALL_DIR/bin/"* "$TEMP_DIR/bin/" 2>/dev/null || true
+for script in workflow-update workflow-version workflow-toggle workflow-uninstall workflow-init; do
+    if [ -f "$INSTALL_DIR/bin/$script" ]; then
+        cp "$INSTALL_DIR/bin/$script" "$TEMP_DIR/bin/$script"
+    fi
+done
 
 # Replace
 rm -rf "$INSTALL_DIR"
@@ -684,6 +689,20 @@ echo ""
 SCRIPT
 
 chmod +x "$INSTALL_DIR/bin/workflow-init"
+
+# Copy additional bin scripts from repository (workflow-patch, workflow-fix-hooks, etc.)
+if [ -d "$TEMP_DIR/bin" ]; then
+    for script in "$TEMP_DIR/bin"/*; do
+        if [ -f "$script" ]; then
+            script_name=$(basename "$script")
+            # Only copy scripts that weren't generated inline above
+            if [[ ! "$script_name" =~ ^(workflow-update|workflow-version|workflow-toggle|workflow-uninstall|workflow-init)$ ]]; then
+                cp "$script" "$INSTALL_DIR/bin/$script_name"
+                chmod +x "$INSTALL_DIR/bin/$script_name"
+            fi
+        fi
+    done
+fi
 
 # ─────────────────────────────────────────────────────────────────
 # Add to PATH
