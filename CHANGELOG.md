@@ -38,6 +38,17 @@ Format: [Semantic Versioning](https://semver.org/)
   - Fixed `workflow-update` INSTALL_DIR path bug (`$HOME/.claude` → `$HOME/.claude-workflow-agents`)
   - Fixed `workflow-update` to preserve ONLY generated scripts, allowing new scripts from repo to be installed
   - **Migration for existing users**: Reinstall with `curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash` (now actually works!)
+- **llm-user-architect subagent was not installed**
+  - **Root cause**: Missing from CORE_AGENTS array in install.sh line 118
+  - **Impact**: Agent documented everywhere but not symlinked, causing "agent is not available" errors
+  - **Fix**: Added "llm-user-architect" to CORE_AGENTS array
+  - Users can now use `/llm-user init` and LLM user testing features
+- **workflow-patch rejected v2.0 CLAUDE.md files**
+  - v2.0 used "## 🔄 WORKFLOW ACTIVE", v3.x uses "## 🔄 Workflow Active"
+  - Updated regex to match both formats for backward compatibility
+- **workflow-init detected projects with backend/frontend as greenfield**
+  - Brownfield detection only checked src/, app/, lib/, pkg/ directories
+  - Added detection for backend/, frontend/, server/, client/ directories
 
 ---
 
