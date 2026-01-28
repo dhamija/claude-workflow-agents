@@ -125,7 +125,7 @@ tests/llm-user/
 **What it does:**
 1. Compares file hashes in test-spec.yaml to current docs
 2. Detects which docs changed
-3. Re-invokes llm-user-architect for changed components
+3. Re-runs llm-user-testing skill protocol for changed components
 4. Shows diff of changes
 5. Asks for confirmation before overwriting
 

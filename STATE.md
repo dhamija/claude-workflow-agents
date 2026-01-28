@@ -35,7 +35,8 @@
 | brownfield-analyzer | L1 Support | ✓ Complete |
 | acceptance-validator | L2 Validation | ✓ Complete |
 | project-ops | Operations | ✓ Complete |
-| llm-user-architect | Operations | ✓ Complete |
+
+**Note:** llm-user-architect was removed in v3.1.1 - functionality now in `llm-user-testing` skill.
 
 ## Commands List
 
