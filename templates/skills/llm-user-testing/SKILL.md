@@ -15,6 +15,74 @@ version: 1.1.0
 
 ---
 
+## Command Reference (Consolidated)
+
+All LLM user testing functionality is under the `/llm-user` command:
+
+| Command | Purpose |
+|---------|---------|
+| `/llm-user init` | Initialize testing artifacts from docs |
+| `/llm-user test <url>` | Run LLM user tests against live app |
+| `/llm-user status` | Show current test results and gap count |
+| `/llm-user fix` | Systematically fix gaps |
+| `/llm-user refresh` | Regenerate artifacts from updated docs |
+
+**IMPORTANT:** The old `/test-ui` and `/fix-gaps` commands no longer exist. Use `/llm-user test` and `/llm-user fix` instead.
+
+---
+
+## Output Templates
+
+### After `/llm-user init`
+
+When initialization completes successfully, output this exact format:
+
+```
+✅ LLM User Testing Initialized
+
+Generated artifacts:
+- docs/testing/llm-user-personas.md
+- docs/testing/llm-user-scenarios.md
+- docs/testing/llm-user-rubric.md
+
+▶️ Next Steps
+1. Start your app: npm run dev (or your start command)
+2. Run tests: /llm-user test http://localhost:5173
+3. Review results: /llm-user status
+4. Fix gaps: /llm-user fix
+```
+
+### After `/llm-user test`
+
+```
+✅ LLM User Tests Complete
+
+Results: X/Y scenarios passed
+Score: 8.5/10
+
+Gaps found: Z (N critical, M high)
+
+▶️ Next Steps
+1. View full results: /llm-user status
+2. Fix critical gaps: /llm-user fix --critical
+3. Re-run tests: /llm-user test http://localhost:5173
+```
+
+### After `/llm-user fix`
+
+```
+✅ Gap Fixed: [gap description]
+
+Remaining gaps: X (N critical)
+
+▶️ Next Steps
+1. Verify fix: /llm-user test http://localhost:5173
+2. Continue fixing: /llm-user fix
+3. Check status: /llm-user status
+```
+
+---
+
 ## Core Principles
 
 ### 1. Authenticity Over Optimization
