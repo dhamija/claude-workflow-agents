@@ -283,8 +283,62 @@ fi
 rm -rf "$INSTALL_DIR"
 mv "$TEMP_DIR" "$INSTALL_DIR"
 
+# Refresh symlinks in ~/.claude/ for new commands
+CLAUDE_DIR="$HOME/.claude"
+mkdir -p "$CLAUDE_DIR/agents"
+mkdir -p "$CLAUDE_DIR/commands"
+mkdir -p "$CLAUDE_DIR/skills"
+
+# Clean up old workflow symlinks
+for file in "$CLAUDE_DIR/commands"/*; do
+    if [ -L "$file" ]; then
+        target=$(readlink "$file")
+        if [[ "$target" == *"workflow-agents"* ]]; then
+            rm -f "$file"
+        fi
+    fi
+done
+
+# Recreate command symlinks (includes new commands)
+for command_file in "$INSTALL_DIR/commands"/*.md; do
+    if [ -f "$command_file" ]; then
+        filename=$(basename "$command_file")
+        ln -sf "$command_file" "$CLAUDE_DIR/commands/$filename"
+    fi
+done
+
+# Refresh skills (may have new ones)
+for skill_dir in "$CLAUDE_DIR/skills"/*; do
+    if [ -d "$skill_dir" ]; then
+        skill_name=$(basename "$skill_dir")
+        if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver)$ ]]; then
+            rm -rf "$skill_dir"
+        fi
+    fi
+done
+cp -r "$INSTALL_DIR/templates/skills"/* "$CLAUDE_DIR/skills/"
+
+# Refresh subagent symlinks
+for file in "$CLAUDE_DIR/agents"/*; do
+    if [ -L "$file" ]; then
+        target=$(readlink "$file")
+        if [[ "$target" == *"workflow-agents"* ]]; then
+            rm -f "$file"
+        fi
+    fi
+done
+
+CORE_AGENTS=("code-reviewer" "debugger" "ui-debugger")
+for agent_name in "${CORE_AGENTS[@]}"; do
+    agent_file="$INSTALL_DIR/agents/${agent_name}.md"
+    if [ -f "$agent_file" ]; then
+        ln -sf "$agent_file" "$CLAUDE_DIR/agents/${agent_name}.md"
+    fi
+done
+
 echo ""
 echo "✓ Updated to $NEW_VERSION"
+echo "✓ Refreshed all command and skill symlinks"
 echo ""
 SCRIPT
 chmod +x "$INSTALL_DIR/bin/workflow-update"
