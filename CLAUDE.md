@@ -1,1018 +1,526 @@
-# Claude Workflow Agents - Repository
+# CLAUDE.md
 
-> **v3.1 Architecture:** Skills + Hooks + Subagents. 10 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-> **Instructions for maintaining THIS repository.**
-> **This file is NOT installed to user systems.**
+## Repository Overview
 
----
+**Claude Workflow Agents** is a skills-based workflow system for Claude Code that helps build software systematically. The system operates through:
 
-## 🚨 CLAUDE: READ THIS FIRST
+- **Skills** (domain expertise loaded on-demand)
+- **Subagents** (isolated execution environments)
+- **Commands** (user-facing slash commands)
+- **Templates** (project scaffolding)
 
-**Before making ANY changes to this repository:**
+The architecture emphasizes **context efficiency** - v3.1 uses ~80 lines + on-demand skills vs. v2.0's 750+ lines loaded every session (90% reduction).
 
-1. Read the [MANDATORY MAINTENANCE PROTOCOL](#️-mandatory-maintenance-protocol) section below
-2. After changes to `agents/` or `commands/`, you MUST run `./scripts/verify.sh`
-3. Do NOT commit until verify.sh passes - CI will fail otherwise
-
----
-
-## ⚠️ Important Distinction
-
-| This Repo | User Projects |
-|-----------|---------------|
-| **CLAUDE.md** (this file) | **templates/project/CLAUDE.md.template** |
-| For maintaining workflow-agents | For user projects |
-| NOT installed | Installed and customized |
-
-**Never confuse repo files with user templates!**
-
----
-
-## Installation Architecture (v3.1)
-
-**Skills + Hooks + Subagents Architecture**
+## Core Architecture
 
 ### Directory Structure
 
 ```
-~/.claude-workflow-agents/           # Installation directory
-├── agents/                          # 17 agent files (invoked by workflow via Task tool)
-├── commands/                        # 26 command definitions
-├── templates/                       # Templates for user projects
-│   ├── project/                     # Project bootstrap templates
-│   │   ├── CLAUDE.md.minimal.template (greenfield, ~80 lines)
-│   │   └── CLAUDE.md.minimal-brownfield.template (~80 lines)
-│   ├── skills/                      # 10 skill templates
-│   │   ├── workflow/, ux-design/, frontend/, backend/
-│   │   ├── testing/, validation/, debugging/
-│   │   └── code-quality/, brownfield/
-│   └── hooks/                       # Hooks configuration template
-│       └── settings.json.template
-├── bin/                            # CLI commands
-│   ├── workflow-init               # Initialize project
-│   ├── workflow-toggle             # Enable/disable globally
-│   ├── workflow-update             # Update from git
-│   ├── workflow-uninstall          # Remove installation
-│   └── workflow-version            # Show version
-└── version.txt                     # Current version (3.1.0)
-
-~/.claude/                           # Claude Code's directory
-├── skills/                          # 10 skills (loaded on-demand by Claude)
-│   ├── workflow/, ux-design/, frontend/, backend/
-│   ├── testing/, validation/, debugging/
-│   └── code-quality/, brownfield/, llm-user-testing/
-├── agents/                          # 3 subagents (isolated context)
-│   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
-│   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
-│   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
-└── commands/                        # 26 command symlinks
-    ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
-    ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
-    └── ... (26 total)
+agents/                  # 14 agent definitions (orchestration, planning, building)
+commands/                # 27 slash commands (/analyze, /audit, /gap, /fix-gaps, etc.)
+templates/
+  ├── skills/            # 11 domain expertise skills (workflow, ux-design, frontend, etc.)
+  ├── project/           # CLAUDE.md templates (greenfield/brownfield)
+  ├── docs/              # Documentation templates (intent, UX, architecture)
+  ├── infrastructure/    # Scripts, hooks, CI/CD templates
+  └── integrations/      # LLM provider & MCP integrations
+bin/                     # Utility scripts (workflow-patch, workflow-update, etc.)
+tests/                   # 35+ test scripts for system validation
+scripts/                 # Maintenance scripts (release, verify, sync)
 ```
 
-### How It Works (v3.1)
+### Key Components
 
-1. **Install** (`install.sh`):
-   - Downloads to `~/.claude-workflow-agents/`
-   - **Copies 10 skills to `~/.claude/skills/`** (loaded on-demand by Claude)
-   - **Symlinks 3 subagents to `~/.claude/agents/`** (code-reviewer, debugger, ui-debugger)
-   - Symlinks 26 commands to `~/.claude/commands/`
-   - Adds bin/ commands to PATH
-   - Workflow immediately active for all projects
+**Skills System (v3.1 Architecture)**
+- Skills are loaded on-demand by Claude when needed
+- Located in `templates/skills/` during development
+- Deployed to `~/.claude/skills/` on installation
+- Each skill is a markdown file with frontmatter (name, description) + expertise content
+- Core skills: workflow, ux-design, frontend, backend, testing, validation, debugging, code-quality, brownfield, llm-user-testing, gap-resolver
 
-2. **Init Project** (`workflow-init`):
-   - Detects greenfield vs brownfield (code indicators)
-   - Creates minimal CLAUDE.md (~80 lines, state only)
-   - Optionally sets up hooks (.claude/settings.json)
-   - Preserves existing CLAUDE.md content if present
+**Agent System**
+- Agents orchestrate complex workflows via Claude's Task tool
+- Workflow-orchestrator.md is the main controller (reads other agents on-demand)
+- Subagents (code-reviewer, debugger, ui-debugger) run in isolated contexts
+- Agents trigger each other automatically - users never invoke manually
 
-3. **Enable/Disable** (`workflow-toggle on|off|status`):
-   - **Global operation** - affects all Claude Code sessions
-   - `on`: Creates skills + subagent symlinks
-   - `off`: Removes only workflow files, preserves user's own
-   - `status`: Shows count of skills/subagents/commands
+**Command System**
+- Commands are markdown files with frontmatter in `commands/`
+- Symlinked to `~/.claude/commands/` on installation
+- Critical commands: /fix-gaps (gap resolution), /llm-user (user testing), /audit (brownfield analysis)
 
-4. **Update** (`workflow-update`):
-   - Pulls latest from git
-   - Updates skills in `~/.claude/skills/`
-   - Re-creates subagent symlinks
-   - Preserves user's own agents/commands
+**Template System**
+- Brownfield vs. greenfield templates have different workflows
+- Templates use `{{VARIABLES}}` replaced during `workflow-init`
+- CLAUDE.md templates contain workflow state tracking
 
-5. **Uninstall** (`workflow-uninstall`):
-   - Removes skills from `~/.claude/skills/`
-   - Removes workflow symlinks from `~/.claude/agents/` and `~/.claude/commands/`
-   - Removes `~/.claude-workflow-agents/` directory
-   - Preserves user's own agents/commands
+## Development Commands
 
-### Key Design Decisions
+### Testing
 
-1. **No per-project control**: Claude Code loads agents globally from `~/.claude/`. Project-local agents don't work reliably.
+```bash
+# Run full test suite
+./tests/run_all_tests.sh
 
-2. **Individual file symlinks**: User's own agents/commands coexist with workflow files in same directories.
+# Run specific test categories
+./tests/structural/test_agents_exist.sh       # Verify agents present
+./tests/structural/test_commands_exist.sh     # Verify commands present
+./tests/structural/test_directory_structure.sh # Verify structure
+./tests/install/test_workflow_init_greenfield.sh  # Test greenfield init
+./tests/install/test_workflow_init_brownfield.sh  # Test brownfield init
+./tests/content/test_template_completeness.sh # Verify templates complete
+./tests/consistency/test_agent_references.sh  # Check cross-references
 
-3. **No CLAUDE.md markers**: Earlier versions used `<!-- workflow: enabled -->` markers in project files. These were vestigial - Claude Code doesn't read them. Removed in v1.3.0.
+# Run verification scripts
+./scripts/verify.sh        # Comprehensive documentation sync check
+./scripts/verify-docs.sh   # Documentation verification only
+```
 
-4. **Global toggle only**: `workflow-toggle` affects all projects simultaneously. Cannot enable workflow for only some projects.
+### Installation Testing
 
-### User Experience
+```bash
+# Test local install (doesn't affect global install)
+./install.sh
 
-- **Install once**: `curl -fsSL ... | bash`
-- **Use everywhere**: All projects immediately have access to workflow agents
-- **Disable when not needed**: `workflow-toggle off` (global)
-- **No per-project setup**: No need to run commands in each project
+# Test update mechanism
+~/.claude-workflow-agents/bin/workflow-update master
 
+# Test in a project
+cd /tmp/test-project
+workflow-init
+# Verify CLAUDE.md created, type detected correctly
+```
+
+### Releasing
+
+```bash
+# Bump version
+./scripts/release.sh [major|minor|patch]
+# This updates version.txt, commits, tags, and pushes
+
+# Or manually:
+echo "3.2.0" > version.txt
+git add version.txt CHANGELOG.md
+git commit -m "chore: bump version to 3.2.0"
+git tag -a v3.2.0 -m "Release v3.2.0"
+git push origin master --tags
+```
+
+### Documentation Maintenance
+
+```bash
+# Update system docs after changes
+./scripts/update-system-docs.sh
+
+# Verify all documentation is in sync
+./scripts/verify-docs.sh
+
+# Check specific consistency
+./tests/consistency/test_full_sync.sh
+./tests/consistency/test_help_coverage.sh
+```
+
+## Critical Development Patterns
+
+### Workflow-Patch System
+
+`bin/workflow-patch` is the smart merge utility that updates project CLAUDE.md files:
+
+**How it works:**
+1. Extracts user's custom sections (Project Context, Workflow State)
+2. Loads latest template based on project type (greenfield/brownfield)
+3. Merges: template structure + user's preserved content
+4. Only updates if template version > current version
+
+**Critical bugs to avoid:**
+- Line number extraction must handle duplicate section headers
+- Use `awk -F:` when parsing `grep -n` output (format: "line:content")
+- CONTEXT_END must find FIRST separator AFTER CONTEXT_START (use awk comparison)
+- When extracting from user file: use `tail -1` (last match = actual content)
+- When replacing in template: use `head -1` (first match = template location)
+- Build files with direct reconstruction (header + content + footer), not intermediate sed deletions
+
+**Testing workflow-patch:**
+```bash
+cd /tmp/test-project
+workflow-init  # Creates v3.1 or v3.2 CLAUDE.md
+# Manually edit version in CLAUDE.md to simulate old version
+workflow-patch  # Should detect update and apply correctly
+```
+
+### Workflow-Update System
+
+`bin/workflow-update` (embedded in install.sh) updates the global installation:
+
+**Critical requirements:**
+- Must refresh symlinks in `~/.claude/commands/` after update (ensures new commands appear)
+- Must refresh symlinks in `~/.claude/agents/` after update
+- Must copy new skills from `templates/skills/` to `~/.claude/skills/`
+- Must preserve generated bin scripts (workflow-update itself, workflow-version, etc.)
+- Must install NEW bin scripts from repo (workflow-patch, workflow-fix-hooks, workflow-refresh)
+
+**Testing workflow-update:**
+```bash
+# Make changes to commands/fix-gaps.md
+git add commands/fix-gaps.md && git commit -m "test: update fix-gaps" && git push
+workflow-update master
+ls -la ~/.claude/commands/fix-gaps.md  # Should show updated timestamp
+```
+
+### Version Management
+
+Version appears in THREE places that must stay in sync:
+1. `version.txt` - Source of truth
+2. Templates (`CLAUDE.md.*.template`) - workflow.version field
+3. README.md - Multiple mentions
+
+When bumping version:
+```bash
+echo "3.2.0" > version.txt
+# Update all templates: grep -r "version: 3.1" templates/project/
+# Update README.md: "Version: 3.1.0" → "Version: 3.2.0"
+```
+
+### Skills Development
+
+Skills are the core domain expertise. When modifying skills:
+
+**Structure:**
+```markdown
+---
+name: skill-name
+description: Brief description
 ---
 
-## 📋 Template Architecture (v1.0 - Self-Contained)
+# Skill Content
 
-**CRITICAL DESIGN CHANGE:** As of v1.0, orchestration logic is self-contained in user project CLAUDE.md files.
-
-### How Orchestration Works
-
-#### Old Architecture (v0.9 - Broken) ❌
-
-```
-User Project CLAUDE.md
-   ↓
-   HTML comment: "READ workflow-orchestrator.md"
-   ↓
-   Hope Claude reads it
-   ↓
-   No enforcement → Can be ignored
+[Expertise, principles, protocols]
 ```
 
-**Problem:** Claude Code doesn't auto-read external files. HTML comments aren't enforced.
-
-#### New Architecture (v1.0 - Self-Contained) ✓
-
-```
-Template: templates/project/CLAUDE.md.greenfield.template
-   ↓
-   Contains ALL orchestration logic embedded (750+ lines)
-   ↓
-   workflow-init generates → User Project CLAUDE.md
-   ↓
-   Self-contained, guaranteed to work
-```
-
-**Solution:** Orchestration logic embedded directly in templates. External agent files become optional reference documentation.
-
-### Template Files
-
-**Greenfield Template:** `templates/project/CLAUDE.md.greenfield.template` (793 lines)
-- Complete L1 orchestration flow (Intent → UX → Architecture → Planning)
-- Complete L2 orchestration flow (Backend → Frontend → Testing → Verification)
-- Change request handling (change-analyzer integration)
-- Issue response protocols (debugger, ui-debugger flows)
-- Quality gates (automatic enforcement)
-- Design principles (auto-applied)
-- Workflow state tracking (YAML)
-- Commands reference
-
-**Brownfield Template:** `templates/project/CLAUDE.md.brownfield.template` (795 lines)
-- Brownfield analysis flow (brownfield-analyzer)
-- Gap analysis flow (gap-analyzer)
-- Complete L2 orchestration (same as greenfield)
-- Change request handling (same as greenfield)
-- Issue response protocols (same as greenfield)
-- Quality gates (same as greenfield)
-- Design principles (same as greenfield)
-- Workflow state tracking (YAML with analysis phase)
-
-### Role of agents/*.md Files (Changed in v1.0)
-
-**Previous (v0.9):** Required for operation. Claude expected to read these files.
-
-**Current (v1.0):** Optional reference documentation for:
-- Contributors understanding system architecture
-- Users customizing behavior (reading detailed prompts)
-- Debugging agent invocations
-- System maintenance
-
-**Exception:** `agents/workflow-orchestrator.md` is now **contributor documentation only**. It documents the orchestration system architecture for maintainers. It is NOT read by Claude during operation.
-
-### How workflow-init Works
-
-1. User runs `workflow-init` in project directory
-2. Script detects greenfield (empty/new) or brownfield (existing code)
-3. Script selects appropriate template:
-   - `CLAUDE.md.greenfield.template` for new projects
-   - `CLAUDE.md.brownfield.template` for existing codebases
-4. Script replaces template variables:
-   - `{{PROJECT_NAME}}` - from directory name or user input
-   - `{{PROJECT_DESCRIPTION}}` - from user input
-   - `{{DATE}}` - current date
-   - `{{WORKFLOW_HOME}}` - `~/.claude-workflow-agents`
-5. Script generates `CLAUDE.md` in project root
-6. User project now has complete self-contained orchestration
-
-### Template Maintenance
-
-**When to update templates:**
-- Adding/removing agents
-- Changing orchestration flows
-- Modifying quality gates
-- Adding new workflow features
-
-**After updating templates:**
-1. Update `agents/workflow-orchestrator.md` (contributor docs)
-2. Update this file (CLAUDE.md) if architecture changed
-3. Run `./scripts/verify-docs.sh`
-4. Test with `workflow-init` in test directory
-5. Verify Claude follows new flow correctly
-6. Commit all changes together
-
-**Important:** Changes to templates do NOT automatically propagate to existing user projects. Users must run `workflow-update` (updates repo) and then `workflow-patch` (merges template changes into their CLAUDE.md).
-
-### User Update Workflow
-
-**Users have two commands for keeping their workflow up to date:**
-
-#### 1. workflow-update (Update the Workflow System)
-
+**Testing skill changes:**
 ```bash
-# From anywhere (updates the global installation)
-workflow-update
+# Skills are copied to ~/.claude/skills/ on install
+# After modifying templates/skills/workflow/SKILL.md:
+workflow-update master  # Refreshes skills
+# Or manually: cp -r templates/skills/* ~/.claude/skills/
 ```
 
-**What it does:**
-- Pulls latest changes from git repository
-- Updates `~/.claude-workflow-agents/` with new agents, commands, templates
-- Recreates symlinks if new agents/commands were added
-- Detects if run from a project directory with CLAUDE.md
-- Offers to run `workflow-patch` if updates affect orchestration
+**Skill loading behavior:**
+- Claude loads skills automatically based on context
+- Skills can reference other skills
+- Skills should be self-contained (don't assume other skills loaded)
 
-**When to run:**
-- Periodically to get new features and bug fixes
-- After seeing announcement of new workflow version
-- When new agents/commands become available
+### Command Development
 
-#### 2. workflow-patch (Update Project CLAUDE.md)
+Commands are slash commands exposed to users.
 
-```bash
-# From project directory
-cd /path/to/your/project
-workflow-patch
-```
-
-**What it does:**
-- Detects current CLAUDE.md version and type (greenfield/brownfield)
-- Loads corresponding template from updated workflow system
-- Extracts user sections (preserves your customizations):
-  - Project name and description
-  - Workflow state (progress, features, promises)
-  - Project context (decisions, notes)
-- Replaces template sections (updates orchestration logic):
-  - Quick Reference tables
-  - Session Start Protocol
-  - L1/L2 Orchestration Flows
-  - Issue Response Protocols
-  - Quality Gates
-  - Design Principles
-  - Commands Reference
-- Shows diff preview
-- Requires confirmation
-- Creates backup before applying
-
-**Safety features:**
-- Automatic backup: `CLAUDE.md.backup-<timestamp>`
-- Diff preview before applying
-- Can show detailed diff with `[D]` option
-- Preserves all user customizations
-- Aborts on any errors
-
-**When to run:**
-- After running `workflow-update` and seeing template changes
-- When new orchestration features become available
-- When quality gates or protocols are improved
-
-**Example workflow:**
-
-```bash
-# 1. Update workflow system globally
-workflow-update
-
-# Output:
-#   Updated: 0.9 → 1.0
-#   Changes: New gap-analyzer flows, improved quality gates
-#   Would you like to patch your CLAUDE.md? [Y/n/l]
-
-# 2. Review and apply patches (if run from project directory)
-# Or navigate to project and run manually:
-cd ~/my-project
-workflow-patch
-
-# Shows diff preview:
-#   - Old orchestration flows
-#   + New orchestration flows
-#
-#   Apply patch? [Y/n/d]
-
-# 3. Review changes
-git diff CLAUDE.md
-
-# 4. Test that orchestration still works
-# Claude Code should now use updated flows
-
-# 5. Delete backup if satisfied
-rm CLAUDE.md.backup-20260126-143022
-```
-
-**Troubleshooting:**
-
-If patch fails or produces unexpected results:
-
-```bash
-# Restore from backup
-cp CLAUDE.md.backup-<timestamp> CLAUDE.md
-
-# Report issue with:
-# - Your CLAUDE.md version
-# - Template version you tried to patch to
-# - Error message or unexpected behavior
-```
-
+**Structure:**
+```markdown
+---
+description: What this command does
 ---
 
-## Multi-Agent Workflow System
+[Detailed instructions for Claude on how to execute this command]
+```
 
-Multi-agent workflow system for Claude Code
+**Testing new commands:**
+```bash
+# After creating commands/my-command.md:
+ln -sf $(pwd)/commands/my-command.md ~/.claude/commands/my-command.md
+# Now /my-command should be available in Claude Code
+```
 
-## ⚠️ MANDATORY MAINTENANCE PROTOCOL
+**Command naming:**
+- Use kebab-case: /fix-gaps, /llm-user
+- Keep names short and memorable
+- Prefix subcommands with parent: /fix-gaps status, /llm-user init
 
-**CRITICAL: Claude MUST follow this protocol after ANY change to `agents/` or `commands/`.**
+## Important Context for Bug Fixes
 
-**See [Documentation Dependency Map](#-documentation-dependency-map) for complete file interdependencies.**
+### Common Issues
 
-### Step-by-Step Checklist
+**Issue: New commands not appearing after workflow-update**
+- **Root cause:** workflow-update wasn't refreshing symlinks
+- **Fix:** Added symlink refresh logic to install.sh (lines 282-337)
+- **Test:** Add new command, push, run workflow-update master, verify symlink exists
 
-When you add, modify, or remove ANY agent or command file:
+**Issue: workflow-patch failing with "illegal line count" or "sed command expected"**
+- **Root causes:**
+  1. Multiple "## Project Context" sections in user's CLAUDE.md
+  2. CONTEXT_END calculation getting line BEFORE CONTEXT_START (backwards range)
+  3. Missing -F: flag in awk (can't parse grep -n output)
+  4. Off-by-one errors in tail commands
+- **Fixes:** All fixed in commits aa1c1df, b969680, 8a01723, 8a06d52
+- **Test:** Create CLAUDE.md with duplicate sections, run workflow-patch
 
-1. ✅ **Update CLAUDE.md** (Current State section)
-   - Update agent/command counts
-   - Add new entries to the tables
-   - Remove deleted entries
+**Issue: Skills not loading**
+- **Check:** ls ~/.claude/skills/ should show 11 directories
+- **Fix:** workflow-update master OR cp -r templates/skills/* ~/.claude/skills/
 
-2. ✅ **Update commands/help.md**
-   - Add new agents to appropriate section (L1/L2/Operations/Orchestration)
-   - Update agent count in header ("THE X AGENTS")
-   - Add new commands to the commands list
+### Testing Discipline
 
-3. ✅ **Update README.md**
-   - Update agent count (line ~124)
-   - Update command count (line ~125)
-   - Add new entries to agent/command tables
+**Before committing changes to core systems (workflow-patch, workflow-update, install.sh):**
 
-4. ✅ **Update templates/project/*.template** (CRITICAL!)
-   - Add agent to "Agents Available" table in both greenfield and brownfield templates
-   - Add trigger keywords to "Issue Detection Keywords" table if applicable
-   - Add orchestration flow if it's a primary workflow agent (e.g., gap-analyzer, change-analyzer)
-   - Update quality gates if agent requires automatic invocation
-   - Update agents/workflow-orchestrator.md (contributor docs) to reflect changes
-
-5. ✅ **Update tests**
-   - `tests/structural/test_agents_exist.sh` - add to REQUIRED_AGENTS array
-   - `tests/structural/test_commands_exist.sh` - add to REQUIRED_COMMANDS array
-   - `tests/test_agents.sh` - add to REQUIRED_AGENTS array
-   - `tests/test_commands.sh` - add to REQUIRED_COMMANDS array
-
-6. ✅ **RUN VERIFICATION (MANDATORY)**
+1. Test in clean environment:
    ```bash
-   ./scripts/verify.sh
-   ```
-
-   **YOU MUST RUN THIS COMMAND BEFORE COMMITTING.**
-
-   - If it fails, fix ALL reported issues immediately
-   - Do NOT commit until verify.sh passes
-   - Do NOT skip this step - CI will fail and block merges
-   - **Check 7/7 specifically ensures workflow-orchestrator is in sync!**
-
-7. ✅ **Update workflow commands in install.sh (if applicable)**
-
-   If your changes affect the workflow commands, update the embedded scripts in `install.sh`:
-
-   - **workflow-version** (line ~137-169)
-     - Update commands list if new commands added
-     - Update agent/command counts if changed
-
-   - **workflow-update** (created in bin/workflow-update, installed by install.sh)
-     - If update process changes
-     - If new features need announcing
-
-   - **workflow-patch** (created in bin/workflow-patch, installed by install.sh)
-     - If patch logic changes
-     - If section extraction needs updating
-
-   - **Install success message** (line ~700-710)
-     - Keep command list in sync with workflow-version output
-
-   **Examples of when to update:**
-   - Adding new agent → Update workflow-version commands list
-   - New workflow command → Add to both workflow-version and install success
-   - Changing template structure → Update workflow-patch logic
-
-8. ✅ **Update STATE.md**
-   - Add entry to Recent Changes section
-   - Update component counts if changed
-   - Update last updated timestamps
-
-### Why This Matters
-
-- **CI Enforcement**: `./scripts/verify.sh` runs in CI. PRs will be blocked if docs are out of sync.
-- **User Experience**: Out-of-sync docs confuse users and break trust.
-- **Automatic Detection**: The verify script catches 100% of sync issues before they reach users.
-
-### Automation Helpers
-
-To make this easier:
-
-```bash
-# After making changes, run:
-./scripts/verify.sh
-
-# If it passes, you're good to commit
-git add -A
-git commit -m "feat: add new agent"
-
-# If it fails, fix the reported issues and run again
-```
-
-### Failure Recovery
-
-If you forgot to run verify.sh and CI fails:
-
-1. Read the CI error output - it shows exactly what's missing
-2. Fix the reported issues locally
-3. Run `./scripts/verify.sh` to confirm
-4. Commit the fixes
-5. Push again
-
-**Remember: verify.sh is your friend. It prevents mistakes, not creates them.**
-
----
-
-## 🧪 PRE-RELEASE VERIFICATION CHECKLIST
-
-**CRITICAL: Run this checklist BEFORE releasing ANY version to catch installation issues.**
-
-### Why This Exists
-
-Multiple iterations were needed to fix v3.1.0 post-release because installation state wasn't verified:
-- workflow-patch missing (TEMP_DIR deleted too early)
-- llm-user-architect was subagent but should have been skill
-- Zombie agents from v2.0 not cleaned up
-- Architecture mismatch: Task tool doesn't recognize custom subagents
-
-These issues were only discovered after users reported them. This checklist prevents that.
-
-### Pre-Release Checklist
-
-**Before tagging a release:**
-
-1. ✅ **Fresh Install Test (Clean Environment)**
-   ```bash
-   # In a VM or clean user account
+   cd /tmp && mkdir test-workflow && cd test-workflow
    curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
-   source ~/.bashrc
+   workflow-init
    ```
 
-2. ✅ **Run Installation Verification**
+2. Test update path:
    ```bash
-   ~/.claude-workflow-agents/scripts/verify-installation.sh
-   ```
-
-   Must show:
-   - ✓ All 3 subagents present and correctly symlinked
-   - ✓ No zombie agents found
-   - ✓ All 10 skills present
-   - ✓ All bin scripts present and executable
-   - ✓ VERIFICATION PASSED
-
-3. ✅ **Check Actual Files (Not Just Counts)**
-   ```bash
-   # Verify only expected files exist
-   ls -la ~/.claude/agents/
-   # Should show ONLY 3 symlinks (code-reviewer, debugger, ui-debugger)
-   # NO regular files from old versions
-
-   ls ~/.claude/skills/
-   # Should show exactly 10 directories
-
-   ls ~/.claude-workflow-agents/bin/
-   # Should show all 7 scripts: workflow-init, workflow-update, workflow-version,
-   # workflow-toggle, workflow-uninstall, workflow-patch, workflow-fix-hooks
-   ```
-
-4. ✅ **Test Upgrade from Previous Version**
-   ```bash
-   # Install previous stable version first
-   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/v3.1.0/install.sh | bash
-
-   # Verify old files exist (simulate v2.0 upgrade)
-   touch ~/.claude/agents/acceptance-validator.md
-   touch ~/.claude/agents/agentic-architect.md
-
-   # Now upgrade to new version
+   # From your dev repo:
+   git add . && git commit -m "test" && git push
+   # From clean environment:
    workflow-update master
-
-   # Run verification - should clean up zombie files
-   ~/.claude-workflow-agents/scripts/verify-installation.sh
+   # Verify changes applied
    ```
 
-5. ✅ **Test workflow-init in Sample Project**
+3. Test workflow-patch:
    ```bash
-   mkdir /tmp/test-greenfield && cd /tmp/test-greenfield
-   workflow-init
-   # Should detect greenfield, create minimal CLAUDE.md, show all 3 subagents
-
-   mkdir /tmp/test-brownfield && cd /tmp/test-brownfield
-   mkdir backend frontend
-   echo '{"name":"test"}' > package.json
-   workflow-init
-   # Should detect brownfield, create minimal-brownfield CLAUDE.md
-   ```
-
-6. ✅ **Test workflow-patch (v2.0 → v3.1+ Migration)**
-   ```bash
-   cd /tmp/test-project
-   # Copy a v2.0 CLAUDE.md with "## 🔄 WORKFLOW ACTIVE"
+   # Simulate old version
+   sed -i '' 's/version: 3.2/version: 3.1/' CLAUDE.md
    workflow-patch
-   # Should accept both v2.0 and v3.x formats
+   # Should detect 3.1 → 3.2 and update
    ```
 
-7. ✅ **Verify Documentation Accuracy**
+4. Run test suite:
    ```bash
-   # Check that docs match reality
-   grep "subagent" README.md USAGE.md GUIDE.md CLAUDE.md
-   # All references should say "3 subagents"
-
-   grep "CORE_AGENTS" install.sh
-   # Should include all 3: code-reviewer, debugger, ui-debugger
+   ./tests/run_all_tests.sh
    ```
 
-8. ✅ **Test Toggle On/Off**
-   ```bash
-   workflow-toggle status
-   workflow-toggle off
-   ls ~/.claude/agents/ ~/.claude/skills/
-   # Should remove workflow files, keep user's own files
+### Documentation Standards
 
-   workflow-toggle on
-   ~/.claude-workflow-agents/scripts/verify-installation.sh
-   # Should pass verification again
-   ```
+**When adding new features:**
+1. Add to appropriate command (commands/*.md)
+2. Add to appropriate skill (templates/skills/*/SKILL.md)
+3. Update README.md commands reference
+4. Update templates if workflow changes
+5. Add tests to verify feature works
+6. Run `./scripts/verify-docs.sh`
 
-9. ✅ **Check Post-Install Verification Output**
-   ```bash
-   # The install.sh should show:
-   # Verifying installation...
-   #   Subagents: 4/4
-   #   Skills:    10/10
-   #   Commands:  26
-   # ✓ Installed successfully
+**Documentation hierarchy:**
+- README.md - User-facing overview
+- GUIDE.md - Detailed user guide
+- WORKFLOW.md - Technical workflow details
+- AGENTS.md - Agent reference (legacy)
+- COMMANDS.md - Command reference
+- PATTERNS.md - Common usage patterns
+- EXAMPLES.md - Example conversations
 
-   # If it shows warnings, FIX BEFORE RELEASE
-   ```
+### Shell Script Conventions
 
-10. ✅ **Run All Tests**
-    ```bash
-    cd ~/dev/claude-workflow-agents
-    ./tests/run_all_tests.sh
-    # All tests must pass
-    ```
+**All shell scripts should:**
+- Use `set -e` (exit on error)
+- Define colors at top if using colored output
+- Use `$(command)` not backticks
+- Quote variables: `"$VAR"` not `$VAR`
+- Use absolute paths when possible
+- Provide usage instructions
+- Return meaningful exit codes
 
-### Quick Pre-Release Command
-
+**Testing shell scripts:**
 ```bash
-# Run this one-liner before every release
-bash <(curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh) && \
-~/.claude-workflow-agents/scripts/verify-installation.sh && \
-echo "✓ Ready to release"
+# Run shellcheck (if available)
+shellcheck bin/workflow-patch
+
+# Test all error paths
+# Test with missing files
+# Test with invalid input
+# Test with edge cases (empty files, duplicate sections, etc.)
 ```
 
-### What to Do If Verification Fails
+## Git Workflow
 
-1. **DO NOT RELEASE** - Fix issues first
-2. Identify root cause (check install.sh, CORE_AGENTS array, cleanup logic)
-3. Fix and commit
-4. Re-run full checklist
-5. Only release after all checks pass
+**Branch strategy:**
+- Main branch: `master`
+- All changes go through commits to master
+- Tags for releases: `v3.1.0`, `v3.2.0`
 
-### Success Criteria
-
-- verify-installation.sh shows "✓ VERIFICATION PASSED"
-- No zombie files in ~/.claude/agents/
-- Exactly 3 subagents (symlinks), 10 skills (directories)
-- All 7 bin scripts present and executable
-- workflow-init works in both greenfield and brownfield
-- Documentation counts match actual installation
-
-**If ANY check fails, DO NOT tag the release.**
-
----
-
-## 🔢 VERSION BUMP PROTOCOL
-
-**CRITICAL: Follow this protocol when releasing a new version to ensure ALL files are updated.**
-
-### Files That MUST Be Updated
-
-When bumping version (e.g., 3.1.0 → 3.1.0), these files MUST be updated:
-
-1. **`version.txt`** (single line file)
-   ```
-   3.1.0
-   ```
-
-2. **`install.sh`** (line ~8)
-   ```bash
-   VERSION="3.1.0"
-   ```
-   **⚠️ MOST COMMONLY FORGOTTEN - Double-check this!**
-
-3. **`CHANGELOG.md`**
-   - Rename `[Unreleased]` or create new section to `[3.1.0] - YYYY-MM-DD`
-   - Document all changes in appropriate categories (Added/Changed/Fixed/Removed)
-
-4. **All Documentation Files** (automated with sed)
-   - README.md
-   - CLAUDE.md
-   - commands/help.md
-   - AGENTS.md, COMMANDS.md, GUIDE.md, WORKFLOW.md, STATE.md, USAGE.md, EXAMPLES.md, PATTERNS.md
-   - agents/workflow-orchestrator.md
-
-5. **Template Files**
-   - `templates/project/CLAUDE.md.minimal.template` - Update `workflow.version` field
-   - `templates/project/CLAUDE.md.minimal-brownfield.template` - Update `workflow.version` field
-
-### Automated Update Commands
-
-**Step 1: Update Core Version Files**
-```bash
-# Update version.txt
-echo "3.1.0" > version.txt
-
-# Update install.sh VERSION variable (line 8)
-sed -i '' 's/VERSION="[0-9.]*"/VERSION="3.1.0"/' install.sh
-
-# Update CHANGELOG.md (rename section header)
-sed -i '' 's/## \[Unreleased\]/## [3.1.0] - 2026-01-27/' CHANGELOG.md
+**Commit conventions:**
+```
+feat: Add new command or feature
+fix: Bug fix
+docs: Documentation updates
+chore: Maintenance (version bumps, dependency updates)
+test: Test additions or fixes
+refactor: Code restructuring without behavior change
 ```
 
-**Step 2: Bulk Update All Documentation References**
-```bash
-# Replace version references across all docs (adjust OLD_VERSION as needed)
-OLD_VERSION="3.1.0"
-NEW_VERSION="3.1.0"
+**Release workflow:**
+1. Make changes, commit to master
+2. Run `./scripts/release.sh [major|minor|patch]`
+3. Script handles: version bump, CHANGELOG update, git tag, push
+4. Users update with: `workflow-update`
 
-for file in README.md CLAUDE.md commands/help.md AGENTS.md COMMANDS.md GUIDE.md WORKFLOW.md STATE.md USAGE.md EXAMPLES.md PATTERNS.md agents/workflow-orchestrator.md; do
-  sed -i '' "s/${OLD_VERSION}/${NEW_VERSION}/g" "$file"
-  sed -i '' "s/v${OLD_VERSION%.*}/v${NEW_VERSION%.*}/g" "$file"  # Handle vX.Y format
+## Key Files to Understand
+
+**Core system files:**
+- `install.sh` - Installation script (generates workflow-update, workflow-init, etc.)
+- `bin/workflow-patch` - Smart merge utility for CLAUDE.md updates
+- `bin/workflow-update` - Auto-generated by install.sh, clones from GitHub
+- `agents/workflow-orchestrator.md` - Main orchestration agent
+- `templates/skills/workflow/SKILL.md` - Workflow orchestration skill
+
+**Template files:**
+- `templates/project/CLAUDE.md.greenfield.template` - New projects
+- `templates/project/CLAUDE.md.brownfield.template` - Existing codebases
+- `templates/project/CLAUDE.md.minimal*.template` - Compact versions for workflow-init
+
+**Critical utilities:**
+- `tests/run_all_tests.sh` - Master test runner
+- `scripts/verify-docs.sh` - Documentation sync checker
+- `scripts/release.sh` - Release automation
+
+## Common Development Tasks
+
+**Adding a new command:**
+```bash
+# 1. Create command file
+vim commands/my-command.md
+# Add frontmatter and instructions
+
+# 2. Test locally
+ln -sf $(pwd)/commands/my-command.md ~/.claude/commands/my-command.md
+
+# 3. Update documentation
+# Add to README.md Commands Reference section
+
+# 4. Commit and push
+git add commands/my-command.md README.md
+git commit -m "feat: add /my-command for X"
+git push
+```
+
+**Adding a new skill:**
+```bash
+# 1. Create skill directory and file
+mkdir -p templates/skills/my-skill
+vim templates/skills/my-skill/SKILL.md
+# Add frontmatter (name, description) and expertise
+
+# 2. Update installation script
+# Add 'my-skill' to skill list in install.sh (line ~314, ~441, ~953)
+
+# 3. Test locally
+cp -r templates/skills/my-skill ~/.claude/skills/
+
+# 4. Update documentation
+# Add to README.md Skills Reference section
+
+# 5. Commit and push
+git add templates/skills/my-skill install.sh README.md
+git commit -m "feat: add my-skill for X"
+git push
+```
+
+**Fixing a workflow-patch bug:**
+```bash
+# 1. Reproduce the issue
+cd /tmp/test && workflow-init
+# Manually create conditions that trigger bug
+
+# 2. Fix bin/workflow-patch
+
+# 3. Test fix locally
+bash bin/workflow-patch  # Should work now
+
+# 4. Deploy to global install for further testing
+rm -f ~/.claude-workflow-agents/bin/workflow-patch
+cp bin/workflow-patch ~/.claude-workflow-agents/bin/workflow-patch
+
+# 5. Test in actual project
+cd /tmp/test && workflow-patch  # Should work
+
+# 6. Commit and push
+git add bin/workflow-patch
+git commit -m "fix: workflow-patch handles X correctly"
+git push
+```
+
+**Updating a template:**
+```bash
+# 1. Edit template
+vim templates/project/CLAUDE.md.greenfield.template
+
+# 2. Bump version if needed
+# If adding new features, increment workflow.version in template
+
+# 3. Update corresponding brownfield template (keep in sync)
+vim templates/project/CLAUDE.md.brownfield.template
+
+# 4. Test workflow-patch picks up changes
+cd /tmp/test && workflow-init
+# Simulate old version, run workflow-patch
+
+# 5. Commit
+git add templates/project/
+git commit -m "feat: add X to templates"
+git push
+```
+
+## When Things Break
+
+**Installation not working:**
+```bash
+# Check global install
+ls ~/.claude-workflow-agents/
+ls ~/.claude/skills/
+ls ~/.claude/commands/
+ls ~/.claude/agents/
+
+# Reinstall
+workflow-uninstall
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash
+```
+
+**Commands not appearing:**
+```bash
+# Check symlinks
+ls -la ~/.claude/commands/ | grep workflow-agents
+
+# Refresh symlinks
+workflow-refresh
+
+# Or manually
+for f in ~/.claude-workflow-agents/commands/*.md; do
+  ln -sf "$f" ~/.claude/commands/$(basename "$f")
 done
 ```
 
-**Step 3: Update Template Workflow Versions**
+**workflow-patch not working:**
 ```bash
-# Update workflow.version in templates (handles both X.Y and X.Y.Z formats)
-sed -i '' 's/version: [0-9.]*$/version: 3.1/' templates/project/CLAUDE.md.minimal.template
-sed -i '' 's/version: [0-9.]*$/version: 3.1/' templates/project/CLAUDE.md.minimal-brownfield.template
+# Check CLAUDE.md has workflow marker
+grep "WORKFLOW ACTIVE" CLAUDE.md
+
+# Check version detection
+grep "version:" CLAUDE.md
+
+# Run with debug output
+bash -x ~/.claude-workflow-agents/bin/workflow-patch
 ```
 
-**Step 4: Verify All Updates**
+**Tests failing:**
 ```bash
-# Run verification to ensure nothing broke
-./scripts/verify.sh
+# Run specific failing test
+bash -x ./tests/structural/test_agents_exist.sh
 
-# Manually verify critical files
-echo "=== version.txt ==="
-cat version.txt
-
-echo "=== install.sh VERSION (line 8) ==="
-head -n 10 install.sh | grep VERSION
-
-echo "=== CHANGELOG.md (latest version) ==="
-head -n 20 CHANGELOG.md | grep -A 5 "\[3.1.0\]"
-
-echo "=== Template workflow versions ==="
-grep "version:" templates/project/CLAUDE.md.*.template
+# Check test expectations match reality
+# Tests are in tests/ with descriptive names
+# Each test is self-contained and can be read/modified
 ```
 
-**Step 5: Git Tag and Release**
-```bash
-# Commit version bump
-git add -A
-git commit -m "chore: bump version to 3.1.0"
+## Philosophy
 
-# Create annotated tag
-git tag -a v3.1.0 -m "Release v3.1.0
+**Context efficiency:** Keep runtime context minimal. Load expertise on-demand via skills.
 
-- Feature 1
-- Feature 2
-- Bug fix 1"
+**User simplicity:** Users just describe what they want. Claude handles orchestration automatically.
 
-# Push commit and tag
-git push origin main
-git push origin v3.1.0
-```
+**Maintainability:** Clear separation: skills (expertise), agents (orchestration), commands (user interface), templates (scaffolding).
 
-### Common Mistakes and How to Avoid Them
+**Testing:** Every core system component has tests. Run `./tests/run_all_tests.sh` before releases.
 
-| Mistake | Impact | Prevention |
-|---------|--------|------------|
-| ❌ Forget `install.sh` VERSION | Users get wrong version, updates fail | Run grep check before committing |
-| ❌ Inconsistent version refs in docs | Confusion, looks unprofessional | Use automated sed commands |
-| ❌ Forget to update templates | New projects initialized with wrong version | Check grep output for all workflow.version fields |
-| ❌ Skip CHANGELOG.md update | No release notes, breaks semver tracking | Make it first step before any commits |
-| ❌ Typo in version number | Breaking inconsistency | Verify with grep across all files |
-
-### Pre-Release Checklist
-
-Before creating the git tag, confirm:
-
-- [ ] `version.txt` contains new version
-- [ ] `install.sh` line 8 has `VERSION="X.Y.Z"` with new version
-- [ ] `CHANGELOG.md` has `[X.Y.Z] - YYYY-MM-DD` section with all changes documented
-- [ ] All docs have consistent version references (run grep to verify)
-- [ ] Templates have `workflow.version: X.Y` updated
-- [ ] `./scripts/verify.sh` passes
-- [ ] All tests pass (`./tests/run_all_tests.sh`)
-- [ ] Git working directory is clean
-
-### Why This Protocol Exists
-
-The user's question **"why is self maintenance not kicking in for these things?"** highlighted a gap in our process. This protocol ensures:
-
-1. **No files are forgotten** - Comprehensive checklist catches everything
-2. **Automation reduces errors** - Sed commands eliminate manual find-replace mistakes
-3. **Verification is mandatory** - Multiple checkpoints prevent bad releases
-4. **Process is documented** - Future maintainers know exactly what to do
-
-**If you're bumping a version and this protocol doesn't cover something, UPDATE THIS PROTOCOL FIRST, then proceed with the version bump.**
-
----
-
-## 📄 Documentation Dependency Map
-
-**CRITICAL: These files must stay in sync when agents/commands change.**
-
-### Primary Documentation Files
-
-| File | Contains | Must Update When |
-|------|----------|------------------|
-| **CLAUDE.md** | Repo maintenance, agent/command tables, counts | Any agent/command added/removed |
-| **STATE.md** | Current state, agent/command lists, recent changes | Any agent/command added/removed, after major changes |
-| **README.md** | User-facing docs, agent/command counts, tables | Any agent/command added/removed |
-| **commands/help.md** | In-app help system, agent descriptions ("THE X AGENTS") | Any agent/command added/removed |
-| **agents/workflow-orchestrator.md** | Orchestration logic, agent coordination, invocation table | **ANY agent/command added/removed/modified** |
-| **AGENTS.md** | Detailed agent documentation | Agent capabilities change |
-| **COMMANDS.md** | Detailed command documentation | Command behavior changes |
-
-**⚠️ CRITICAL:** workflow-orchestrator.md is the MOST IMPORTANT file to keep in sync! It coordinates all agents and must know about every single one.
-
-### Cross-Reference Matrix
-
-When you add/remove an agent, it must be updated in:
-
-1. ✅ **CLAUDE.md** - Current State section → Agents table
-2. ✅ **STATE.md** - Agents List table + Component Counts
-3. ✅ **README.md** - "The X Agents" section + table
-4. ✅ **commands/help.md** - "THE X AGENTS" header + agent sections (L1/L2/Operations/Orchestration)
-5. ✅ **agents/workflow-orchestrator.md** - "Agents Coordinated" section + invocation table
-6. ✅ **tests/structural/test_agents_exist.sh** - REQUIRED_AGENTS array
-7. ✅ **tests/test_agents.sh** - REQUIRED_AGENTS array
-
-**CRITICAL: workflow-orchestrator.md must list ALL agents it coordinates!**
-- When adding an agent, add it to the appropriate category (L1/L2/Support/Operations)
-- Update the "When to Invoke Each Agent" table
-- Add orchestration flow if it's a primary workflow agent
-
-When you add/remove a command, it must be updated in:
-
-1. ✅ **CLAUDE.md** - Directory Structure comment (count)
-2. ✅ **STATE.md** - Component Counts
-3. ✅ **README.md** - Commands count
-4. ✅ **commands/help.md** - Commands section (if user-visible)
-5. ✅ **tests/structural/test_commands_exist.sh** - REQUIRED_COMMANDS array
-6. ✅ **tests/test_commands.sh** - REQUIRED_COMMANDS array
-
-### Workflow Command Scripts
-
-**When you add/modify workflow commands (workflow-*, bin/*), update:**
-
-| Script Location | What to Update | When |
-|-----------------|----------------|------|
-| **install.sh** (line ~137-169) | `workflow-version` embedded script | New command added, agent/command counts changed |
-| **install.sh** (line ~700-710) | Install success message commands list | New command added |
-| **bin/workflow-update** | Update logic, change detection | Update process changes, new features |
-| **bin/workflow-patch** | Section extraction, merge logic | Template structure changes, new sections |
-| **README.md** | Terminal commands table, updating section | New command added, behavior changes |
-
-**Examples:**
-- **Add new command** → Update workflow-version output + install.sh success message + README.md
-- **Add agent** → Update workflow-version if affects command list
-- **Change templates** → Update workflow-patch section extraction logic
-- **Add feature** → Update workflow-update to announce it
-
-**Why this matters:**
-- workflow-version is the first thing users run to check their installation
-- Out-of-sync command lists confuse users
-- workflow-patch must know template structure to preserve user data
-
-### Verification System
-
-The `./scripts/verify.sh` script automatically checks (7 checks):
-
-✓ **[1/7]** Agent counts consistent (CLAUDE.md, STATE.md, README.md, help.md)
-✓ **[2/7]** Command counts consistent (CLAUDE.md, STATE.md, README.md)
-✓ **[3/7]** All agents referenced in CLAUDE.md
-✓ **[4/7]** All agents referenced in help.md
-✓ **[5/7]** All agents in test files
-✓ **[6/7]** All commands in test files
-✓ **[7/7]** All agents in STATE.md agents list
-✓ **[7/7]** **workflow-orchestrator knows all agents it coordinates**
-
-**NEW:** Check 7 ensures the orchestrator stays in sync when agents change!
-
-**If verify.sh passes, your docs are in sync. If it fails, follow the error messages.**
-
-### Documentation Categories
-
-**User-Facing** (affects end users):
-- README.md
-- GUIDE.md
-- EXAMPLES.md
-- WORKFLOW.md
-- USAGE.md
-- commands/help.md
-
-**Developer-Facing** (affects contributors):
-- CLAUDE.md (this file)
-- STATE.md
-- AGENTS.md
-- COMMANDS.md
-- BACKEND.md
-- FRONTEND.md
-
-**Templates** (not direct docs):
-- templates/project/*.template
-- templates/docs/**
-
-**Generated** (created during workflow, not maintained):
-- docs/gaps/*.md (created by gap-analyzer)
-
----
-
-## What This Is
-
-A multi-agent workflow system. Users describe what they want, Claude orchestrates specialized agents to build it.
-
-**Two-level workflow:**
-- L1 (once): Understand → Design → Plan
-- L2 (per feature): Build → Test → Verify
-
----
-
-## Current State
-
-| Metric | Count |
-|--------|-------|
-| Agents | 16 |
-| Commands | 24 |
-
-### Agents
-
-| Agent | Category | Purpose |
-|-------|----------|---------|
-| intent-guardian | L1 | Define user promises with criticality |
-| ux-architect | L1 | Design experience |
-| agentic-architect | L1 | Design system with promise mapping |
-| implementation-planner | L1 | Create build plan with validation tasks |
-| change-analyzer | L1 Support | Assess changes |
-| gap-analyzer | L1 Support | Find issues |
-| brownfield-analyzer | L1 Support | Scan existing codebases |
-| backend-engineer | L2 | Build backend |
-| frontend-engineer | L2 | Build frontend |
-| test-engineer | L2 | Write tests |
-| code-reviewer | L2 Support | Review code |
-| debugger | L2 Support | Fix bugs |
-| ui-debugger | L2 Support | Debug UI with browser automation |
-| acceptance-validator | L2 Validation | Validate promises are kept |
-| workflow-orchestrator | Orchestration | Auto-chain agents and quality gates |
-| project-ops | Ops | Setup, sync, docs |
-
-### Commands
-
-| Command | Purpose |
-|---------|---------|
-| /help | Help system |
-| /workflow | Enable/disable/status |
-| /status | Show progress |
-| /next | Continue building |
-| /plan | View plans |
-| /verify | Verify phase |
-| /review | Code review |
-| /parallel | Parallel development |
-| /design | Design system |
-| /project | Project operations |
-| /llm-user | LLM user testing (init/gaps/refresh) |
-| /test-ui | Run LLM user tests |
-
----
-
-## Repository Structure
-
-```
-├── REPO FILES (for maintaining THIS repo, NOT installed)
-│   ├── CLAUDE.md              # THIS FILE (repo instructions)
-│   ├── README.md              # Repo documentation
-│   ├── CHANGELOG.md           # Repo releases
-│   ├── version.txt            # Repo version
-│   ├── scripts/               # Repo scripts
-│   ├── tests/                 # Repo tests
-│   └── .github/workflows/     # Repo CI
-│
-├── INSTALLED FILES (copied to ~/.claude-workflow-agents/)
-│   ├── agents/                # Agent definitions (17)
-│   ├── commands/              # Command definitions (26)
-│   ├── templates/             # User project templates
-│   └── version.txt            # Workflow version
-│
-└── USER TEMPLATES (in templates/, for user projects)
-    ├── project/
-    │   ├── CLAUDE.md.greenfield.template  # → user's CLAUDE.md (new projects)
-    │   ├── CLAUDE.md.brownfield.template  # → user's CLAUDE.md (existing code)
-    │   └── README.md.template     # → user's README.md
-    ├── docs/
-    │   ├── intent/                # → user's /docs/intent/
-    │   ├── ux/                    # → user's /docs/ux/
-    │   └── architecture/          # → user's /docs/architecture/
-    ├── infrastructure/
-    │   ├── scripts/verify.sh.template      # → user's scripts/
-    │   └── github/workflows/verify.yml.template  # → user's .github/
-    └── release/
-        ├── CHANGELOG.md.template  # → user's CHANGELOG.md
-        └── version.txt.template   # → user's version.txt
-```
-
-### What Gets Installed Where
-
-**Global Install (~/.claude-workflow-agents/):**
-```bash
-~/.claude-workflow-agents/
-├── agents/              # From repo agents/
-├── commands/            # From repo commands/
-├── templates/           # From repo templates/
-├── version.txt          # Workflow-agents version
-└── bin/                 # Created by install.sh
-    ├── workflow-init
-    ├── workflow-remove
-    ├── workflow-update
-    └── workflow-version
-```
-
-**NOT Installed (Repo-Specific):**
-- CLAUDE.md (this file)
-- README.md (repo docs)
-- CHANGELOG.md (repo changelog)
-- scripts/ (repo scripts)
-- tests/ (repo tests)
-- .github/ (repo CI)
-
-## Installation Model
-
-**Global Install + Per-Project Activation**
-
-- Install once: `~/.claude-workflow-agents/` (agents, commands, scripts)
-- Per project: Just `CLAUDE.md` with workflow markers
-- Lightweight: Projects reference global installation
-
-**Commands created by install.sh:**
-- `workflow-init` - Initialize project
-- `workflow-remove` - Remove from project
-- `workflow-update` - Update global install
-- `workflow-uninstall` - Remove global install
-
----
-
-## Adding an Agent
-
-1. Create `agents/new-agent.md`
-2. Add to this file's agent table
-3. Add to `commands/help.md` agents section
-4. Add to `README.md` agents table
-5. Add to `tests/structural/test_agents_exist.sh`
-6. Run `./scripts/verify.sh`
-7. Commit all files together
-
-## Adding a Command
-
-1. Create `commands/new-command.md`
-2. Add to this file's command table
-3. Add to `commands/help.md` commands section
-4. Add to `README.md` commands table
-5. Add to `tests/structural/test_commands_exist.sh`
-6. Run `./scripts/verify.sh`
-7. Commit all files together
+**Self-maintenance:** The system should work reliably. workflow-update, workflow-patch, workflow-init must be bulletproof - they're the update mechanism.
