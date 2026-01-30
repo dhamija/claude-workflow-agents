@@ -79,9 +79,9 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 
 **What this does:**
 - Installs to `~/.claude-workflow-agents/` (global location)
-- Copies **11 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
+- Copies **12 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
 - Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
-- Symlinks **27 commands** to `~/.claude/commands/`
+- Symlinks **28 commands** to `~/.claude/commands/`
 - Adds workflow commands to PATH
 
 ### What Gets Installed
@@ -102,6 +102,7 @@ Skills are domain expertise modules that Claude loads automatically when needed:
 | `brownfield` | Existing codebase analysis |
 | `llm-user-testing` | LLM-as-user testing protocols |
 | `gap-resolver` | Systematic gap resolution from test results |
+| `solution-iteration` | Multi-approach evaluation using LLM judges |
 
 #### Subagents (Isolated Context)
 Subagents are isolated execution environments for specific tasks:
@@ -490,6 +491,7 @@ Claude: [Loads gap-analysis skill]
 | Command | Description | When to Use |
 |---------|-------------|-------------|
 | `/implement <feature>` | Build a specific feature | Ready to code |
+| `/iterate` | Compare approaches using LLM judges | Evaluating options |
 | `/verify` | Run full verification (tests, promises, docs) | Before marking feature complete |
 | `/review <files>` | Code review | After implementing |
 | `/debug <issue>` | Launch debugger | Something broken |
@@ -755,6 +757,40 @@ Validation: User can actually find recipes by typing "chicken" in search
 ```
 
 **Key insight:** LLM user testing finds what's broken from the user's perspective - gap-resolver systematically fixes it and proves promises are kept.
+
+### Solution Iteration
+
+**Skill:** `solution-iteration`
+**Auto-loaded:** When comparing approaches or making architectural decisions
+**Purpose:** Evaluate multiple solutions using diverse LLM perspectives to find optimal approach
+
+**Provides:**
+- Multi-dimensional evaluation (UX, technical, business, security perspectives)
+- Judge personas (Pragmatist, Innovator, User Advocate, Business Strategist, Technical Architect, Security Auditor)
+- Synthesis of insights across evaluations
+- Hybrid approach generation combining best elements
+- Progressive refinement through multiple rounds
+
+**Commands:**
+```bash
+/iterate "Should I use X or Y?"     # Quick 2-approach comparison
+/iterate compare                    # Detailed comparison with multiple judges
+/iterate evaluate                   # Full evaluation of 3+ approaches
+/iterate refine                     # Progressive improvement rounds
+```
+
+**Evaluation Flow:**
+```
+Generate Approaches → Document Each → Run Judge Evaluations → Synthesize Insights → Recommend/Refine
+```
+
+**Example Use Cases:**
+- **Architecture decisions:** REST vs GraphQL vs tRPC
+- **State management:** Context vs Redux vs Zustand
+- **UI patterns:** Tabs vs Accordion vs Drawer
+- **Performance optimization:** Caching vs Indexing vs Redesign
+
+**Key insight:** Different approaches excel in different dimensions. Using multiple LLM judges reveals trade-offs and often leads to hybrid solutions that combine the best elements of each approach.
 
 ---
 

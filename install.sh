@@ -147,7 +147,7 @@ if [ -d "$CLAUDE_DIR/skills" ]; then
         if [ -d "$skill_dir" ]; then
             # Only remove workflow skill directories, preserve user's own skills
             skill_name=$(basename "$skill_dir")
-            if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow)$ ]]; then
+            if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver|solution-iteration)$ ]]; then
                 rm -rf "$skill_dir"
             fi
         fi
@@ -311,7 +311,7 @@ done
 for skill_dir in "$CLAUDE_DIR/skills"/*; do
     if [ -d "$skill_dir" ]; then
         skill_name=$(basename "$skill_dir")
-        if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver)$ ]]; then
+        if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver|solution-iteration)$ ]]; then
             rm -rf "$skill_dir"
         fi
     fi
@@ -492,7 +492,7 @@ case "$CMD" in
             for skill_dir in "$CLAUDE_DIR/skills"/*; do
                 if [ -d "$skill_dir" ]; then
                     skill_name=$(basename "$skill_dir")
-                    if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow)$ ]]; then
+                    if [[ "$skill_name" =~ ^(backend|brownfield|code-quality|debugging|frontend|llm-user-testing|testing|ux-design|validation|workflow|gap-resolver|solution-iteration)$ ]]; then
                         rm -rf "$skill_dir"
                     fi
                 fi
@@ -521,7 +521,7 @@ case "$CMD" in
 
         echo "✓ Workflow enabled"
         echo "  Created symlinks for 3 subagents and all commands"
-        echo "  Installed 10 skills"
+        echo "  Installed 12 skills"
         echo "  Your own files in ~/.claude/ remain untouched"
         ;;
 
@@ -1004,7 +1004,7 @@ for agent in code-reviewer debugger ui-debugger; do
 done
 
 SKILL_COUNT=0
-for skill in backend brownfield code-quality debugging frontend llm-user-testing testing ux-design validation workflow; do
+for skill in backend brownfield code-quality debugging frontend llm-user-testing testing ux-design validation workflow gap-resolver solution-iteration; do
     if [ -d "$CLAUDE_DIR/skills/$skill" ]; then
         ((SKILL_COUNT++))
     fi
@@ -1044,8 +1044,8 @@ if [ $SUBAGENT_COUNT -ne 3 ] || [ $SKILL_COUNT -ne 10 ] || [ $ZOMBIE_COUNT -gt 0
     if [ $SUBAGENT_COUNT -ne 3 ]; then
         echo "  • Expected 3 subagents, found $SUBAGENT_COUNT"
     fi
-    if [ $SKILL_COUNT -ne 10 ]; then
-        echo "  • Expected 10 skills, found $SKILL_COUNT"
+    if [ $SKILL_COUNT -ne 12 ]; then
+        echo "  • Expected 12 skills, found $SKILL_COUNT"
     fi
     if [ $ZOMBIE_COUNT -gt 0 ]; then
         echo "  • Found $ZOMBIE_COUNT zombie agent files from previous version"
