@@ -1,16 +1,16 @@
 # Project State
 
 > **Auto-updated by**: `./scripts/update-claude-md.sh`
->  **Last updated**: 2026-01-27
+>  **Last updated**: 2026-01-28
 
-## Component Counts (v3.1)
+## Component Counts (v3.2)
 
 | Component | Count | Last Changed |
 |-----------|-------|--------------|
 | Skills | 11 | 2026-01-28 |
-| Subagents | 3 | 2026-01-27 |
-| Agent Files (for Task tool invocation) | 17 | 2026-01-27 |
-| Commands | 27 | 2026-01-28 |
+| Subagents | 3 | 2026-01-28 |
+| Agent Files (for Task tool invocation) | 16 | 2026-01-28 |
+| Commands | 25 | 2026-01-28 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
 | Tests | 32 | 2026-01-26 |
@@ -49,7 +49,6 @@
 | debug | ✓ Complete |
 | design | ✓ Complete |
 | docs | ✓ Complete |
-| fix-gaps | ✓ Complete |
 | gap | ✓ Complete |
 | implement | ✓ Complete |
 | improve | ✓ Complete |
@@ -62,7 +61,6 @@
 | replan | ✓ Complete |
 | review | ✓ Complete |
 | sync | ✓ Complete |
-| test-ui | ✓ Complete |
 | update | ✓ Complete |
 | ux | ✓ Complete |
 | ux-audit | ✓ Complete |
@@ -76,6 +74,10 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-28 | Added skill version tracking for artifact regeneration (`ui_testing.skill_version`) | Claude |
+| 2026-01-28 | Added scene-grounded responses to llm-user-testing skill (v1.1.0) | Claude |
+| 2026-01-28 | Consolidated /test-ui and /fix-gaps into /llm-user (27→25 commands) | Claude |
+| 2026-01-28 | Added LLM User Testing Architecture section to CLAUDE.md | Claude |
 | 2026-01-26 | **v2.0.0 RELEASE:** Self-contained CLAUDE.md templates architecture | Claude |
 | 2026-01-26 | BREAKING: Embedded all orchestration logic in CLAUDE.md templates (750+ lines each) | Claude |
 | 2026-01-26 | workflow-orchestrator.md converted to contributor documentation only | Claude |

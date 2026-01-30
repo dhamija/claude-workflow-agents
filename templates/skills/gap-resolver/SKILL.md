@@ -28,9 +28,9 @@ This skill takes gap analysis from LLM user testing and systematically:
 │  GAP ANALYSIS          FIX IMPLEMENTATION           RE-VALIDATION              │
 │  ════════════          ═══════════════════          ═════════════              │
 │                                                                                 │
-│  [CRITICAL] P3    ──▶  Design ──▶ Build ──▶ Test ──▶ /test-ui    ──▶ P3 ✓     │
-│  [HIGH] P2        ──▶  Design ──▶ Build ──▶ Test ──▶ /test-ui    ──▶ P2 ✓     │
-│  [MEDIUM] UX      ──▶  Build ──▶ Test        ──▶ /test-ui    ──▶ UX ✓     │
+│  [CRITICAL] P3    ──▶  Design ──▶ Build ──▶ Test ──▶ /llm-user test    ──▶ P3 ✓     │
+│  [HIGH] P2        ──▶  Design ──▶ Build ──▶ Test ──▶ /llm-user test    ──▶ P2 ✓     │
+│  [MEDIUM] UX      ──▶  Build ──▶ Test        ──▶ /llm-user test    ──▶ UX ✓     │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -41,12 +41,12 @@ This skill takes gap analysis from LLM user testing and systematically:
 
 | Command | Description |
 |---------|-------------|
-| `/fix-gaps` | Start fixing gaps from last analysis |
-| `/fix-gaps --priority=critical` | Fix only critical gaps |
-| `/fix-gaps --gap=GAP-ID` | Fix specific gap |
-| `/fix-gaps status` | Show fix progress |
-| `/fix-gaps verify` | Re-run tests for fixed gaps |
-| `/fix-gaps report` | Generate fix summary report |
+| `/llm-user fix` | Fix all gaps (prioritized by severity) |
+| `/llm-user fix critical` | Fix only critical gaps |
+| `/llm-user fix high` | Fix only high priority gaps |
+| `/llm-user fix GAP-XXX` | Fix specific gap by ID |
+| `/llm-user status` | View results, gaps, and progress |
+| `/llm-user status --filter=critical` | Filter by severity |
 
 ---
 
@@ -520,7 +520,7 @@ Implementation complete at: 2024-01-15T14:00:00Z
 Total time: 13h (estimated: 14h)
 
 Ready for verification. Run:
-  /fix-gaps verify --gap=GAP-001
+  /llm-user fix verify --gap=GAP-001
 ```
 
 ---
@@ -546,7 +546,7 @@ VERIFICATION: GAP-001 - Progress Tracking
    For each (scenario, persona) combination:
 
    Load llm-user-testing skill
-   Execute: /test-ui --scenario=multi-scene-session --persona=jake-teen
+   Execute: /llm-user test --scenario=multi-scene-session --persona=jake-teen
 
 3. COMPARE RESULTS
    ───────────────────────────────────────────────────────────
@@ -603,7 +603,7 @@ VERIFICATION: GAP-001 - Progress Tracking
    ───────────────────────────────────────────────────────────
    Ensure fix didn't break other scenarios:
 
-   /test-ui --scenario=all --personas=all
+   /llm-user test --scenario=all --personas=all
 
    Results:
    ✓ first-scene-description (Maria) - PASS
@@ -879,11 +879,11 @@ Proceed with fix design? [Y/n]
     "PostToolUse": [{
       "matcher": {
         "tool_name": "Bash",
-        "content": "test-ui"
+        "content": "llm-user test"
       },
       "hooks": [{
         "type": "command",
-        "command": "echo '[GAP-RESOLVER] Tests complete. Run /fix-gaps to address issues.'"
+        "command": "echo '[GAP-RESOLVER] Tests complete. Run /llm-user fix to address issues.'"
       }]
     }]
   }
@@ -900,9 +900,9 @@ FEATURE COMPLETION CHECKLIST (Updated)
 □ Unit tests pass
 □ Integration tests pass
 □ Code reviewed
-□ LLM user tests run (/test-ui)
+□ LLM user tests run (/llm-user test)
 □ Gaps identified and prioritized
-□ Critical gaps fixed (/fix-gaps --priority=critical)  ← REQUIRED
+□ Critical gaps fixed (/llm-user fix --priority=critical)  ← REQUIRED
 □ All scenarios pass
 □ Promise validated
 □ Documentation updated
@@ -914,31 +914,31 @@ CANNOT release with unfixed CRITICAL gaps
 
 ## Commands Reference
 
-### `/fix-gaps` (Main Command)
+### `/llm-user fix` (Main Command)
 
 Start fixing gaps from latest analysis.
 
 ```bash
 # Fix all gaps in priority order
-/fix-gaps
+/llm-user fix
 
 # Only critical gaps (blocks release)
-/fix-gaps --priority=critical
+/llm-user fix --priority=critical
 
 # Critical and high priority
-/fix-gaps --priority=high
+/llm-user fix --priority=high
 
 # Specific gap only
-/fix-gaps --gap=GAP-001
+/llm-user fix --gap=GAP-001
 
 # Show what would be fixed (dry run)
-/fix-gaps --dry-run
+/llm-user fix --dry-run
 
 # Limit number of gaps to fix
-/fix-gaps --limit=3
+/llm-user fix --limit=3
 ```
 
-### `/fix-gaps status`
+### `/llm-user fix status`
 
 Show current fix progress.
 
@@ -970,22 +970,22 @@ Promises:
 Next: Complete GAP-002 verification, then fix GAP-003
 ```
 
-### `/fix-gaps verify`
+### `/llm-user fix verify`
 
 Re-run tests for implemented fixes.
 
 ```bash
 # Verify all implemented gaps
-/fix-gaps verify
+/llm-user fix verify
 
 # Verify specific gap
-/fix-gaps verify --gap=GAP-001
+/llm-user fix verify --gap=GAP-001
 
 # Verify and show detailed results
-/fix-gaps verify --verbose
+/llm-user fix verify --verbose
 ```
 
-### `/fix-gaps report`
+### `/llm-user fix report`
 
 Generate summary report of all fixes.
 
@@ -1059,11 +1059,11 @@ Found: None
 
 You must run LLM user tests first:
   1. /llm-user init    (if not done)
-  2. /test-ui          (run tests)
-  3. /fix-gaps         (fix gaps)
+  2. /llm-user test          (run tests)
+  3. /llm-user fix         (fix gaps)
 
 Or specify a specific results directory:
-  /fix-gaps --results=tests/llm-user/results/2024-01-15T10-00-00/
+  /llm-user fix --results=tests/llm-user/results/2024-01-15T10-00-00/
 ```
 
 ### If No Gaps Found
@@ -1144,7 +1144,7 @@ Even small fixes can break other scenarios.
 
 ```
 ALWAYS:
-  After closing gap → Run /test-ui --scenario=all
+  After closing gap → Run /llm-user test --scenario=all
   Ensure no new failures introduced
 ```
 

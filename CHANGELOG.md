@@ -9,6 +9,30 @@ Format: [Semantic Versioning](https://semver.org/)
 ## [Unreleased]
 
 ### Added
+- **Skill Version Tracking for Artifact Regeneration**
+  - Added `skill_version` field to `ui_testing` state in CLAUDE.md templates
+  - `/llm-user init` detects version mismatch and suggests `--upgrade`
+  - `/llm-user refresh` checks both doc changes AND skill version
+  - Enables projects to benefit from new skill features automatically
+
+- **Scene-Grounded Responses in LLM User Testing (v1.1.0)**
+  - New principle: LLM users must make LANGUAGE mistakes (grammar, vocabulary), not PERCEPTION mistakes (wrong objects)
+  - Step 0: GROUND IN SCENE - Extract all visible elements before generating responses
+  - Scene-Response Validation with regeneration logic if mismatch detected
+  - Scene-Based Scenario Template for language learning apps
+  - Prevents test users from describing objects not in scene (invalidates test results)
+
+- **LLM User Testing Architecture Documentation**
+  - Added comprehensive section to CLAUDE.md documenting design decisions
+  - Covers: command consolidation, skill version tracking, scene-grounding, gap-driven flow
+
+### Changed
+- **Consolidated LLM User Commands (27 → 25 commands)**
+  - `/test-ui` removed → functionality in `/llm-user test`
+  - `/fix-gaps` removed → functionality in `/llm-user fix`
+  - Single entry point: `/llm-user init|test|fix|status|refresh`
+  - Clearer mental model with related functionality grouped together
+
 - **Version Selection for Install and Update**
   - `install.sh` now supports version arguments: `latest` (default), `master`, or specific tags (e.g., `v3.1.0`)
   - `workflow-update` now supports version arguments for targeted updates
@@ -63,7 +87,7 @@ Format: [Semantic Versioning](https://semver.org/)
   - **Impact**: `llm-user-architect` couldn't be invoked by Task tool, but skill already existed with full functionality
   - **Fix**: Removed llm-user-architect from CORE_AGENTS, deleted redundant agent file
     - LLM user testing now uses `llm-user-testing` skill exclusively
-    - Skill has complete protocol (/llm-user init, /test-ui, /llm-user gaps, etc.)
+    - Skill has complete protocol (/llm-user init, /llm-user test, /llm-user gaps, etc.)
     - Updated all templates and orchestration to reference skill instead of subagent
     - Subagent count: 4 → 3 (code-reviewer, debugger, ui-debugger)
     - Skills count: 9 → 10 (added llm-user-testing to documented list)
@@ -77,7 +101,7 @@ Format: [Semantic Versioning](https://semver.org/)
 - **LLM User Testing System** - Doc-driven automated UI testing with LLM-simulated users
   - New skill: `llm-user-testing` - Protocols for LLM-as-user testing, persona simulation, gap analysis
   - New subagent: `llm-user-architect` - Generates project-specific test infrastructure from workflow docs
-  - New commands: `/llm-user init`, `/test-ui`, `/llm-user gaps`, `/llm-user refresh`
+  - New commands: `/llm-user init`, `/llm-user test`, `/llm-user gaps`, `/llm-user refresh`
   - Automatically synthesizes test specs from existing L1 docs (intent, UX, architecture)
   - Domain-specific personas and scenarios extracted from user journeys
   - Promise-based validation with traceability back to original requirements

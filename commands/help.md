@@ -239,15 +239,15 @@ SKILLS (On-Demand Domain Expertise)
 
   ┌─────────────────────────────────────────────────────────────┐
   │ LLM-USER-TESTING (Automated UI Testing)                     │
-  │ Purpose: LLM-as-user testing protocols                       │
-  │ Loads: When working with /llm-user or /test-ui commands     │
+  │ Purpose: LLM-as-user testing protocols                      │
+  │ Loads: When working with /llm-user commands                 │
   │ Includes: Persona simulation, gap analysis, evaluation      │
   └─────────────────────────────────────────────────────────────┘
 
   ┌─────────────────────────────────────────────────────────────┐
   │ GAP-RESOLVER (Gap-Driven Development)                       │
   │ Purpose: Systematic gap resolution from LLM user testing    │
-  │ Loads: When working with /fix-gaps commands                 │
+  │ Loads: When working with /llm-user fix commands             │
   │ Includes: Fix specs, task orchestration, verification       │
   └─────────────────────────────────────────────────────────────┘
 
@@ -373,15 +373,11 @@ DEVELOPMENT
 
 LLM USER TESTING
 ────────────────
-  /llm-user init             Generate LLM user testing infrastructure
-  /llm-user gaps [--run]     Display gap analysis from test run
-  /llm-user refresh          Regenerate test artifacts after doc changes
-  /test-ui [--url]           Execute LLM user tests with personas
-  /fix-gaps [options]        Fix gaps systematically
-  /fix-gaps status           Show gap resolution progress
-  /fix-gaps verify [--gap]   Re-run verification for fixes
-  /fix-gaps report           Generate comprehensive gap report
-  /fix-gaps list             List all gaps with filtering
+  /llm-user init             Generate test infrastructure from L1 docs
+  /llm-user test [url]       Run LLM user tests against your UI
+  /llm-user fix [gap-id]     Fix gaps (auto-verifies after each)
+  /llm-user status           View test results, gaps, and progress
+  /llm-user refresh          Regenerate after doc changes
 
 
 PARALLEL (Advanced, Opt-In)

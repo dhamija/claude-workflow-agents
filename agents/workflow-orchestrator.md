@@ -253,14 +253,14 @@ Load llm-user-testing skill
    │   ├─► Show: Evaluation criteria
    │   └─► Ask: "Review test-spec.yaml and iterate if needed?"
    └─► Phase 5: Ready to test
-       └─► Suggest: "Run /test-ui --url=<URL> to execute tests"
+       └─► Suggest: "Run /llm-user test --url=<URL> to execute tests"
    ↓
 User reviews evaluation criteria
    ├─► If needs changes: Edit test-spec.yaml → /llm-user refresh
    └─► If approved: Continue
    ↓
 Execute UI tests
-   ├─► Invoke /test-ui command
+   ├─► Invoke /llm-user test command
    ├─► For each scenario:
    │   ├─► Spawn LLM user with persona
    │   ├─► Execute user journey steps
@@ -277,29 +277,29 @@ Execute UI tests
        └─► Suggest: "/llm-user gaps for details"
    ↓
 Handle results
-   ├─► If critical gaps: Load gap-resolver skill → Suggest "/fix-gaps --priority=critical"
-   ├─► If high priority gaps: Load gap-resolver skill → Suggest "/fix-gaps --priority=high"
-   ├─► If medium/low gaps: Log for future improvement → Suggest "/fix-gaps list"
+   ├─► If critical gaps: Load gap-resolver skill → Suggest "/llm-user fix --priority=critical"
+   ├─► If high priority gaps: Load gap-resolver skill → Suggest "/llm-user fix --priority=high"
+   ├─► If medium/low gaps: Log for future improvement → Suggest "/llm-user fix list"
    └─► Update promise status in CLAUDE.md state
    ↓
 Gap-driven development cycle (with gap-resolver skill)
-   1. /fix-gaps → Systematic gap resolution
+   1. /llm-user fix → Systematic gap resolution
       ├─► Prioritize gaps by severity
       ├─► Create fix specification
       ├─► Implement via workflow agents
       └─► Verify with re-testing
-   2. /fix-gaps verify → Re-run failed scenarios
+   2. /llm-user fix verify → Re-run failed scenarios
       └─► Compare before/after results
-   3. /fix-gaps status → Track progress
-   4. /fix-gaps report → Generate improvement report
+   3. /llm-user fix status → Track progress
+   4. /llm-user fix report → Generate improvement report
 ```
 
 **Integration Points:**
 
 1. **After frontend-engineer completes** → Check if UI accessible → Suggest `/llm-user init`
 2. **Before acceptance-validator** → Run LLM user tests first (automated validation)
-3. **After test results** → If gaps found → Load gap-resolver skill → Suggest `/fix-gaps`
-4. **After gaps fixed** → Suggest `/fix-gaps verify` to re-run failed scenarios
+3. **After test results** → If gaps found → Load gap-resolver skill → Suggest `/llm-user fix`
+4. **After gaps fixed** → Suggest `/llm-user fix verify` to re-run failed scenarios
 5. **When docs change** → Remind user to run `/llm-user refresh`
 
 **Keywords that trigger LLM user testing:**
@@ -352,7 +352,7 @@ Gap-driven development cycle (with gap-resolver skill)
 1. LLM User Testing (if UI exists)
    - Check: UI accessible + L1 docs exist
    - Suggest: /llm-user init (if not done)
-   - Execute: /test-ui to validate user journeys
+   - Execute: /llm-user test to validate user journeys
    - If critical gaps: STOP, fix, re-test
    - If high priority gaps: Recommend fixing
    - Update promise status based on test results
@@ -426,9 +426,9 @@ session:
 | "add [feature]", "also need", "change [thing]" | **change-analyzer** |
 | "/gap", "/audit", "improve codebase", "fix tech debt" | **gap-analyzer** |
 | "UI is ready", "frontend done", "deployed to staging", "test user journeys" | Load `llm-user-testing` skill → `/llm-user init` |
-| "validate user experience", "check if promises work in UI" | `/test-ui` |
-| "fix the gaps", "resolve issues", "critical gaps", "validate promises" | Load `gap-resolver` skill → `/fix-gaps` |
-| "verify fixes", "re-test", "check improvements" | `/fix-gaps verify` |
+| "validate user experience", "check if promises work in UI" | `/llm-user test` |
+| "fix the gaps", "resolve issues", "critical gaps", "validate promises" | Load `gap-resolver` skill → `/llm-user fix` |
+| "verify fixes", "re-test", "check improvements" | `/llm-user fix verify` |
 
 ### Response Protocols
 
@@ -642,7 +642,7 @@ grep -A 10 "## L1 Orchestration Flow" CLAUDE.md
 ### v3.1 (2026-01-27)
 - **Breaking Change:** Skills + Hooks architecture
 - Orchestration logic moved FROM CLAUDE.md TO workflow skill
-- 10 skills loaded on-demand by Claude
+- 11 skills loaded on-demand by Claude
 - Only 3 subagents (isolated tasks)
 - Minimal CLAUDE.md (~80 lines, state only)
 - Optional hooks for automatic quality gates

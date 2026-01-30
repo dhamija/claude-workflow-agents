@@ -41,7 +41,7 @@ This project uses **Claude Workflow Agents** - an automated orchestration system
 | "test failing", "tests broken", "spec failed" | **debugger** + **test-engineer** |
 | "add [feature]", "also need", "change [thing]" | **change-analyzer** |
 | "UI is ready", "frontend done", "deployed to staging", "test user journeys" | Load `llm-user-testing` skill → `/llm-user init` |
-| "validate user experience", "check if promises work in UI" | `/test-ui` |
+| "validate user experience", "check if promises work in UI" | `/llm-user test` |
 
 ---
 
@@ -340,7 +340,7 @@ Starting with backend...
      → If user agrees: Load `llm-user-testing` skill and execute `/llm-user init` protocol
    - If initialized but not run recently:
      ```
-     Suggest: Run /test-ui --url=[URL] to validate user journeys
+     Suggest: Run /llm-user test --url=[URL] to validate user journeys
      ```
    - If critical gaps found:
      ```
@@ -355,7 +355,7 @@ Starting with backend...
      [Fix now / Show details / Continue anyway (not recommended)]
      ```
      → DO NOT mark feature complete until critical gaps fixed
-     → Re-run /test-ui after fixes
+     → Re-run /llm-user test after fixes
    - Update state: `ui_testing.last_run`, `ui_testing.last_score`, `ui_testing.critical_gaps`
 
 2. **CRITICAL:** Promise Validation
@@ -777,7 +777,7 @@ validation:
 
 ui_testing:
   initialized: false           # true after /llm-user init
-  last_run: null               # timestamp of last /test-ui run
+  last_run: null               # timestamp of last /llm-user test run
   last_score: null             # overall score (0-10)
   critical_gaps: 0             # number of critical gaps found
   high_priority_gaps: 0        # number of high priority gaps
@@ -804,11 +804,11 @@ session:
 | `/status` | Show detailed project progress |
 | `/llm-user init` | Generate LLM user testing infrastructure |
 | `/llm-user gaps` | Display gap analysis from test run |
-| `/test-ui [--url]` | Execute LLM user tests with personas |
-| `/fix-gaps` | Fix gaps systematically (after LLM user testing) |
-| `/fix-gaps status` | Show gap resolution progress |
-| `/fix-gaps verify` | Re-run tests to validate fixes |
-| `/fix-gaps report` | Generate improvement report |
+| `/llm-user fix` | Fix gaps systematically (after LLM user testing) |
+| `/llm-user verify` | Re-run tests to validate fixes |
+| `/llm-user status` | Show gap resolution progress |
+| `/llm-user report` | Generate improvement report |
+| `/llm-user test [--url]` | Execute LLM user tests with personas |
 | `/next` | Continue to next workflow step |
 | `/review [path]` | Run code-reviewer on specific files |
 | `/verify` | Run verification checks (tests, lint, etc.) |

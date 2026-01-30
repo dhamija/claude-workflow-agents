@@ -1,396 +1,411 @@
 ---
-description: LLM user testing commands (init, gaps, refresh)
+description: LLM user testing - setup, test, fix, and track
 ---
 
 # LLM User Testing
 
-**Command Family:** `/llm-user <subcommand>`
+**Command:** `/llm-user <subcommand>`
 
-**Purpose:** Initialize, execute, and manage domain-specific LLM user testing for your project.
+**Purpose:** Automated UI testing using LLM-simulated users to validate promises.
 
 ---
 
-## Subcommands
+## Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+| `init` | Generate test infrastructure from L1 docs |
+| `test` | Run LLM user tests against your UI |
+| `fix` | Systematically fix gaps found by tests |
+| `status` | View test results, gaps, and progress |
+| `refresh` | Regenerate after doc changes |
+
+---
+
+## Workflow
+
+```
+/llm-user init     → Generate personas, scenarios, evaluators
+       ↓
+/llm-user test     → Run tests, find gaps
+       ↓
+/llm-user status   → Review gaps by priority
+       ↓
+/llm-user fix      → Fix gaps (auto-verifies after each)
+       ↓
+/llm-user test     → Confirm all gaps resolved
+```
+
+---
+
+## Commands
 
 ### `/llm-user init`
 
-**Purpose:** Analyze workflow docs and generate LLM user testing infrastructure.
+Generate test infrastructure from your L1 workflow docs.
 
-**Usage:**
 ```bash
-/llm-user init [--force]
+/llm-user init           # Generate from docs
+/llm-user init --force   # Regenerate even if exists
+/llm-user init --upgrade # Regenerate with latest skill version
 ```
-
-**What it does:**
-1. Scans for workflow documentation (intent, UX, architecture)
-2. Validates docs contain testable content
-3. Generates unified test specification
-4. Creates project-specific test subagents
-5. Sets up test infrastructure
 
 **Prerequisites:**
-- ✅ `docs/intent/product-intent.md` exists
-- ✅ `docs/ux/user-journeys.md` exists
-- ✅ `docs/architecture/agent-design.md` (or `system-design.md`) exists
+- `docs/intent/product-intent.md`
+- `docs/ux/user-journeys.md`
+- `docs/architecture/agent-design.md`
 
-**Outputs:**
+**Creates:**
 ```
 tests/llm-user/
-├── test-spec.yaml
-├── personas/
-│   ├── {{persona-id}}.yaml
-│   └── ...
-└── scenarios/
-    ├── {{scenario-id}}.yaml
-    └── ...
+├── test-spec.yaml       # Unified test configuration
+├── personas/            # Simulated user profiles
+└── scenarios/           # Test scenarios
 
 .claude/agents/
-├── {{project}}-llm-user.md
-└── {{project}}-evaluator.md
+├── {{project}}-llm-user.md      # Domain-specific user agent
+└── {{project}}-evaluator.md     # Domain-specific evaluator
 ```
 
-**Options:**
-- `--force`: Regenerate even if files exist
+**Version Tracking:**
+When artifacts are generated, the skill version is recorded in CLAUDE.md:
+```yaml
+ui_testing:
+  skill_version: "1.1.0"  # Version that generated artifacts
+```
 
-**Example:**
-```bash
-# After L1 planning complete
-/llm-user init
+If the skill is upgraded, `/llm-user init` will detect the version mismatch:
+```
+⚠ Artifacts were generated with skill v1.0.0
+  Current skill version: v1.1.0
 
-# Output shows:
-# - 3 personas extracted
-# - 5 scenarios generated
-# - Evaluation rubric created
-# Ready to test!
+New features in v1.1.0:
+  - Scene-grounded responses (critical for scene-based apps)
+  - Improved validation rules
+
+Run /llm-user init --upgrade to regenerate with new features
 ```
 
 ---
 
-### `/llm-user gaps`
+### `/llm-user test`
 
-**Purpose:** Display gap analysis from most recent test run.
+Run LLM user tests against your UI.
 
-**Usage:**
 ```bash
-/llm-user gaps [--run=<timestamp>] [--format=md|html|json]
-```
+# Run all tests against localhost:3000
+/llm-user test
 
-**What it does:**
-1. Finds most recent test run (or specified run)
-2. Reads gap analysis report
-3. Displays prioritized recommendations
-4. Shows traceability to original docs
+# Test specific URL
+/llm-user test https://staging.myapp.com
+
+# Test specific scenario
+/llm-user test --scenario=checkout-flow
+
+# Test specific persona
+/llm-user test --persona=maria-beginner
+
+# Combine options
+/llm-user test https://staging.myapp.com --scenario=checkout --persona=expert
+```
 
 **Options:**
-- `--run=<timestamp>`: View specific test run
-- `--format=md`: Markdown (default)
-- `--format=html`: HTML report
-- `--format=json`: Machine-readable
+| Option | Description |
+|--------|-------------|
+| `[url]` | Base URL (default: localhost:3000) |
+| `--scenario=<id>` | Run specific scenario only |
+| `--persona=<id>` | Run with specific persona only |
+| `--critical` | Run only critical path scenarios |
 
-**Example:**
-```bash
-/llm-user gaps
+**Output:**
+```
+LLM USER TEST RESULTS
+═════════════════════
 
-# Output shows:
-# Overall Score: 7.2/10
-# Critical Gaps: 1
-# High Priority: 2
-# ...
+URL: https://staging.myapp.com
+Scenarios: 4 | Passed: 3 | Failed: 1
+
+SCORE: 7.2/10
+
+GAPS FOUND:
+🔴 CRITICAL (1)
+   GAP-001: No progress tracking visible
+
+🟠 HIGH (2)
+   GAP-002: Feedback not level-adaptive
+   GAP-003: Loading time >3s
+
+Run /llm-user status for details
+Run /llm-user fix to resolve gaps
 ```
 
-**Output format:**
-- Executive summary
-- Promise fulfillment status
-- Detailed gap analysis by severity
-- Recommendations with priority
-- Traceability matrix
+---
+
+### `/llm-user fix`
+
+Fix gaps found by LLM user testing. Auto-verifies after each fix.
+
+```bash
+# Fix all gaps (critical first)
+/llm-user fix
+
+# Fix only critical gaps
+/llm-user fix --critical
+
+# Fix only high priority
+/llm-user fix --high
+
+# Fix specific gap
+/llm-user fix GAP-001
+
+# Fix up to N gaps
+/llm-user fix --limit=3
+```
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `[gap-id]` | Fix specific gap |
+| `--critical` | Only critical gaps |
+| `--high` | Critical and high gaps |
+| `--limit=N` | Stop after N gaps |
+
+**Workflow per gap:**
+1. Create fix specification
+2. Implement via workflow agents (backend/frontend/test)
+3. Run code review
+4. **Auto-verify** by re-running failed scenarios
+5. Update gap status (OPEN → CLOSED)
+6. Move to next gap
+
+**Output:**
+```
+FIXING GAPS
+═══════════
+
+🎯 GAP-001 (CRITICAL): No progress tracking
+   Creating fix spec...
+   Implementing 3 tasks...
+   ✓ Backend: progress tracking API
+   ✓ Frontend: progress dashboard
+   ✓ Tests: progress tracking tests
+
+   Verifying...
+   Re-running: multi-scene-session
+   ✓ Verification PASSED
+
+   Status: OPEN → CLOSED
+   Score: 7.2 → 8.5
+
+Continue to GAP-002? [Y/n]
+```
+
+---
+
+### `/llm-user status`
+
+View test results, gaps, and fix progress.
+
+```bash
+# Show current status
+/llm-user status
+
+# Show specific test run
+/llm-user status --run=2026-01-28T10:30:00
+
+# Filter by priority
+/llm-user status --critical
+/llm-user status --high
+
+# Filter by status
+/llm-user status --open
+/llm-user status --closed
+
+# Export to file
+/llm-user status --export
+/llm-user status --export=json
+```
+
+**Options:**
+| Option | Description |
+|--------|-------------|
+| `--run=<timestamp>` | View specific test run |
+| `--critical` | Show only critical gaps |
+| `--high` | Show critical and high |
+| `--open` | Show only unresolved gaps |
+| `--closed` | Show only resolved gaps |
+| `--export` | Export to markdown file |
+| `--export=json` | Export as JSON |
+
+**Output:**
+```
+LLM USER TESTING STATUS
+═══════════════════════
+
+LATEST RUN: 2026-01-28T10:30:00
+SCORE: 8.5/10 (was 7.2)
+
+PROMISE VALIDATION
+──────────────────
+✓ P1: Scene descriptions work
+✓ P2: Helpful corrections
+✓ P3: Progress visible (was ✗)
+~ P4: Level-adaptive (in progress)
+
+GAPS (2 open, 1 closed)
+───────────────────────
+🟢 CLOSED
+   ✓ GAP-001: Progress tracking
+
+🟠 OPEN - HIGH
+   • GAP-002: Feedback not adaptive
+   • GAP-003: Loading time >3s
+
+NEXT: /llm-user fix GAP-002
+```
 
 ---
 
 ### `/llm-user refresh`
 
-**Purpose:** Regenerate test artifacts after workflow doc changes.
+Regenerate test artifacts after workflow docs or skill version changes.
 
-**Usage:**
 ```bash
-/llm-user refresh [--what=all|spec|agents|scenarios]
+# Detect changes and regenerate
+/llm-user refresh
+
+# Force full regeneration
+/llm-user refresh --force
 ```
 
 **When to use:**
 - After updating `product-intent.md` (new promises)
-- After updating `user-journeys.md` (new personas/journeys)
-- After updating architecture (behavior changes)
-- After modifying acceptance criteria in plans
+- After updating `user-journeys.md` (new personas)
+- After architecture changes
+- After `workflow-update` installs new skill version
 
-**What it does:**
-1. Compares file hashes in test-spec.yaml to current docs
-2. Detects which docs changed
-3. Re-runs llm-user-testing skill protocol for changed components
-4. Shows diff of changes
-5. Asks for confirmation before overwriting
+**What it checks:**
+1. Doc hash changes (product-intent.md, user-journeys.md, etc.)
+2. Skill version changes (e.g., 1.0.0 → 1.1.0)
 
-**Options:**
-- `--what=all`: Regenerate everything
-- `--what=spec`: Only test-spec.yaml
-- `--what=agents`: Only subagent prompts
-- `--what=scenarios`: Only scenario files
+```
+LLM USER TESTING REFRESH
+════════════════════════
 
-**Example:**
-```bash
-# Added new promise P4 to intent doc
-/llm-user refresh
+Checking for changes...
 
-# Output shows:
-# Changed docs:
-#   - docs/intent/product-intent.md (new promise P4)
-#
-# Will update:
-#   - test-spec.yaml (add P4 to success criteria)
-#   - {{project}}-evaluator.md (add P4 scoring)
-#
-# Confirm? [Y/n]
+📄 Doc changes:    None
+🔧 Skill version:  1.0.0 → 1.1.0 (upgraded!)
+
+New in v1.1.0:
+  • Scene-grounded responses
+  • Improved validation
+
+Regenerating artifacts with v1.1.0 patterns...
+✓ Personas updated (3)
+✓ Scenarios updated (5)
+✓ Evaluators updated
+
+Done! Run /llm-user test to validate changes.
 ```
 
 ---
 
-## Complete Workflow
-
-### 1. Initial Setup
+## Complete Example
 
 ```bash
-# After L1 planning
+# 1. After L1 planning, set up testing
 /llm-user init
+# ✓ 3 personas, 5 scenarios generated
 
-# Generates:
-# ✓ test-spec.yaml
-# ✓ 3 personas
-# ✓ 5 scenarios
-# ✓ {{project}}-llm-user.md
-# ✓ {{project}}-evaluator.md
-```
+# 2. After L2 implementation, test the UI
+/llm-user test https://staging.myapp.com
+# Score: 7.2/10, 3 gaps found
 
-### 2. Run Tests
+# 3. Review what's wrong
+/llm-user status
+# Shows gaps by priority with recommendations
 
-```bash
-# Test against staging
-/test-ui --url=https://staging.app.com
+# 4. Fix the issues
+/llm-user fix --critical
+# Fixes GAP-001, auto-verifies, score improves
 
-# Results:
-# ✓ 4 scenarios passed
-# ✗ 1 scenario failed
-# Overall: 7.2/10
-# 1 critical gap found
-```
+/llm-user fix --high
+# Fixes GAP-002, GAP-003
 
-### 3. Review Gaps
+# 5. Final verification
+/llm-user test https://staging.myapp.com
+# Score: 9.5/10, all promises validated
 
-```bash
-/llm-user gaps
-
-# Shows:
-# [CRITICAL] No progress tracking
-# Recommendation: Add progress dashboard
-# Priority: CRITICAL (blocks release)
-```
-
-### 4. Fix and Re-test
-
-```bash
-# After implementing progress dashboard
-/test-ui --url=https://staging.app.com --scenario=multi-scene-session
-
-# Results:
-# ✓ Gap resolved
-# Score improved: 7.2 → 8.5
-```
-
-### 5. Update Docs and Refresh
-
-```bash
-# Added new promise to intent doc
+# 6. After doc updates, refresh
 /llm-user refresh
-
-# Regenerates test artifacts with new promise
-# Re-run tests to validate new promise
-/test-ui
+# Regenerates test specs with new promises
 ```
 
 ---
 
 ## File Structure
 
-After initialization:
-
 ```
-project/
-├── tests/llm-user/
-│   ├── test-spec.yaml              # Generated: unified spec
-│   ├── personas/
-│   │   ├── maria-beginner.yaml
-│   │   ├── jake-teen.yaml
-│   │   └── sofia-heritage.yaml
-│   └── scenarios/
-│       ├── first-scene.yaml
-│       ├── error-recovery.yaml
-│       └── multi-scene.yaml
-│
-├── .claude/agents/
-│   ├── spanish-app-llm-user.md     # Generated: domain-specific user
-│   └── spanish-app-evaluator.md    # Generated: domain-specific evaluator
-│
-├── results/llm-user/
-│   └── 2026-01-27T10-20-00Z/
-│       ├── recordings/
-│       ├── screenshots/
-│       ├── gap-analysis.md
-│       └── gap-analysis.json
-│
-└── docs/                           # Source docs (in version control)
-    ├── intent/product-intent.md
-    ├── ux/user-journeys.md
-    └── architecture/agent-design.md
+tests/llm-user/
+├── test-spec.yaml           # Test configuration
+├── personas/
+│   ├── maria-beginner.yaml
+│   ├── jake-teen.yaml
+│   └── sofia-expert.yaml
+├── scenarios/
+│   ├── first-scene.yaml
+│   ├── error-recovery.yaml
+│   └── multi-scene.yaml
+└── fixes/                   # Fix specifications
+    └── GAP-001-progress.yaml
+
+results/llm-user/
+└── 2026-01-28T10-30-00/
+    ├── recordings/          # Session recordings
+    ├── screenshots/         # Visual evidence
+    ├── gap-analysis.md      # Human-readable
+    └── gap-analysis.json    # Machine-readable
 ```
 
 ---
 
 ## Best Practices
 
-### DO
+**DO:**
+- Run `init` after L1 planning completes
+- Test early and often during L2
+- Fix critical gaps before release
+- Re-test after fixes to confirm
 
-✅ **Run init after L1 complete** - Docs must exist first
-✅ **Test early and often** - Find issues before production
-✅ **Fix critical gaps first** - They block releases
-✅ **Re-test after fixes** - Verify improvements
-✅ **Refresh after doc changes** - Keep tests in sync
-
-### DON'T
-
-❌ **Don't commit generated files** - Only commit source docs
-❌ **Don't skip init** - `/test-ui` requires setup
-❌ **Don't ignore critical gaps** - They're release blockers
-❌ **Don't test without docs** - Garbage in, garbage out
+**DON'T:**
+- Skip `init` (tests need setup first)
+- Ignore critical gaps (they block release)
+- Manually edit generated files (use `refresh`)
+- Test without L1 docs (garbage in, garbage out)
 
 ---
 
 ## Troubleshooting
 
-### "Required docs not found"
+**"Test spec not found"**
+→ Run `/llm-user init` first
 
-**Problem:** Missing intent, UX, or architecture docs
+**"Required docs not found"**
+→ Complete L1 planning first (`/intent`, `/ux`, `/architect`)
 
-**Solution:**
-Run L1 agents first:
-```bash
-/intent    # Creates product-intent.md
-/ux        # Creates user-journeys.md
-/architect # Creates agent-design.md
-/llm-user init
-```
+**"All tests pass but users complain"**
+→ Check personas have realistic frustration thresholds
+→ Run `/llm-user refresh` to regenerate
 
-### "Generated artifacts out of date"
-
-**Problem:** Docs changed since last init
-
-**Solution:**
-```bash
-/llm-user refresh
-```
-
-### "Subagents not found during /test-ui"
-
-**Problem:** Init didn't complete or files deleted
-
-**Solution:**
-```bash
-/llm-user init --force
-```
-
-### "Tests always pass but issues exist"
-
-**Problem:** Criteria not strict enough or personas not realistic
-
-**Solution:**
-- Review test-spec.yaml
-- Check persona frustration triggers
-- Ensure promises are measurable
-- Run `/llm-user refresh` after fixing docs
+**"Fix verification keeps failing"**
+→ Review fix specification
+→ May need different implementation approach
 
 ---
 
-## Integration with Workflow
+## Related
 
-### L1 Phase (Planning)
-
-```
-intent-guardian    → Defines testable promises
-ux-architect       → Defines personas & journeys
-agentic-architect  → Defines system behavior
-implementation-planner → Defines acceptance criteria
-
-                ↓
-         /llm-user init
-                ↓
-  Test infrastructure ready
-```
-
-### L2 Phase (Building)
-
-```
-backend-engineer   → Implements features
-frontend-engineer  → Implements UI
-test-engineer      → Writes unit tests
-
-                ↓
-            /test-ui
-                ↓
-      Validates promises in UI
-                ↓
-         Gap analysis
-                ↓
-       Fix critical gaps
-```
-
-### Post-L2 (Validation)
-
-```
-acceptance-validator → Manual validation
-/test-ui            → Automated validation
-
-                ↓
-       Both must pass
-                ↓
-      Feature complete
-```
-
----
-
-## Success Indicators
-
-**LLM user testing is working if:**
-
-1. ✅ Setup takes <5 minutes (vs days for manual test writing)
-2. ✅ Tests find real UX issues humans missed
-3. ✅ Gaps trace to specific promises
-4. ✅ Recommendations are actionable
-5. ✅ Re-testing shows improvement
-6. ✅ Different personas have different experiences
-
----
-
-## Related Commands
-
-- `/test-ui` - Execute LLM user tests
-- `/intent` - Create promises that tests validate
-- `/ux` - Create personas and journeys for tests
-- `/verify final` - Manual acceptance testing
-- `/review` - Code quality review (different focus)
-
----
-
-## Notes
-
-- **Auto-generated artifacts** - Don't edit generated files directly
-- **Source docs in version control** - Only commit docs/, not tests/llm-user/
-- **Regenerate after clone** - Run `/llm-user init` after cloning repo
-- **Complements manual testing** - Use both automated and real user testing
-- **Domain-specific by design** - Tests generated from YOUR docs, not generic templates
+- `/review` - Code review (different from UX testing)
+- `/verify` - Run verification checks
+- `/debug` - Debug specific issues
