@@ -25,6 +25,8 @@ REQUIRED_COMMANDS=(
     "llm-user"
     "parallel"
     "plan"
+    "reality-audit"
+    "recover"
     "replan"
     "review"
     "update"

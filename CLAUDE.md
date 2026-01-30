@@ -1136,7 +1136,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | Metric | Count |
 |--------|-------|
 | Agents | 17 |
-| Commands | 26 |
+| Commands | 28 |
 
 ### Agents
 

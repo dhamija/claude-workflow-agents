@@ -116,3 +116,15 @@ Create a reality report showing:
 This command will likely reveal that 60-80% of "validated" promises are actually broken.
 
 That's OK - knowing the truth is the first step to fixing it.
+
+## Next Steps
+
+After running reality audit, start the recovery process:
+
+```
+/recover           # Start full 5-phase recovery
+/recover tests     # Jump to creating test infrastructure
+/recover fix       # Start fixing broken features
+```
+
+See `/recover` command for the complete recovery workflow.
