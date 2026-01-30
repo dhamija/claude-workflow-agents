@@ -23,6 +23,7 @@ REQUIRED_AGENTS=(
     "acceptance-validator"
     "workflow-orchestrator"
     "project-ops"
+    "solution-iterator"
 )
 
 # Check each agent

@@ -21,6 +21,7 @@ REQUIRED_COMMANDS=(
     "improve"
     "intent"
     "intent-audit"
+    "iterate"
     "llm-user"
     "parallel"
     "plan"

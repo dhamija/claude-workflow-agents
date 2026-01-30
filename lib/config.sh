@@ -43,7 +43,7 @@ CORE_SUBAGENT_COUNT=${#CORE_SUBAGENTS[@]}
 # ============================================================================
 # WORKFLOW SKILLS (copied to ~/.claude/skills/)
 # ============================================================================
-# Skills loaded on-demand by Claude. 11 skills in v3.1+
+# Skills loaded on-demand by Claude. 12 skills in v3.2+
 
 WORKFLOW_SKILLS=(
     "backend"
@@ -53,6 +53,7 @@ WORKFLOW_SKILLS=(
     "frontend"
     "gap-resolver"
     "llm-user-testing"
+    "solution-iteration"
     "testing"
     "ux-design"
     "validation"

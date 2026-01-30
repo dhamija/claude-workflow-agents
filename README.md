@@ -81,7 +81,7 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 - Installs to `~/.claude-workflow-agents/` (global location)
 - Copies **11 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
 - Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
-- Symlinks **25 commands** to `~/.claude/commands/`
+- Symlinks **26 commands** to `~/.claude/commands/`
 - Adds workflow commands to PATH
 
 ### What Gets Installed
@@ -144,7 +144,7 @@ workflow-update master    # Update to bleeding edge
 | `/debug <issue>` | Debug problem |
 | `/llm-user` | LLM user testing (init/test/fix/status/refresh) |
 
-See [Commands Reference](#commands-reference) for all 25 commands.
+See [Commands Reference](#commands-reference) for all 26 commands.
 
 ### Verify Installation
 ```bash

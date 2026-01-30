@@ -9,8 +9,8 @@
 |-----------|-------|--------------|
 | Skills | 11 | 2026-01-28 |
 | Subagents | 3 | 2026-01-28 |
-| Agent Files (for Task tool invocation) | 16 | 2026-01-28 |
-| Commands | 25 | 2026-01-28 |
+| Agent Files (for Task tool invocation) | 17 | 2026-01-29 |
+| Commands | 26 | 2026-01-29 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
 | Tests | 32 | 2026-01-26 |
@@ -35,6 +35,7 @@
 | brownfield-analyzer | L1 Support | ✓ Complete |
 | acceptance-validator | L2 Validation | ✓ Complete |
 | project-ops | Operations | ✓ Complete |
+| solution-iterator | L2 Support | ✓ Complete |
 
 **Note:** llm-user-architect was removed in v3.1.1 - functionality now in `llm-user-testing` skill.
 
@@ -42,33 +43,32 @@
 
 | Command | Status |
 |---------|--------|
-| agent-wf-help | ✓ Complete |
+| aa | ✓ Complete |
+| aa-audit | ✓ Complete |
 | analyze | ✓ Complete |
 | audit | ✓ Complete |
+| auto | ✓ Complete |
 | change | ✓ Complete |
 | debug | ✓ Complete |
 | design | ✓ Complete |
-| docs | ✓ Complete |
 | gap | ✓ Complete |
+| help | ✓ Complete |
 | implement | ✓ Complete |
 | improve | ✓ Complete |
 | intent | ✓ Complete |
 | intent-audit | ✓ Complete |
-| llm | ✓ Complete |
+| iterate | ✓ Complete |
 | llm-user | ✓ Complete |
 | parallel | ✓ Complete |
 | plan | ✓ Complete |
+| project | ✓ Complete |
 | replan | ✓ Complete |
 | review | ✓ Complete |
-| sync | ✓ Complete |
 | update | ✓ Complete |
 | ux | ✓ Complete |
 | ux-audit | ✓ Complete |
 | verify | ✓ Complete |
 | workflow | ✓ Complete |
-| aa | ✓ Complete |
-| aa-audit | ✓ Complete |
-| mcp | ✓ Complete |
 
 ## Recent Changes
 
