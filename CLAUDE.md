@@ -38,7 +38,7 @@
 ```
 ~/.claude-workflow-agents/           # Installation directory
 ├── agents/                          # 17 agent files (invoked by workflow via Task tool)
-├── commands/                        # 26 command definitions
+├── commands/                        # 28 command definitions
 ├── lib/                             # Shared configuration and functions
 │   └── config.sh                    # SINGLE SOURCE OF TRUTH for all scripts
 ├── templates/                       # Templates for user projects
@@ -68,10 +68,10 @@
 │   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
 │   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
 │   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
-└── commands/                        # 26 command symlinks
+└── commands/                        # 28 command symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
-    └── ... (26 total)
+    └── ... (28 total)
 ```
 
 ### How It Works (v3.2)

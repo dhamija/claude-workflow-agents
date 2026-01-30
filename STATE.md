@@ -10,7 +10,7 @@
 | Skills | 11 | 2026-01-28 |
 | Subagents | 3 | 2026-01-28 |
 | Agent Files (for Task tool invocation) | 17 | 2026-01-29 |
-| Commands | 26 | 2026-01-29 |
+| Commands | 28 | 2026-01-30 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
 | Tests | 32 | 2026-01-26 |
@@ -62,6 +62,8 @@
 | parallel | ✓ Complete |
 | plan | ✓ Complete |
 | project | ✓ Complete |
+| reality-audit | ✓ Complete |
+| recover | ✓ Complete |
 | replan | ✓ Complete |
 | review | ✓ Complete |
 | update | ✓ Complete |
