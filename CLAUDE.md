@@ -1121,6 +1121,220 @@ L3 Validation (Gap-Driven)
 
 ---
 
+## 🔄 UNIFIED GAP SYSTEM ARCHITECTURE (v1.0)
+
+**Purpose:** Consolidate three parallel gap discovery/resolution workflows into a single, coherent system that handles all gap types uniformly.
+
+### Problem Statement
+
+**User Question:** "Reality-audit reveals what is broken, then /recover does the same thing? Should we combine in one command where audit creates artifact then recover uses it? What's the ideal way?"
+
+**Issue Identified:** We had three separate systems doing essentially the same thing:
+
+1. **`/reality-audit` + `/recover`** - Tested real functionality → found broken promises → fixed them
+2. **`/gap` + `/improve`** - Analyzed documents → found missing capabilities → implemented them
+3. **`/llm-user test` + `/llm-user fix`** - Simulated users → found UX issues → resolved them
+
+This created:
+- **Confusion:** Which command to use when?
+- **Duplication:** Same gap might be found by multiple methods
+- **Inconsistency:** Different workflows for essentially the same task
+- **Fragmentation:** No unified view of all project issues
+
+### Architectural Decision: Layered System
+
+**Solution:** Create a layered architecture where specialized discovery feeds into unified resolution:
+
+```
+Discovery Layer (Specialized):
+  /reality-audit    → Creates GAP-R-XXX gaps
+  /llm-user test    → Creates GAP-U-XXX gaps
+  /gap              → Creates GAP-A-XXX gaps
+        ↓
+Gap Repository (Unified):
+  docs/gaps/        → All gaps in consistent format
+        ↓
+Resolution Layer (Unified):
+  /improve          → Fixes any gap type
+        ↓
+Verification Layer (Smart):
+  /verify           → Uses appropriate method per gap
+```
+
+### Unified Gap Format
+
+All gaps, regardless of discovery source, follow this structure:
+
+```yaml
+gap_id: GAP-[SOURCE]-[NUMBER]  # R=reality, U=user, A=analysis
+title: "Clear problem description"
+category: functionality|ux|architecture|performance|security
+severity: CRITICAL|HIGH|MEDIUM|LOW
+
+discovery:
+  source: reality-audit|llm-user|gap-analysis
+  discovered_at: timestamp
+  discovered_by: command
+
+problem:
+  description: What's wrong
+  evidence: Proof points
+  root_cause: Why it happened
+
+resolution:
+  approach: How to fix
+  effort: small|medium|large
+  tasks: [list of steps]
+
+verification:
+  method: reality|llm-user|manual|automated
+  [method-specific details]
+
+status:
+  state: open|in_progress|fixed|verified|closed
+```
+
+### Key Design Decisions
+
+#### 1. Why Not Fully Merge Commands?
+
+**Considered:** Merging all discovery into single `/audit` command.
+
+**Rejected Because:**
+- Each discovery method has specialized expertise (reality tests, UX simulation, doc analysis)
+- Different triggers and contexts (broken build vs UX testing vs planning)
+- Users have clear mental models of when to use each
+
+**Decision:** Keep specialized discovery, unify storage and resolution.
+
+#### 2. Smart Verification
+
+**Problem:** Different gap types need different verification methods.
+
+**Solution:** `/verify` intelligently selects method based on gap source:
+- Reality gaps (GAP-R-XXX) → Run real tests
+- User gaps (GAP-U-XXX) → Re-run LLM user scenarios
+- Analysis gaps (GAP-A-XXX) → Check implementation exists
+
+**Implementation:** Gap's `verification.method` field drives verification approach.
+
+#### 3. Artifact Staleness
+
+**Problem:** Gap discovered Monday, fixed Friday - is it still valid?
+
+**Solution:** Staleness detection in gap files:
+```yaml
+discovery:
+  discovered_at: "2024-01-30T10:00:00Z"
+  git_commit: "abc123"  # Code state when discovered
+
+# Staleness check:
+- Time-based: >24 hours old
+- Code-based: git diff since discovery
+- Promise-based: Intent doc changed
+```
+
+#### 4. Deprecation Strategy
+
+**Deprecated (but still functional):**
+- `/llm-user fix` → Use `/improve` instead
+- Recovery-specific phases → Use unified gap workflow
+
+**Migration Path:**
+- Old commands still work but show deprecation notice
+- Documentation guides users to new workflow
+- Future version will remove deprecated commands
+
+### Implementation Details
+
+#### Command Updates
+
+**Discovery Commands (write to unified format):**
+- `/reality-audit` - Updated to create GAP-R-XXX entries
+- `/gap` - Updated to create GAP-A-XXX entries
+- `/llm-user test` - Updated to create GAP-U-XXX entries
+
+**Resolution Commands (read from unified format):**
+- `/improve` - Enhanced to handle all gap types, filter by severity/source
+- `/verify` - New command with smart verification
+- `/recover` - Updated to use unified gap commands
+
+#### File Structure
+
+```
+docs/gaps/
+├── gap-registry.yaml           # Master list of all gaps
+├── gap-analysis.md            # Human-readable report
+├── migration-plan.md          # Phased fix plan
+│
+├── gaps/                       # Individual gap files
+│   ├── GAP-R-001.yaml         # Reality gap
+│   ├── GAP-U-001.yaml         # User testing gap
+│   └── GAP-A-001.yaml         # Analysis gap
+│
+└── artifacts/                  # Supporting evidence
+    ├── reality-audit-*.json
+    └── llm-user-results-*.json
+```
+
+### Usage Examples
+
+#### Discovering Gaps
+```bash
+# Different methods, same unified output
+/reality-audit              # Tests promises → GAP-R-XXX
+/llm-user test              # Simulates users → GAP-U-XXX
+/gap                        # Analyzes docs → GAP-A-XXX
+```
+
+#### Fixing Gaps (Unified)
+```bash
+# Single command handles all types
+/improve --severity=critical     # Fix most urgent
+/improve --source=reality        # Fix reality gaps
+/improve GAP-R-001              # Fix specific gap
+```
+
+#### Verifying Fixes (Smart)
+```bash
+# Automatic method selection
+/verify GAP-R-001               # Runs reality tests
+/verify GAP-U-001               # Runs LLM user scenario
+/verify --all                   # Verifies all fixed gaps
+```
+
+### Benefits Achieved
+
+1. **Mental Model Clarity:** A gap is a gap, regardless of how discovered
+2. **No Duplicate Work:** Same issue found by multiple methods tracked once
+3. **Unified Prioritization:** All gaps ranked together by impact
+4. **Consistent Workflow:** Same fix → verify cycle for all types
+5. **Complete Visibility:** Single source of truth at `docs/gaps/`
+6. **Smart Automation:** System knows how to handle each gap type
+
+### Future Enhancements
+
+**Planned:**
+- Gap deduplication (detect when different methods find same issue)
+- Cross-gap dependencies (GAP-R-001 blocks GAP-U-003)
+- Automated gap discovery scheduling
+- Gap resolution metrics and reporting
+
+**Under Consideration:**
+- ML-based gap prediction
+- Automated fix generation for common patterns
+- Integration with CI/CD for continuous gap discovery
+
+### Lessons Learned
+
+1. **Unification vs Specialization:** Keep specialized discovery, unify everything else
+2. **User Mental Models Matter:** Don't break existing command expectations
+3. **Progressive Enhancement:** Deprecate gradually, maintain compatibility
+4. **Smart Defaults:** System should know what to do without user specifying
+5. **Single Source of Truth:** One place for all gaps prevents confusion
+
+---
+
 ## What This Is
 
 A multi-agent workflow system. Users describe what they want, Claude orchestrates specialized agents to build it.
