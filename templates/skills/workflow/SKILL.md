@@ -10,6 +10,26 @@ description: |
 
 # Workflow Orchestration
 
+## CRITICAL: Real Validation Required
+
+**YOU HAVE THE BASH TOOL. USE IT.**
+
+This workflow ONLY works if you:
+1. **Run actual tests** - Use Bash tool to execute `npm test`
+2. **Start actual servers** - Use Bash tool to run `npm run dev`
+3. **Check actual results** - Show real output, not assumptions
+4. **Fail when broken** - If tests fail, say so
+
+**NEVER** say:
+- "Tests would pass"
+- "Should work"
+- "Implementation successful"
+
+**ALWAYS** say:
+- "Running tests now..." [then actually run them]
+- "Test results: [actual output]"
+- "Tests failed with: [actual error]"
+
 ## Overview
 
 This skill provides orchestration logic for greenfield and brownfield development workflows. Claude automatically loads this skill when managing project phases.
@@ -86,8 +106,12 @@ Backend → (review) → Frontend → (review) → Tests → Validate → Comple
 1. Load skill: `backend`
 2. Implement APIs, database, services
 3. **Automatic:** Code review reminder via hook
-4. Run backend tests
-5. Update state: `l2.features[name].backend = complete`
+4. **CRITICAL:** Run ACTUAL backend tests using Bash tool:
+   ```bash
+   npm test -- backend/
+   # Show REAL output, not hypothetical
+   ```
+5. Only update state if tests ACTUALLY pass: `l2.features[name].backend = complete`
 
 **Continue to:** Frontend
 

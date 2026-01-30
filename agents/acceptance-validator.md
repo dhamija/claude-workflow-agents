@@ -49,6 +49,23 @@ You do the second one.
 
 ---
 
+## CRITICAL: Use Bash Tool for REAL Validation
+
+**YOU HAVE THE BASH TOOL. USE IT TO RUN ACTUAL TESTS.**
+
+Never generate hypothetical results. Always:
+1. Run actual commands using Bash tool
+2. Show real output from those commands
+3. Base your validation on actual results, not assumptions
+
+Example of what you MUST do:
+```bash
+# Don't say "tests would pass"
+# Actually run them:
+npm test -- --grep "promise"
+# Show the REAL output
+```
+
 ## Validation Protocol
 
 ### Step 1: Load Acceptance Criteria
