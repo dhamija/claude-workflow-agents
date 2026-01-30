@@ -69,12 +69,157 @@ else
 fi
 ```
 
-### 4. Generate Reality Report
+### 4. Generate Unified Gap Report
 
-Create a reality report showing:
+Create gaps in unified format and write to gap registry:
+
+```bash
+# Create gap directory structure
+mkdir -p docs/gaps/discovered docs/gaps/gaps docs/gaps/artifacts
+
+# Save raw audit results
+echo "Saving reality audit artifact..."
+cat > docs/gaps/artifacts/reality-audit-$(date +%Y%m%d-%H%M%S).json << 'EOF'
+{
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "total_promises": 8,
+  "working": 2,
+  "partial": 1,
+  "broken": 5,
+  "git_commit": "$(git rev-parse HEAD)",
+  "test_command": "npm test"
+}
+EOF
+```
+
+For each broken promise, create a gap entry:
+
+```yaml
+# docs/gaps/gaps/GAP-R-001.yaml
+gap_id: GAP-R-001
+title: "Question-First Learning Completely Broken"
+category: functionality
+severity: CRITICAL
+priority: 1
+
+discovery:
+  source: reality-audit
+  discovered_at: "2024-01-30T10:00:00Z"
+  discovered_by: "/reality-audit command"
+
+problem:
+  description: |
+    PRM-007 claims app supports question-first learning, but backend
+    doesn't detect questions at all. Tests are mocked to always pass.
+
+  evidence:
+    - type: test_failure
+      detail: "curl test shows no questionDetected in response"
+    - type: missing_code
+      detail: "No question detection logic in conversation-agent.js"
+    - type: promise_violation
+      detail: "Core promise PRM-007 completely unfulfilled"
+
+  affected:
+    promises: [PRM-007]
+    features: [question-detection, adaptive-learning]
+
+  root_cause: |
+    Feature marked complete without implementation.
+    Tests written with mocks instead of real functionality.
+
+expected:
+  description: |
+    System should detect when users ask questions and adapt the
+    learning experience accordingly.
+
+  acceptance_criteria:
+    - "Backend detects questions in user input"
+    - "System responds appropriately to questions"
+    - "Learning path adapts based on questions asked"
+
+  references:
+    - "docs/intent/product-intent.md#PRM-007"
+
+resolution:
+  approach: |
+    Implement question detection logic in conversation agent.
+    Add real integration tests for question scenarios.
+
+  effort: medium
+  risk: low
+
+  tasks:
+    - "Add question detection to conversation-agent.js"
+    - "Create question response logic"
+    - "Write real integration tests"
+    - "Remove mocked tests"
+
+verification:
+  method: reality
+
+  reality_tests:
+    - "npm test -- tests/promises/PRM-007.test.js"
+    - "curl -X POST http://localhost:3001/api/conversation -d '{\"message\": \"What is that?\"}' | grep questionDetected"
+
+  success_criteria:
+    - "Question detection returns true for questions"
+    - "Non-questions return false"
+    - "Integration tests pass without mocks"
+
+status:
+  state: open
+  notes: "Blocking release - core promise violation"
+```
+
+Update the gap registry:
+
+```yaml
+# docs/gaps/gap-registry.yaml
+registry:
+  version: "1.0"
+  last_updated: "2024-01-30T10:00:00Z"
+
+  summary:
+    total: 5
+    by_state:
+      open: 5
+    by_severity:
+      critical: 3
+      high: 2
+    by_source:
+      reality_audit: 5
+
+  gaps:
+    - id: GAP-R-001
+      title: "Question-First Learning Completely Broken"
+      severity: CRITICAL
+      state: open
+      promise: PRM-007
+      file: gaps/GAP-R-001.yaml
+
+    - id: GAP-R-002
+      title: "Response Length Matching Not Implemented"
+      severity: CRITICAL
+      state: open
+      promise: PRM-008
+      file: gaps/GAP-R-002.yaml
+
+    - id: GAP-R-003
+      title: "Engagement Patterns Missing"
+      severity: HIGH
+      state: open
+      promise: PRM-004
+      file: gaps/GAP-R-003.yaml
+```
+
+Generate human-readable report:
 
 ```markdown
 # Reality Audit Report
+
+Generated: 2024-01-30T10:00:00Z
+Method: Real test execution
 
 ## Summary
 - Total Promises: 8
@@ -82,33 +227,41 @@ Create a reality report showing:
 - Partially Working: 1 (12.5%)
 - Completely Broken: 5 (62.5%)
 
-## Promise Status (Reality)
+## Gaps Discovered
 
-### ✅ Working (Can Demo Right Now)
-- PRM-001: Visual vocabulary (basic version works)
+### Critical Gaps (Must Fix Before Release)
 
-### ⚠️ Partial (Some parts work)
-- PRM-006: Auto-save (saves but no UI feedback)
+**[GAP-R-001]** Question-First Learning Completely Broken
+- Promise: PRM-007
+- Issue: Backend doesn't detect questions at all
+- Impact: Core learning mode unavailable
+- Evidence: Test returns no questionDetected field
 
-### ❌ Broken (Would fail in demo)
-- PRM-007: Question-First Learning
-  - Issue: Backend doesn't detect questions
-  - Missing: questionDetected logic in conversation-agent.js
+**[GAP-R-002]** Response Length Matching Not Implemented
+- Promise: PRM-008
+- Issue: Accepts any length response
+- Impact: No adaptive difficulty
+- Evidence: Validation always returns true
 
-- PRM-008: Response Length Matching
-  - Issue: Accepts any length response
-  - Missing: Validation logic
+### High Priority Gaps
 
-- PRM-004: Engagement Patterns
-  - Issue: Not implemented at all
-  - Missing: Entire feature
+**[GAP-R-003]** Engagement Patterns Missing
+- Promise: PRM-004
+- Issue: Feature not implemented
+- Impact: No personalized learning paths
 
-## Recommended Recovery Plan
+## Gaps Written to Unified System
 
-1. STOP claiming these work
-2. Create actual integration tests
-3. Fix the broken features
-4. Re-validate with real tests
+✅ Created 5 gaps in unified format
+📁 Location: docs/gaps/
+🔧 Fix with: /improve --source=reality
+✓ Verify with: /verify --source=reality
+
+## Next Steps
+
+1. Run `/improve --severity=critical` to fix blocking issues
+2. Or run `/recover` for guided 5-phase recovery process
+3. After fixes, run `/verify` to confirm resolution
 ```
 
 ## The Hard Truth

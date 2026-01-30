@@ -1,45 +1,166 @@
 ---
-description: Incrementally improve codebase based on migration plan (brownfield L3)
-argument-hint: <"phase N" or specific gap ID>
+description: Fix gaps from unified gap system - any source, any type
+argument-hint: <gap-id | --severity=X | --source=Y | phase N>
 ---
 
-## Prerequisites
+## Unified Gap Resolution System
 
-Check migration plan exists:
-- /docs/gaps/migration-plan.md
+This command fixes gaps discovered by ANY method:
+- Reality audit gaps (GAP-R-XXX)
+- LLM user test gaps (GAP-U-XXX)
+- Analysis gaps (GAP-A-XXX)
+- Intent gaps (GAP-I-XXX)
+- Technical gaps (GAP-T-XXX)
 
-If missing: "Run /gap first"
-
-## Parse Target
+## Parse Arguments
 
 Target: $ARGUMENTS
 
-### If "phase N":
-1. Read /docs/gaps/migration-plan.md
-2. Find Phase N items
-3. Execute each improvement
+### Specific Gap ID (e.g., "GAP-R-001", "GAP-U-012"):
+```bash
+# Load specific gap from unified system
+cat docs/gaps/gaps/GAP-R-001.yaml
+```
 
-### If specific gap (e.g., "GAP-007"):
-1. Find that gap in gap-analysis.md
-2. Execute just that fix
+### Filter by Severity (--severity=critical):
+```bash
+# Find all gaps matching severity
+grep -l "severity: CRITICAL" docs/gaps/gaps/*.yaml
+```
 
-### If empty:
-1. Find first incomplete phase
-2. Execute it
+### Filter by Source (--source=reality):
+```bash
+# Find gaps from specific discovery source
+grep -l "source: reality-audit" docs/gaps/gaps/*.yaml
+```
+
+### Phase-based (phase N):
+```bash
+# Read migration plan if it exists
+cat docs/gaps/migration-plan.md | grep "Phase $N" -A 20
+```
+
+### Default (no arguments):
+```bash
+# Show gap summary and ask what to fix
+cat docs/gaps/gap-registry.yaml
+echo "What would you like to fix?"
+echo "  1. All CRITICAL gaps (3 gaps)"
+echo "  2. All HIGH priority (5 gaps)"
+echo "  3. Specific gap by ID"
+echo "  4. Phase-based from migration plan"
+```
 
 ## Execution
 
-For each gap:
+For each gap to fix:
 
-1. Read the gap details from gap-analysis.md
-2. Determine the type:
-   - Intent/Promise fix → backend-engineer or frontend-engineer
-   - UX fix → frontend-engineer
-   - Architecture fix → backend-engineer (may involve agentic-architect for design)
-   - Test fix → test-engineer
-3. Implement the fix
-4. Write/update tests to verify the fix
-5. Commit: `fix([scope]): [GAP-XXX] [description]`
+### 1. Load Gap from Unified System
+
+```bash
+# Read gap details
+GAP_FILE="docs/gaps/gaps/${GAP_ID}.yaml"
+if [ ! -f "$GAP_FILE" ]; then
+  echo "Gap $GAP_ID not found"
+  exit 1
+fi
+```
+
+### 2. Analyze Gap Type and Select Agent
+
+Based on gap category and source:
+
+| Category | Source | Primary Agent | Support Agents |
+|----------|--------|---------------|----------------|
+| functionality | reality-audit | backend/frontend-engineer | test-engineer |
+| ux | llm-user | frontend-engineer | ui-debugger |
+| architecture | gap-analysis | backend-engineer | agentic-architect |
+| performance | any | backend-engineer | - |
+| security | any | backend-engineer | code-reviewer |
+
+### 3. Execute Fix Based on Source
+
+#### For Reality Gaps (GAP-R-XXX):
+```bash
+# These are broken promises/features
+echo "Fixing reality gap: $GAP_ID"
+echo "This feature claims to work but doesn't"
+
+# 1. Run the failing test to see actual error
+npm test -- ${gap.verification.reality_tests[0]}
+
+# 2. Fix the implementation (not the test!)
+# Use appropriate engineer agent
+
+# 3. Verify test now passes FOR REAL
+npm test -- ${gap.verification.reality_tests[0]}
+```
+
+#### For User Gaps (GAP-U-XXX):
+```bash
+# These are UX issues found by LLM users
+echo "Fixing UX gap: $GAP_ID"
+echo "LLM user ${gap.problem.affected.personas[0]} had this issue"
+
+# 1. Review the user behavior that led to gap
+cat tests/llm-user/results/latest/recordings/${scenario}.json
+
+# 2. Implement UX fix
+# Usually frontend-engineer
+
+# 3. Will be verified by re-running LLM user test
+```
+
+#### For Analysis Gaps (GAP-A-XXX):
+```bash
+# These are missing capabilities
+echo "Fixing analysis gap: $GAP_ID"
+echo "Current state doesn't match intended design"
+
+# 1. Review what should exist
+echo ${gap.expected.description}
+
+# 2. Implement missing capability
+# Use appropriate engineer
+
+# 3. Manual or automated verification
+```
+
+### 4. Update Gap Status
+
+```yaml
+# Update docs/gaps/gaps/GAP-XXX.yaml
+status:
+  state: in_progress  # was: open
+  assignee: "improve-command"
+  started_at: "2024-01-30T11:00:00Z"
+```
+
+### 5. Implement Fix
+
+Use the resolution approach from gap:
+
+```bash
+echo "Resolution approach:"
+echo "${gap.resolution.approach}"
+
+echo "Tasks to complete:"
+for task in ${gap.resolution.tasks}; do
+  echo "  - $task"
+done
+```
+
+### 6. Commit with Proper Message
+
+```bash
+# Commit format includes gap ID
+git commit -m "fix(${gap.category}): [${GAP_ID}] ${gap.title}
+
+- ${summary_of_changes}
+- Fixes ${gap.problem.affected.promises}
+
+Verification: ${gap.verification.method}"
+```
 
 ## After Each Gap
 

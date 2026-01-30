@@ -299,6 +299,7 @@ The workflow skill invokes specialized agents via Task tool:
   - gap-analyzer         → Finds code quality gaps
   - brownfield-analyzer  → Scans existing code
   - project-ops          → Project operations
+  - solution-iterator    → Compare multiple solutions
 
 
 WHY SKILLS + SUBAGENTS?
@@ -360,8 +361,30 @@ ANALYSIS & PLANNING
   /ux-audit [focus]          Audit user experience
   /aa [focus]                Agentic architecture analysis
   /aa-audit [focus]          Audit agentic optimizations
-  /gap [focus]               Find gaps and create migration plan
   /change <description>      Analyze change impact
+
+
+🆕 UNIFIED GAP SYSTEM
+─────────────────────
+  Discovery → Unified Format → Resolution → Verification
+
+  DISCOVERY (creates gaps):
+    /reality-audit           Test promises → GAP-R-XXX
+    /llm-user test          Test UX → GAP-U-XXX
+    /gap [focus]            Analyze → GAP-A-XXX
+
+  RESOLUTION (fixes any gap):
+    /improve <gap-id>       Fix specific gap
+    /improve --severity=X   Fix by priority (critical/high/medium)
+    /improve --source=Y     Fix by source (reality/llm-user/analysis)
+
+  VERIFICATION (smart):
+    /verify <gap-id>        Verifies using appropriate method
+    /verify --all           Verify all fixed gaps
+    /verify --final         Pre-release verification
+
+  RECOVERY:
+    /recover                5-phase guided recovery (uses gaps)
 
 
 DEVELOPMENT
@@ -374,10 +397,10 @@ DEVELOPMENT
 LLM USER TESTING
 ────────────────
   /llm-user init             Generate test infrastructure from L1 docs
-  /llm-user test [url]       Run LLM user tests against your UI
-  /llm-user fix [gap-id]     Fix gaps (auto-verifies after each)
-  /llm-user status           View test results, gaps, and progress
+  /llm-user test [url]       Run tests → Creates GAP-U-XXX gaps
+  /llm-user status           View test results and gaps
   /llm-user refresh          Regenerate after doc changes
+  (Use /improve to fix gaps, not /llm-user fix)
 
 
 PARALLEL (Advanced, Opt-In)

@@ -76,6 +76,16 @@
 
 | Date | Change | By |
 |------|--------|-----|
+| 2026-01-30 | **UNIFIED GAP SYSTEM:** Consolidated 3 parallel gap workflows into single system | Claude |
+| 2026-01-30 | All gap discovery writes to unified format (GAP-[SOURCE]-[NUMBER]) | Claude |
+| 2026-01-30 | Enhanced /improve to handle all gap types (reality, user, analysis) | Claude |
+| 2026-01-30 | Created smart /verify with automatic method selection per gap type | Claude |
+| 2026-01-30 | Updated /reality-audit to write GAP-R-XXX gaps | Claude |
+| 2026-01-30 | Updated /gap to write GAP-A-XXX gaps | Claude |
+| 2026-01-30 | Updated /llm-user test to write GAP-U-XXX gaps | Claude |
+| 2026-01-30 | Updated /recover to use unified gap commands | Claude |
+| 2026-01-30 | Deprecated /llm-user fix in favor of unified /improve | Claude |
+| 2026-01-30 | Created unified gap repository structure at docs/gaps/ | Claude |
 | 2026-01-28 | Added skill version tracking for artifact regeneration (`ui_testing.skill_version`) | Claude |
 | 2026-01-28 | Added scene-grounded responses to llm-user-testing skill (v1.1.0) | Claude |
 | 2026-01-28 | Consolidated /test-ui and /fix-gaps into /llm-user (27→25 commands) | Claude |

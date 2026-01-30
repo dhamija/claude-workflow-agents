@@ -27,38 +27,41 @@ Use this command when you discover:
 - Promises to users aren't being kept
 - You can't demo features that should work
 
-## The Recovery Process
+## The Recovery Process (Using Unified Gap System)
 
 ### Phase 1: Truth Discovery (audit)
 
-First, discover what ACTUALLY works:
+Run reality audit which creates gaps in unified format:
 
 ```bash
-# Run comprehensive reality check
-echo "Starting reality audit..."
+echo "Starting reality audit (creates gaps in unified format)..."
 
-# Check if tests exist
-if [ -f "package.json" ]; then
-  echo "Found package.json, checking test scripts..."
-  npm test --version 2>/dev/null || echo "❌ No test command found"
-fi
+# Run reality audit command
+/reality-audit
 
-# Try to run existing tests
-echo "Attempting to run tests..."
-npm test 2>&1 | head -20
+# Check what gaps were discovered
+echo ""
+echo "Gaps discovered:"
+ls -la docs/gaps/gaps/GAP-R-*.yaml 2>/dev/null | wc -l
+echo ""
 
-# Check for promise tests
-echo "Looking for promise validation tests..."
-find . -name "*test*" -o -name "*spec*" | grep -i promise || echo "❌ No promise tests found"
-
-# Audit each promise
-for promise in $(grep -oE "PRM-[0-9]+" docs/intent/product-intent.md 2>/dev/null); do
-  echo "Checking $promise..."
-  npm test -- $promise 2>/dev/null && echo "✓ Has test" || echo "❌ No test"
+# Show critical gaps
+echo "Critical gaps that block release:"
+grep -l "severity: CRITICAL" docs/gaps/gaps/GAP-R-*.yaml | while read f; do
+  GAP_ID=$(basename $f .yaml)
+  TITLE=$(grep "title:" $f | cut -d'"' -f2)
+  echo "  $GAP_ID: $TITLE"
 done
+
+# Show gap summary
+cat docs/gaps/gap-registry.yaml | grep -A10 "summary:"
 ```
 
-Output a reality report showing what's actually broken.
+The reality audit automatically:
+- Tests all promises
+- Creates GAP-R-XXX entries for broken features
+- Writes to unified gap system at `docs/gaps/`
+- Provides verification methods for each gap
 
 ### Phase 2: Test Infrastructure (tests)
 
@@ -87,54 +90,85 @@ describe('PRM-XXX: [Promise Name]', () => {
 
 ### Phase 3: Triage & Prioritize (triage)
 
-Analyze and prioritize what to fix first:
+Use the unified gap system's built-in prioritization:
 
-```markdown
-Priority Matrix:
+```bash
+echo "Analyzing gaps for prioritization..."
 
-CRITICAL (Fix immediately):
-- Complete failures that break core functionality
-- Promises with CORE criticality
-- Demo blockers
+# Show gaps by severity
+echo "Gap Prioritization:"
+echo ""
+echo "CRITICAL (Must fix before release):"
+grep -l "severity: CRITICAL" docs/gaps/gaps/GAP-R-*.yaml | while read f; do
+  GAP_ID=$(basename $f .yaml)
+  EFFORT=$(grep "effort:" $f | cut -d: -f2 | tr -d ' ')
+  echo "  $GAP_ID - Effort: $EFFORT"
+done
 
-HIGH (Fix this week):
-- Partial failures affecting user experience
-- IMPORTANT promises
-- Integration issues
+echo ""
+echo "HIGH (Fix this week):"
+grep -l "severity: HIGH" docs/gaps/gaps/GAP-R-*.yaml | while read f; do
+  GAP_ID=$(basename $f .yaml)
+  EFFORT=$(grep "effort:" $f | cut -d: -f2 | tr -d ' ')
+  echo "  $GAP_ID - Effort: $EFFORT"
+done
 
-MEDIUM (Fix this sprint):
-- Minor issues
-- NICE_TO_HAVE promises
-- Performance problems
+# Generate or update migration plan
+cat > docs/gaps/migration-plan.md << 'EOF'
+# Recovery Migration Plan
+
+## Phase 0: Critical Fixes (Immediate)
+[List CRITICAL gaps]
+
+## Phase 1: Core Functionality (Week 1)
+[List HIGH priority gaps]
+
+## Phase 2: Polish (Week 2)
+[List MEDIUM gaps]
+EOF
 ```
 
 ### Phase 4: Fix with Verification (fix)
 
-For each broken promise:
+Use the unified gap system to fix systematically:
 
-1. **Run the failing test** (using Bash tool)
+```bash
+# Fix all CRITICAL gaps
+/improve --severity=critical
+
+# Or fix specific gaps
+/improve GAP-R-001
+/improve GAP-R-002
+
+# The improve command will:
+# 1. Load gap from unified system
+# 2. Run failing tests to see actual error
+# 3. Fix the implementation (not the test!)
+# 4. Update gap status to 'fixed'
+```
+
+For each gap being fixed:
+
+1. **See the actual failure**
    ```bash
-   npm test -- PRM-XXX
-   # Show ACTUAL failure
+   # Reality gaps have real test commands
+   npm test -- tests/promises/PRM-007.test.js
+   # Shows: ACTUAL failure, not mock
    ```
 
-2. **Fix the implementation**
-   - Update code based on real error
-   - Don't guess - use test feedback
+2. **Fix the real implementation**
+   - Gap file contains resolution approach
+   - Fix code based on actual error
+   - Never just make tests pass with mocks
 
-3. **Verify the fix** (using Bash tool)
+3. **Verify with smart verification**
    ```bash
-   npm test -- PRM-XXX
-   # Must ACTUALLY pass
+   # Verify knows how to test each gap type
+   /verify GAP-R-001
+   # Runs appropriate verification method
    ```
 
-4. **Manual verification**
-   ```bash
-   npm run dev
-   # Actually test the feature
-   ```
-
-**NEVER mark fixed without test passing!**
+**The gap is only closed when `/verify` passes!**
 
 ### Phase 5: Lock in Progress (lock)
 
@@ -167,39 +201,70 @@ jobs:
       - run: npm test -- tests/promises/
 ```
 
-## Implementation
+## Implementation with Unified Gap System
 
 When user runs `/recover`, you should:
 
-1. **Assess current state**
-   - Check if tests exist
-   - Try to run existing tests
-   - Count broken vs working features
-
-2. **Start appropriate phase**
-   - If no tests: Start with Phase 2 (create tests)
-   - If tests exist but fail: Start with Phase 4 (fix)
-   - If unsure: Start with Phase 1 (audit)
-
-3. **Use Bash tool for EVERYTHING**
-   - Actually run commands
-   - Show real output
-   - Never pretend or assume
-
-4. **Be brutally honest**
-   - "70% of your features are broken"
-   - "This will take 2 weeks to fix"
-   - "You cannot demo most features"
-
-5. **Track progress**
-   ```yaml
-   recovery_status:
-     phase_1_audit: complete
-     phase_2_tests: in_progress
-     phase_3_triage: pending
-     phase_4_fix: pending
-     phase_5_lock: pending
+1. **Check for existing gaps**
+   ```bash
+   # See if gaps already exist
+   if [ -d "docs/gaps/gaps" ] && [ "$(ls docs/gaps/gaps/GAP-R-*.yaml 2>/dev/null | wc -l)" -gt 0 ]; then
+     echo "Found existing reality gaps. Skipping audit."
+     SKIP_AUDIT=true
+   fi
    ```
+
+2. **Run or skip audit**
+   ```bash
+   if [ "$SKIP_AUDIT" != "true" ]; then
+     /reality-audit  # Creates GAP-R-XXX gaps
+   fi
+   ```
+
+3. **Show gap summary**
+   ```bash
+   # Display what was found
+   echo "Recovery Assessment:"
+   echo "==================="
+   cat docs/gaps/gap-registry.yaml | grep -A15 "summary:"
+   ```
+
+4. **Start recovery based on gaps**
+   ```bash
+   # Count critical gaps
+   CRITICAL_COUNT=$(grep -l "severity: CRITICAL" docs/gaps/gaps/GAP-R-*.yaml | wc -l)
+
+   if [ $CRITICAL_COUNT -gt 0 ]; then
+     echo "Starting with $CRITICAL_COUNT critical gaps..."
+     /improve --severity=critical
+   else
+     echo "No critical gaps. Starting with high priority..."
+     /improve --severity=high
+   fi
+   ```
+
+5. **Track recovery progress**
+   ```yaml
+   # In CLAUDE.md workflow state
+   recovery:
+     started_at: "2024-01-30"
+     using_unified_gaps: true
+
+     gaps_discovered: 8
+     gaps_fixed: 0
+     gaps_verified: 0
+
+     phase_1_audit: complete  # Created GAP-R-XXX gaps
+     phase_2_tests: pending   # Will create as part of gap fixes
+     phase_3_triage: complete # Gap system auto-prioritizes
+     phase_4_fix: in_progress # Using /improve command
+     phase_5_lock: pending    # After all gaps verified
+   ```
+
+6. **Use unified commands**
+   - `/improve` to fix gaps
+   - `/verify` to verify fixes
+   - No need for separate recovery-specific commands
 
 ## Expected Timeline
 

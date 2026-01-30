@@ -117,7 +117,7 @@ Run LLM user tests against your UI.
 | `--persona=<id>` | Run with specific persona only |
 | `--critical` | Run only critical path scenarios |
 
-**Output:**
+**Output (Unified Gap System):**
 ```
 LLM USER TEST RESULTS
 ═════════════════════
@@ -127,40 +127,116 @@ Scenarios: 4 | Passed: 3 | Failed: 1
 
 SCORE: 7.2/10
 
-GAPS FOUND:
+GAPS CREATED (Unified System):
 🔴 CRITICAL (1)
-   GAP-001: No progress tracking visible
+   GAP-U-001: No progress tracking visible
 
 🟠 HIGH (2)
-   GAP-002: Feedback not level-adaptive
-   GAP-003: Loading time >3s
+   GAP-U-002: Feedback not level-adaptive
+   GAP-U-003: Loading time >3s
 
-Run /llm-user status for details
-Run /llm-user fix to resolve gaps
+✅ Gaps written to: docs/gaps/gaps/GAP-U-*.yaml
+📁 Registry updated: docs/gaps/gap-registry.yaml
+
+Next steps:
+- View gaps: /llm-user status
+- Fix gaps: /improve --source=llm-user
+- Verify fixes: /verify --source=llm-user
+```
+
+**Unified Gap Creation:**
+
+For each UX issue found, creates gap in unified format:
+
+```yaml
+# docs/gaps/gaps/GAP-U-001.yaml
+gap_id: GAP-U-001
+title: "No Progress Tracking Visible"
+category: ux
+severity: CRITICAL
+priority: 1
+
+discovery:
+  source: llm-user
+  discovered_at: "2024-01-30T10:30:00Z"
+  discovered_by: "/llm-user test"
+
+problem:
+  description: |
+    Jake (impatient teen) abandoned at scene 3 because
+    no progress indication was visible.
+
+  evidence:
+    - type: user_behavior
+      detail: "Jake's frustration: 0.85 at abandonment"
+    - type: user_thought
+      detail: "How many more? This is pointless."
+    - type: scenario_failure
+      detail: "multi-scene-session failed"
+
+  affected:
+    personas: [jake-teen]
+    scenarios: [multi-scene-session]
+    promises: [P3]
+
+  root_cause: |
+    Progress tracking not implemented or not visible to users.
+
+expected:
+  description: |
+    Users should see clear progress indicators showing
+    how far they've come and what's ahead.
+
+  acceptance_criteria:
+    - "Progress visible after each activity"
+    - "Overall progress accessible"
+    - "Users feel sense of advancement"
+
+resolution:
+  approach: |
+    Add progress dashboard and mini-progress indicators.
+    Show after each scene and in navigation.
+
+  effort: medium
+  risk: low
+
+verification:
+  method: llm-user
+
+  llm_user_scenarios:
+    - scenario: multi-scene-session
+      personas: [jake-teen]
+
+  success_criteria:
+    - "Jake completes 5+ scenes"
+    - "Frustration stays below 0.5"
+    - "Jake mentions progress positively"
+
+status:
+  state: open
+  notes: "Discovered by LLM user testing"
 ```
 
 ---
 
-### `/llm-user fix`
+### `/llm-user fix` (DEPRECATED - Use `/improve`)
 
-Fix gaps found by LLM user testing. Auto-verifies after each fix.
+**⚠️ DEPRECATED:** Use `/improve` command instead for unified gap fixing.
 
 ```bash
-# Fix all gaps (critical first)
-/llm-user fix
-
-# Fix only critical gaps
+# Old way (deprecated):
 /llm-user fix --critical
 
-# Fix only high priority
-/llm-user fix --high
-
-# Fix specific gap
-/llm-user fix GAP-001
-
-# Fix up to N gaps
-/llm-user fix --limit=3
+# New way (unified system):
+/improve --source=llm-user --severity=critical
+/improve GAP-U-001
 ```
+
+The unified `/improve` command:
+- Reads gaps from unified system
+- Handles all gap types (R, U, A)
+- Uses same fix workflow
+- Auto-verifies with `/verify`
 
 **Options:**
 | Option | Description |
