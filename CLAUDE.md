@@ -765,6 +765,23 @@ echo "✓ Ready to release"
 
 **CRITICAL: Follow this protocol when releasing a new version to ensure ALL files are updated.**
 
+### 🚨 WHEN TO BUMP VERSION (Critical Rule)
+
+**MUST bump version when:**
+1. **Templates change** - ANY modification to `templates/project/*.template`
+2. **Workflow changes** - Skills/agents that affect workflow behavior
+3. **Breaking changes** - Incompatible modifications
+
+**NO bump needed for:**
+1. Documentation updates
+2. Test additions
+3. Internal improvements
+4. Standalone utilities
+
+**Golden Rule:** If users need `workflow-patch` to get your changes, bump the version!
+
+See [VERSION-BUMP-PROTOCOL.md](VERSION-BUMP-PROTOCOL.md) for detailed decision tree.
+
 ### Files That MUST Be Updated
 
 When bumping version (e.g., 3.3.0 → 3.3.0), these files MUST be updated:
