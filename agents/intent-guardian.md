@@ -10,8 +10,11 @@ description: |
   MODES:
   - CREATE: Define intent from scratch for new project
   - AUDIT: Infer intent from existing code, mark as [INFERRED]
+  - EVOLVE: Update existing intent with new requirements (v1.0 → v2.0)
 
-  OUTPUTS: /docs/intent/product-intent.md
+  OUTPUTS:
+  - Standard: /docs/intent/product-intent.md
+  - Evolve: /docs/intent/product-intent-v2.0.md (preserves v1.0)
 
   TRIGGERS: "build", "create", "make", "analyze", "audit", "what's wrong", "promise", "guarantee"
 tools: Read, Glob, Grep, WebFetch, WebSearch
@@ -630,6 +633,199 @@ promise_summary:
     Each module must have acceptance validation defined.
     Architect cannot proceed to planning without full CORE coverage.
 ```
+
+---
+
+## EVOLVE Mode (Iteration Support)
+
+When invoked with `--evolve` flag and enhancement request, consolidate existing intent with new requirements:
+
+### Process
+
+1. **Load Base Intent (v1.0)**
+   ```bash
+   Read("/docs/intent/product-intent.md")
+   ```
+
+2. **Analyze Enhancement Request**
+   - What new problems does this solve?
+   - What new promises are needed?
+   - What existing promises might change?
+   - What boundaries need adjustment?
+
+3. **Create Consolidated Intent (v2.0)**
+
+   **Preservation Rules:**
+   - Keep ALL existing CORE promises (unless explicitly deprecated)
+   - Keep ALL existing invariants (these are sacred)
+   - Preserve 80-90% of existing promises
+   - Add new promises for enhancement
+   - Mark deprecated promises as [DEPRECATED in v2.0]
+   - Mark new promises as [NEW in v2.0]
+   - Mark modified promises as [MODIFIED in v2.0]
+
+4. **Output Format for Evolution**
+
+   ```markdown
+   # Product Intent v2.0
+
+   > Evolution of v1.0 with: [enhancement description]
+   > Base preserved: 85%
+   > Changes: 3 new promises, 1 modified, 1 deprecated
+
+   ## Version History
+   - v1.0: Original intent (link to /docs/intent/product-intent.md)
+   - v2.0: Added [enhancement] capability
+
+   ## Intent Statement
+   ```yaml
+   product: <name>
+   version: 2.0
+   core_problem: <expanded problem - includes original + new>
+   for_whom: <expanded or same user base>
+   success_state: <enhanced success state>
+   why_us: <updated differentiator>
+   ```
+
+   ## Core Invariants (Sacred - Never Change)
+   ```yaml
+   invariants:
+     - id: INV-001
+       statement: "User data is never shared without explicit consent"
+       status: PRESERVED  # Always preserved
+       rationale: <why this is sacred>
+       verification: <how to check this holds>
+   ```
+
+   ## User Promises (Evolved)
+   ```yaml
+   promises:
+     # PRESERVED FROM V1.0
+     - id: PRM-001
+       promise: "Your work is auto-saved every 30 seconds"
+       status: PRESERVED
+       criticality: CORE
+       [rest of original promise]
+
+     # MODIFIED IN V2.0
+     - id: PRM-002
+       promise: "You'll get a response within 12 hours"  # Was 24 hours
+       status: MODIFIED
+       previous: "You'll get a response within 24 hours"
+       modification_reason: "Enhancement requires faster support"
+       criticality: IMPORTANT
+       [updated criteria]
+
+     # NEW IN V2.0
+     - id: PRM-010
+       promise: "AI suggestions improve over time with your usage"
+       status: NEW
+       enhancement: "AI-powered suggestions"
+       criticality: IMPORTANT
+       rationale: |
+         The AI enhancement requires this new promise to set
+         expectations about personalization and learning.
+       [full promise definition]
+
+     # DEPRECATED IN V2.0
+     - id: PRM-003
+       promise: "Manual categorization for all items"
+       status: DEPRECATED
+       deprecated_reason: "Replaced by automatic AI categorization"
+       replacement: PRM-011
+   ```
+
+   ## Behavioral Contracts (Evolved)
+   [Similar format with PRESERVED/MODIFIED/NEW/DEPRECATED markers]
+
+   ## Boundaries (Adjusted)
+   ```yaml
+   boundaries:
+     # Original boundaries preserved
+     not_a: "Social network"
+     why: "We solve [X], not connection/engagement"
+
+     # New boundary for AI enhancement
+     not_a: "General purpose AI assistant"
+     why: "We provide domain-specific suggestions, not general chat"
+     status: NEW
+   ```
+
+   ## Delta Analysis
+   ```yaml
+   delta_summary:
+     base_version: 1.0
+     new_version: 2.0
+     preservation_rate: 85%
+
+     changes:
+       new_promises: 3
+       modified_promises: 1
+       deprecated_promises: 1
+       new_invariants: 0  # Should always be 0
+       modified_invariants: 0  # Should always be 0
+
+     risk_assessment:
+       breaking_changes: false
+       user_retraining_needed: minimal
+       backward_compatible: true
+   ```
+
+   ## Migration Notes
+   ```yaml
+   migration:
+     from_v1_to_v2:
+       - Auto-migration for most features
+       - User notification about enhanced AI capabilities
+       - Gradual rollout recommended
+
+     rollback_plan:
+       - Feature flags for v2.0 features
+       - Can disable AI and revert to v1.0 behavior
+   ```
+   ```
+
+5. **Gap Generation Instructions**
+
+   After creating v2.0 intent, instruct the system to:
+   ```markdown
+   ## Next Steps for Gap Analysis
+
+   Run gap analysis between v1.0 and v2.0:
+   ```bash
+   /gap --between "v1.0" "v2.0"
+   ```
+
+   This will identify:
+   - Implementation gaps for new promises
+   - Modification gaps for changed promises
+   - Deprecation cleanup for removed promises
+   ```
+
+### Example EVOLVE Mode Invocation
+
+```bash
+# User request
+/intent --evolve "add AI-powered suggestions"
+
+# Agent actions:
+1. Load /docs/intent/product-intent.md (v1.0)
+2. Analyze AI enhancement requirements
+3. Create /docs/intent/product-intent-v2.0.md
+4. Preserve 85% of v1.0 promises
+5. Add 3 new AI-related promises
+6. Modify 1 promise (faster support for AI feedback)
+7. Output delta analysis
+8. Recommend gap analysis command
+```
+
+### Validation Rules for Evolution
+
+1. **Never remove CORE promises** - Only deprecate with replacement
+2. **Never modify invariants** - These are sacred
+3. **Preserve minimum 80%** - More change = revolution not evolution
+4. **Always backward compatible** - Users shouldn't break
+5. **Clear version tracking** - Know what changed and why
 
 ---
 

@@ -7,12 +7,17 @@ description: |
   - After changes require replanning
   - User asks "how do we build this", "what's the plan", "ready to build"
 
+  MODES:
+  - FULL: Create complete implementation plan from scratch
+  - INCREMENTAL: Update existing plan with new/modified features (v1.0 → v2.0)
+
   WHAT IT DOES:
   - Creates overview plans (full system reference)
   - Creates feature plans (vertical slices for parallel work)
   - Maps feature dependencies
   - Determines parallel batches
   - Creates implementation order
+  - In INCREMENTAL mode: Preserves existing plans, adds delta plans
 
   OUTPUTS:
   - /docs/plans/overview/backend-plan.md
@@ -873,6 +878,215 @@ would accelerate development:
 
 Run `/mcp setup postgres github puppeteer` to configure.
 (Optional but recommended for faster development)
+```
+
+---
+
+## INCREMENTAL Mode (Iteration Support)
+
+When invoked with `--incremental` flag after architecture evolution, create delta implementation plans:
+
+### Process
+
+1. **Load Existing Plans (v1.0)**
+   ```bash
+   Read("/docs/plans/overview/*.md")
+   Read("/docs/plans/features/*.md")
+   Read("/docs/plans/implementation-order.md")
+   ```
+
+2. **Load Evolution Artifacts (v2.0)**
+   ```bash
+   Read("/docs/intent/product-intent-v2.0.md")
+   Read("/docs/ux/user-journeys-v2.0.md")
+   Read("/docs/architecture/README-v2.0.md")
+   ```
+
+3. **Identify Deltas**
+   - New features to implement
+   - Modified features to update
+   - Deprecated features to remove
+   - Unchanged features to preserve
+
+4. **Create Incremental Plans**
+
+   **Preservation Rules:**
+   - Keep ALL working feature plans
+   - Preserve implementation order for unchanged features
+   - Insert new features at appropriate points
+   - Mark modified features for update
+   - Mark deprecated features for removal
+
+5. **Output Format for Incremental Planning**
+
+   ```markdown
+   # Implementation Plan v2.0 (Incremental)
+
+   > Evolution of v1.0 with: [enhancement description]
+   > Base preserved: 85%
+   > New features: 2, Modified: 1, Deprecated: 0
+
+   ## Implementation Order (Updated)
+
+   ### Phase 1: Foundation [COMPLETED]
+   Status: COMPLETED in v1.0
+   Features:
+   - ✅ user-authentication
+   - ✅ database-setup
+   - ✅ api-framework
+
+   ### Phase 2: Core Features [COMPLETED]
+   Status: COMPLETED in v1.0
+   Features:
+   - ✅ content-management
+   - ✅ search-basic
+
+   ### Phase 3: Enhancement Features [NEW]
+   Status: TO_IMPLEMENT
+   Features:
+   - 🔄 search-enhanced [MODIFY existing search-basic]
+   - 🆕 ai-suggestions [NEW]
+   - 🆕 vector-search [NEW]
+
+   ## Feature Plans (Delta)
+
+   ### Features to Preserve (No Changes)
+   - user-authentication (/docs/plans/features/user-authentication.md)
+   - content-management (/docs/plans/features/content-management.md)
+
+   ### Features to Modify
+   #### search-enhanced [MODIFICATION of search-basic]
+   Base: /docs/plans/features/search-basic.md
+   Changes:
+   - Add vector embedding generation
+   - Integrate semantic search
+   - Maintain backward compatibility
+
+   **Modified Implementation:**
+   ```yaml
+   backend:
+     preserve:
+       - Basic search endpoints
+       - Keyword matching logic
+     modify:
+       - Add embedding pipeline
+       - Add vector similarity search
+     new:
+       - Vector storage service
+       - Embedding generator
+
+   frontend:
+     preserve:
+       - Search UI components
+     modify:
+       - Add AI toggle switch
+       - Show confidence scores
+   ```
+
+   ### New Feature Plans
+   #### ai-suggestions [NEW]
+   ```yaml
+   overview: Generate AI-powered content suggestions
+
+   backend:
+     new_endpoints:
+       - POST /api/suggestions/generate
+       - GET /api/suggestions/history
+     services:
+       - SuggestionService (new)
+       - LLMClient (new)
+     dependencies:
+       - OpenAI API key
+       - Redis for caching
+
+   frontend:
+     new_components:
+       - SuggestionPanel
+       - AIToggle
+       - ConfidenceIndicator
+     integration:
+       - Add to CreateScreen
+       - Add to EditScreen
+   ```
+
+   ## Overview Plans (Delta)
+
+   ### Backend Overview (Incremental)
+   ```markdown
+   ## Existing Modules [PRESERVED]
+   - AuthService ✅
+   - UserService ✅
+   - ContentService ✅
+
+   ## Modified Modules
+   - SearchService
+     - Add: Vector search capability
+     - Add: Embedding generation
+     - Keep: Existing keyword search
+
+   ## New Modules [NEW in v2.0]
+   - AIService
+     - Suggestion generation
+     - Prompt management
+     - Response caching
+   ```
+
+   ## Migration Plan
+   ```yaml
+   migration_strategy:
+     approach: "Incremental with feature flags"
+
+     sequence:
+       1: Deploy AI service (isolated)
+       2: Add vector DB tables (non-breaking)
+       3: Feature flag new search
+       4: Feature flag AI suggestions
+       5: Gradual rollout
+
+     risks:
+       - API rate limits for AI service
+       - Vector DB performance
+       - Cache invalidation complexity
+
+     mitigations:
+       - Rate limiting on AI endpoints
+       - Vector index optimization
+       - Clear cache strategy
+   ```
+
+   ## Gap Identification
+   ```yaml
+   implementation_gaps:
+     - GAP-I-001: Implement AI service module
+     - GAP-I-002: Add vector search to existing search
+     - GAP-I-003: Create suggestion UI components
+     - GAP-I-004: Integrate embeddings pipeline
+   ```
+   ```
+
+6. **Validation Rules**
+
+   - Never remove working features without explicit deprecation
+   - Maintain backward compatibility
+   - Feature flags for all new/modified features
+   - Clear rollback strategy
+   - Preserve 80%+ of existing implementation
+
+### Example INCREMENTAL Mode Invocation
+
+```bash
+# User request
+/plan --incremental
+
+# Agent actions:
+1. Load existing plans from v1.0
+2. Load v2.0 artifacts (intent, UX, architecture)
+3. Identify delta (new AI features)
+4. Create incremental implementation plan
+5. Preserve completed phases
+6. Add new Phase 3 for enhancements
+7. Generate feature modification plans
+8. Output gap list for implementation
 ```
 
 ---

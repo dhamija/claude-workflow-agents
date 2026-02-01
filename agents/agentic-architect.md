@@ -10,10 +10,11 @@ description: |
   MODES:
   - CREATE: Design architecture from scratch
   - AUDIT: Infer architecture, identify agentic opportunities
+  - EVOLVE: Update existing architecture with new requirements (v1.0 → v2.0)
 
   OUTPUTS:
-  - /docs/architecture/README.md (comprehensive architecture)
-  - /docs/architecture/agent-design.md (agent-specific design)
+  - Standard: /docs/architecture/README.md, /docs/architecture/agent-design.md
+  - Evolve: /docs/architecture/README-v2.0.md, /docs/architecture/agent-design-v2.0.md
 
   TRIGGERS: "architecture", "system design", "analyze", "audit", "improve", "how will it work"
 tools: Read, Glob, Grep, WebFetch, WebSearch
@@ -1448,6 +1449,235 @@ If adding AI agents:
 - LOW: Messy, inconsistent, hard to understand
 - UNCERTAIN: Contradictory patterns
 
+
+---
+
+## EVOLVE Mode (Iteration Support)
+
+When invoked with `--evolve` flag and enhancement request, update existing architecture to support new requirements:
+
+### Process
+
+1. **Load Base Architecture (v1.0)**
+   ```bash
+   Read("/docs/architecture/README.md")
+   Read("/docs/architecture/agent-design.md")
+   ```
+
+2. **Analyze Enhancement Request**
+   - What new capabilities are needed?
+   - Which existing modules need enhancement?
+   - Are new agents required?
+   - What architectural patterns apply?
+
+3. **Create Evolved Architecture (v2.0)**
+
+   **Preservation Rules:**
+   - Keep ALL working modules (unless explicitly deprecated)
+   - Preserve 80-90% of existing architecture
+   - Maintain existing interfaces where possible
+   - Add new modules/agents for enhancement
+   - Mark deprecated components as [DEPRECATED in v2.0]
+   - Mark new components as [NEW in v2.0]
+   - Mark modified components as [MODIFIED in v2.0]
+
+4. **Output Format for Evolution**
+
+   ```markdown
+   # System Architecture v2.0
+
+   > Evolution of v1.0 with: [enhancement description]
+   > Base preserved: 85%
+   > Changes: 2 new modules, 1 modified, 1 new agent
+
+   ## Version History
+   - v1.0: Original architecture (link to /docs/architecture/README.md)
+   - v2.0: Added [enhancement] capabilities
+
+   ## System Overview (Evolved)
+
+   ### Core Components [PRESERVED]
+   - Backend API (Node.js/Express)
+   - Database (PostgreSQL)
+   - Frontend (React)
+   - Authentication Service
+
+   ### Enhanced Components [MODIFIED]
+   - Search Service
+     - Status: MODIFIED
+     - Changes: Added vector search for AI
+     - Previous: Keyword search only
+     - New capabilities: Semantic search, embeddings
+
+   ### New Components [NEW in v2.0]
+   - AI Service
+     - Status: NEW
+     - Purpose: Handle AI suggestions
+     - Technology: Python/FastAPI
+     - Integration: REST API with main backend
+
+   ## Agent Architecture (Evolved)
+
+   ### Existing Agents [PRESERVED]
+   - ContentValidator Agent
+   - NotificationAgent
+
+   ### New Agents [NEW in v2.0]
+   - SuggestionAgent
+     - Purpose: Generate AI suggestions
+     - Triggers: Content creation, search
+     - LLM: GPT-4 or Claude
+     - Context: User history, preferences
+
+   ## Data Flow (Delta)
+
+   ### Preserved Flows
+   - User Auth → Backend → Database
+   - Content CRUD operations
+
+   ### Modified Flows
+   - Search: User → Backend → [NEW] Vector DB → Results
+
+   ### New Flows
+   - AI Suggestions: User Action → AI Service → LLM → Cache → Response
+
+   ## Module Inventory (Delta)
+
+   ### Modules to Preserve (unchanged)
+   ```yaml
+   preserved_modules:
+     - auth_module: No changes needed
+     - user_module: No changes needed
+     - core_api: No changes needed
+   ```
+
+   ### Modules to Modify
+   ```yaml
+   modified_modules:
+     - search_module:
+         changes:
+           - Add embedding generation
+           - Integrate vector search
+           - Keep backward compatibility
+     - content_module:
+         changes:
+           - Add AI suggestion hooks
+           - Keep existing CRUD intact
+   ```
+
+   ### New Modules
+   ```yaml
+   new_modules:
+     - ai_suggestion_module:
+         purpose: Generate and manage AI suggestions
+         dependencies: ["openai", "langchain"]
+     - vector_search_module:
+         purpose: Semantic search capabilities
+         dependencies: ["pgvector", "sentence-transformers"]
+   ```
+
+   ## Integration Points (Evolution)
+
+   ### Existing Integrations [PRESERVED]
+   - Database connections
+   - Auth providers
+   - Storage services
+
+   ### New Integrations [NEW in v2.0]
+   - OpenAI API (for suggestions)
+   - Vector database (for embeddings)
+   - Redis (for AI response caching)
+
+   ## Promise Mapping (Updated)
+
+   | Promise ID | Module | Status |
+   |-----------|--------|--------|
+   | PRM-001 | auth_module | PRESERVED |
+   | PRM-002 | user_module | PRESERVED |
+   | PRM-010 | ai_suggestion_module | NEW |
+   | PRM-011 | vector_search_module | NEW |
+
+   ## Delta Analysis
+   ```yaml
+   delta_summary:
+     base_version: 1.0
+     new_version: 2.0
+     preservation_rate: 85%
+
+     changes:
+       new_modules: 2
+       modified_modules: 2
+       deprecated_modules: 0
+       new_agents: 1
+       new_integrations: 3
+
+     architectural_impact:
+       complexity_increase: moderate
+       new_dependencies: 5
+       breaking_changes: false
+       backward_compatible: true
+   ```
+
+   ## Migration Architecture
+   ```yaml
+   migration:
+     strategy: "Blue-Green with feature flags"
+
+     phases:
+       1: Deploy new AI service separately
+       2: Add vector DB alongside existing search
+       3: Feature flag for AI suggestions
+       4: Gradual rollout by user percentage
+
+     rollback:
+       - Feature flags allow instant disable
+       - AI service can be disconnected
+       - Vector search falls back to keyword
+   ```
+   ```
+
+5. **Gap Generation Instructions**
+
+   After creating v2.0 architecture:
+   ```markdown
+   ## Next Steps for Implementation
+
+   Run gap analysis for architectural changes:
+   ```bash
+   /gap --architecture "v1.0" "v2.0"
+   ```
+
+   This will identify:
+   - New modules to implement
+   - Module modifications needed
+   - New agents to create
+   - Integration points to build
+   ```
+
+### Example EVOLVE Mode Invocation
+
+```bash
+# User request
+/architect --evolve "add AI-powered suggestions"
+
+# Agent actions:
+1. Load /docs/architecture/README.md (v1.0)
+2. Analyze AI enhancement architectural needs
+3. Create /docs/architecture/README-v2.0.md
+4. Preserve 85% of v1.0 architecture
+5. Add AI service module
+6. Add suggestion agent
+7. Modify search to support vectors
+8. Output delta analysis
+```
+
+### Validation Rules for Architecture Evolution
+
+1. **Preserve working systems** - Don't break what works
+2. **Maintain interfaces** - Existing APIs stay compatible
+3. **Incremental complexity** - Add, don't rewrite
+4. **Feature flag everything** - Allow rollback
+5. **Clear migration path** - Phase the changes
 
 ---
 

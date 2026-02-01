@@ -9,6 +9,11 @@ argument-hint: <task description>
 
 **Purpose:** Forces planning-first approach by creating explicit workflow execution plan
 
+**CRITICAL FOR ITERATIONS:** When in iteration mode (--iterate), this command will:
+1. Invoke agents to regenerate L1 artifacts (intent v2.0, UX v2.0, architecture v2.0)
+2. Create incremental implementation plans
+3. Generate gaps for future analysis and LLM user testing
+
 ---
 
 ## MANDATORY: Use This Before ANY Implementation
@@ -113,41 +118,56 @@ Approve this plan? (y/n)
 - Current features: [list from CLAUDE.md]
 
 ## 2. ITERATION ANALYSIS
-/iterate-analyze "AI suggestions"
+Task: iteration-analyzer "AI suggestions"
 - Compatibility check with existing promises
 - Impact on current user journeys
 - Architecture extension points
 
-## 3. EVOLUTIONARY DESIGN
-/intent --evolve "AI suggestions"     # Creates Intent v2.0
-/ux --evolve "AI suggestions"         # Creates UX v2.0
-/architect --evolve "AI suggestions"  # Creates Architecture v2.0
+## 3. REGENERATE L1 ARTIFACTS (v2.0)
+**CRITICAL: These agents will create new versioned artifacts**
 
-## 4. DELTA ANALYSIS
-/delta-analysis v1.0 v2.0
-- New promises: [list]
-- Modified journeys: [list]
-- New components: [list]
-- Preserved: 85% of existing system
+Task: intent-guardian with mode=evolve enhancement="AI suggestions"
+→ Creates: /docs/intent/product-intent-v2.0.md
+→ Preserves: 80-90% of v1.0 promises
+→ Adds: New promises for AI features
+
+Task: ux-architect with mode=evolve enhancement="AI suggestions"
+→ Creates: /docs/ux/user-journeys-v2.0.md
+→ Preserves: 80-90% of v1.0 journeys
+→ Adds: New AI interaction patterns
+
+Task: agentic-architect with mode=evolve enhancement="AI suggestions"
+→ Creates: /docs/architecture/README-v2.0.md
+→ Preserves: 80-90% of v1.0 architecture
+→ Adds: New AI service modules
+
+Task: implementation-planner with mode=incremental
+→ Creates: /docs/plans/implementation-v2.0.md
+→ Preserves: Completed phases
+→ Adds: New phase for enhancements
+
+## 4. DELTA ANALYSIS (Automatic)
+Each agent outputs delta analysis:
+- New promises: [auto-generated]
+- Modified journeys: [auto-generated]
+- New components: [auto-generated]
+- Preservation rate: 85%
 
 ## 5. GAP IDENTIFICATION
 /gap --between "v1.0" "v2.0"
-- Creates GAP-I-XXX (iteration gaps)
+→ Creates: GAP-I-001 through GAP-I-XXX
+→ Based on: Comparing v1.0 vs v2.0 artifacts
 
-## 6. IMPLEMENTATION PLAN
-/plan --incremental
-- Preserve: [unchanged components]
-- Evolve: [modified components]
-- Create: [new components]
-
-## 7. EXECUTE CHANGES
-/improve GAP-I-001
-/improve GAP-I-002
+## 6. EXECUTE CHANGES
+/improve GAP-I-001  # Implement first gap
+/improve GAP-I-002  # Implement second gap
 ...
 
-## 8. VALIDATION
+## 7. VALIDATION
 /verify --iteration
-- Existing features still work
+- Test v1.0 features still work
+- Test v2.0 features work
+- No regressions
 - New features integrated
 - No regressions
 

@@ -9,8 +9,11 @@ description: |
   MODES:
   - CREATE: Design UX from scratch
   - AUDIT: Infer journeys from existing UI/routes, mark as [INFERRED]
+  - EVOLVE: Update existing UX with new requirements (v1.0 → v2.0)
 
-  OUTPUTS: /docs/ux/user-journeys.md
+  OUTPUTS:
+  - Standard: /docs/ux/user-journeys.md
+  - Evolve: /docs/ux/user-journeys-v2.0.md (preserves v1.0)
 
   TRIGGERS: "user flow", "how will users", "screens", "pages", "UX", "analyze", "audit", "improve"
 tools: Read, Glob, Grep, WebFetch, WebSearch
@@ -463,6 +466,198 @@ Issues to address in improvement plan:
 - MEDIUM: Some gaps but main flow exists
 - LOW: Incomplete, unclear, or broken
 - UNCERTAIN: Contradictory patterns or missing pages
+
+---
+
+## EVOLVE Mode (Iteration Support)
+
+When invoked with `--evolve` flag and enhancement request, consolidate existing UX with new requirements:
+
+### Process
+
+1. **Load Base UX (v1.0)**
+   ```bash
+   Read("/docs/ux/user-journeys.md")
+   Read("/docs/ux/design-system.md")  # if exists
+   ```
+
+2. **Analyze Enhancement Request**
+   - What new journeys are needed?
+   - What existing journeys need modification?
+   - What new UI patterns are required?
+   - What interaction models change?
+
+3. **Create Consolidated UX (v2.0)**
+
+   **Preservation Rules:**
+   - Keep ALL core journeys (unless explicitly deprecated)
+   - Preserve 80-90% of existing flows
+   - Maintain existing mental models
+   - Add new journeys for enhancement
+   - Mark deprecated journeys as [DEPRECATED in v2.0]
+   - Mark new journeys as [NEW in v2.0]
+   - Mark modified journeys as [MODIFIED in v2.0]
+
+4. **Output Format for Evolution**
+
+   ```markdown
+   # User Journeys v2.0
+
+   > Evolution of v1.0 with: [enhancement description]
+   > Base preserved: 85%
+   > Changes: 2 new journeys, 1 modified, 0 deprecated
+
+   ## Version History
+   - v1.0: Original UX (link to /docs/ux/user-journeys.md)
+   - v2.0: Added [enhancement] capabilities
+
+   ## User Personas (Evolved)
+   [Existing personas + any new ones needed for enhancement]
+
+   ## Core Journeys (Evolved)
+
+   ### 1. User Registration [PRESERVED]
+   Status: PRESERVED
+   Changes: None
+   [Original journey details]
+
+   ### 2. Content Creation [MODIFIED]
+   Status: MODIFIED
+   Changes: Added AI suggestion step
+   Previous: Manual entry only
+
+   **Enhanced Journey:**
+   1. User clicks "Create"
+   2. [NEW STEP] AI suggests initial content
+   3. User edits/accepts suggestion
+   4. [Rest of original flow]
+
+   ### 5. AI-Powered Search [NEW]
+   Status: NEW
+   Enhancement: AI capabilities
+
+   **Journey:**
+   1. User enters natural language query
+   2. AI interprets intent
+   3. Results shown with explanations
+   4. User can refine with AI help
+
+   ## UI Patterns (Evolved)
+
+   ### Existing Patterns [PRESERVED]
+   - Card layouts
+   - Form inputs
+   - Navigation drawer
+
+   ### New Patterns [NEW in v2.0]
+   - AI suggestion cards
+   - Confidence indicators
+   - Learning feedback widgets
+
+   ## Interaction Models (Evolved)
+
+   ### Base Interactions [PRESERVED]
+   - Click to select
+   - Drag to reorder
+   - Swipe to dismiss
+
+   ### Enhanced Interactions [NEW in v2.0]
+   - Voice input for AI queries
+   - Gesture-based feedback
+   - Progressive disclosure for AI explanations
+
+   ## Screen Inventory (Delta)
+
+   ### Screens to Preserve
+   - LoginScreen (unchanged)
+   - DashboardScreen (unchanged)
+   - ProfileScreen (unchanged)
+
+   ### Screens to Modify
+   - CreateScreen (add AI panel)
+   - SearchScreen (add natural language bar)
+
+   ### New Screens
+   - AISettingsScreen
+   - SuggestionHistoryScreen
+
+   ## Delta Analysis
+   ```yaml
+   delta_summary:
+     base_version: 1.0
+     new_version: 2.0
+     preservation_rate: 85%
+
+     changes:
+       new_journeys: 2
+       modified_journeys: 1
+       deprecated_journeys: 0
+       new_screens: 2
+       modified_screens: 2
+
+     ux_impact:
+       learning_curve: minimal
+       muscle_memory_preserved: true
+       mental_model_shift: small
+   ```
+
+   ## Migration UX
+   ```yaml
+   onboarding_changes:
+     first_time_v2:
+       - Highlight new AI features
+       - Optional tutorial for AI interactions
+       - Progressive disclosure of new capabilities
+
+     returning_users:
+       - "What's new" modal on first v2.0 login
+       - Tooltips for modified screens
+       - AI features opt-in initially
+   ```
+   ```
+
+5. **Gap Generation Instructions**
+
+   After creating v2.0 UX:
+   ```markdown
+   ## Next Steps for Implementation
+
+   Run gap analysis for UX changes:
+   ```bash
+   /gap --ux "v1.0" "v2.0"
+   ```
+
+   This will identify:
+   - New screens to implement
+   - Screen modifications needed
+   - New interaction patterns to build
+   - Deprecated UI to remove
+   ```
+
+### Example EVOLVE Mode Invocation
+
+```bash
+# User request
+/ux --evolve "add AI-powered suggestions"
+
+# Agent actions:
+1. Load /docs/ux/user-journeys.md (v1.0)
+2. Analyze AI enhancement UX needs
+3. Create /docs/ux/user-journeys-v2.0.md
+4. Preserve 85% of v1.0 journeys
+5. Add 2 new AI-related journeys
+6. Modify 1 journey (content creation with AI)
+7. Define new UI patterns for AI
+8. Output delta analysis
+```
+
+### Validation Rules for UX Evolution
+
+1. **Preserve muscle memory** - Common actions stay in same place
+2. **Maintain mental models** - Don't change core concepts
+3. **Progressive disclosure** - New features don't overwhelm
+4. **Backward compatible** - Users can ignore new features
+5. **Clear visual hierarchy** - New doesn't dominate existing
 
 ---
 
