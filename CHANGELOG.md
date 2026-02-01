@@ -6,6 +6,25 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [3.5.0] - 2026-02-01
+
+### Added
+- **Evolutionary Artifact Regeneration** - L1 agents now support evolution modes
+  - intent-guardian --evolve creates product-intent-v2.0.md
+  - ux-architect --evolve creates user-journeys-v2.0.md
+  - agentic-architect --evolve creates README-v2.0.md
+  - implementation-planner --incremental creates delta plans
+  - Preserves 80-90% of existing artifacts while adding enhancements
+  - Enables proper gap analysis and LLM user testing on updated systems
+
+### Changed
+- workflow-plan command now invokes agents to regenerate artifacts during iteration
+- Iteration workflow actually updates L1 documentation (was missing before)
+
+### Fixed
+- Critical issue where iteration workflow wasn't regenerating artifacts
+- Gap analysis and LLM user testing now work correctly with evolved systems
+
 ## [3.4.0] - 2026-02-01
 
 ### Added
