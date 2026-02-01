@@ -46,7 +46,7 @@ Automatic reminders via hooks:
 
 ```yaml
 workflow:
-  version: 3.1
+  version: 3.3
   type: greenfield              # greenfield | brownfield
   phase: L1                     # L1 (planning) | L2 (building)
   status: not_started           # not_started | in_progress | paused | complete

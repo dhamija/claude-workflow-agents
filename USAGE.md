@@ -1,6 +1,6 @@
 # Usage Guide
 
-> **v3.1 Architecture:** Skills + Hooks. 11 skills loaded on-demand, 3 subagents for isolated tasks. See README.md for detailed architecture.
+> **v3.3 Architecture:** Skills + Hooks. 11 skills loaded on-demand, 3 subagents for isolated tasks. See README.md for detailed architecture.
 
 ## Installation
 
@@ -17,7 +17,7 @@ source ~/.bashrc  # or restart terminal
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s latest
 
 # Specific version
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s v3.1.0
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s v3.3.0
 
 # Bleeding edge
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s master
@@ -31,7 +31,7 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 
 ### Commands Available
 - `workflow-toggle on/off/status` - Enable, disable, or check workflow status (global)
-- `workflow-update [version]` - Update global installation (latest/v3.1.0/master)
+- `workflow-update [version]` - Update global installation (latest/v3.3.0/master)
 - `workflow-version` - Show current version
 - `workflow-uninstall` - Remove global installation
 

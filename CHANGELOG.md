@@ -6,9 +6,33 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
-## [Unreleased]
+## [3.3.0] - 2026-01-31
 
 ### Added
+- **PLANNING-FIRST Principle** - Mandatory workflow enforcement to prevent ad-hoc coding
+  - New `/workflow-plan` command for explicit planning before implementation
+  - Enhanced workflow skill with mandatory planning requirements and state tracking
+  - Planning verification checklist before any implementation
+  - Updated brownfield skill to prevent immediate coding
+  - TodoWrite integration for step-by-step execution tracking
+
+- **Unified Gap System** - Consolidated three parallel gap workflows into one
+  - Single gap format: GAP-[SOURCE]-[NUMBER] for all gap types
+  - `/reality-audit` creates GAP-R-XXX (reality gaps)
+  - `/llm-user test` creates GAP-U-XXX (user testing gaps)
+  - `/gap` creates GAP-A-XXX (analysis gaps)
+  - Enhanced `/improve` command handles all gap types with smart filtering
+  - New `/verify` command with intelligent method selection per gap type
+  - Updated `/recover` to use unified gap commands
+  - Deprecated `/llm-user fix` in favor of unified `/improve`
+
+- **Preventing Illusion of Progress Documentation**
+  - Critical principle documented in CLAUDE.md
+  - Spanish Learner PRM-007 case study
+  - Mandatory validation rules using Bash tool
+  - Red flags for detecting fake validation
+
+### Changed
 - **Skill Version Tracking for Artifact Regeneration**
   - Added `skill_version` field to `ui_testing` state in CLAUDE.md templates
   - `/llm-user init` detects version mismatch and suggests `--upgrade`
@@ -21,6 +45,8 @@ Format: [Semantic Versioning](https://semver.org/)
   - Scene-Response Validation with regeneration logic if mismatch detected
   - Scene-Based Scenario Template for language learning apps
   - Prevents test users from describing objects not in scene (invalidates test results)
+
+### Changed
 
 - **LLM User Testing Architecture Documentation**
   - Added comprehensive section to CLAUDE.md documenting design decisions

@@ -1,6 +1,6 @@
 # Claude Workflow Agents - Repository
 
-> **v3.1 Architecture:** Skills + Hooks + Subagents. 11 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
+> **v3.3 Architecture:** Skills + Hooks + Subagents. 11 skills loaded on-demand, 3 subagents for isolated tasks, minimal CLAUDE.md (~80 lines). 90% context reduction.
 
 > **Instructions for maintaining THIS repository.**
 > **This file is NOT installed to user systems.**
@@ -29,7 +29,7 @@
 
 ---
 
-## Installation Architecture (v3.1)
+## Installation Architecture (v3.3)
 
 **Skills + Hooks + Subagents Architecture**
 
@@ -554,7 +554,7 @@ EOF
 
 ### Why This Architecture
 
-**Before (v3.1):** Constants scattered across 4+ locations
+**Before (v3.3):** Constants scattered across 4+ locations
 - CORE_AGENTS in install.sh:164, install.sh:331 (embedded), install.sh:506 (embedded), bin/workflow-refresh:70
 - Skill regex in 4 places with inconsistencies
 - Changes required updating multiple files manually
@@ -607,7 +607,7 @@ EOF
 
 ### Why This Exists
 
-Multiple iterations were needed to fix v3.1.0 post-release because installation state wasn't verified:
+Multiple iterations were needed to fix v3.3.0 post-release because installation state wasn't verified:
 - workflow-patch missing (TEMP_DIR deleted too early)
 - llm-user-architect was subagent but should have been skill
 - Zombie agents from v2.0 not cleaned up
@@ -656,7 +656,7 @@ These issues were only discovered after users reported them. This checklist prev
 4. ✅ **Test Upgrade from Previous Version**
    ```bash
    # Install previous stable version first
-   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/v3.1.0/install.sh | bash
+   curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/v3.3.0/install.sh | bash
 
    # Verify old files exist (simulate v2.0 upgrade)
    touch ~/.claude/agents/acceptance-validator.md
@@ -682,7 +682,7 @@ These issues were only discovered after users reported them. This checklist prev
    # Should detect brownfield, create minimal-brownfield CLAUDE.md
    ```
 
-6. ✅ **Test workflow-patch (v2.0 → v3.1+ Migration)**
+6. ✅ **Test workflow-patch (v2.0 → v3.3+ Migration)**
    ```bash
    cd /tmp/test-project
    # Copy a v2.0 CLAUDE.md with "## 🔄 WORKFLOW ACTIVE"
@@ -767,21 +767,21 @@ echo "✓ Ready to release"
 
 ### Files That MUST Be Updated
 
-When bumping version (e.g., 3.1.0 → 3.1.0), these files MUST be updated:
+When bumping version (e.g., 3.3.0 → 3.3.0), these files MUST be updated:
 
 1. **`version.txt`** (single line file)
    ```
-   3.1.0
+   3.3.0
    ```
 
 2. **`install.sh`** (line ~8)
    ```bash
-   VERSION="3.1.0"
+   VERSION="3.3.0"
    ```
    **⚠️ MOST COMMONLY FORGOTTEN - Double-check this!**
 
 3. **`CHANGELOG.md`**
-   - Rename `[Unreleased]` or create new section to `[3.1.0] - YYYY-MM-DD`
+   - Rename `[Unreleased]` or create new section to `[3.3.0] - YYYY-MM-DD`
    - Document all changes in appropriate categories (Added/Changed/Fixed/Removed)
 
 4. **All Documentation Files** (automated with sed)
@@ -800,20 +800,20 @@ When bumping version (e.g., 3.1.0 → 3.1.0), these files MUST be updated:
 **Step 1: Update Core Version Files**
 ```bash
 # Update version.txt
-echo "3.1.0" > version.txt
+echo "3.3.0" > version.txt
 
 # Update install.sh VERSION variable (line 8)
-sed -i '' 's/VERSION="[0-9.]*"/VERSION="3.1.0"/' install.sh
+sed -i '' 's/VERSION="[0-9.]*"/VERSION="3.3.0"/' install.sh
 
 # Update CHANGELOG.md (rename section header)
-sed -i '' 's/## \[Unreleased\]/## [3.1.0] - 2026-01-27/' CHANGELOG.md
+sed -i '' 's/## \[Unreleased\]/## [3.3.0] - 2026-01-27/' CHANGELOG.md
 ```
 
 **Step 2: Bulk Update All Documentation References**
 ```bash
 # Replace version references across all docs (adjust OLD_VERSION as needed)
-OLD_VERSION="3.1.0"
-NEW_VERSION="3.1.0"
+OLD_VERSION="3.3.0"
+NEW_VERSION="3.3.0"
 
 for file in README.md CLAUDE.md commands/help.md AGENTS.md COMMANDS.md GUIDE.md WORKFLOW.md STATE.md USAGE.md EXAMPLES.md PATTERNS.md agents/workflow-orchestrator.md; do
   sed -i '' "s/${OLD_VERSION}/${NEW_VERSION}/g" "$file"
@@ -841,7 +841,7 @@ echo "=== install.sh VERSION (line 8) ==="
 head -n 10 install.sh | grep VERSION
 
 echo "=== CHANGELOG.md (latest version) ==="
-head -n 20 CHANGELOG.md | grep -A 5 "\[3.1.0\]"
+head -n 20 CHANGELOG.md | grep -A 5 "\[3.3.0\]"
 
 echo "=== Template workflow versions ==="
 grep "version:" templates/project/CLAUDE.md.*.template
@@ -851,10 +851,10 @@ grep "version:" templates/project/CLAUDE.md.*.template
 ```bash
 # Commit version bump
 git add -A
-git commit -m "chore: bump version to 3.1.0"
+git commit -m "chore: bump version to 3.3.0"
 
 # Create annotated tag
-git tag -a v3.1.0 -m "Release v3.1.0
+git tag -a v3.3.0 -m "Release v3.3.0
 
 - Feature 1
 - Feature 2
@@ -862,7 +862,7 @@ git tag -a v3.1.0 -m "Release v3.1.0
 
 # Push commit and tag
 git push origin main
-git push origin v3.1.0
+git push origin v3.3.0
 ```
 
 ### Common Mistakes and How to Avoid Them

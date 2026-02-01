@@ -4,7 +4,7 @@ A **skills-based workflow system** for Claude Code that helps you build software
 
 **Just talk naturally.** Claude automatically loads the right skills and uses the right agents.
 
-> **Version:** 3.1.0
+> **Version:** 3.3.0
 > **Architecture:** Skills + Hooks + Subagents
 
 ---
@@ -71,7 +71,7 @@ Then restart your terminal (or `source ~/.bashrc`).
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s latest
 
 # Specific version
-curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s v3.1.0
+curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s v3.3.0
 
 # Bleeding edge (master branch)
 curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash -s master
@@ -126,7 +126,7 @@ Subagents are isolated execution environments for specific tasks:
 ```bash
 workflow-update           # Update to latest stable release
 workflow-update latest    # Update to latest stable release
-workflow-update v3.1.0    # Update to specific version
+workflow-update v3.3.0    # Update to specific version
 workflow-update master    # Update to bleeding edge
 ```
 
@@ -150,7 +150,7 @@ See [Commands Reference](#commands-reference) for all 29 commands.
 ```bash
 ls ~/.claude/skills/              # Should show 10 directories
 ls ~/.claude/agents/*.md          # Should show 3 subagents
-workflow-version                  # Should show v3.1.0
+workflow-version                  # Should show v3.3.0
 ```
 
 ### Uninstall
@@ -165,7 +165,7 @@ Removes skills, symlinks, and installation directory. Preserves user's own agent
 
 ## Architecture
 
-### v3.1: Skills + Hooks
+### v3.3: Skills + Hooks
 
 Claude Workflow Agents uses a **context-efficient architecture**:
 
@@ -197,7 +197,7 @@ Project/CLAUDE.md                   # Minimal (~80 lines)
 
 **Context Efficiency:**
 - v2.0: 750+ lines loaded every session
-- v3.1: ~80 lines + skills loaded only when needed
+- v3.3: ~80 lines + skills loaded only when needed
 - **90% reduction in upfront context**
 
 **Performance:**

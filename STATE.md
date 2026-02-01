@@ -37,7 +37,7 @@
 | project-ops | Operations | ✓ Complete |
 | solution-iterator | L2 Support | ✓ Complete |
 
-**Note:** llm-user-architect was removed in v3.1.1 - functionality now in `llm-user-testing` skill.
+**Note:** llm-user-architect was removed in v3.3.1 - functionality now in `llm-user-testing` skill.
 
 ## Commands List
 
