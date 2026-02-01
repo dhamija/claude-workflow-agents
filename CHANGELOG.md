@@ -6,6 +6,34 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [3.4.0] - 2026-02-01
+
+### Added
+- **Iteration Workflow** - New workflow mode for evolving existing systems
+  - Preserves 80-90% of existing functionality when adding features
+  - Extends documentation (v1.0 → v2.0) rather than replacing
+  - Creates iteration gaps (GAP-I-XXX) for incremental implementation
+  - Maintains backward compatibility automatically
+
+- **Smart Detection in /workflow-plan** - Automatic artifact detection
+  - Detects existing L1 artifacts (intent, UX, architecture)
+  - Automatically recommends iteration mode when appropriate
+  - Prevents accidental redesigns of existing systems
+  - User can override with `--force-standard` if needed
+
+- **iteration-analyzer Agent** - Compatibility analysis for enhancements
+  - Analyzes impact of proposed changes on existing system
+  - Provides risk assessment and preservation percentage
+  - Identifies integration points and breaking changes
+  - Recommends evolutionary vs revolutionary approach
+
+### Changed
+- Enhanced workflow skill with iteration flow and smart detection logic
+- Updated /workflow-plan command with --iterate mode and auto-detection
+- Improved user experience - no need to manually specify iteration mode
+
+---
+
 ## [3.3.0] - 2026-01-31
 
 ### Added
