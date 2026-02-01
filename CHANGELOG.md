@@ -6,6 +6,23 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [3.6.0] - 2026-02-01
+
+### Added
+- **Explicit L1 Artifact Regeneration in Plans** - Claude now clearly shows artifact regeneration
+  - Plans explicitly show "Creates: product-intent-v2.0.md" etc.
+  - L1 regeneration always shown as Phase 1 in iteration plans
+  - Users never have to ask if artifacts will be updated
+  - Clear consequences shown for skipping L1 regeneration
+
+### Changed
+- Workflow skill updated with mandatory iteration plan format
+- Automatic mode detection now checks for both product-intent.md and intent-audit.md
+
+### Fixed
+- Iteration plans now unmistakably clear about artifact regeneration
+- User no longer needs to ask follow-up about L1 updates
+
 ## [3.5.0] - 2026-02-01
 
 ### Added
