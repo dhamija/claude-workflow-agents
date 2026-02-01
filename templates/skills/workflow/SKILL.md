@@ -42,6 +42,42 @@ description: |
 
 **NEVER jump straight into coding without a plan!**
 
+### Smart Mode Detection
+
+**When user requests enhancements, CHECK FOR EXISTING ARTIFACTS FIRST:**
+
+```bash
+# Before creating plan, check:
+ls docs/intent/product-intent.md 2>/dev/null
+ls docs/ux/user-journeys.md 2>/dev/null
+ls docs/architecture/system-design.md 2>/dev/null
+grep "features:" CLAUDE.md
+```
+
+**If artifacts exist:**
+```
+📊 Detected existing system with completed features
+📈 This appears to be an enhancement to v1.0
+
+Recommended approach: ITERATION MODE
+- Preserves 80-90% of existing functionality
+- Extends rather than replaces documentation
+- Implements only what changed
+- Ensures backward compatibility
+
+Should I create an iteration plan? [Y/n]
+```
+
+**User can override but explain consequences:**
+```
+⚠️ Standard mode will redesign from scratch
+- May break existing features
+- Will take significantly longer
+- Could disrupt user workflows
+
+Are you sure you want standard mode? [y/N]
+```
+
 ### Planning Verification Checklist
 
 Before proceeding with ANY implementation, verify:
@@ -194,6 +230,115 @@ Backend → (review) → Frontend → (review) → Tests → Validate → Comple
 **Continue to:** Next feature or project complete
 
 ---
+
+## Iteration Flow (Evolving Systems)
+
+**NEW! For v2.0+ enhancements to existing systems**
+
+### When to Use Iteration Flow
+
+**Triggered when:**
+- User says "enhance with [X]", "add [major feature]", "redesign [area]"
+- Significant evolution beyond simple bug fixes
+- Need to maintain backward compatibility
+- Want to preserve existing functionality
+
+### Iteration Workflow Steps
+
+```
+Load State → Analyze Impact → Evolve Docs → Delta Analysis → Incremental Implementation
+```
+
+#### Step 1: Load Current State
+
+```bash
+# Load existing documentation versions
+cat docs/intent/product-intent.md        # v1.0 promises
+cat docs/ux/user-journeys.md            # v1.0 journeys
+cat docs/architecture/system-design.md   # v1.0 architecture
+grep "features:" CLAUDE.md              # Completed features
+```
+
+#### Step 2: Iteration Analysis
+
+**Analyze enhancement compatibility:**
+1. Will it break existing promises?
+2. Does it conflict with current UX?
+3. Can architecture support it?
+4. What's the integration effort?
+
+**Output:** Compatibility report with risk assessment
+
+#### Step 3: Evolutionary Design
+
+**Create v2.0 documents that EXTEND v1.0:**
+
+```markdown
+# Intent v2.0
+## Existing Promises (v1.0)
+[Keep all existing promises]
+
+## New Promises (v2.0)
+[Add new promises]
+
+## Evolution Notes
+- What changed and why
+- Backward compatibility notes
+```
+
+Same pattern for UX v2.0 and Architecture v2.0
+
+#### Step 4: Delta Analysis
+
+**Identify precise changes:**
+```yaml
+delta_analysis:
+  new_promises: [P8, P9]
+  modified_journeys: [checkout, profile]
+  new_components: [ai_service, suggestion_engine]
+  deprecated: []
+  preserved: 85%
+  breaking_changes: none
+```
+
+#### Step 5: Gap-Based Implementation
+
+**Create iteration gaps (GAP-I-XXX):**
+```bash
+/gap --iteration "v1.0 to v2.0"
+# Creates GAP-I-001, GAP-I-002, etc.
+```
+
+**Implement incrementally:**
+```bash
+/improve GAP-I-001  # Highest priority first
+/verify GAP-I-001   # Verify no regression
+```
+
+#### Step 6: Validation
+
+**Ensure both old AND new work:**
+1. All v1.0 tests still pass
+2. New v2.0 features validated
+3. No performance regression
+4. User journeys intact
+
+### State Tracking for Iterations
+
+```yaml
+workflow:
+  mode: iteration
+  version: "1.0 → 2.0"
+
+iteration:
+  base_version: "1.0"
+  target_version: "2.0"
+  compatibility: maintained
+  preserved_percentage: 85
+  new_promises: [P8, P9]
+  iteration_gaps: [GAP-I-001, GAP-I-002]
+  status: in_progress
+```
 
 ## Brownfield Flow (Existing Code)
 

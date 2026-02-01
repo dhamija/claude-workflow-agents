@@ -300,6 +300,7 @@ The workflow skill invokes specialized agents via Task tool:
   - brownfield-analyzer  → Scans existing code
   - project-ops          → Project operations
   - solution-iterator    → Compare multiple solutions
+  - iteration-analyzer   → Analyze iteration compatibility
 
 
 WHY SKILLS + SUBAGENTS?

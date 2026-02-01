@@ -24,6 +24,7 @@ REQUIRED_AGENTS=(
     "workflow-orchestrator"
     "project-ops"
     "solution-iterator"
+    "iteration-analyzer"
 )
 
 # Check each agent

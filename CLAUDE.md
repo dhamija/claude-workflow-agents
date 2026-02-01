@@ -37,7 +37,7 @@
 
 ```
 ~/.claude-workflow-agents/           # Installation directory
-├── agents/                          # 17 agent files (invoked by workflow via Task tool)
+├── agents/                          # 18 agent files (invoked by workflow via Task tool)
 ├── commands/                        # 29 command definitions
 ├── lib/                             # Shared configuration and functions
 │   └── config.sh                    # SINGLE SOURCE OF TRUTH for all scripts
@@ -1485,6 +1485,223 @@ docs/gaps/
 
 ---
 
+## 🔄 ITERATION WORKFLOW (Evolving Existing Systems)
+
+**THE EVOLUTION PRINCIPLE:** When enhancing existing systems, preserve what works while evolving what needs improvement.
+
+### The Problem
+
+The standard workflow assumes greenfield development:
+```
+Intent → UX → Architecture → Implementation
+```
+
+But real projects need iterations:
+- Users request enhancements after v1.0
+- New ideas emerge during usage
+- Technology evolves requiring updates
+- Business needs change over time
+
+Starting over each time would:
+- Lose existing functionality
+- Break user workflows
+- Waste implementation effort
+- Create migration nightmares
+
+### The Solution: Iteration Workflow with Smart Detection
+
+**The workflow automatically detects when to use iteration mode:**
+
+```bash
+# User request (no need to specify mode)
+/workflow-plan "enhance with AI suggestions"
+
+# System detects existing artifacts:
+📊 Detected existing v1.0 artifacts
+📈 Recommending ITERATION mode (preserves 80-90% of system)
+
+Use iteration mode? [Y/n]  # User confirms
+```
+
+**Manual override if needed:**
+```bash
+# Force iteration mode
+/workflow-plan --iterate "AI suggestions"
+
+# Force standard mode (complete redesign)
+/workflow-plan --force-standard "complete rewrite"
+```
+
+This creates an evolutionary plan that:
+1. **Preserves** existing functionality (typically 80-90%)
+2. **Extends** documentation versions (v1.0 → v2.0)
+3. **Identifies** precise deltas between versions
+4. **Implements** only what changed
+5. **Validates** both old and new functionality
+
+### Iteration Workflow Steps
+
+#### 1. Load Current State
+```bash
+# What do we have?
+- Intent v1.0 (existing promises)
+- UX v1.0 (existing journeys)
+- Architecture v1.0 (existing design)
+- Completed features from CLAUDE.md
+```
+
+#### 2. Iteration Analysis
+```bash
+/iterate-analyze "enhancement request"
+# Outputs compatibility report:
+- Will it break promises?
+- Impact on user journeys?
+- Architecture support?
+- Integration effort?
+```
+
+#### 3. Evolutionary Design
+```markdown
+# Documents EXTEND rather than replace:
+
+## Intent v2.0
+### Existing Promises (v1.0)
+[All current promises preserved]
+
+### New Promises (v2.0)
+[Only new additions]
+
+### Evolution Notes
+- What changed and why
+- Backward compatibility guaranteed
+```
+
+#### 4. Delta Analysis
+```yaml
+# Precise change identification:
+delta:
+  new_promises: [P8, P9]
+  modified_journeys: [checkout]
+  new_components: [ai_service]
+  preserved: 85%
+  breaking_changes: none
+```
+
+#### 5. Gap-Based Implementation
+```bash
+# Create iteration gaps
+/gap --iteration "v1.0 to v2.0"
+# Creates GAP-I-001, GAP-I-002...
+
+# Implement incrementally
+/improve GAP-I-001
+/verify GAP-I-001  # No regression
+```
+
+### Key Differences from Standard Workflow
+
+| Aspect | Standard Workflow | Iteration Workflow |
+|--------|------------------|-------------------|
+| Starting Point | Empty | Existing v1.0 |
+| Documentation | Create new | Extend existing |
+| Implementation | Build everything | Build changes only |
+| Testing | Test new features | Test new + regression |
+| Risk | Greenfield risk | Compatibility risk |
+| Effort | 100% new | 10-30% changes |
+
+### When to Use Iteration Mode
+
+**Use iteration mode when:**
+- Adding major features to existing system
+- User requests "enhance with X"
+- Need to maintain backward compatibility
+- Want to preserve user workflows
+- Evolution not revolution
+
+**Use standard mode when:**
+- Starting completely new project
+- Complete rewrite needed
+- Breaking changes acceptable
+- No compatibility requirements
+
+### Smart Detection Logic
+
+The system automatically detects iteration needs by checking:
+
+1. **Artifact Existence**
+   ```bash
+   docs/intent/product-intent.md exists? → v1.0 found
+   docs/ux/user-journeys.md exists? → UX designed
+   docs/architecture/system-design.md exists? → Architecture done
+   ```
+
+2. **Feature Completion**
+   ```yaml
+   # In CLAUDE.md
+   l2.features:
+     auth: complete
+     search: complete
+     storage: complete
+   # → System is live, needs iteration
+   ```
+
+3. **Request Analysis**
+   - "enhance" → iteration
+   - "add to existing" → iteration
+   - "improve" → iteration
+   - "redesign" → standard (with warning)
+   - "start over" → standard
+
+### Example: Adding AI to Existing App
+
+```bash
+# User request
+"Add AI-powered suggestions to our app"
+
+# Just use workflow-plan (smart detection handles it)
+/workflow-plan "AI suggestions"
+
+# System responds:
+📊 Detected existing v1.0 system with 7 completed features
+📈 Recommending ITERATION mode to preserve functionality
+
+This will:
+- Keep 90% of existing code unchanged
+- Extend documentation (v1.0 → v2.0)
+- Add only new components
+- Maintain backward compatibility
+
+Use iteration mode? [Y/n]: Y  # User confirms
+
+# Creates plan:
+1. Load v1.0 state
+2. Analyze AI compatibility (non-breaking)
+3. Extend Intent with P8: AI assistance
+4. Extend UX with suggestion flows
+5. Extend Architecture with AI service
+6. Gap: GAP-I-001 (add AI service)
+7. Gap: GAP-I-002 (add UI components)
+8. Implement gaps incrementally
+9. Verify no regression
+```
+
+### State Tracking for Iterations
+
+```yaml
+workflow:
+  mode: iteration
+  base_version: "1.0"
+  target_version: "2.0"
+
+iteration:
+  enhancement: "AI suggestions"
+  preserved_percentage: 85
+  new_promises: [P8, P9]
+  gaps_created: [GAP-I-001, GAP-I-002]
+  backward_compatible: true
+  status: in_progress
+```
+
 ## 🎯 PLANNING-FIRST PRINCIPLE (Mandatory Workflow Enforcement)
 
 **THE CARDINAL RULE:** Never start implementation without an explicit workflow plan. Always use `/workflow-plan` command first.
@@ -1564,7 +1781,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 
 | Metric | Count |
 |--------|-------|
-| Agents | 17 |
+| Agents | 18 |
 | Commands | 29 |
 
 ### Agents
@@ -1588,6 +1805,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | workflow-orchestrator | Orchestration | Auto-chain agents and quality gates |
 | project-ops | Ops | Setup, sync, docs |
 | solution-iterator | L2 Support | Compare multiple solutions with LLM judges |
+| iteration-analyzer | L1 Support | Analyze impact of iterations on existing system |
 
 ### Commands
 

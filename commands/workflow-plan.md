@@ -21,12 +21,56 @@ argument-hint: <task description>
 
 ## What It Does
 
-1. **Analyzes request against workflow system**
-2. **Creates step-by-step plan using workflow commands**
-3. **Shows plan to user for approval**
-4. **Tracks execution state**
+1. **Detects existing artifacts automatically**
+2. **Chooses appropriate mode (standard vs iteration)**
+3. **Creates step-by-step plan using workflow commands**
+4. **Shows plan to user for approval**
+5. **Tracks execution state**
 
-## Output Format
+## Smart Detection
+
+**The command automatically detects if you should use iteration mode:**
+
+```bash
+# Check for existing artifacts
+if [ -f "docs/intent/product-intent.md" ] && \
+   [ -f "docs/ux/user-journeys.md" ] && \
+   [ -f "docs/architecture/system-design.md" ]; then
+   # Artifacts exist - suggest iteration mode
+   echo "📊 Detected existing v1.0 artifacts"
+   echo "📈 Recommending ITERATION mode to preserve existing functionality"
+   echo ""
+   echo "Use iteration mode? (preserves 80-90% of existing system) [Y/n]"
+fi
+```
+
+**Detection triggers when:**
+- L1 artifacts exist (intent, ux, architecture)
+- CLAUDE.md shows completed features
+- Previous version documented
+
+**User can override:**
+```bash
+# Force standard mode even with existing artifacts
+/workflow-plan --force-standard "complete redesign"
+
+# Accept smart recommendation
+/workflow-plan "add AI features"  # Auto-detects and suggests iteration
+```
+
+## Modes
+
+### Standard Mode (New Features)
+```bash
+/workflow-plan "add knowledge graph"
+```
+
+### Iteration Mode (Evolving Existing System)
+```bash
+/workflow-plan --iterate "enhance with AI suggestions"
+```
+
+## Output Format (Standard Mode)
 
 ```markdown
 # Workflow Plan: Knowledge Graph Visualization
@@ -55,6 +99,59 @@ argument-hint: <task description>
 ...
 
 Approve this plan? (y/n)
+```
+
+## Output Format (Iteration Mode)
+
+```markdown
+# Iteration Plan: AI Suggestions Enhancement
+
+## 1. LOAD EXISTING STATE
+- Intent v1.0: docs/intent/product-intent.md
+- UX v1.0: docs/ux/user-journeys.md
+- Architecture v1.0: docs/architecture/system-design.md
+- Current features: [list from CLAUDE.md]
+
+## 2. ITERATION ANALYSIS
+/iterate-analyze "AI suggestions"
+- Compatibility check with existing promises
+- Impact on current user journeys
+- Architecture extension points
+
+## 3. EVOLUTIONARY DESIGN
+/intent --evolve "AI suggestions"     # Creates Intent v2.0
+/ux --evolve "AI suggestions"         # Creates UX v2.0
+/architect --evolve "AI suggestions"  # Creates Architecture v2.0
+
+## 4. DELTA ANALYSIS
+/delta-analysis v1.0 v2.0
+- New promises: [list]
+- Modified journeys: [list]
+- New components: [list]
+- Preserved: 85% of existing system
+
+## 5. GAP IDENTIFICATION
+/gap --between "v1.0" "v2.0"
+- Creates GAP-I-XXX (iteration gaps)
+
+## 6. IMPLEMENTATION PLAN
+/plan --incremental
+- Preserve: [unchanged components]
+- Evolve: [modified components]
+- Create: [new components]
+
+## 7. EXECUTE CHANGES
+/improve GAP-I-001
+/improve GAP-I-002
+...
+
+## 8. VALIDATION
+/verify --iteration
+- Existing features still work
+- New features integrated
+- No regressions
+
+Approve iteration plan? (y/n)
 ```
 
 ## Execution Tracking
