@@ -32,48 +32,50 @@ argument-hint: <task description>
 4. **Shows plan to user for approval**
 5. **Tracks execution state**
 
-## Smart Detection
+## Automatic Mode Detection
 
-**The command automatically detects if you should use iteration mode:**
+**The command AUTOMATICALLY uses the right mode based on project state:**
 
 ```bash
-# Check for existing artifacts
+# Automatic detection logic:
 if [ -f "docs/intent/product-intent.md" ] && \
    [ -f "docs/ux/user-journeys.md" ] && \
    [ -f "docs/architecture/system-design.md" ]; then
-   # Artifacts exist - suggest iteration mode
-   echo "📊 Detected existing v1.0 artifacts"
-   echo "📈 Recommending ITERATION mode to preserve existing functionality"
-   echo ""
-   echo "Use iteration mode? (preserves 80-90% of existing system) [Y/n]"
+   # Existing project → ITERATION MODE (default)
+   echo "📊 Detected existing project with L1 artifacts"
+   echo "📈 Using ITERATION mode (preserves 80-90% of existing system)"
+else
+   # New project → STANDARD MODE
+   echo "🆕 New project detected"
+   echo "📝 Using STANDARD mode (creating from scratch)"
 fi
 ```
 
-**Detection triggers when:**
-- L1 artifacts exist (intent, ux, architecture)
-- CLAUDE.md shows completed features
-- Previous version documented
-
-**User can override:**
+**No flags needed - it just works:**
 ```bash
-# Force standard mode even with existing artifacts
-/workflow-plan --force-standard "complete redesign"
+# Existing project - automatically uses iteration
+/workflow-plan "add AI features"        # → Iteration mode
 
-# Accept smart recommendation
-/workflow-plan "add AI features"  # Auto-detects and suggests iteration
+# New project - automatically uses standard
+/workflow-plan "build todo app"         # → Standard mode
 ```
 
-## Modes
-
-### Standard Mode (New Features)
+**Override only for special cases:**
 ```bash
-/workflow-plan "add knowledge graph"
+# Force complete redesign (rare)
+/workflow-plan --force-standard "complete rewrite"
+
+# Force iteration on partial project (rare)
+/workflow-plan --force-iterate "enhance incomplete system"
 ```
 
-### Iteration Mode (Evolving Existing System)
-```bash
-/workflow-plan --iterate "enhance with AI suggestions"
-```
+## Modes (Automatically Selected)
+
+### Standard Mode (New Projects - Auto-detected)
+Used when no L1 artifacts exist. Creates everything from scratch.
+
+### Iteration Mode (Existing Projects - Auto-detected)
+Used when L1 artifacts exist. Evolves the system preserving 80-90% of functionality.
 
 ## Output Format (Standard Mode)
 

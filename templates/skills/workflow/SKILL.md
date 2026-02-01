@@ -42,24 +42,27 @@ description: |
 
 **NEVER jump straight into coding without a plan!**
 
-### Smart Mode Detection
+### Automatic Mode Selection
 
-**When user requests enhancements, CHECK FOR EXISTING ARTIFACTS FIRST:**
+**The workflow AUTOMATICALLY detects project state:**
 
 ```bash
-# Before creating plan, check:
-ls docs/intent/product-intent.md 2>/dev/null
-ls docs/ux/user-journeys.md 2>/dev/null
-ls docs/architecture/system-design.md 2>/dev/null
-grep "features:" CLAUDE.md
+# Automatic check when user requests features:
+if [ -f "docs/intent/product-intent.md" ] && \
+   [ -f "docs/ux/user-journeys.md" ] && \
+   [ -f "docs/architecture/system-design.md" ]; then
+   # ITERATION MODE (default for existing projects)
+   echo "📊 Existing project detected - using iteration mode"
+else
+   # STANDARD MODE (for new projects)
+   echo "🆕 New project - using standard workflow"
+fi
 ```
 
-**If artifacts exist:**
-```
-📊 Detected existing system with completed features
-📈 This appears to be an enhancement to v1.0
-
-Recommended approach: ITERATION MODE
+**No need to ask - just use the right mode:**
+- **Existing project?** → Automatically iterate (preserve 80-90%)
+- **New project?** → Automatically create from scratch
+- **User wants complete redesign?** → They'll explicitly say "redesign" or "start over"
 - Preserves 80-90% of existing functionality
 - Extends rather than replaces documentation
 - Implements only what changed
