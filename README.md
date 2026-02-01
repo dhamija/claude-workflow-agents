@@ -81,7 +81,7 @@ curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/mast
 - Installs to `~/.claude-workflow-agents/` (global location)
 - Copies **11 skills** to `~/.claude/skills/` (loaded on-demand by Claude)
 - Symlinks **3 subagents** to `~/.claude/agents/` (for isolated tasks)
-- Symlinks **28 commands** to `~/.claude/commands/`
+- Symlinks **29 commands** to `~/.claude/commands/`
 - Adds workflow commands to PATH
 
 ### What Gets Installed
@@ -144,7 +144,7 @@ workflow-update master    # Update to bleeding edge
 | `/debug <issue>` | Debug problem |
 | `/llm-user` | LLM user testing (init/test/fix/status/refresh) |
 
-See [Commands Reference](#commands-reference) for all 28 commands.
+See [Commands Reference](#commands-reference) for all 29 commands.
 
 ### Verify Installation
 ```bash
@@ -944,7 +944,7 @@ A: Check `ls ~/.claude/skills/`. If empty, run `workflow-update` to reinstall.
 A: Check `ls ~/.claude/agents/*.md`. Should show 4 files. If not, run `workflow-update`.
 
 **Q: Commands not working**
-A: Check `ls ~/.claude/commands/*.md`. Should show 26 files. If not, run `workflow-update`.
+A: Check `ls ~/.claude/commands/*.md`. Should show 29 files. If not, run `workflow-update`.
 
 **Q: Hook reminders not showing**
 A: Check `.claude/settings.json` exists. If not, run `workflow-init` again and enable hooks.

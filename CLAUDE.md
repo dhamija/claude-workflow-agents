@@ -38,7 +38,7 @@
 ```
 ~/.claude-workflow-agents/           # Installation directory
 ├── agents/                          # 17 agent files (invoked by workflow via Task tool)
-├── commands/                        # 28 command definitions
+├── commands/                        # 29 command definitions
 ├── lib/                             # Shared configuration and functions
 │   └── config.sh                    # SINGLE SOURCE OF TRUTH for all scripts
 ├── templates/                       # Templates for user projects
@@ -68,10 +68,10 @@
 │   ├── code-reviewer.md -> ~/.claude-workflow-agents/agents/code-reviewer.md
 │   ├── debugger.md -> ~/.claude-workflow-agents/agents/debugger.md
 │   └── ui-debugger.md -> ~/.claude-workflow-agents/agents/ui-debugger.md
-└── commands/                        # 28 command symlinks
+└── commands/                        # 29 command symlinks
     ├── analyze.md -> ~/.claude-workflow-agents/commands/analyze.md
     ├── plan.md -> ~/.claude-workflow-agents/commands/plan.md
-    └── ... (28 total)
+    └── ... (29 total)
 ```
 
 ### How It Works (v3.2)
@@ -1485,6 +1485,71 @@ docs/gaps/
 
 ---
 
+## 🎯 PLANNING-FIRST PRINCIPLE (Mandatory Workflow Enforcement)
+
+**THE CARDINAL RULE:** Never start implementation without an explicit workflow plan. Always use `/workflow-plan` command first.
+
+### The Problem We're Solving
+
+When asked to implement features, Claude often:
+- Jumps straight into coding
+- Skips the established workflow system
+- Creates ad-hoc solutions instead of systematic ones
+- Misses critical validation steps
+- Doesn't update state properly
+
+This violates the entire purpose of the workflow system.
+
+### The Solution: Mandatory Planning
+
+**Every implementation request MUST follow this pattern:**
+
+```bash
+# 1. User requests feature
+User: "Add knowledge graph visualization"
+
+# 2. Claude MUST create plan first
+Claude: "I'll create a workflow plan for this feature..."
+/workflow-plan "add knowledge graph visualization"
+
+# 3. Show plan to user
+"Here's my workflow plan:
+1. /intent-audit - Check alignment with promises
+2. Load ux-design skill - Design multi-panel UI
+3. /gap - Identify missing capabilities
+4. /improve --severity=critical - Fix blocking issues
+5. /verify - Validate implementation
+
+Shall I proceed with this plan?"
+
+# 4. Execute step-by-step with state tracking
+[Execute each command, update CLAUDE.md state, show real output]
+```
+
+### Implementation Changes
+
+1. **Updated workflow skill** with PLANNING-FIRST section
+2. **Created /workflow-plan command** for explicit planning
+3. **Added state persistence requirements** with execution tracking
+4. **Updated brownfield skill** to prevent immediate coding
+5. **Added planning verification checklist** before any implementation
+
+### Why This Matters
+
+**Without Planning:**
+- Features implemented outside workflow
+- No systematic validation
+- State not tracked
+- Progress illusion (seems done but isn't)
+
+**With Planning:**
+- Every step uses workflow commands
+- Validation at each phase
+- Complete state tracking
+- Real, verifiable progress
+
+---
+
 ## What This Is
 
 A multi-agent workflow system. Users describe what they want, Claude orchestrates specialized agents to build it.
@@ -1500,7 +1565,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 | Metric | Count |
 |--------|-------|
 | Agents | 17 |
-| Commands | 28 |
+| Commands | 29 |
 
 ### Agents
 
@@ -1530,6 +1595,7 @@ A multi-agent workflow system. Users describe what they want, Claude orchestrate
 |---------|---------|
 | /help | Help system |
 | /workflow | Enable/disable/status |
+| /workflow-plan | Create explicit plan before implementation |
 | /status | Show progress |
 | /next | Continue building |
 | /plan | View plans |

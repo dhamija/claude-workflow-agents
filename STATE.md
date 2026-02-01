@@ -10,7 +10,7 @@
 | Skills | 11 | 2026-01-28 |
 | Subagents | 3 | 2026-01-28 |
 | Agent Files (for Task tool invocation) | 17 | 2026-01-29 |
-| Commands | 28 | 2026-01-30 |
+| Commands | 29 | 2026-01-31 |
 | Templates | 27 | 2026-01-25 |
 | Help Topics | 13 | 2026-01-26 |
 | Tests | 32 | 2026-01-26 |
@@ -71,6 +71,7 @@
 | ux-audit | ✓ Complete |
 | verify | ✓ Complete |
 | workflow | ✓ Complete |
+| workflow-plan | ✓ Complete |
 
 ## Recent Changes
 
@@ -85,6 +86,10 @@
 | 2026-01-30 | Updated /llm-user test to write GAP-U-XXX gaps | Claude |
 | 2026-01-30 | Updated /recover to use unified gap commands | Claude |
 | 2026-01-30 | Deprecated /llm-user fix in favor of unified /improve | Claude |
+| 2026-01-31 | **PLANNING-FIRST PRINCIPLE:** Created mandatory workflow planning | Claude |
+| 2026-01-31 | Added /workflow-plan command for explicit planning before implementation | Claude |
+| 2026-01-31 | Enhanced workflow skill with planning requirements and state tracking | Claude |
+| 2026-01-31 | Added planning verification checklist to prevent ad-hoc coding | Claude |
 | 2026-01-30 | Created unified gap repository structure at docs/gaps/ | Claude |
 | 2026-01-28 | Added skill version tracking for artifact regeneration (`ui_testing.skill_version`) | Claude |
 | 2026-01-28 | Added scene-grounded responses to llm-user-testing skill (v1.1.0) | Claude |

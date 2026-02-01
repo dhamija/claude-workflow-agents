@@ -353,6 +353,7 @@ PROJECT OPERATIONS
 
 ANALYSIS & PLANNING
 ───────────────────
+  /workflow-plan <task>      🆕 Create explicit plan BEFORE implementation
   /analyze                   Run all analysis agents
   /plan                      Generate implementation plans
   /replan                    Regenerate plans after changes

@@ -7,6 +7,20 @@ description: |
 
 # Brownfield Analysis Skill
 
+## 🚨 MANDATORY: Plan Before Acting
+
+**STOP! When user asks to add/change/fix anything:**
+
+1. **DO NOT start coding immediately**
+2. **CREATE a workflow plan first:**
+   ```
+   /workflow-plan "user's request"
+   ```
+3. **FOLLOW the generated plan step-by-step**
+
+**Common mistake:** Jumping into code when user says "add feature X"
+**Correct approach:** Plan → Audit → Design → Implement → Validate
+
 ## First Session Protocol
 
 When encountering existing code:

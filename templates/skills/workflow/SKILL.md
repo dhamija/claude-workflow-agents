@@ -10,6 +10,51 @@ description: |
 
 # Workflow Orchestration
 
+## 🚨 MANDATORY: PLANNING-FIRST PRINCIPLE
+
+**STOP! Before implementing ANYTHING, you MUST:**
+
+1. **CREATE A PLAN** using TodoWrite tool:
+   ```
+   - List EXACT workflow commands to use
+   - List SPECIFIC skills to load
+   - List FILES to create/modify
+   - List TESTS to run for validation
+   ```
+
+2. **SHOW THE PLAN** to the user:
+   ```
+   "Here's my workflow plan:
+   1. /intent-audit to analyze gaps
+   2. Load ux-design skill for multi-panel UI
+   3. /gap to create GAP-A-XXX entries
+   4. /improve --severity=critical
+   5. /verify to validate fixes
+
+   Shall I proceed with this plan?"
+   ```
+
+3. **EXECUTE STEP-BY-STEP**:
+   - Mark each todo as in_progress when starting
+   - Mark as completed when done
+   - Show actual command output
+   - Update state in CLAUDE.md
+
+**NEVER jump straight into coding without a plan!**
+
+### Planning Verification Checklist
+
+Before proceeding with ANY implementation, verify:
+
+- [ ] TodoWrite plan created with specific workflow steps?
+- [ ] Plan shown to user for approval?
+- [ ] Each step maps to a workflow command or skill?
+- [ ] State tracking configured in CLAUDE.md?
+- [ ] Tests identified for validation?
+- [ ] No direct code writing without workflow commands?
+
+**If any item unchecked → STOP and create proper plan first!**
+
 ## CRITICAL: Real Validation Required
 
 **YOU HAVE THE BASH TOOL. USE IT.**
@@ -229,6 +274,33 @@ Stop hook reminds to check:
 ---
 
 ## State Management
+
+### CRITICAL: State Must Be Persisted
+
+**Every workflow action MUST update state in CLAUDE.md immediately:**
+
+1. **Read current state first:**
+   ```bash
+   grep -A 20 "workflow:" CLAUDE.md
+   ```
+
+2. **Update after EVERY action:**
+   - Command executed → Update state
+   - Skill loaded → Update state
+   - Test run → Update state with results
+   - Feature completed → Update state
+
+3. **State includes execution details:**
+   ```yaml
+   workflow:
+     phase: L1|L2
+     status: in_progress|paused|complete
+     last_command: "/gap"
+     last_command_output: "Created 5 gaps"
+     pending_steps:
+       - "/improve --severity=critical"
+       - "/verify"
+   ```
 
 Always update CLAUDE.md state after significant actions:
 
