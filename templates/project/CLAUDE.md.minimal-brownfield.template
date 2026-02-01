@@ -42,7 +42,7 @@ Automatic reminders via hooks:
 
 ```yaml
 workflow:
-  version: 3.6
+  version: 3.7
   type: brownfield              # Existing codebase
   phase: analysis               # analysis | L2 (building)
   status: not_started

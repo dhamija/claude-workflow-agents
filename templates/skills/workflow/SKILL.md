@@ -34,11 +34,19 @@ description: |
    Shall I proceed with this plan?"
    ```
 
-3. **EXECUTE STEP-BY-STEP**:
+3. **EXECUTE STEP-BY-STEP** (MANDATORY):
    - Mark each todo as in_progress when starting
+   - **ACTUALLY RUN THE TASK COMMANDS** shown in the plan
+   - For "Task: intent-guardian with mode=evolve" → Use Task tool to invoke it
+   - For "/gap" → Use SlashCommand tool to execute it
    - Mark as completed when done
    - Show actual command output
    - Update state in CLAUDE.md
+
+   **CRITICAL: The plan is NOT self-executing. You MUST:**
+   - Use Task tool for each "Task: agent-name" in the plan
+   - Use SlashCommand tool for each "/command" in the plan
+   - Actually create the v2.0 artifacts, not just plan to create them
 
 **NEVER jump straight into coding without a plan!**
 
@@ -129,24 +137,55 @@ This skill provides orchestration logic for greenfield and brownfield developmen
 ✓ Existing L1 artifacts found
 ✓ Using ITERATION mode
 
-## 🚨 PHASE 1: REGENERATE L1 ARTIFACTS (SHOW THIS FIRST!)
+## 🚨 PHASE 1: REGENERATE L1 ARTIFACTS (EXECUTE THESE TASKS!)
 ### 1.1 Intent v2.0
 - Task: intent-guardian --evolve
 - Creates: /docs/intent/product-intent-v2.0.md
+- **ACTION: Use Task tool with subagent_type="general-purpose" and prompt="Load the intent-guardian skill and use it in EVOLVE mode to create product-intent-v2.0.md"**
 
 ### 1.2 UX v2.0
 - Task: ux-architect --evolve
 - Creates: /docs/ux/user-journeys-v2.0.md
+- **ACTION: Use Task tool with subagent_type="general-purpose" and prompt="Load the ux-design skill and use it in EVOLVE mode to create user-journeys-v2.0.md"**
 
 ### 1.3 Architecture v2.0
 - Task: agentic-architect --evolve
 - Creates: /docs/architecture/system-design-v2.0.md
+- **ACTION: Use Task tool with subagent_type="general-purpose" and prompt="Load the architecture skill and use it in EVOLVE mode to create system-design-v2.0.md"**
 
 ## PHASE 2: IMPLEMENTATION
 [Rest of plan...]
 ```
 
 **User should NEVER have to ask if L1 artifacts will be updated!**
+
+### 📌 AFTER SHOWING THE PLAN
+
+**CRITICAL: After user approves the plan, you MUST execute it:**
+
+```markdown
+User: "yes" or "proceed" or "go ahead"
+
+Claude: "Starting Phase 1: Regenerating L1 artifacts..."
+
+[ACTUALLY USE TASK TOOL HERE - Don't just say you will!]
+
+Task tool invocation #1:
+- subagent_type: "general-purpose"
+- prompt: "Load intent-guardian skill, use EVOLVE mode to update product-intent.md to v2.0 with [specific enhancement]"
+
+[WAIT FOR TASK TO COMPLETE]
+
+✓ Created product-intent-v2.0.md
+
+Task tool invocation #2:
+- subagent_type: "general-purpose"
+- prompt: "Load ux-design skill, use EVOLVE mode to update user-journeys.md to v2.0 with [specific enhancement]"
+
+[CONTINUE WITH ALL TASKS IN PLAN]
+```
+
+**Common mistake:** Showing the plan but not executing it. The plan is a TODO list, not self-executing code!
 
 ## L1 Planning Flow (Greenfield)
 

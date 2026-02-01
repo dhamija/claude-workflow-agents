@@ -6,6 +6,21 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [3.7.0] - 2026-02-01
+
+### Fixed
+- **Critical: Plan Execution Clarity** - Workflow now explicitly states plans must be EXECUTED
+  - Added clear instructions that plans are TODO lists, not self-executing
+  - Specified exactly how to use Task tool for each planned action
+  - Added "AFTER SHOWING THE PLAN" section with execution examples
+  - Common mistake warning: "Showing the plan but not executing it"
+  - Each artifact regeneration step now shows exact Task tool parameters
+
+### Changed
+- Enhanced workflow skill with mandatory execution instructions
+- Made it crystal clear that Task tool must be used for each "Task:" in plan
+- Added specific ACTION items showing how to invoke each agent
+
 ## [3.6.0] - 2026-02-01
 
 ### Added
