@@ -118,6 +118,36 @@ This workflow ONLY works if you:
 
 This skill provides orchestration logic for greenfield and brownfield development workflows. Claude automatically loads this skill when managing project phases.
 
+## 🔄 ITERATION WORKFLOW (Most Common - Enhancing Existing Projects)
+
+**CRITICAL: When adding features to existing projects, ALWAYS show this plan:**
+
+```markdown
+# Iteration Plan: [Your Enhancement]
+
+## 📊 DETECTED STATE
+✓ Existing L1 artifacts found
+✓ Using ITERATION mode
+
+## 🚨 PHASE 1: REGENERATE L1 ARTIFACTS (SHOW THIS FIRST!)
+### 1.1 Intent v2.0
+- Task: intent-guardian --evolve
+- Creates: /docs/intent/product-intent-v2.0.md
+
+### 1.2 UX v2.0
+- Task: ux-architect --evolve
+- Creates: /docs/ux/user-journeys-v2.0.md
+
+### 1.3 Architecture v2.0
+- Task: agentic-architect --evolve
+- Creates: /docs/architecture/system-design-v2.0.md
+
+## PHASE 2: IMPLEMENTATION
+[Rest of plan...]
+```
+
+**User should NEVER have to ask if L1 artifacts will be updated!**
+
 ## L1 Planning Flow (Greenfield)
 
 ```
