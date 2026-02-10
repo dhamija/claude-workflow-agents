@@ -4,7 +4,7 @@ description: |
   Domain expertise for LLM-as-User testing. Provides principles, protocols,
   and best practices for simulating real users to test UIs. Loaded on-demand
   when executing /llm-user commands (init, test, fix, status, refresh).
-version: 1.1.0
+version: 1.2.0
 ---
 
 # LLM User Testing Skill
@@ -31,6 +31,41 @@ All LLM user testing functionality is under the `/llm-user` command:
 
 ---
 
+## Artifact Generation Requirements
+
+### CRITICAL: Include Preflight Checks in Generated Scenarios
+
+**When generating `docs/testing/llm-user-scenarios.md`, ALWAYS include preflight section:**
+
+```markdown
+# LLM User Test Scenarios
+
+## Preflight Requirements
+
+These checks MUST pass before testing can begin:
+
+### Infrastructure
+- [ ] Backend health check at /api/health
+- [ ] Database has required content (scenes/data)
+- [ ] Frontend renders without errors
+
+### Critical Dependencies
+For Spanish Learner / Scene-Based Apps:
+- [ ] At least 1 scene available via /api/scenes
+- [ ] Scene images load correctly
+- [ ] Question endpoint responds at /api/conversation
+
+### Critical UI Elements
+- [ ] App root renders
+- [ ] Navigation elements visible
+- [ ] Primary action buttons present
+
+If ANY preflight check fails, testing aborts with specific fix instructions.
+
+## Scenarios
+[... rest of scenarios ...]
+```
+
 ## Output Templates
 
 ### After `/llm-user init`
@@ -42,7 +77,7 @@ When initialization completes successfully, output this exact format:
 
 Generated artifacts:
 - docs/testing/llm-user-personas.md
-- docs/testing/llm-user-scenarios.md
+- docs/testing/llm-user-scenarios.md (with preflight checks)
 - docs/testing/llm-user-rubric.md
 
 ▶️ Next Steps
@@ -52,7 +87,7 @@ Generated artifacts:
 4. Fix gaps: /llm-user fix
 ```
 
-### After `/llm-user test`
+### After `/llm-user test` (Successful)
 
 ```
 ✅ LLM User Tests Complete
@@ -66,6 +101,33 @@ Gaps found: Z (N critical, M high)
 1. View full results: /llm-user status
 2. Fix critical gaps: /llm-user fix --critical
 3. Re-run tests: /llm-user test http://localhost:5173
+```
+
+### After `/llm-user test` (Preflight Failed)
+
+```
+❌ PREFLIGHT CHECK FAILED
+
+Cannot proceed with user testing. Fix these issues first:
+
+[CRITICAL] Backend Health
+  Error: Backend not responding
+  Fix: Start backend: cd backend && npm run dev
+
+[CRITICAL] Content Availability
+  Error: No scenes in database (0 found, minimum 1 required)
+  Fix: Run: npm run db:seed
+  Impact: ENTIRE APP NON-FUNCTIONAL - All user journeys impossible
+
+Testing aborted. The application is not in a testable state.
+
+Created infrastructure gaps:
+- GAP-I-001: Infrastructure: Backend Health (CRITICAL)
+- GAP-I-002: Infrastructure: Content Availability (CRITICAL)
+
+▶️ Required Actions
+1. Fix infrastructure issues above
+2. Re-run: /llm-user test http://localhost:5173
 ```
 
 ### After `/llm-user fix`
@@ -82,6 +144,179 @@ Remaining gaps: X (N critical)
 ```
 
 ---
+
+## 🚨 CRITICAL: Preflight Infrastructure Validation
+
+**MANDATORY: Before ANY user journey testing, validate infrastructure exists!**
+
+### Why This Matters
+
+Testing user journeys without validating the infrastructure is like:
+- Testing a car's navigation without checking if there's an engine
+- Testing a restaurant menu without checking if there's food
+- Testing a video game's levels without checking if the game loads
+
+### Required Preflight Checks
+
+```javascript
+// MUST RUN BEFORE ANY SCENARIO TESTING
+async function validateInfrastructure() {
+  const failures = [];
+
+  // 1. Backend Health Check
+  try {
+    const health = await fetch(`${BASE_URL}/api/health`);
+    if (!health.ok) {
+      failures.push({
+        type: 'CRITICAL',
+        check: 'Backend Health',
+        error: 'Backend not responding',
+        fix: 'Start backend: npm run dev'
+      });
+    }
+  } catch (e) {
+    failures.push({
+      type: 'CRITICAL',
+      check: 'Backend Connection',
+      error: `Cannot connect to backend at ${BASE_URL}`,
+      fix: 'Ensure backend is running on correct port'
+    });
+  }
+
+  // 2. Critical Data Dependencies
+  // For content-based apps (language learning, media viewers, etc.)
+  if (appType === 'content-based') {
+    const response = await fetch(`${BASE_URL}/api/scenes`);
+    const data = await response.json();
+
+    if (!data.scenes || data.scenes.length === 0) {
+      failures.push({
+        type: 'CRITICAL',
+        check: 'Content Availability',
+        error: 'No scenes/content in database',
+        fix: 'Run: npm run db:seed',
+        impact: 'ENTIRE APP NON-FUNCTIONAL - All user journeys impossible'
+      });
+    }
+  }
+
+  // 3. Frontend Rendering
+  const page = await browser.newPage();
+  await page.goto(APP_URL);
+
+  // Check critical UI elements exist
+  const criticalElements = [
+    { selector: '[data-testid="app-root"]', name: 'App Root' },
+    { selector: 'button, a, [role="button"]', name: 'Interactive Elements' },
+    // App-specific critical elements from scenarios
+  ];
+
+  for (const element of criticalElements) {
+    const found = await page.$(element.selector);
+    if (!found) {
+      failures.push({
+        type: 'HIGH',
+        check: `UI Element: ${element.name}`,
+        error: `Critical element not found: ${element.selector}`,
+        fix: 'Check frontend build and rendering'
+      });
+    }
+  }
+
+  // 4. Critical Path Validation
+  // Can the most basic user journey even start?
+  const criticalPath = getCriticalPath(); // From scenarios
+  for (const step of criticalPath) {
+    if (!await canExecuteStep(step)) {
+      failures.push({
+        type: 'CRITICAL',
+        check: `Critical Path: ${step.name}`,
+        error: `Cannot execute: ${step.description}`,
+        fix: step.fix || 'Check application setup'
+      });
+    }
+  }
+
+  // FAIL FAST with actionable errors
+  if (failures.length > 0) {
+    console.error(`
+❌ PREFLIGHT CHECK FAILED
+
+Cannot proceed with user testing. Fix these issues first:
+
+${failures.map(f => `
+[${f.type}] ${f.check}
+  Error: ${f.error}
+  Fix: ${f.fix}
+  ${f.impact ? `Impact: ${f.impact}` : ''}
+`).join('')}
+
+Testing aborted. The application is not in a testable state.
+Fix the above issues and try again.
+    `);
+
+    // Create infrastructure gaps
+    for (const failure of failures.filter(f => f.type === 'CRITICAL')) {
+      createGap({
+        id: `GAP-I-${Date.now()}`,
+        title: `Infrastructure: ${failure.check}`,
+        severity: 'CRITICAL',
+        category: 'infrastructure',
+        evidence: failure.error,
+        fix: failure.fix
+      });
+    }
+
+    process.exit(1);
+  }
+}
+```
+
+### Preflight Configuration in Scenarios
+
+When generating scenarios, include preflight requirements:
+
+```yaml
+preflight:
+  infrastructure:
+    - name: "Backend Health"
+      endpoint: "/api/health"
+      required: true
+
+    - name: "Database Content"
+      endpoint: "/api/scenes"  # Or relevant content endpoint
+      validation: "response.scenes.length > 0"
+      required: true
+      error_message: "No scenes available - run npm run db:seed"
+
+  critical_elements:
+    - selector: ".scene-card"
+      min_count: 1
+      error: "No scene cards visible - app cannot function"
+
+    - selector: "button:contains('Start Exploring')"
+      min_count: 1
+      error: "No way to start user journey"
+
+  critical_path:
+    - step: "Load homepage"
+      validation: "page renders without errors"
+    - step: "View content"
+      validation: "at least one content item visible"
+    - step: "Interact with content"
+      validation: "interaction produces response"
+```
+
+### Actionable Error Messages
+
+Always provide specific fixes, not generic errors:
+
+| Bad Error | Good Error |
+|-----------|------------|
+| "Test failed" | "No scenes in database. Run: npm run db:seed" |
+| "Backend error" | "Backend not running on port 3001. Run: cd backend && npm run dev" |
+| "UI broken" | "Scene cards not rendering. Check: 1) Backend returning scenes 2) Frontend SceneGrid component" |
+| "Cannot proceed" | "Critical dependency missing: scenes. This app requires scenes to function. Fix: Seed database with test data" |
 
 ## Core Principles
 

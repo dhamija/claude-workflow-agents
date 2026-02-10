@@ -6,6 +6,27 @@ Format: [Semantic Versioning](https://semver.org/)
 
 ---
 
+## [3.8.0] - 2026-02-09
+
+### Added
+- **Preflight Infrastructure Validation for LLM User Testing**
+  - Mandatory infrastructure checks before any user journey testing
+  - Backend health, database content, and critical UI element validation
+  - Fail fast with actionable error messages (e.g., "Run: npm run db:seed")
+  - Creates GAP-I-XXX infrastructure gaps for tracking
+  - Prevents testing fictional journeys when infrastructure is missing
+
+### Changed
+- LLM user testing skill version 1.1.0 → 1.2.0
+- Test scenarios now include preflight requirements section
+- Test output distinguishes between successful tests and preflight failures
+- Added specific fixes for each infrastructure failure type
+
+### Fixed
+- LLM user tests no longer blindly test non-functional apps
+- Tests abort immediately if critical dependencies are missing
+- Clear error messages explain exactly what to fix and how
+
 ## [3.7.0] - 2026-02-01
 
 ### Fixed
