@@ -12,6 +12,7 @@ A **skills-based workflow system** for Claude Code that helps you build software
 ## Table of Contents
 
 - [Quick Start](#quick-start)
+- [Visual Control Center (NEW)](#visual-control-center-new)
 - [Installation](#installation)
 - [Architecture](#architecture)
 - [Usage](#usage)
@@ -51,6 +52,53 @@ Claude: [Loads workflow skill → Creates intent → Designs UX → Plans archit
 ```
 
 That's it. Claude handles the rest.
+
+---
+
+## Visual Control Center (NEW)
+
+**🆕 Feature Branch:** Interactive web interface for visual workflow management
+
+The Workflow Control Center provides a production-ready web dashboard to visualize and control the entire workflow system.
+
+### Features
+
+- **Grid-based artifact visualization** - View Intent, UX, Architecture, and Plan in organized grid
+- **Real-time progress tracking** - Live updates via WebSocket as tasks complete
+- **One-click operations** - Regenerate artifacts, fix gaps, approve enhancements
+- **Claude Code integration** - Seamless bridge between UI and terminal
+- **Gap management** - Unified view of all gaps with severity sorting
+- **Activity logging** - Complete audit trail of all operations
+
+### Quick Start
+
+```bash
+# Clone and checkout UI branch
+git clone https://github.com/dhamija/claude-workflow-agents.git
+cd claude-workflow-agents
+git checkout feature/workflow-ui
+
+# Install and start UI
+cd ui
+npm install
+
+# Terminal 1: Start backend service
+cd server && npm run dev
+
+# Terminal 2: Start UI
+npm run dev
+
+# Open http://localhost:3000
+```
+
+### Architecture
+
+- **Frontend:** React + TypeScript + Zustand + Tailwind CSS
+- **Backend:** Express + Socket.io + File system bridge
+- **Integration:** Task queue system via `.claude/tasks/`
+- **Testing:** Vitest + Testing Library + Playwright
+
+See [ui/README.md](ui/README.md) for complete documentation.
 
 ---
 
