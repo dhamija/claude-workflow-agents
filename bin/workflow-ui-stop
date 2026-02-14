@@ -1,0 +1,72 @@
+#!/bin/bash
+
+# Stop the Workflow Control Center UI
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+# Configuration
+UI_PID_FILE="$HOME/.claude-workflow-ui.pid"
+UI_PORT="${UI_PORT:-3000}"
+SERVER_PORT="${SERVER_PORT:-4000}"
+
+echo ""
+echo "Stopping Workflow UI..."
+echo ""
+
+# Function to kill process on port
+kill_port() {
+    local port=$1
+    local name=$2
+
+    # Find PIDs using the port
+    local pids=$(lsof -ti:$port 2>/dev/null || true)
+
+    if [ -n "$pids" ]; then
+        echo -n "Stopping $name on port $port..."
+        for pid in $pids; do
+            kill -9 $pid 2>/dev/null || true
+        done
+        echo -e " ${GREEN}✓${NC}"
+        return 0
+    else
+        echo -e "${YELLOW}⚠ $name not running on port $port${NC}"
+        return 1
+    fi
+}
+
+# Stop the frontend
+kill_port $UI_PORT "UI Frontend" || true
+
+# Stop the backend server
+kill_port $SERVER_PORT "UI Server" || true
+
+# Clean up PID file
+if [ -f "$UI_PID_FILE" ]; then
+    rm "$UI_PID_FILE"
+    echo -e "${GREEN}✓ Cleaned up PID file${NC}"
+fi
+
+# Check if any node processes are still running
+remaining=$(ps aux | grep -E "node.*workflow.*ui" | grep -v grep || true)
+if [ -n "$remaining" ]; then
+    echo ""
+    echo -e "${YELLOW}⚠ Some UI processes may still be running:${NC}"
+    echo "$remaining"
+    echo ""
+    echo "To force kill all workflow UI processes:"
+    echo "  pkill -f 'node.*workflow.*ui'"
+fi
+
+echo ""
+echo "════════════════════════════════════════════════════════════════"
+echo -e "${GREEN}✓ Workflow UI stopped${NC}"
+echo "════════════════════════════════════════════════════════════════"

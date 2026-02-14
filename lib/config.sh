@@ -28,6 +28,17 @@ CLAUDE_DIR="$HOME/.claude"
 REPO_URL="https://github.com/dhamija/claude-workflow-agents"
 
 # ============================================================================
+# UI CONFIGURATION
+# ============================================================================
+
+UI_PORT="${UI_PORT:-3000}"
+SERVER_PORT="${SERVER_PORT:-4000}"
+UI_BRANCH="feature/workflow-ui"
+UI_DIR="$INSTALL_DIR/ui"
+UI_PID_FILE="$HOME/.claude-workflow-ui.pid"
+UI_LOG_FILE="$HOME/.claude-workflow-ui.log"
+
+# ============================================================================
 # CORE SUBAGENTS (symlinked to ~/.claude/agents/)
 # ============================================================================
 # These are agents invoked via Task tool with isolated context.

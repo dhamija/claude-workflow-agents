@@ -28,6 +28,11 @@ This document provides detailed information about each workflow command.
   - [/aa-audit](#aa-audit)
 - [Design Commands](#design-commands)
   - [/design](#design)
+- [UI Commands](#ui-commands)
+  - [workflow-ui-install](#workflow-ui-install)
+  - [workflow-ui-start](#workflow-ui-start)
+  - [workflow-ui-stop](#workflow-ui-stop)
+  - [workflow-ui-status](#workflow-ui-status)
 - [Enhancement Commands](#enhancement-commands)
   - [/mcp](#mcp)
   - [/llm](#llm)
@@ -845,6 +850,95 @@ Manages `/docs/ux/design-system.md` containing complete visual specifications:
 - Colors (primary, secondary, neutral, semantic, dark mode)
 - Typography (fonts, sizes, weights)
 - Spacing & layout (scale, max-widths, grid, border radius, shadows)
+
+---
+
+## UI Commands
+
+Commands for managing the Workflow Control Center visual interface.
+
+### workflow-ui-install
+
+**Purpose:** Install or update the Workflow Control Center UI
+
+**Usage:**
+```bash
+workflow-ui-install [branch-name]  # Default: feature/workflow-ui
+```
+
+**What it does:**
+- Checks Node.js/npm requirements
+- Fetches specified branch
+- Installs all dependencies
+- Sets up command symlinks
+
+**Example:**
+```bash
+workflow-ui-install              # Install from default feature branch
+workflow-ui-install master        # Install from master (when merged)
+```
+
+### workflow-ui-start
+
+**Purpose:** Start the Workflow Control Center UI
+
+**Usage:**
+```bash
+workflow-ui-start [--background]
+```
+
+**What it does:**
+- Starts backend server (port 4000)
+- Starts frontend (port 3000)
+- Opens browser automatically
+- Detects current project
+
+**Example:**
+```bash
+cd my-project
+workflow-ui-start                # Start UI for current project
+workflow-ui-start --background   # Run in background
+```
+
+### workflow-ui-stop
+
+**Purpose:** Stop the Workflow Control Center UI
+
+**Usage:**
+```bash
+workflow-ui-stop
+```
+
+**What it does:**
+- Stops frontend and backend
+- Cleans up PID files
+- Shows remaining processes
+
+### workflow-ui-status
+
+**Purpose:** Check UI status
+
+**Usage:**
+```bash
+workflow-ui-status
+```
+
+**What it shows:**
+- Installation status
+- Service health
+- Claude connection
+- Project context
+- Task queue stats
+
+**Output:**
+```
+Service Status:
+  Backend Server:   ✓ Running on port 4000
+  Frontend:         ✓ Running on port 3000
+  URL:              http://localhost:3000
+```
+
+**See Also:** [UI Commands Documentation](docs/UI-COMMANDS.md) for complete details
 - Components (buttons, inputs, cards, modals with CSS/Tailwind specs)
 - Motion & animation (timing, easing, keyframes)
 - Accessibility (contrast ratios, focus states, ARIA patterns)

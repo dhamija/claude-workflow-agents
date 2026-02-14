@@ -1,0 +1,254 @@
+#!/bin/bash
+
+# Start the Workflow Control Center UI
+# This command launches the visual interface for the workflow system
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/config.sh"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Configuration
+UI_DIR="$INSTALL_DIR/ui"
+UI_PID_FILE="$HOME/.claude-workflow-ui.pid"
+UI_LOG_FILE="$HOME/.claude-workflow-ui.log"
+UI_PORT="${UI_PORT:-3000}"
+SERVER_PORT="${SERVER_PORT:-4000}"
+
+# Function to check if UI is installed
+check_ui_installed() {
+    if [ ! -d "$UI_DIR" ]; then
+        echo -e "${YELLOW}⚠ Workflow UI is not installed${NC}"
+        echo ""
+        echo "The UI is currently in a feature branch. To install:"
+        echo ""
+        echo "  1. Update to get the UI branch:"
+        echo "     ${BLUE}workflow-update feature/workflow-ui${NC}"
+        echo ""
+        echo "  2. Or manually install:"
+        echo "     ${BLUE}cd ~/.claude-workflow-agents${NC}"
+        echo "     ${BLUE}git fetch origin feature/workflow-ui${NC}"
+        echo "     ${BLUE}git checkout feature/workflow-ui${NC}"
+        echo ""
+        echo "  3. Install dependencies:"
+        echo "     ${BLUE}cd ~/.claude-workflow-agents/ui${NC}"
+        echo "     ${BLUE}npm install${NC}"
+        echo "     ${BLUE}cd server && npm install${NC}"
+        echo ""
+        return 1
+    fi
+
+    # Check if node_modules exists
+    if [ ! -d "$UI_DIR/node_modules" ]; then
+        echo -e "${YELLOW}⚠ UI dependencies not installed${NC}"
+        echo ""
+        echo "Installing dependencies..."
+        cd "$UI_DIR"
+        npm install
+        cd "$UI_DIR/server"
+        npm install
+        echo -e "${GREEN}✓ Dependencies installed${NC}"
+    fi
+
+    return 0
+}
+
+# Function to check if a port is in use
+check_port() {
+    local port=$1
+    if lsof -Pi :$port -sTCP:LISTEN -t >/dev/null 2>&1; then
+        return 0  # Port is in use
+    else
+        return 1  # Port is free
+    fi
+}
+
+# Function to start the UI server
+start_ui_server() {
+    echo "Starting Workflow UI Server..."
+
+    # Check if server port is in use
+    if check_port $SERVER_PORT; then
+        echo -e "${YELLOW}⚠ Server port $SERVER_PORT is already in use${NC}"
+        echo "  The UI server may already be running."
+        return 1
+    fi
+
+    # Start the backend server
+    cd "$UI_DIR/server"
+    nohup npm run dev > "$UI_LOG_FILE" 2>&1 &
+    local server_pid=$!
+
+    # Wait for server to start
+    echo -n "Waiting for server to start"
+    for i in {1..30}; do
+        if check_port $SERVER_PORT; then
+            echo -e " ${GREEN}✓${NC}"
+            echo -e "${GREEN}✓ UI Server started on port $SERVER_PORT${NC}"
+            return 0
+        fi
+        echo -n "."
+        sleep 1
+    done
+
+    echo -e " ${RED}✗${NC}"
+    echo -e "${RED}✗ Failed to start UI server${NC}"
+    echo "Check the log file: $UI_LOG_FILE"
+    return 1
+}
+
+# Function to start the UI frontend
+start_ui_frontend() {
+    echo "Starting Workflow UI Frontend..."
+
+    # Check if UI port is in use
+    if check_port $UI_PORT; then
+        echo -e "${YELLOW}⚠ UI port $UI_PORT is already in use${NC}"
+        echo "  The UI may already be running."
+        return 1
+    fi
+
+    # Start the frontend
+    cd "$UI_DIR"
+
+    # Check which package manager to use
+    if [ -f "package-lock.json" ]; then
+        npm run dev > /dev/null 2>&1 &
+    elif [ -f "yarn.lock" ]; then
+        yarn dev > /dev/null 2>&1 &
+    elif [ -f "pnpm-lock.yaml" ]; then
+        pnpm dev > /dev/null 2>&1 &
+    else
+        npm run dev > /dev/null 2>&1 &
+    fi
+
+    local ui_pid=$!
+    echo $ui_pid > "$UI_PID_FILE"
+
+    # Wait for UI to start
+    echo -n "Waiting for UI to start"
+    for i in {1..30}; do
+        if check_port $UI_PORT; then
+            echo -e " ${GREEN}✓${NC}"
+            echo -e "${GREEN}✓ UI Frontend started on port $UI_PORT${NC}"
+            return 0
+        fi
+        echo -n "."
+        sleep 1
+    done
+
+    echo -e " ${RED}✗${NC}"
+    echo -e "${RED}✗ Failed to start UI frontend${NC}"
+    return 1
+}
+
+# Function to open browser
+open_browser() {
+    local url="http://localhost:$UI_PORT"
+
+    echo ""
+    echo "Opening browser..."
+
+    # Detect platform and open browser
+    case "$OSTYPE" in
+        darwin*)
+            open "$url"
+            ;;
+        linux*)
+            if command -v xdg-open > /dev/null; then
+                xdg-open "$url"
+            elif command -v gnome-open > /dev/null; then
+                gnome-open "$url"
+            else
+                echo "Please open your browser and navigate to: $url"
+            fi
+            ;;
+        msys*|cygwin*|win32*)
+            start "$url"
+            ;;
+        *)
+            echo "Please open your browser and navigate to: $url"
+            ;;
+    esac
+}
+
+# Main execution
+main() {
+    echo ""
+    echo "╔════════════════════════════════════════════════════════════════╗"
+    echo "║     Workflow Control Center                                   ║"
+    echo "╚════════════════════════════════════════════════════════════════╝"
+    echo ""
+
+    # Check if UI is installed
+    if ! check_ui_installed; then
+        exit 1
+    fi
+
+    # Check project context
+    if [ -f "CLAUDE.md" ]; then
+        echo -e "${GREEN}✓ Project detected:${NC} $(basename "$PWD")"
+        export PROJECT_ROOT="$PWD"
+    else
+        echo -e "${YELLOW}⚠ No project detected${NC}"
+        echo "  Running in global mode. To use with a project:"
+        echo "  ${BLUE}cd your-project && workflow-ui-start${NC}"
+        echo ""
+    fi
+
+    # Start the servers
+    if start_ui_server; then
+        if start_ui_frontend; then
+            echo ""
+            echo "════════════════════════════════════════════════════════════════"
+            echo -e "${GREEN}✓ Workflow UI is running!${NC}"
+            echo ""
+            echo "  Frontend:  ${BLUE}http://localhost:$UI_PORT${NC}"
+            echo "  Backend:   ${BLUE}http://localhost:$SERVER_PORT${NC}"
+            echo "  Logs:      $UI_LOG_FILE"
+            echo ""
+            echo "  To stop the UI, run:"
+            echo "    ${BLUE}workflow-ui-stop${NC}"
+            echo ""
+            echo "  To check status, run:"
+            echo "    ${BLUE}workflow-ui-status${NC}"
+            echo ""
+            echo "  In Claude Code, connect with:"
+            echo "    ${BLUE}workflow-ui-connect${NC}"
+            echo "════════════════════════════════════════════════════════════════"
+
+            # Open browser
+            open_browser
+
+            # Keep script running if in foreground mode
+            if [ "$1" != "--background" ]; then
+                echo ""
+                echo "Press Ctrl+C to stop the UI..."
+
+                # Trap Ctrl+C
+                trap 'echo ""; workflow-ui-stop; exit 0' INT
+
+                # Wait forever
+                while true; do
+                    sleep 1
+                done
+            fi
+        else
+            echo -e "${RED}✗ Failed to start UI frontend${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${RED}✗ Failed to start UI server${NC}"
+        exit 1
+    fi
+}
+
+# Run main function
+main "$@"
