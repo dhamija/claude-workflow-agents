@@ -88,8 +88,25 @@ main() {
     echo "Installing Workflow UI..."
     echo ""
 
+    # Check if workflow is installed
+    if [ ! -d "$INSTALL_DIR" ]; then
+        echo -e "${RED}✗ Workflow agents not installed${NC}"
+        echo ""
+        echo "Please install workflow agents first:"
+        echo "  ${BLUE}curl -fsSL https://raw.githubusercontent.com/dhamija/claude-workflow-agents/master/install.sh | bash${NC}"
+        exit 1
+    fi
+
     # Navigate to workflow directory
     cd "$INSTALL_DIR"
+
+    # Check if it's a git repository
+    if [ ! -d ".git" ]; then
+        echo -e "${YELLOW}⚠ Installation directory is not a git repository${NC}"
+        echo "Initializing git repository..."
+        git init
+        git remote add origin "$REPO_URL"
+    fi
 
     # Fetch the UI branch
     echo "Fetching UI branch..."
@@ -97,7 +114,7 @@ main() {
         echo -e "${RED}✗ Failed to fetch branch: $UI_BRANCH${NC}"
         echo ""
         echo "Available branches:"
-        git branch -r | grep -E "origin/(master|main|feature/)" | sed 's/origin\//  /'
+        git ls-remote --heads origin | sed 's/.*refs\/heads\//  /' | grep -E "(master|main|feature/)"
         echo ""
         echo "Usage: workflow-ui-install [branch-name]"
         exit 1
