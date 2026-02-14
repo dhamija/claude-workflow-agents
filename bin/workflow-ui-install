@@ -120,15 +120,64 @@ main() {
         exit 1
     }
 
-    # Stash any local changes
-    if [ -n "$(git status --porcelain)" ]; then
-        echo "Stashing local changes..."
-        git stash push -m "UI installation $(date +%Y%m%d-%H%M%S)"
-    fi
+    # Handle the checkout carefully
+    echo "Preparing to checkout $UI_BRANCH..."
 
-    # Checkout the UI branch
-    echo "Checking out $UI_BRANCH..."
-    git checkout "$UI_BRANCH"
+    # Check if we have an existing checkout
+    current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "none")
+
+    if [ "$current_branch" = "$UI_BRANCH" ]; then
+        echo "Already on $UI_BRANCH, pulling latest changes..."
+        git pull origin "$UI_BRANCH"
+    elif git rev-parse HEAD >/dev/null 2>&1; then
+        # We have commits, normal checkout with handling of untracked files
+
+        # Check for untracked files that would conflict
+        conflicting_files=$(git checkout "$UI_BRANCH" --dry-run 2>&1 | grep "would be overwritten" | sed 's/.*: //' | sed 's/ would.*//' || true)
+
+        if [ -n "$conflicting_files" ]; then
+            echo -e "${YELLOW}⚠ Found conflicting untracked files${NC}"
+            echo "Moving them to backup..."
+            backup_dir="$INSTALL_DIR/.backup-$(date +%Y%m%d-%H%M%S)"
+            mkdir -p "$backup_dir"
+
+            # Move conflicting files
+            echo "$conflicting_files" | while read -r file; do
+                if [ -f "$file" ]; then
+                    file_dir=$(dirname "$file")
+                    mkdir -p "$backup_dir/$file_dir"
+                    mv "$file" "$backup_dir/$file"
+                    echo "  Backed up: $file"
+                fi
+            done
+
+            echo "Backup saved to: $backup_dir"
+        fi
+
+        # Now try the checkout
+        git checkout "$UI_BRANCH" 2>/dev/null || git checkout -b "$UI_BRANCH" "origin/$UI_BRANCH"
+    else
+        # Empty repo - need to handle untracked files before initial checkout
+        echo "Initializing from $UI_BRANCH..."
+
+        # Back up any existing files
+        if [ "$(ls -A .)" ]; then
+            backup_dir="$INSTALL_DIR/.backup-$(date +%Y%m%d-%H%M%S)"
+            mkdir -p "$backup_dir"
+
+            # Move all files except .git and .backup-* to backup
+            for item in *; do
+                if [[ "$item" != ".git" && "$item" != .backup-* ]]; then
+                    mv "$item" "$backup_dir/" 2>/dev/null || true
+                fi
+            done
+
+            echo -e "${YELLOW}⚠ Existing files backed up to: $backup_dir${NC}"
+        fi
+
+        # Now checkout
+        git checkout -b "$UI_BRANCH" "origin/$UI_BRANCH"
+    fi
 
     # Check if UI directory exists
     if [ ! -d "$UI_DIR" ]; then
