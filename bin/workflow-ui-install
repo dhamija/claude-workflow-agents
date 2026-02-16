@@ -165,10 +165,21 @@ main() {
             backup_dir="$INSTALL_DIR/.backup-$(date +%Y%m%d-%H%M%S)"
             mkdir -p "$backup_dir"
 
-            # Move all files except .git and .backup-* to backup
-            for item in *; do
+            # Move all files and directories except .git and .backup-* to backup
+            # Handle both visible and hidden files
+            for item in * .[^.]* ..?*; do
+                # Skip if doesn't exist (glob didn't match)
+                [ -e "$item" ] || continue
+
+                # Skip .git directory and backup directories
                 if [[ "$item" != ".git" && "$item" != .backup-* ]]; then
-                    mv "$item" "$backup_dir/" 2>/dev/null || true
+                    # Create parent directory structure in backup if needed
+                    if [ -d "$item" ]; then
+                        cp -R "$item" "$backup_dir/" 2>/dev/null || true
+                        rm -rf "$item" 2>/dev/null || true
+                    elif [ -f "$item" ]; then
+                        mv "$item" "$backup_dir/" 2>/dev/null || true
+                    fi
                 fi
             done
 
